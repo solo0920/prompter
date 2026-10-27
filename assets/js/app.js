@@ -65,41 +65,30 @@
     });
   }
 
+  function settingsModule() {
+    return global.Prompter && global.Prompter.settings;
+  }
+
   function effectiveTheme() {
-    if (state.preferences.theme === 'light' || state.preferences.theme === 'dark') {
-      return state.preferences.theme;
+    var settings = settingsModule();
+    if (settings && typeof settings.effectiveTheme === 'function') {
+      return settings.effectiveTheme(state.preferences);
     }
-    return global.matchMedia && global.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    return state.preferences.theme === 'dark' ? 'dark' : 'light';
   }
 
   function applyAppearance() {
-    var root = global.document.documentElement;
-    root.setAttribute('data-theme', effectiveTheme());
-    root.setAttribute('data-style', state.preferences.style);
-    if (elements['style-select']) {
-      elements['style-select'].value = state.preferences.style;
-    }
-    if (elements.canvas) {
-      elements.canvas.classList.toggle('grid-hidden', !state.preferences.showGrid);
-    }
-    if (elements['show-grid']) {
-      elements['show-grid'].checked = state.preferences.showGrid;
-    }
-    if (elements['default-marker']) {
-      elements['default-marker'].value = state.preferences.defaultMarker;
+    var settings = settingsModule();
+    if (settings && typeof settings.applyAppearance === 'function') {
+      settings.applyAppearance();
     }
   }
 
   function savePreferences() {
-    try {
-      state.preferences = state.storage.savePreferences(state.preferences);
-      state.preferences = Model.normalizePreferences(state.preferences);
-    } catch (error) {
-      showError(error);
+    var settings = settingsModule();
+    if (settings && typeof settings.savePreferences === 'function') {
+      return settings.savePreferences();
     }
-    applyAppearance();
   }
 
   function updateStatus() {
@@ -253,21 +242,9 @@
   }
 
   function syncSettingsDialog() {
-    if (elements['app-version']) {
-      elements['app-version'].textContent = VERSION;
-    }
-    if (elements['schema-version']) {
-      elements['schema-version'].textContent = String(Model.SCHEMA_VERSION);
-    }
-    if (elements['storage-mode-label']) {
-      var info = state.storageInfo || (state.storage && state.storage.info());
-      elements['storage-mode-label'].textContent = info ? info.modeLabel : '—';
-    }
-    if (elements['default-marker']) {
-      elements['default-marker'].value = state.preferences.defaultMarker;
-    }
-    if (elements['show-grid']) {
-      elements['show-grid'].checked = state.preferences.showGrid;
+    var settings = settingsModule();
+    if (settings && typeof settings.syncDialog === 'function') {
+      settings.syncDialog();
     }
   }
 
@@ -906,36 +883,6 @@
   }
 
   function wireHeader() {
-    if (elements['theme-toggle']) {
-      elements['theme-toggle'].addEventListener('click', function () {
-        state.preferences.theme = effectiveTheme() === 'dark' ? 'light' : 'dark';
-        savePreferences();
-      });
-    }
-    if (elements['style-select']) {
-      elements['style-select'].addEventListener('change', function () {
-        state.preferences.style = elements['style-select'].value === 'graphite' ? 'graphite' : 'paper';
-        savePreferences();
-      });
-    }
-    if (elements['settings-button']) {
-      elements['settings-button'].addEventListener('click', function () {
-        syncSettingsDialog();
-        openDialog(elements['settings-dialog']);
-      });
-    }
-    if (elements['settings-close']) {
-      elements['settings-close'].addEventListener('click', function () {
-        closeDialog(elements['settings-dialog']);
-      });
-    }
-    if (elements['settings-dialog']) {
-      elements['settings-dialog'].addEventListener('close', function () {
-        if (elements['settings-button']) {
-          elements['settings-button'].focus();
-        }
-      });
-    }
     if (elements['preview-button']) {
       elements['preview-button'].addEventListener('click', function () {
         if (!state.document) {
@@ -955,51 +902,6 @@
         } else {
           toast('複製將在後續版本提供。');
         }
-      });
-    }
-  }
-
-  function wireSettings() {
-    if (elements['default-marker']) {
-      elements['default-marker'].addEventListener('change', function () {
-        state.preferences.defaultMarker = elements['default-marker'].value;
-        savePreferences();
-        if (global.Prompter.editor && typeof global.Prompter.editor.setDefaultMarker === 'function') {
-          global.Prompter.editor.setDefaultMarker(state.preferences.defaultMarker);
-        }
-      });
-    }
-    if (elements['show-grid']) {
-      elements['show-grid'].addEventListener('change', function () {
-        state.preferences.showGrid = elements['show-grid'].checked;
-        savePreferences();
-      });
-    }
-    if (elements['follow-system-button']) {
-      elements['follow-system-button'].addEventListener('click', function () {
-        state.preferences.theme = 'system';
-        savePreferences();
-        toast('已改為跟隨系統明暗。');
-      });
-    }
-    if (elements['clear-library-button']) {
-      elements['clear-library-button'].addEventListener('click', function () {
-        openDialog(elements['clear-dialog']);
-      });
-    }
-    if (elements['clear-cancel']) {
-      elements['clear-cancel'].addEventListener('click', function () {
-        closeDialog(elements['clear-dialog']);
-      });
-    }
-    if (elements['clear-confirm']) {
-      elements['clear-confirm'].addEventListener('click', function () {
-        state.storage.clearLibrary().then(function () {
-          closeDialog(elements['clear-dialog']);
-          closeDialog(elements['settings-dialog']);
-          clearDocument();
-          toast('本機資料庫已清除，磁碟上的檔案不受影響。');
-        }).catch(showError);
       });
     }
   }
@@ -1117,16 +1019,6 @@
       event.returnValue = '';
       return '';
     });
-    if (global.matchMedia) {
-      var media = global.matchMedia('(prefers-color-scheme: dark)');
-      if (typeof media.addEventListener === 'function') {
-        media.addEventListener('change', function () {
-          if (state.preferences.theme === 'system') {
-            applyAppearance();
-          }
-        });
-      }
-    }
     global.document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape') {
         if (!elements['file-menu'].hidden) {
@@ -1148,7 +1040,9 @@
     state.storage = Storage.createStorage();
     wireFileMenu();
     wireHeader();
-    wireSettings();
+    if (global.Prompter.settings && typeof global.Prompter.settings.init === 'function') {
+      global.Prompter.settings.init();
+    }
     wireDirectory();
     wireTitle();
     wireImagePicker();

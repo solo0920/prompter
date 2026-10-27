@@ -211,17 +211,17 @@ empty, preferences remain, and saved files on disk are untouched.
 
 ### Tests for User Story 5
 
-- [ ] T061 [P] [US5] Add `tests/unit/preferences.test.js` for defaults, valid/invalid values, system theme behavior, schema version, and persistence serialization.
+- [x] T061 [P] [US5] Add `tests/unit/preferences.test.js` for defaults, valid/invalid values, system theme behavior, schema version, and persistence serialization.
 
 ### Implementation for User Story 5
 
-- [ ] T062 [US5] Implement the Settings dialog in `assets/js/settings.js`: default Marker, alignment-grid toggle, follow-system reset, clear-library action, version/storage-schema information, close control, immediate application, and persistence.
-- [ ] T063 [US5] Implement appearance controls in `assets/js/app.js` and `assets/js/settings.js`: 紙張/石墨 style selector, light/dark toggle, system-preference following via `matchMedia`, explicit-choice persistence, and independence of style and theme.
-- [ ] T064 [US5] Complete preference persistence in `assets/js/storage.js` and `assets/js/utils.js`: validate unknown/invalid values to defaults, apply theme/style preflight before first paint, and keep preferences out of clear-library.
-- [ ] T065 [US5] Implement Clear Library in `assets/js/settings.js`, `assets/js/storage.js`, and `assets/js/app.js`: explicit confirmation explaining local removal, destructive action styling, close the current document, clear IndexedDB/localStorage/memory records and file targets, keep preferences, never touch disk files, and report partial failures.
-- [ ] T066 [US5] Add the compact header at 360 px in `assets/css/app.css` and `assets/js/app.js`: compact icon buttons for File, directory, Preview, Copy, style, theme, and settings; hide non-essential labels; keep 44 px touch targets and all actions reachable without horizontal scrolling.
-- [ ] T067 [US5] Extend `tests/browser/harness.js` with settings persistence, default-Marker application, grid visibility, theme/style preflight, and clear-library checks that do not depend on real pickers.
-- [ ] T068 [US5] Run quickstart scenarios 11–12 and the settings checks in `tests/browser/harness.js`; fix persistence, preflight flash, grid, compact header, and clear-library defects in `assets/js/settings.js`.
+- [x] T062 [US5] Implement the Settings dialog in `assets/js/settings.js`: default Marker, alignment-grid toggle, follow-system reset, clear-library action, version/storage-schema information, close control, immediate application, and persistence.
+- [x] T063 [US5] Implement appearance controls in `assets/js/app.js` and `assets/js/settings.js`: 紙張/石墨 style selector, light/dark toggle, system-preference following via `matchMedia`, explicit-choice persistence, and independence of style and theme.
+- [x] T064 [US5] Complete preference persistence in `assets/js/storage.js` and `assets/js/utils.js`: validate unknown/invalid values to defaults, apply theme/style preflight before first paint, and keep preferences out of clear-library.
+- [x] T065 [US5] Implement Clear Library in `assets/js/settings.js`, `assets/js/storage.js`, and `assets/js/app.js`: explicit confirmation explaining local removal, destructive action styling, close the current document, clear IndexedDB/localStorage/memory records and file targets, keep preferences, never touch disk files, and report partial failures.
+- [x] T066 [US5] Add the compact header at 360 px in `assets/css/app.css` and `assets/js/app.js`: compact icon buttons for File, directory, Preview, Copy, style, theme, and settings; hide non-essential labels; keep 44 px touch targets and all actions reachable without horizontal scrolling.
+- [x] T067 [US5] Extend `tests/browser/harness.js` with settings persistence, default-Marker application, grid visibility, theme/style preflight, and clear-library checks that do not depend on real pickers.
+- [x] T068 [US5] Run quickstart scenarios 11–12 and the settings checks in `tests/browser/harness.js`; fix persistence, preflight flash, grid, compact header, and clear-library defects in `assets/js/settings.js`.
 
 **Checkpoint**: All five user stories work independently and together.
 

@@ -226,6 +226,88 @@
     });
   }
 
+  function withPreferences(win, changes, run) {
+    var app = win.Prompter.app;
+    var Model = win.Prompter.model;
+    var original = Model.normalizePreferences(app.state.storage.getPreferences());
+    var next = Model.normalizePreferences(original);
+    Object.keys(changes || {}).forEach(function (key) {
+      next[key] = changes[key];
+    });
+    next = Model.normalizePreferences(next);
+    app.state.preferences = next;
+    app.state.storage.savePreferences(next);
+    app.applyAppearance();
+
+    function restore() {
+      var restored = Model.normalizePreferences(original);
+      app.state.preferences = restored;
+      try {
+        app.state.storage.savePreferences(restored);
+      } catch (error) {
+        // Restoring test preferences is best-effort.
+      }
+      app.applyAppearance();
+      if (win.Prompter.editor && typeof win.Prompter.editor.setDefaultMarker === 'function') {
+        win.Prompter.editor.setDefaultMarker(restored.defaultMarker);
+      }
+      closeDialogs(win);
+    }
+
+    return Promise.resolve().then(run).then(function (value) {
+      restore();
+      return value;
+    }, function (error) {
+      restore();
+      throw error;
+    });
+  }
+
+  function changeSelect(win, select, value) {
+    select.value = value;
+    select.dispatchEvent(new win.Event('change', { bubbles: true }));
+  }
+
+  function toggleCheckbox(win, checkbox, checked) {
+    checkbox.checked = checked;
+    checkbox.dispatchEvent(new win.Event('change', { bubbles: true }));
+  }
+
+  function loadProbeFrame(win) {
+    var probe = win.document.createElement('iframe');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.title = 'Prompter appearance probe';
+    probe.style.position = 'fixed';
+    probe.style.left = '-2200px';
+    probe.style.top = '0';
+    probe.style.width = '1200px';
+    probe.style.height = '820px';
+    probe.style.border = '0';
+    probe.src = './index.html';
+    win.document.body.appendChild(probe);
+    return waitFor(function () {
+      var doc = probe.contentDocument;
+      if (!doc || !doc.documentElement) {
+        return null;
+      }
+      return doc.documentElement.getAttribute('data-style') ? probe : null;
+    }, 10000);
+  }
+
+  function withProbeFrame(win, run) {
+    return loadProbeFrame(win).then(function (probe) {
+      return Promise.resolve().then(function () {
+        return run(probe);
+      }).then(function (value) {
+        probe.remove();
+        return value;
+      }, function (error) {
+        probe.remove();
+        throw error;
+      });
+    });
+  }
+
   function withClipboardStub(win, hooks, run) {
     var options = hooks || {};
     var navigator = win.navigator;
@@ -2245,6 +2327,424 @@
             });
           });
         });
+      });
+    });
+  });
+
+  test('US5 settings apply the default Marker and grid, persist, and show version information', function () {
+    return appReady().then(function (win) {
+      return withPreferences(win, {
+        style: 'paper',
+        theme: 'light',
+        defaultMarker: 'none',
+        showGrid: false,
+        lastDocumentId: null
+      }, function () {
+        return withCleanLibrary(win, function () {
+          var app = win.Prompter.app;
+          var state = app.state;
+          var settingsButton = byId(win, 'settings-button');
+          var dialog = byId(win, 'settings-dialog');
+          settingsButton.focus();
+          settingsButton.click();
+          assert(dialog.open, 'The settings dialog must open.');
+          equal(byId(win, 'app-version').textContent, '1.0.0');
+          equal(byId(win, 'schema-version').textContent, '1');
+          assert(byId(win, 'storage-mode-label').textContent.length > 0 &&
+            byId(win, 'storage-mode-label').textContent !== '—',
+          'The active storage mode must be shown.');
+
+          var marker = byId(win, 'default-marker');
+          equal(marker.value, 'none');
+          changeSelect(win, marker, '##');
+          equal(state.preferences.defaultMarker, '##');
+          equal(state.storage.getPreferences().defaultMarker, '##');
+
+          var grid = byId(win, 'show-grid');
+          equal(grid.checked, false);
+          toggleCheckbox(win, grid, true);
+          equal(state.preferences.showGrid, true);
+          equal(state.storage.getPreferences().showGrid, true);
+          equal(byId(win, 'canvas').classList.contains('grid-hidden'), false);
+          assert(win.getComputedStyle(byId(win, 'canvas')).backgroundImage !== 'none',
+            'Enabling the grid must show its background lines.');
+
+          byId(win, 'settings-close').click();
+          return waitFor(function () {
+            return !dialog.open && win.document.activeElement === settingsButton;
+          }, 5000).then(function () {
+            return app.requestNewDocument();
+          }).then(function () {
+            return waitFor(function () {
+              return win.document.querySelector('#canvas .composer-marker');
+            }, 5000);
+          }).then(function (composerMarker) {
+            equal(composerMarker.textContent, '##',
+              'A new composer must use the saved default Marker.');
+            byId(win, 'settings-button').click();
+            return waitFor(function () {
+              return dialog.open ? true : null;
+            }, 5000);
+          }).then(function () {
+            toggleCheckbox(win, byId(win, 'show-grid'), false);
+            equal(byId(win, 'canvas').classList.contains('grid-hidden'), true);
+            equal(win.getComputedStyle(byId(win, 'canvas')).backgroundImage, 'none');
+            equal(state.storage.getPreferences().showGrid, false);
+            byId(win, 'settings-close').click();
+            return waitFor(function () {
+              return !dialog.open ? true : null;
+            }, 5000);
+          });
+        });
+      });
+    });
+  });
+
+  test('US5 theme and style apply immediately, persist, follow the system and preflight', function () {
+    return appReady().then(function (win) {
+      return withPreferences(win, {
+        style: 'paper',
+        theme: 'light',
+        showGrid: false,
+        lastDocumentId: null
+      }, function () {
+        var app = win.Prompter.app;
+        var state = app.state;
+        var root = win.document.documentElement;
+        app.clearDocument();
+        equal(root.getAttribute('data-theme'), 'light');
+        equal(root.getAttribute('data-style'), 'paper');
+        var toggle = byId(win, 'theme-toggle');
+        equal(toggle.getAttribute('aria-pressed'), 'false');
+        toggle.click();
+        equal(root.getAttribute('data-theme'), 'dark');
+        equal(toggle.getAttribute('aria-pressed'), 'true');
+        equal(toggle.getAttribute('aria-label'), '切換為淺色');
+        equal(state.preferences.theme, 'dark');
+        equal(state.storage.getPreferences().theme, 'dark');
+
+        changeSelect(win, byId(win, 'style-select'), 'graphite');
+        equal(root.getAttribute('data-style'), 'graphite');
+        equal(state.preferences.style, 'graphite');
+        equal(state.storage.getPreferences().style, 'graphite');
+
+        return withProbeFrame(win, function (probe) {
+          equal(probe.contentDocument.documentElement.getAttribute('data-theme'), 'dark',
+            'The preflight must apply the saved dark theme before storage initializes.');
+          equal(probe.contentDocument.documentElement.getAttribute('data-style'), 'graphite',
+            'The preflight must apply the saved graphite style.');
+        }).then(function () {
+          byId(win, 'settings-button').click();
+          return waitFor(function () {
+            return byId(win, 'settings-dialog').open ? true : null;
+          }, 5000);
+        }).then(function () {
+          byId(win, 'follow-system-button').click();
+          equal(state.preferences.theme, 'system');
+          equal(state.storage.getPreferences().theme, 'system');
+          var expected = win.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+          equal(root.getAttribute('data-theme'), expected,
+            'Following the system must use the current media preference.');
+          equal(root.getAttribute('data-style'), 'graphite',
+            'The style must remain independent of the theme.');
+          byId(win, 'settings-close').click();
+          return waitFor(function () {
+            return byId(win, 'settings-dialog').open ? null : true;
+          }, 5000);
+        });
+      });
+    });
+  });
+
+  test('US5 clear library confirms, keeps preferences, and removes local records and targets', function () {
+    return appReady().then(function (win) {
+      return withPreferences(win, {
+        style: 'graphite',
+        theme: 'dark',
+        defaultMarker: '##',
+        showGrid: true,
+        lastDocumentId: null
+      }, function () {
+        return withCleanLibrary(win, function () {
+          var app = win.Prompter.app;
+          var state = app.state;
+          var Model = win.Prompter.model;
+          var documentId = 'clear-library-document';
+          var asset = {
+            id: 'clear-library-asset',
+            documentId: documentId,
+            fileName: 'clear-library.png',
+            originalName: '清除測試.png',
+            mimeType: 'image/png',
+            width: 1,
+            height: 1,
+            size: 68,
+            createdAt: '2026-10-28T00:00:00.000Z',
+            dataUrl: 'data:image/png;base64,' + PNG_BASE64
+          };
+          var document = Model.createPromptDocument({
+            id: documentId,
+            title: '清除測試文件',
+            fileName: 'clear-library.md',
+            updatedAt: '2026-10-28T05:00:00.000Z',
+            blocks: [
+              Model.createTextBlock({
+                id: 'clear-library-text',
+                text: '本機內容',
+                y: 0,
+                seq: 1
+              }),
+              Model.createImageBlock({
+                id: 'clear-library-image',
+                assetId: asset.id,
+                alt: '清除測試',
+                y: 24,
+                seq: 2
+              })
+            ]
+          });
+
+          return saveStoredDocument(win, document, [asset])
+            .then(function () {
+              return app.refreshDirectory();
+            })
+            .then(function () {
+              return waitFor(function () {
+                return directoryButton(win, documentId);
+              }, 5000);
+            })
+            .then(function () {
+              directoryButton(win, documentId).click();
+              return waitFor(function () {
+                return state.document && state.document.id === documentId &&
+                  state.documentPersisted ? state.document : null;
+              }, 8000);
+            })
+            .then(function () {
+              return state.storage.setFileTarget(documentId, { name: '測試資料夾' });
+            })
+            .then(function () {
+              equal(state.storage.getLastDocumentId(), documentId);
+              byId(win, 'settings-button').click();
+              return waitFor(function () {
+                return byId(win, 'settings-dialog').open ? true : null;
+              }, 5000);
+            })
+            .then(function () {
+              var confirmation = byId(win, 'clear-dialog').textContent;
+              assert(confirmation.indexOf('磁碟') !== -1,
+                'Clear confirmation must state that disk files are untouched.');
+              assert(confirmation.indexOf('偏好設定') !== -1,
+                'Clear confirmation must state that preferences are kept.');
+              byId(win, 'clear-library-button').click();
+              return waitFor(function () {
+                return byId(win, 'clear-dialog').open ? true : null;
+              }, 5000);
+            })
+            .then(function () {
+              byId(win, 'clear-cancel').click();
+              return waitFor(function () {
+                return byId(win, 'clear-dialog').open ? null : true;
+              }, 5000);
+            })
+            .then(function () {
+              return state.storage.getDocuments();
+            })
+            .then(function (stored) {
+              equal(stored.length, 1, 'Canceling must keep the local library.');
+              equal(state.document.id, documentId);
+              byId(win, 'clear-library-button').click();
+              return waitFor(function () {
+                return byId(win, 'clear-dialog').open ? true : null;
+              }, 5000);
+            })
+            .then(function () {
+              byId(win, 'clear-confirm').click();
+              return waitFor(function () {
+                return !byId(win, 'clear-dialog').open &&
+                  !byId(win, 'settings-dialog').open &&
+                  state.document === null;
+              }, 8000);
+            })
+            .then(function () {
+              equal(directoryItems(win).length, 0);
+              equal(byId(win, 'directory-empty').hidden, false);
+              equal(state.storage.getLastDocumentId(), null,
+                'Clear library must forget the removed last document.');
+              var preferences = state.storage.getPreferences();
+              equal(preferences.style, 'graphite');
+              equal(preferences.theme, 'dark');
+              equal(preferences.defaultMarker, '##');
+              equal(preferences.showGrid, true);
+              equal(win.document.documentElement.getAttribute('data-style'), 'graphite');
+              assert(byId(win, 'toast-region').textContent
+                .indexOf('本機資料庫已清除，磁碟上的檔案不受影響。') !== -1,
+              'Clear library must confirm that disk files were untouched.');
+              return state.storage.getDocuments();
+            })
+            .then(function (stored) {
+              equal(stored.length, 0);
+              return state.storage.getAllAssets();
+            })
+            .then(function (assets) {
+              equal(assets.length, 0);
+              return state.storage.getFileTarget(documentId);
+            })
+            .then(function (target) {
+              equal(target, null);
+            });
+        });
+      });
+    });
+  });
+
+  test('US5 clear library reports failures without discarding the current document', function () {
+    return appReady().then(function (win) {
+      return withCleanLibrary(win, function () {
+        var app = win.Prompter.app;
+        var state = app.state;
+        var Model = win.Prompter.model;
+        var document = Model.createPromptDocument({
+          id: 'clear-failure-document',
+          title: '清除失敗測試',
+          fileName: 'clear-failure.md',
+          blocks: [Model.createTextBlock({
+            id: 'clear-failure-text',
+            text: '保留內容',
+            y: 0,
+            seq: 1
+          })]
+        });
+        var originalClear = state.storage.clearLibrary;
+
+        return saveStoredDocument(win, document)
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            return waitFor(function () {
+              return directoryButton(win, document.id);
+            }, 5000);
+          })
+          .then(function () {
+            directoryButton(win, document.id).click();
+            return waitFor(function () {
+              return state.document && state.document.id === document.id
+                ? state.document
+                : null;
+            }, 8000);
+          })
+          .then(function () {
+            state.storage.clearLibrary = function () {
+              return Promise.reject(new Error('模擬清除失敗'));
+            };
+            byId(win, 'settings-button').click();
+            return waitFor(function () {
+              return byId(win, 'settings-dialog').open ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            byId(win, 'clear-library-button').click();
+            return waitFor(function () {
+              return byId(win, 'clear-dialog').open ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            byId(win, 'clear-confirm').click();
+            return waitFor(function () {
+              return byId(win, 'alert-region').textContent
+                .indexOf('模擬清除失敗') !== -1;
+            }, 5000);
+          })
+          .then(function () {
+            equal(state.document && state.document.id, document.id,
+              'A failed clear must keep the current document open.');
+            byId(win, 'clear-cancel').click();
+            return waitFor(function () {
+              return byId(win, 'clear-dialog').open ? null : true;
+            }, 5000);
+          })
+          .then(function () {
+            return state.storage.getDocuments();
+          })
+          .then(function (stored) {
+            equal(stored.length, 1, 'A failed clear must keep local records.');
+          })
+          .then(function () {
+            state.storage.clearLibrary = originalClear;
+          }, function (error) {
+            state.storage.clearLibrary = originalClear;
+            throw error;
+          });
+      });
+    });
+  });
+
+  test('US5 the compact header keeps every action reachable at 360 px', function () {
+    return appReady().then(function (win) {
+      frame.style.width = '1280px';
+      frame.style.height = '720px';
+      function restoreWidth() {
+        frame.style.width = '';
+        frame.style.height = '';
+      }
+      return waitFor(function () {
+        return win.innerWidth === 1280 && byId(win, 'directory-toggle').offsetParent === null
+          ? true
+          : null;
+      }, 5000).then(function () {
+        assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
+          'The 1280 px layout must not scroll horizontally.');
+        assert(byId(win, 'directory').getBoundingClientRect().width > 0,
+          'The directory must be visible at 1280 px.');
+        frame.style.width = '360px';
+        frame.style.height = '800px';
+        return waitFor(function () {
+          return byId(win, 'directory-toggle').offsetParent !== null ? true : null;
+        }, 5000);
+      }).then(function () {
+        assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
+          'The 360 px header must not scroll horizontally: ' +
+          win.document.documentElement.scrollWidth + ' > ' + win.innerWidth);
+        ['file-menu-button', 'directory-toggle', 'preview-button', 'copy-button',
+          'theme-toggle', 'settings-button'].forEach(function (id) {
+          var element = byId(win, id);
+          var rect = element.getBoundingClientRect();
+          assert(rect.width >= 44 && rect.height >= 44,
+            id + ' must provide a 44 px touch target.');
+          assert(rect.left >= 0 && rect.right <= win.innerWidth + 1,
+            id + ' must stay inside the 360 px viewport.');
+          var icon = element.querySelector('.button-icon');
+          assert(icon && icon.getBoundingClientRect().width > 0,
+            id + ' must show a compact icon.');
+          var label = element.querySelector('.button-label');
+          if (label) {
+            assert(label.getBoundingClientRect().width <= 1,
+              id + ' must hide its non-essential text label.');
+          }
+        });
+        var styleSelect = byId(win, 'style-select');
+        var styleRect = styleSelect.getBoundingClientRect();
+        assert(styleRect.height >= 44 && styleRect.right <= win.innerWidth + 1,
+          'The style selector must be compact and remain inside the viewport.');
+        equal(byId(win, 'file-menu-button').getAttribute('aria-haspopup'), 'menu');
+        equal(byId(win, 'preview-button').textContent.trim(), '預覽');
+        equal(byId(win, 'copy-button').textContent.trim(), '複製');
+        equal(byId(win, 'settings-button').textContent.trim(), '設定');
+
+        byId(win, 'file-menu-button').click();
+        var menu = byId(win, 'file-menu');
+        assert(!menu.hidden, 'The File menu must open in the compact header.');
+        var menuRect = menu.getBoundingClientRect();
+        assert(menuRect.left >= 0 && menuRect.right <= win.innerWidth + 1,
+          'The File menu must stay inside the 360 px viewport.');
+        press(win, win.document, 'Escape');
+        restoreWidth();
+      }, function (error) {
+        restoreWidth();
+        throw error;
       });
     });
   });
