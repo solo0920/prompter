@@ -182,17 +182,17 @@ content, block positions, and Markdown reading order.
 
 ### Tests for User Story 4
 
-- [ ] T053 [P] [US4] Add `tests/unit/search.test.js` for literal case-insensitive matching, leading/trailing whitespace trimming, Traditional Chinese/English/mixed text, punctuation, image file names, empty query, and no-match behavior; confirm it fails before implementation.
+- [x] T053 [P] [US4] Add `tests/unit/search.test.js` for literal case-insensitive matching, leading/trailing whitespace trimming, Traditional Chinese/English/mixed text, punctuation, image file names, empty query, and no-match behavior; confirm it fails before implementation.
 
 ### Implementation for User Story 4
 
-- [ ] T054 [US4] Implement `assets/js/search.js`: lowercase in-memory index over title, text blocks, image alt text, and image file names; literal `includes` filtering; 80 ms debounce; rebuild on library changes; and a linear-scan fallback.
-- [ ] T055 [US4] Implement directory rendering in `assets/js/app.js`: newest-first by `updatedAt`, title plus localized last-modified time, localized match count, selected item with `aria-current`, empty-library state with `新增文件`, no-results message, clear-search action, and DocumentFragment updates.
-- [ ] T056 [US4] Implement directory selection and document switching in `assets/js/app.js`: run the Save/Discard/Cancel gate when dirty, load the selected document and assets, mark it selected, restore layout, and keep the current document on cancel.
-- [ ] T057 [US4] Implement New/search interactions in `assets/js/app.js`: New clears an active search, a saved new document becomes visible, and an unsaved new document is not added to the directory.
-- [ ] T058 [US4] Implement last-document restore in `assets/js/app.js` and `assets/js/storage.js`: reopen the last document only when it still exists and is readable, without marking it dirty or bypassing storage warnings.
-- [ ] T059 [US4] Add directory drawer and search styles to `assets/css/app.css` and wiring in `assets/js/app.js`: labeled toggle with `aria-expanded`, off-canvas drawer plus overlay below 768 px, Escape closes and returns focus, and no horizontal scrolling at 360 px.
-- [ ] T060 [US4] Run quickstart scenario 10 with 5, 50, and 500 documents using `tests/browser/harness.js`; fix sorting, initial 500-document render, search latency, no-results, clear-search, selection, last-document restore, and saved-layout/reading-order restore defects in `assets/js/search.js` and `assets/js/app.js`.
+- [x] T054 [US4] Implement `assets/js/search.js`: lowercase in-memory index over title, text blocks, image alt text, and image file names; literal `includes` filtering; 80 ms debounce; rebuild on library changes; and a linear-scan fallback.
+- [x] T055 [US4] Implement directory rendering in `assets/js/app.js`: newest-first by `updatedAt`, title plus localized last-modified time, localized match count, selected item with `aria-current`, empty-library state with `新增文件`, no-results message, clear-search action, and DocumentFragment updates.
+- [x] T056 [US4] Implement directory selection and document switching in `assets/js/app.js`: run the Save/Discard/Cancel gate when dirty, load the selected document and assets, mark it selected, restore layout, and keep the current document on cancel.
+- [x] T057 [US4] Implement New/search interactions in `assets/js/app.js`: New clears an active search, a saved new document becomes visible, and an unsaved new document is not added to the directory.
+- [x] T058 [US4] Implement last-document restore in `assets/js/app.js` and `assets/js/storage.js`: reopen the last document only when it still exists and is readable, without marking it dirty or bypassing storage warnings.
+- [x] T059 [US4] Add directory drawer and search styles to `assets/css/app.css` and wiring in `assets/js/app.js`: labeled toggle with `aria-expanded`, off-canvas drawer plus overlay below 768 px, Escape closes and returns focus, and no horizontal scrolling at 360 px.
+- [x] T060 [US4] Run quickstart scenario 10 with 5, 50, and 500 documents using `tests/browser/harness.js`; fix sorting, initial 500-document render, search latency, no-results, clear-search, selection, last-document restore, and saved-layout/reading-order restore defects in `assets/js/search.js` and `assets/js/app.js`.
 
 **Checkpoint**: A returning user can find and reopen any locally saved document in under 10 seconds.
 

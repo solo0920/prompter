@@ -168,6 +168,64 @@
     }, 8000);
   }
 
+  function saveStoredDocument(win, document, assets) {
+    return win.Prompter.app.state.storage.saveDocument(document, assets || [])
+      .then(function () {
+        return document;
+      });
+  }
+
+  function directoryItems(win) {
+    return Array.prototype.slice.call(
+      win.document.querySelectorAll('#document-list .document-item')
+    );
+  }
+
+  function directoryTitles(win) {
+    return directoryItems(win).map(function (item) {
+      return item.querySelector('.document-item-title').textContent;
+    });
+  }
+
+  function directoryButton(win, documentId) {
+    return win.document.querySelector(
+      '#document-list .document-item[data-document-id="' + documentId + '"]'
+    );
+  }
+
+  function cleanLibrary(win) {
+    var app = win.Prompter.app;
+    var state = app.state;
+    return Promise.resolve(state.storage.clearLibrary()).then(function () {
+      try {
+        var preferences = state.storage.getPreferences();
+        preferences.lastDocumentId = null;
+        state.storage.savePreferences(preferences);
+      } catch (error) {
+        // The test cleanup still continues when preferences cannot be reset.
+      }
+      if (typeof app.clearDirectorySearch === 'function') {
+        app.clearDirectorySearch();
+      }
+      app.clearDocument();
+      return app.refreshDirectory();
+    });
+  }
+
+  function withCleanLibrary(win, run) {
+    return cleanLibrary(win).then(run).then(function (value) {
+      return cleanLibrary(win).then(function () {
+        return value;
+      });
+    }, function (error) {
+      return cleanLibrary(win).then(function () {
+        throw error;
+      }, function () {
+        throw error;
+      });
+    });
+  }
+
   function withClipboardStub(win, hooks, run) {
     var options = hooks || {};
     var navigator = win.navigator;
@@ -1554,6 +1612,639 @@
       }).then(function () {
         equal(win.document.activeElement, copyButton,
           'Closing the manual dialog must return focus to Copy.');
+      });
+    });
+  });
+
+  test('US4 the directory lists newest-first and searches titles, content and image names', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var newest = Model.createPromptDocument({
+        id: 'doc-newest',
+        title: '最新提示詞',
+        fileName: 'newest.md',
+        updatedAt: '2026-10-28T03:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({
+            id: 'newest-block',
+            text: '包含 Alpha 關鍵字',
+            y: 0,
+            seq: 1
+          })
+        ]
+      });
+      var middle = Model.createPromptDocument({
+        id: 'doc-middle',
+        title: 'Middle 文件',
+        fileName: 'middle.md',
+        updatedAt: '2026-10-28T02:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({
+            id: 'middle-block',
+            text: 'Beta 內容',
+            y: 0,
+            seq: 1
+          })
+        ]
+      });
+      var imageAsset = {
+        id: 'asset-receipt',
+        documentId: 'doc-oldest',
+        fileName: 'receipt-scan.png',
+        originalName: '收據掃描.png',
+        mimeType: 'image/png',
+        width: 1,
+        height: 1,
+        size: 68,
+        createdAt: '2026-10-28T01:00:00.000Z',
+        dataUrl: 'data:image/png;base64,' + PNG_BASE64
+      };
+      var oldest = Model.createPromptDocument({
+        id: 'doc-oldest',
+        title: 'Old 提示詞',
+        fileName: 'oldest.md',
+        updatedAt: '2026-10-28T01:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({
+            id: 'oldest-text',
+            text: 'Gamma 內容',
+            y: 0,
+            seq: 1
+          }),
+          Model.createImageBlock({
+            id: 'oldest-image',
+            assetId: imageAsset.id,
+            alt: '收據掃描',
+            y: 24,
+            seq: 2
+          })
+        ]
+      });
+
+      return withCleanLibrary(win, function () {
+        return saveStoredDocument(win, middle)
+          .then(function () {
+            return saveStoredDocument(win, newest);
+          })
+          .then(function () {
+            return saveStoredDocument(win, oldest, [imageAsset]);
+          })
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            return waitFor(function () {
+              return directoryItems(win).length === 3 ? true : null;
+            }, 8000);
+          })
+          .then(function () {
+            assert(directoryTitles(win).join('|') === '最新提示詞|Middle 文件|Old 提示詞',
+              'Directory order must be newest-first: ' + directoryTitles(win).join('|'));
+            equal(byId(win, 'result-count').textContent, '3 個文件');
+            equal(byId(win, 'directory-empty').hidden, true);
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 3 &&
+                byId(win, 'result-count').textContent === '3 個文件';
+            }, 3000);
+          })
+          .then(function () {
+            var search = byId(win, 'search-input');
+            setValue(win, search, 'ALPHA');
+            return waitFor(function () {
+              return directoryItems(win).length === 1 &&
+                byId(win, 'result-count').textContent === '1 個結果';
+            }, 5000).then(function () {
+              equal(directoryTitles(win)[0], '最新提示詞');
+              equal(byId(win, 'clear-search').hidden, false);
+            });
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), 'MIDDLE');
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 1 && titles[0] === 'Middle 文件';
+            }, 5000).then(function () {
+              equal(directoryTitles(win)[0], 'Middle 文件');
+            });
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), 'gamma');
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 1 && titles[0] === 'Old 提示詞';
+            }, 5000).then(function () {
+              equal(directoryTitles(win)[0], 'Old 提示詞');
+            });
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), 'receipt-scan');
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 1 && titles[0] === 'Old 提示詞';
+            }, 5000).then(function () {
+              equal(directoryTitles(win)[0], 'Old 提示詞');
+            });
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), 'not-found');
+            return waitFor(function () {
+              return byId(win, 'directory-no-results').hidden === false;
+            }, 5000).then(function () {
+              equal(byId(win, 'result-count').textContent, '0 個結果');
+              equal(byId(win, 'document-list').hidden, true);
+              equal(directoryItems(win).length, 0);
+              byId(win, 'no-results-clear').click();
+              return waitFor(function () {
+                return directoryItems(win).length === 3 &&
+                  byId(win, 'search-input').value === '' &&
+                  byId(win, 'result-count').textContent === '3 個文件';
+              }, 5000);
+            });
+          })
+          .then(function () {
+            equal(byId(win, 'clear-search').hidden, true);
+            equal(byId(win, 'directory-no-results').hidden, true);
+            equal(state.document, null,
+              'The directory test must not open or depend on a document.');
+            equal(win.document.querySelectorAll(
+              '#document-list .document-item[aria-current="true"]').length, 0,
+            'No directory item should be current without an open document.');
+          });
+      });
+    });
+  });
+
+  test('US4 selecting a document restores its layout and guards unsaved changes', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var first = Model.createPromptDocument({
+        id: 'layout-first',
+        title: '甲文件',
+        fileName: 'first.md',
+        updatedAt: '2026-10-28T02:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({
+            id: 'first-block',
+            text: '甲內容',
+            x: 12,
+            y: 24,
+            seq: 1
+          })
+        ]
+      });
+      var second = Model.createPromptDocument({
+        id: 'layout-second',
+        title: '乙文件',
+        fileName: 'second.md',
+        updatedAt: '2026-10-28T01:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({
+            id: 'second-block',
+            text: '乙內容',
+            x: 320,
+            y: 48,
+            seq: 1
+          })
+        ]
+      });
+
+      return withCleanLibrary(win, function () {
+        return saveStoredDocument(win, first)
+          .then(function () {
+            return saveStoredDocument(win, second);
+          })
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            return waitFor(function () {
+              return directoryItems(win).length === 2 ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            directoryButton(win, first.id).click();
+            return waitFor(function () {
+              return state.document && state.document.id === first.id &&
+                state.documentPersisted && !state.dirty ? state.document : null;
+            }, 8000);
+          })
+          .then(function (loaded) {
+            equal(byId(win, 'document-title').value, '甲文件');
+            equal(byId(win, 'document-status').textContent, '已儲存');
+            equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
+            equal(loaded.blocks[0].x, 12);
+            equal(loaded.blocks[0].y, 24);
+            var element = blockById(win, 'first-block');
+            assert(element, 'The opened block must render.');
+            equal(element.style.left, '12px');
+            equal(element.style.top, '24px');
+            state.document.blocks[0].text = '未儲存變更';
+            app.setDirty(true);
+            directoryButton(win, second.id).click();
+            return waitFor(function () {
+              return byId(win, 'unsaved-dialog').open ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            byId(win, 'unsaved-cancel').click();
+            return waitFor(function () {
+              return byId(win, 'unsaved-dialog').open ? null : true;
+            }, 5000);
+          })
+          .then(function () {
+            equal(state.document.id, first.id);
+            equal(state.dirty, true);
+            equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+            equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
+            directoryButton(win, second.id).click();
+            return waitFor(function () {
+              return byId(win, 'unsaved-dialog').open ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            byId(win, 'unsaved-discard').click();
+            return waitFor(function () {
+              return state.document && state.document.id === second.id &&
+                !state.dirty ? state.document : null;
+            }, 8000);
+          })
+          .then(function (loaded) {
+            equal(byId(win, 'document-title').value, '乙文件');
+            equal(byId(win, 'document-status').textContent, '已儲存');
+            equal(directoryButton(win, second.id).getAttribute('aria-current'), 'true');
+            equal(directoryButton(win, first.id).getAttribute('aria-current'), null);
+            equal(loaded.blocks[0].x, 320);
+            equal(loaded.blocks[0].y, 48);
+            var element = blockById(win, 'second-block');
+            assert(element, 'The second opened block must render.');
+            equal(element.style.left, '320px');
+            equal(element.style.top, '48px');
+          });
+      });
+    });
+  });
+
+  test('US4 New clears the search and an unsaved document is not listed', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var first = Model.createPromptDocument({
+        id: 'new-search-first',
+        title: '搜尋文件',
+        fileName: 'search-first.md',
+        updatedAt: '2026-10-28T02:00:00.000Z',
+        blocks: [Model.createTextBlock({ id: 'search-first-block', text: '內容', seq: 1 })]
+      });
+      var second = Model.createPromptDocument({
+        id: 'new-search-second',
+        title: '另一份',
+        fileName: 'search-second.md',
+        updatedAt: '2026-10-28T01:00:00.000Z',
+        blocks: [Model.createTextBlock({ id: 'search-second-block', text: '其他', seq: 1 })]
+      });
+
+      return withCleanLibrary(win, function () {
+        return saveStoredDocument(win, first)
+          .then(function () {
+            return saveStoredDocument(win, second);
+          })
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            return waitFor(function () {
+              return directoryItems(win).length === 2 ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), '搜尋');
+            return waitFor(function () {
+              return directoryItems(win).length === 1 ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            return app.requestNewDocument();
+          })
+          .then(function () {
+            return waitFor(function () {
+              return state.document && state.document.blocks.length === 0 &&
+                state.searchQuery === '' ? state.document : null;
+            }, 5000);
+          })
+          .then(function (document) {
+            equal(byId(win, 'search-input').value, '');
+            equal(byId(win, 'result-count').textContent, '2 個文件');
+            equal(directoryItems(win).length, 2);
+            equal(document.title, 'Untitled');
+            equal(directoryButton(win, document.id), null);
+            equal(win.document.querySelectorAll(
+              '#document-list .document-item[aria-current="true"]').length, 0);
+            return state.storage.getDocuments().then(function (documents) {
+              equal(documents.length, 2,
+                'An unsaved new document must not enter the local directory.');
+            });
+          });
+      });
+    });
+  });
+
+  test('US4 restores the last readable document without marking it dirty', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var document = Model.createPromptDocument({
+        id: 'restore-document',
+        title: '上次開啟',
+        fileName: 'restore.md',
+        updatedAt: '2026-10-28T04:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({
+            id: 'restore-first',
+            text: '還原內容',
+            x: 40,
+            y: 72,
+            seq: 1
+          })
+        ]
+      });
+
+      return withCleanLibrary(win, function () {
+        return saveStoredDocument(win, document)
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            try {
+              var result = state.storage.setLastDocumentId(document.id);
+              return Promise.resolve(result);
+            } catch (error) {
+              throw error;
+            }
+          })
+          .then(function () {
+            app.clearDocument();
+            return app.restoreLastDocument();
+          })
+          .then(function (loaded) {
+            assert(loaded && loaded.document, 'The last document must be restored.');
+            equal(state.document.id, document.id);
+            equal(state.dirty, false);
+            equal(state.documentPersisted, true);
+            equal(byId(win, 'document-title').value, '上次開啟');
+            equal(byId(win, 'document-status').textContent, '已儲存');
+            equal(state.document.blocks[0].x, 40);
+            equal(state.document.blocks[0].y, 72);
+            equal(directoryButton(win, document.id).getAttribute('aria-current'), 'true');
+            var element = blockById(win, 'restore-first');
+            assert(element, 'The restored block must render.');
+            equal(element.style.left, '40px');
+            equal(element.style.top, '72px');
+            state.storage.setLastDocumentId('missing-document');
+            app.clearDocument();
+            return app.restoreLastDocument();
+          })
+          .then(function (loaded) {
+            equal(loaded, null);
+            equal(state.document, null);
+            equal(state.storage.getLastDocumentId(), null,
+              'A missing last document must be forgotten.');
+          });
+      });
+    });
+  });
+
+  test('US4 the directory drawer toggles and closes with Escape', function () {
+    return appReady().then(function (win) {
+      var toggle = byId(win, 'directory-toggle');
+      var directory = byId(win, 'directory');
+      var overlay = byId(win, 'directory-overlay');
+      frame.style.width = '360px';
+      return waitFor(function () {
+        return toggle.offsetParent !== null ? true : null;
+      }, 5000).then(function () {
+        assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
+          'The 360 px layout must not scroll horizontally: ' +
+          win.document.documentElement.scrollWidth + ' > ' + win.innerWidth);
+        if (directory.classList.contains('open')) {
+          overlay.click();
+        }
+        toggle.click();
+        equal(directory.classList.contains('open'), true);
+        equal(toggle.getAttribute('aria-expanded'), 'true');
+        equal(overlay.hidden, false);
+        press(win, win.document, 'Escape');
+        return waitFor(function () {
+          return !directory.classList.contains('open') &&
+            toggle.getAttribute('aria-expanded') === 'false' &&
+            overlay.hidden && win.document.activeElement === toggle;
+        }, 5000);
+      }).then(function () {
+        frame.style.width = '';
+      }, function (error) {
+        frame.style.width = '';
+        throw error;
+      });
+    });
+  });
+
+  test('US4 five- and fifty-document libraries sort and filter literally', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var base = Date.parse('2026-10-20T00:00:00.000Z');
+
+      function makeDocument(id, title, text, index) {
+        return Model.createPromptDocument({
+          id: id,
+          title: title,
+          fileName: id + '.md',
+          updatedAt: new Date(base + index * 1000).toISOString(),
+          blocks: [
+            Model.createTextBlock({
+              id: id + '-block',
+              text: text,
+              y: 0,
+              seq: 1
+            })
+          ]
+        });
+      }
+
+      function saveBatch(documents, start) {
+        if (start >= documents.length) {
+          return Promise.resolve();
+        }
+        return Promise.all(documents.slice(start, start + 10).map(function (document) {
+          return saveStoredDocument(win, document);
+        })).then(function () {
+          return saveBatch(documents, start + 10);
+        });
+      }
+
+      var five = [
+        makeDocument('five-newest', '最新 Alpha 提示詞', '包含 SECURITY 檢查', 4),
+        makeDocument('five-marketing', '行銷文案', '請用 English 語氣', 3),
+        makeDocument('five-punctuation', 'C++? 範例', '使用 C++? 與 JSON。', 2),
+        makeDocument('five-fourth', '第四份', '一般內容', 1),
+        makeDocument('five-fifth', '第五份', '其他內容', 0)
+      ];
+
+      return withCleanLibrary(win, function () {
+        return saveBatch(five, 0)
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            return waitFor(function () {
+              return directoryItems(win).length === 5 ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            equal(directoryTitles(win).join('|'),
+              '最新 Alpha 提示詞|行銷文案|C++? 範例|第四份|第五份');
+            assert(directoryItems(win).every(function (item) {
+              return item.querySelector('.document-item-time').textContent.length > 0;
+            }), 'Every directory entry must show a last-modified time.');
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), '  alpha  ');
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 1 && titles[0] === '最新 Alpha 提示詞';
+            }, 5000);
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), 'english 語氣');
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 1 && titles[0] === '行銷文案';
+            }, 5000);
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), 'C++?');
+            return waitFor(function () {
+              var titles = directoryTitles(win);
+              return titles.length === 1 && titles[0] === 'C++? 範例';
+            }, 5000);
+          })
+          .then(function () {
+            setValue(win, byId(win, 'search-input'), '不存在');
+            return waitFor(function () {
+              return byId(win, 'directory-no-results').hidden === false;
+            }, 5000);
+          })
+          .then(function () {
+            byId(win, 'no-results-clear').click();
+            return waitFor(function () {
+              return directoryItems(win).length === 5 ? true : null;
+            }, 5000);
+          })
+          .then(function () {
+            var fifty = five.slice();
+            for (var index = 5; index < 50; index += 1) {
+              fifty.push(makeDocument(
+                'fifty-' + index,
+                '文件 ' + index,
+                index === 47 ? 'needle 目標' : '提示詞 ' + index,
+                index
+              ));
+            }
+            return saveBatch(fifty.slice(5), 0).then(function () {
+              return app.refreshDirectory();
+            }).then(function () {
+              return waitFor(function () {
+                return directoryItems(win).length === 50 ? true : null;
+              }, 10000);
+            }).then(function () {
+              var started = Date.now();
+              setValue(win, byId(win, 'search-input'), '文件 47');
+              return waitFor(function () {
+                var titles = directoryTitles(win);
+                return titles.length === 1 && titles[0] === '文件 47';
+              }, 5000).then(function () {
+                var elapsed = Date.now() - started;
+                assert(elapsed < 1000,
+                  'Searching 50 documents took ' + elapsed + ' ms.');
+                return state.storage.getDocuments().then(function (stored) {
+                  equal(stored.length, 50);
+                });
+              });
+            });
+          });
+      });
+    });
+  });
+
+  test('US4 five hundred documents render and filter within the directory budget', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var documents = [];
+      var base = Date.parse('2026-10-01T00:00:00.000Z');
+      for (var index = 0; index < 500; index += 1) {
+        documents.push(Model.createPromptDocument({
+          id: 'bulk-' + index,
+          title: '文件 ' + index,
+          fileName: 'bulk-' + index + '.md',
+          updatedAt: new Date(base + index * 1000).toISOString(),
+          blocks: [
+            Model.createTextBlock({
+              id: 'bulk-block-' + index,
+              text: index === 250 ? 'needle 目標' : '提示詞 ' + index,
+              y: 0,
+              seq: 1
+            })
+          ]
+        }));
+      }
+
+      function saveBatch(start) {
+        if (start >= documents.length) {
+          return Promise.resolve();
+        }
+        return Promise.all(documents.slice(start, start + 25).map(function (document) {
+          return saveStoredDocument(win, document);
+        })).then(function () {
+          return saveBatch(start + 25);
+        });
+      }
+
+      return withCleanLibrary(win, function () {
+        return saveBatch(0).then(function () {
+          var started = Date.now();
+          return app.refreshDirectory().then(function () {
+            return waitFor(function () {
+              return directoryItems(win).length === 500 ? true : null;
+            }, 20000).then(function () {
+              var renderElapsed = Date.now() - started;
+              assert(renderElapsed < 1000,
+                'Rendering 500 documents took ' + renderElapsed + ' ms.');
+              equal(directoryTitles(win)[0], '文件 499');
+              var searchStarted = Date.now();
+              setValue(win, byId(win, 'search-input'), 'needle');
+              return waitFor(function () {
+                var titles = directoryTitles(win);
+                return titles.length === 1 && titles[0] === '文件 250';
+              }, 10000).then(function () {
+                var searchElapsed = Date.now() - searchStarted;
+                assert(searchElapsed < 300,
+                  'Searching 500 documents took ' + searchElapsed + ' ms.');
+                return state.storage.getDocuments().then(function (stored) {
+                  equal(stored.length, 500);
+                });
+              });
+            });
+          });
+        });
       });
     });
   });

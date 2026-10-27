@@ -6,6 +6,7 @@
   var Storage = global.Prompter.storage;
   var Files = global.Prompter.files;
   var Markdown = global.Prompter.markdown;
+  var Search = global.Prompter.search;
 
   var VERSION = '1.0.0';
 
@@ -35,6 +36,12 @@
   var elements = {};
   var unsavedResolver = null;
   var unsavedSaving = false;
+  var directoryDocuments = [];
+  var directoryAssets = [];
+  var directoryIndex = { entries: [] };
+  var directoryRequestId = 0;
+  var searchTimer = null;
+  var directoryDateFormatter = null;
 
   function cacheElements() {
     [
@@ -310,6 +317,7 @@
     if (global.Prompter.editor && typeof global.Prompter.editor.render === 'function') {
       global.Prompter.editor.render();
     }
+    renderDirectory();
   }
 
   function clearDocument() {
@@ -323,6 +331,223 @@
     if (global.Prompter.search && typeof global.Prompter.search.refreshDirectory === 'function') {
       global.Prompter.search.refreshDirectory();
     }
+  }
+
+  function sortedDocuments(documents) {
+    return (documents || []).slice().sort(function (left, right) {
+      var leftTime = Date.parse(left.updatedAt) || 0;
+      var rightTime = Date.parse(right.updatedAt) || 0;
+      if (leftTime !== rightTime) {
+        return rightTime - leftTime;
+      }
+      return String(left.id).localeCompare(String(right.id));
+    });
+  }
+
+  function formatUpdatedAt(value) {
+    var date = new Date(value);
+    if (!value || isNaN(date.getTime())) {
+      return '更新時間未知';
+    }
+    if (directoryDateFormatter === null) {
+      try {
+        directoryDateFormatter = new Intl.DateTimeFormat('zh-Hant', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+      } catch (error) {
+        directoryDateFormatter = false;
+      }
+    }
+    if (directoryDateFormatter) {
+      return directoryDateFormatter.format(date);
+    }
+    return date.toLocaleString();
+  }
+
+  function updateSearchControls() {
+    var hasQuery = Search.normalizeQuery(state.searchQuery) !== '';
+    if (elements['clear-search']) {
+      elements['clear-search'].hidden = !hasQuery;
+    }
+  }
+
+  function renderDirectory() {
+    var list = elements['document-list'];
+    if (!list) {
+      return;
+    }
+    var query = Search.normalizeQuery(state.searchQuery);
+    var matches = Search.searchIndex(directoryIndex, query);
+    var currentId = state.document ? state.document.id : null;
+    var fragment = global.document.createDocumentFragment();
+
+    matches.forEach(function (document) {
+      var entry = global.document.createElement('div');
+      entry.setAttribute('role', 'listitem');
+      var button = global.document.createElement('button');
+      button.type = 'button';
+      button.className = 'document-item';
+      button.setAttribute('data-document-id', document.id);
+      if (document.id === currentId) {
+        button.setAttribute('aria-current', 'true');
+      }
+      var modified = formatUpdatedAt(document.updatedAt);
+      button.setAttribute('aria-label', (document.title || 'Untitled') + '，' + modified);
+      var title = global.document.createElement('span');
+      title.className = 'document-item-title';
+      title.textContent = document.title || 'Untitled';
+      var time = global.document.createElement('span');
+      time.className = 'document-item-time';
+      time.textContent = modified;
+      button.appendChild(title);
+      button.appendChild(time);
+      entry.appendChild(button);
+      fragment.appendChild(entry);
+    });
+
+    list.textContent = '';
+    list.appendChild(fragment);
+    list.hidden = matches.length === 0;
+
+    var libraryEmpty = directoryDocuments.length === 0;
+    if (elements['directory-empty']) {
+      elements['directory-empty'].hidden = !libraryEmpty;
+    }
+    if (elements['directory-no-results']) {
+      elements['directory-no-results'].hidden = libraryEmpty || matches.length > 0 || !query;
+    }
+    if (elements['result-count']) {
+      elements['result-count'].textContent = query
+        ? matches.length + ' 個結果'
+        : matches.length + ' 個文件';
+    }
+    updateSearchControls();
+  }
+
+  function refreshDirectory() {
+    if (!state.storage) {
+      return Promise.resolve();
+    }
+    var requestId = directoryRequestId + 1;
+    directoryRequestId = requestId;
+    var documentsPromise = state.storage.getDocuments();
+    var assetsPromise = typeof state.storage.getAllAssets === 'function'
+      ? state.storage.getAllAssets()
+      : Promise.resolve([]);
+    return Promise.all([documentsPromise, assetsPromise]).then(function (values) {
+      if (requestId !== directoryRequestId) {
+        return;
+      }
+      directoryDocuments = sortedDocuments(values[0]);
+      directoryAssets = values[1] || [];
+      directoryIndex = Search.buildIndex(directoryDocuments, directoryAssets);
+      renderDirectory();
+    }).catch(function (error) {
+      if (requestId !== directoryRequestId) {
+        return;
+      }
+      directoryDocuments = [];
+      directoryAssets = [];
+      directoryIndex = Search.buildIndex([], []);
+      renderDirectory();
+      if (state.storage && state.storage.lastReadWarning) {
+        announce(state.storage.lastReadWarning, true);
+      } else {
+        showError(error);
+      }
+    });
+  }
+
+  function clearLastDocumentId() {
+    try {
+      var result = state.storage.setLastDocumentId(null);
+      if (result && typeof result.catch === 'function') {
+        result.catch(function () {});
+      }
+    } catch (error) {
+      // Forgetting a missing document is best-effort.
+    }
+  }
+
+  function restoreLastDocument() {
+    var documentId = state.storage && typeof state.storage.getLastDocumentId === 'function'
+      ? state.storage.getLastDocumentId()
+      : null;
+    if (!documentId) {
+      return Promise.resolve(null);
+    }
+    return state.storage.getDocument(documentId).then(function (loaded) {
+      if (!loaded || !loaded.document) {
+        clearLastDocumentId();
+        return null;
+      }
+      setDocument(loaded.document, loaded.assets, { persisted: true });
+      return state.storage.getFileTarget(documentId).catch(function () {
+        return null;
+      }).then(function (target) {
+        state.fileTarget = target || null;
+        return loaded;
+      });
+    }).catch(function () {
+      return null;
+    });
+  }
+
+  function clearDirectorySearch() {
+    if (searchTimer) {
+      global.clearTimeout(searchTimer);
+      searchTimer = null;
+    }
+    state.searchQuery = '';
+    if (elements['search-input']) {
+      elements['search-input'].value = '';
+    }
+    updateSearchControls();
+  }
+
+  function scheduleDirectoryRender() {
+    if (searchTimer) {
+      global.clearTimeout(searchTimer);
+    }
+    searchTimer = global.setTimeout(function () {
+      searchTimer = null;
+      renderDirectory();
+    }, 80);
+  }
+
+  function closeDirectoryDrawer() {
+    if (!elements.directory) {
+      return;
+    }
+    var wasOpen = elements.directory.classList.contains('open');
+    elements.directory.classList.remove('open');
+    if (elements['directory-toggle']) {
+      elements['directory-toggle'].setAttribute('aria-expanded', 'false');
+    }
+    if (elements['directory-overlay']) {
+      elements['directory-overlay'].hidden = true;
+    }
+    if (wasOpen && elements['directory-toggle']) {
+      elements['directory-toggle'].focus();
+    }
+  }
+
+  function openDirectoryDocument(documentId) {
+    if (!documentId || state.fileBusy) {
+      return Promise.resolve({ ok: false });
+    }
+    if (state.document && state.document.id === documentId) {
+      closeDirectoryDrawer();
+      return Promise.resolve({ ok: true, same: true });
+    }
+    return requestOpenSavedDocument(documentId).then(function (result) {
+      if (result && result.ok) {
+        closeDirectoryDrawer();
+        renderDirectory();
+      }
+      return result;
+    });
   }
 
   function newDocument() {
@@ -351,6 +576,8 @@
     if (global.Prompter.editor && typeof global.Prompter.editor.focusComposer === 'function') {
       global.Prompter.editor.focusComposer();
     }
+    clearDirectorySearch();
+    renderDirectory();
     updateTitleInput();
     updateStatus();
   }
@@ -796,17 +1023,52 @@
     }
     if (elements['directory-overlay']) {
       elements['directory-overlay'].addEventListener('click', function () {
-        elements.directory.classList.remove('open');
-        elements['directory-toggle'].setAttribute('aria-expanded', 'false');
-        elements['directory-overlay'].hidden = true;
-        elements['directory-toggle'].focus();
+        closeDirectoryDrawer();
+      });
+    }
+    if (elements['search-input']) {
+      elements['search-input'].addEventListener('input', function () {
+        state.searchQuery = elements['search-input'].value;
+        updateSearchControls();
+        scheduleDirectoryRender();
+      });
+    }
+    if (elements['clear-search']) {
+      elements['clear-search'].addEventListener('click', function () {
+        clearDirectorySearch();
+        renderDirectory();
+        if (elements['search-input']) {
+          elements['search-input'].focus();
+        }
+      });
+    }
+    if (elements['no-results-clear']) {
+      elements['no-results-clear'].addEventListener('click', function () {
+        clearDirectorySearch();
+        renderDirectory();
+        if (elements['search-input']) {
+          elements['search-input'].focus();
+        }
       });
     }
     if (elements['empty-new-button']) {
-      elements['empty-new-button'].addEventListener('click', newDocument);
+      elements['empty-new-button'].addEventListener('click', function () {
+        requestNewDocument();
+      });
     }
     if (elements['canvas-new-button']) {
-      elements['canvas-new-button'].addEventListener('click', newDocument);
+      elements['canvas-new-button'].addEventListener('click', function () {
+        requestNewDocument();
+      });
+    }
+    if (elements['document-list']) {
+      elements['document-list'].addEventListener('click', function (event) {
+        var item = event.target.closest ? event.target.closest('[data-document-id]') : null;
+        if (!item) {
+          return;
+        }
+        openDirectoryDocument(item.getAttribute('data-document-id'));
+      });
     }
   }
 
@@ -901,7 +1163,6 @@
       applyAppearance();
       refreshStorageInfo();
       syncSettingsDialog();
-      state.initialized = true;
       if (global.Prompter.editor && typeof global.Prompter.editor.init === 'function') {
         global.Prompter.editor.init();
       }
@@ -914,7 +1175,13 @@
       if (global.Prompter.search && typeof global.Prompter.search.init === 'function') {
         global.Prompter.search.init();
       }
-      return state;
+      return refreshDirectory().then(function () {
+        return restoreLastDocument();
+      }).then(function () {
+        renderDirectory();
+        state.initialized = true;
+        return state;
+      });
     }).catch(function (error) {
       showError(error);
       state.initialized = true;
@@ -949,7 +1216,12 @@
     requestNewDocument: requestNewDocument,
     requestOpenPicker: requestOpenPicker,
     requestOpenSavedDocument: requestOpenSavedDocument,
-    insertImagesFromPicker: insertImagesFromPicker
+    insertImagesFromPicker: insertImagesFromPicker,
+    refreshDirectory: refreshDirectory,
+    renderDirectory: renderDirectory,
+    restoreLastDocument: restoreLastDocument,
+    openDirectoryDocument: openDirectoryDocument,
+    clearDirectorySearch: clearDirectorySearch
   };
 
   global.Prompter = global.Prompter || {};

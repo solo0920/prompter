@@ -80,6 +80,10 @@
     };
   }
 
+  function filesModule() {
+    return Files || (global.Prompter && global.Prompter.files);
+  }
+
   function toBlob(asset) {
     if (asset.blob) {
       return asset.blob;
@@ -88,7 +92,7 @@
       return new global.Blob([asset.bytes], { type: asset.mimeType || 'application/octet-stream' });
     }
     if (asset.dataUrl) {
-      return Files.dataUrlToBlob(asset.dataUrl);
+      return filesModule().dataUrlToBlob(asset.dataUrl);
     }
     return null;
   }
@@ -102,7 +106,7 @@
         ';base64,' + Utils.bytesToBase64(asset.bytes));
     }
     if (asset.blob) {
-      return Files.blobToDataUrl(asset.blob);
+      return filesModule().blobToDataUrl(asset.blob);
     }
     return Promise.resolve('');
   }
@@ -340,6 +344,29 @@
       }
       return Promise.resolve(Object.keys(storage._memory.documents).map(function (id) {
         return copyDocument(storage._memory.documents[id]);
+      }));
+    };
+
+    storage.getAllAssets = function () {
+      if (storage.mode === 'idb') {
+        if (!storage._db) {
+          return Promise.reject(storageError('STORAGE_READ_FAILED', '本機資料庫尚未開啟。'));
+        }
+        var transaction = storage._db.transaction(['assets'], 'readonly');
+        return requestToPromise(transaction.objectStore('assets').getAll()).then(function (records) {
+          return (records || []).map(assetMetadata);
+        });
+      }
+      if (storage.mode === 'local') {
+        try {
+          return Promise.resolve(storage._readLocalLibrary().assets.map(assetMetadata));
+        } catch (error) {
+          storage.lastReadWarning = '本機圖片讀取失敗，已顯示空白目錄。';
+          return Promise.resolve([]);
+        }
+      }
+      return Promise.resolve(Object.keys(storage._memory.assets).map(function (id) {
+        return assetMetadata(storage._memory.assets[id]);
       }));
     };
 
