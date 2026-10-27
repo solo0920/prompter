@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompter 瀏覽器測試</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      line-height: 1.55;
+      background: #f7f3ea;
+      color: #2b241c;
+    }
+    main { max-width: 880px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    #summary {
+      display: inline-block;
+      margin: 12px 0 18px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      background: #e6dccb;
+    }
+    #summary[data-status="PASS"] { background: #cde8cf; color: #1d5c26; }
+    #summary[data-status="FAIL"] { background: #f6d9d6; color: #8a231d; }
+    #results { display: grid; gap: 6px; padding: 0; list-style: none; }
+    #results li { padding: 8px 12px; border-radius: 8px; border: 1px solid #d8ccba; background: #fffdf8; }
+    #results li.pass { border-color: #8ecb94; }
+    #results li.fail { border-color: #d38a84; background: #fff4f3; }
+    .name { font-weight: 650; }
+    .detail { display: block; margin-top: 3px; color: #6d6255; font-size: 13px; white-space: pre-wrap; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #app-frame {
+      position: fixed;
+      left: -2200px;
+      top: 0;
+      width: 1200px;
+      height: 820px;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Prompter 瀏覽器測試</h1>
+    <p>測試會在隱藏的 iframe 中載入真正的 <code>index.html</code>，因此 UI、classic scripts 與儲存路徑都與正式頁面相同。</p>
+    <div id="summary" data-status="RUNNING">執行中…</div>
+    <ol id="results"></ol>
+  </main>
+
+  <iframe id="app-frame" title="Prompter 測試應用程式" src="../../index.html"></iframe>
+
+  <script defer src="harness.js"></script>
+</body>
+</html>

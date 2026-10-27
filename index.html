@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light" data-style="paper">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Prompter — Markdown 提示詞編輯器</title>
+  <script>
+    (function () {
+      try {
+        var prefs = JSON.parse(localStorage.getItem('prompter.prefs.v1') || 'null');
+        var theme = prefs && prefs.theme ? prefs.theme : 'system';
+        if (theme === 'system') {
+          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-style', prefs && prefs.style === 'graphite' ? 'graphite' : 'paper');
+      } catch (error) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.documentElement.setAttribute('data-style', 'paper');
+      }
+    }());
+  </script>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/themes.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#canvas">跳至編輯畫布</a>
+
+  <header class="app-header" aria-label="主要工具列">
+    <div class="header-group header-left">
+      <div class="menu-wrap">
+        <button id="file-menu-button" class="button button-quiet" type="button"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="file-menu">檔案</button>
+        <div id="file-menu" class="menu" role="menu" aria-label="檔案" hidden>
+          <button class="menu-item" type="button" role="menuitem" data-action="new">新增文件</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="open">開啟檔案</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="save" disabled>儲存</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="save-as" disabled>另存新檔</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="insert-image" disabled>插入圖片</button>
+        </div>
+      </div>
+      <button id="directory-toggle" class="button button-quiet directory-toggle" type="button"
+              aria-expanded="false" aria-controls="directory">文件目錄</button>
+    </div>
+
+    <div class="header-group header-center">
+      <button id="preview-button" class="button" type="button">預覽</button>
+      <button id="copy-button" class="button" type="button" disabled>複製</button>
+    </div>
+
+    <div class="header-group header-right">
+      <label class="visually-hidden" for="style-select">視覺風格</label>
+      <select id="style-select" class="select" aria-label="視覺風格">
+        <option value="paper">紙張</option>
+        <option value="graphite">石墨</option>
+      </select>
+      <button id="theme-toggle" class="button button-quiet" type="button" aria-label="切換明暗">切換明暗</button>
+      <button id="settings-button" class="button button-quiet" type="button">設定</button>
+    </div>
+  </header>
+
+  <div class="title-bar">
+    <label class="visually-hidden" for="document-title">文件標題</label>
+    <input id="document-title" class="title-input" type="text" maxlength="200"
+           placeholder="Untitled" aria-label="文件標題" autocomplete="off">
+    <span id="document-status" class="document-status" role="status" aria-live="polite"></span>
+  </div>
+
+  <div class="app-main">
+    <aside id="directory" class="directory" aria-label="文件目錄">
+      <div id="storage-warning" class="storage-warning" role="status" hidden>
+        <p id="storage-warning-text"></p>
+        <button id="storage-warning-dismiss" class="button button-small" type="button">知道了</button>
+      </div>
+
+      <div class="search-block">
+        <label for="search-input" class="field-label">搜尋提示詞文件</label>
+        <div class="search-row">
+          <input id="search-input" class="search-input" type="search"
+                 placeholder="搜尋標題或內容…" autocomplete="off">
+          <button id="clear-search" class="button button-small" type="button" hidden>清除搜尋</button>
+        </div>
+        <p id="result-count" class="result-count" aria-live="polite"></p>
+      </div>
+
+      <div id="document-list" class="document-list" role="list"></div>
+      <div id="directory-empty" class="directory-empty" hidden>
+        <p>尚未儲存任何文件。</p>
+        <button id="empty-new-button" class="button" type="button">新增文件</button>
+      </div>
+      <div id="directory-no-results" class="directory-empty" hidden>
+        <p>找不到符合的文件。</p>
+        <button id="no-results-clear" class="button" type="button">清除搜尋</button>
+      </div>
+    </aside>
+    <div id="directory-overlay" class="directory-overlay" hidden></div>
+
+    <main id="workspace" class="workspace" aria-label="提示詞編輯區">
+      <div id="canvas" class="canvas" tabindex="0" role="list" aria-label="編輯畫布">
+        <div id="canvas-empty" class="canvas-empty" hidden>
+          <p>建立第一個提示詞區塊</p>
+          <button id="canvas-new-button" class="button" type="button">新增文件</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+  <div id="alert-region" class="alert-region" role="alert" aria-live="assertive" aria-atomic="true"></div>
+  <div id="move-announcer" class="visually-hidden" role="status" aria-live="polite"></div>
+
+  <dialog id="preview-dialog" class="dialog dialog-wide" aria-labelledby="preview-title">
+    <div class="dialog-header">
+      <h2 id="preview-title">預覽</h2>
+      <button id="preview-close" class="button button-small" type="button" aria-label="關閉預覽">關閉預覽</button>
+    </div>
+    <div id="preview-content" class="preview-content"></div>
+  </dialog>
+
+  <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
+    <div class="dialog-header">
+      <h2 id="settings-title">設定</h2>
+      <button id="settings-close" class="button button-small" type="button" aria-label="關閉設定">關閉設定</button>
+    </div>
+    <div class="settings-body">
+      <label class="field-label" for="default-marker">預設標記</label>
+      <select id="default-marker" class="select">
+        <option value="none">無</option>
+        <option value="#">#</option>
+        <option value="##">##</option>
+        <option value="###">###</option>
+        <option value="-">-</option>
+        <option value="1.">1.</option>
+        <option value=">">&gt;</option>
+        <option value=".">.</option>
+      </select>
+
+      <label class="check-row">
+        <input id="show-grid" type="checkbox">
+        <span>顯示對齊格線</span>
+      </label>
+
+      <button id="follow-system-button" class="button" type="button">跟隨系統明暗</button>
+      <button id="clear-library-button" class="button button-danger" type="button">清除本機資料庫</button>
+
+      <dl class="version-info">
+        <dt>應用程式版本</dt><dd id="app-version">1.0.0</dd>
+        <dt>儲存結構版本</dt><dd id="schema-version">1</dd>
+        <dt>目前儲存模式</dt><dd id="storage-mode-label">—</dd>
+      </dl>
+    </div>
+  </dialog>
+
+  <dialog id="clear-dialog" class="dialog" aria-labelledby="clear-title">
+    <div class="dialog-header">
+      <h2 id="clear-title">清除本機資料庫？</h2>
+    </div>
+    <p>這會移除本機儲存的文件、版面與圖片，但不會刪除任何已儲存在磁碟上的 Markdown 或圖片檔案。工作區偏好設定會保留。</p>
+    <div class="dialog-actions">
+      <button id="clear-cancel" class="button" type="button">取消</button>
+      <button id="clear-confirm" class="button button-danger" type="button">清除</button>
+    </div>
+  </dialog>
+
+  <dialog id="unsaved-dialog" class="dialog" aria-labelledby="unsaved-title">
+    <div class="dialog-header">
+      <h2 id="unsaved-title">尚未儲存的變更</h2>
+    </div>
+    <p>目前的文件有尚未儲存的變更。要儲存、捨棄，還是取消？</p>
+    <div class="dialog-actions">
+      <button id="unsaved-save" class="button button-primary" type="button">儲存</button>
+      <button id="unsaved-discard" class="button" type="button">捨棄</button>
+      <button id="unsaved-cancel" class="button" type="button">取消</button>
+    </div>
+  </dialog>
+
+  <dialog id="manual-copy-dialog" class="dialog dialog-wide" aria-labelledby="manual-copy-title">
+    <div class="dialog-header">
+      <h2 id="manual-copy-title">手動複製</h2>
+      <button id="manual-copy-close" class="button button-small" type="button">關閉</button>
+    </div>
+    <p>瀏覽器無法自動寫入剪貼簿。以下是完整的 Markdown，請選取後手動複製。圖片無法包含在手動複製路徑中。</p>
+    <textarea id="manual-copy-text" class="manual-copy-text" readonly></textarea>
+    <div class="dialog-actions">
+      <button id="manual-copy-select" class="button button-primary" type="button">選取全部</button>
+    </div>
+  </dialog>
+
+  <dialog id="conflict-dialog" class="dialog" aria-labelledby="conflict-title">
+    <div class="dialog-header">
+      <h2 id="conflict-title">檔案已存在</h2>
+    </div>
+    <p>下列檔案已存在，且不屬於這份文件。為避免覆寫無關內容，請選擇其他位置或明確允許覆寫。</p>
+    <ul id="conflict-list" class="conflict-list"></ul>
+    <div class="dialog-actions">
+      <button id="conflict-cancel" class="button" type="button">取消</button>
+      <button id="conflict-choose" class="button" type="button">選擇其他位置</button>
+      <button id="conflict-overwrite" class="button button-danger" type="button">允許覆寫</button>
+    </div>
+  </dialog>
+
+  <dialog id="filename-dialog" class="dialog" aria-labelledby="filename-title">
+    <form id="filename-form" method="dialog">
+      <div class="dialog-header">
+        <h2 id="filename-title">檔案名稱</h2>
+      </div>
+      <label class="field-label" for="filename-input">Markdown 檔案名稱</label>
+      <input id="filename-input" class="text-input" type="text" autocomplete="off">
+      <div class="dialog-actions">
+        <button id="filename-cancel" class="button" type="button">取消</button>
+        <button id="filename-confirm" class="button button-primary" type="submit">確定</button>
+      </div>
+    </form>
+  </dialog>
+
+  <input id="open-input" class="visually-hidden" type="file" multiple
+         accept=".md,.markdown,text/markdown,image/png,image/jpeg,image/gif,image/webp">
+  <input id="image-input" class="visually-hidden" type="file" multiple
+         accept="image/png,image/jpeg,image/gif,image/webp">
+
+  <script defer src="assets/js/utils.js"></script>
+  <script defer src="assets/js/markdown.js"></script>
+  <script defer src="assets/js/model.js"></script>
+  <script defer src="assets/js/storage.js"></script>
+  <script defer src="assets/js/search.js"></script>
+  <script defer src="assets/js/files.js"></script>
+  <script defer src="assets/js/preview.js"></script>
+  <script defer src="assets/js/clipboard.js"></script>
+  <script defer src="assets/js/editor.js"></script>
+  <script defer src="assets/js/settings.js"></script>
+  <script defer src="assets/js/app.js"></script>
+</body>
+</html>
