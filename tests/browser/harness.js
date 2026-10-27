@@ -153,6 +153,80 @@
     return new win.File([bytes], name || 'pixel.png', { type: 'image/png' });
   }
 
+  function addPickerImage(win, name) {
+    var state = win.Prompter.app.state;
+    var before = state.assets.length;
+    var input = byId(win, 'image-input');
+    var data = new win.DataTransfer();
+    data.items.add(pngFile(win, name));
+    input.files = data.files;
+    input.dispatchEvent(new win.Event('change', { bubbles: true }));
+    return waitFor(function () {
+      return state.assets.length > before
+        ? state.assets[state.assets.length - 1]
+        : null;
+    }, 8000);
+  }
+
+  function withClipboardStub(win, hooks, run) {
+    var options = hooks || {};
+    var navigator = win.navigator;
+    var hadClipboard = Object.prototype.hasOwnProperty.call(navigator, 'clipboard');
+    var originalClipboard = navigator.clipboard;
+    var hadClipboardItem = Object.prototype.hasOwnProperty.call(win, 'ClipboardItem');
+    var originalClipboardItem = win.ClipboardItem;
+    var hadExecCommand = Object.prototype.hasOwnProperty.call(win.document, 'execCommand');
+    var originalExecCommand = win.document.execCommand;
+    var clipboard = {};
+
+    if (options.asyncWrite) {
+      clipboard.write = options.asyncWrite;
+      function FakeClipboardItem(items) {
+        this.items = items;
+      }
+      FakeClipboardItem.supports = function () {
+        return false;
+      };
+      win.ClipboardItem = FakeClipboardItem;
+    }
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: clipboard
+    });
+    win.document.execCommand = options.execCommand || function () {
+      return false;
+    };
+
+    function restore() {
+      if (hadClipboard) {
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: originalClipboard
+        });
+      } else {
+        delete navigator.clipboard;
+      }
+      if (hadClipboardItem) {
+        win.ClipboardItem = originalClipboardItem;
+      } else {
+        delete win.ClipboardItem;
+      }
+      if (hadExecCommand) {
+        win.document.execCommand = originalExecCommand;
+      } else {
+        delete win.document.execCommand;
+      }
+    }
+
+    return Promise.resolve().then(run).then(function (value) {
+      restore();
+      return value;
+    }, function (error) {
+      restore();
+      throw error;
+    });
+  }
+
   function svgFile(win, name) {
     var text = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
     return new win.File([text], name || 'icon.svg', { type: 'image/svg+xml' });
@@ -1237,6 +1311,250 @@
         'New must be disabled while a file operation is running.');
       app.setFileBusy(false);
       equal(byId(win, 'document-status').textContent, '新文件');
+    });
+  });
+
+  test('US3 Preview renders canonical content, warns about missing images and restores focus', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      var heading = commitComposer(win, '# 預覽標題');
+      var quote = addBelow(win, heading, '> 引言 <script>alert(1)</script>');
+      addBelow(win, quote, '![遠端](https://example.com/remote.png)');
+      return addPickerImage(win, 'preview.png').then(function () {
+        var button = byId(win, 'preview-button');
+        button.focus();
+        button.click();
+        return waitFor(function () {
+          var content = byId(win, 'preview-content');
+          return byId(win, 'preview-dialog').open &&
+            content.querySelector('h1') ? content : null;
+        }, 8000);
+      }).then(function (content) {
+        equal(content.querySelector('h1').textContent, '預覽標題');
+        var quoteElement = content.querySelector('blockquote');
+        assert(quoteElement, 'Quote lines must render as a blockquote.');
+        assert(quoteElement.textContent.indexOf('引言 <script>alert(1)</script>') !== -1,
+          'Quote text must stay literal inside the preview.');
+        equal(content.innerHTML.indexOf('<script>alert(1)</script>'), -1,
+          'Preview must not emit raw HTML from block text.');
+        var image = content.querySelector('img[alt="preview.png"]');
+        assert(image, 'The local image must render in Preview.');
+        assert(/^data:image\/png;base64,/.test(image.getAttribute('src')),
+          'Preview images must use a local data URL.');
+        var placeholder = content.querySelector('.missing-image');
+        assert(placeholder && placeholder.textContent.indexOf('遠端') !== -1,
+          'Remote images must use a placeholder.');
+        equal(content.innerHTML.indexOf('src="https://example.com/remote.png"'), -1,
+          'Remote URLs must never become image sources.');
+        var warning = content.querySelector('.preview-warning');
+        assert(warning && warning.textContent.indexOf('https://example.com/remote.png') !== -1,
+          'Preview must list images that could not be displayed.');
+        byId(win, 'preview-close').click();
+        return waitFor(function () {
+          return byId(win, 'preview-dialog').open ? null : true;
+        }, 5000);
+      }).then(function () {
+        equal(win.document.activeElement, byId(win, 'preview-button'),
+          'Closing Preview must return focus to its trigger.');
+      });
+    });
+  });
+
+  test('US3 Preview shows an empty state for a blank document', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      var button = byId(win, 'preview-button');
+      button.focus();
+      button.click();
+      return waitFor(function () {
+        var content = byId(win, 'preview-content');
+        return byId(win, 'preview-dialog').open &&
+          content.querySelector('.preview-empty') ? content : null;
+      }, 5000).then(function (content) {
+        equal(content.querySelector('.preview-empty').textContent,
+          '目前沒有可預覽的內容。');
+        byId(win, 'preview-close').click();
+        return waitFor(function () {
+          return !byId(win, 'preview-dialog').open &&
+            win.document.activeElement === byId(win, 'preview-button');
+        }, 5000);
+      }).then(function () {
+        equal(win.document.activeElement, byId(win, 'preview-button'),
+          'Closing the empty Preview must return focus to its trigger.');
+      });
+    });
+  });
+
+  test('US3 Copy is disabled for blank documents and enabled with content', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      var button = byId(win, 'copy-button');
+      equal(button.disabled, true, 'Copy must be disabled for a blank document.');
+      commitComposer(win, '可複製內容');
+      equal(button.disabled, false, 'Copy must be enabled after adding content.');
+    });
+  });
+
+  test('US3 Copy writes exact Markdown and rich HTML through the async clipboard', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var heading = commitComposer(win, '# 複製標題');
+      addBelow(win, heading, '第二行 & <b>');
+      return addPickerImage(win, 'copied.png').then(function () {
+        var written = null;
+        return withClipboardStub(win, {
+          asyncWrite: function (items) {
+            written = items;
+            return Promise.resolve();
+          }
+        }, function () {
+          var button = byId(win, 'copy-button');
+          button.focus();
+          button.click();
+          return waitFor(function () {
+            return written && byId(win, 'toast-region').textContent
+              .indexOf('已複製') !== -1;
+          }, 8000).then(function () {
+            equal(written.length, 1);
+            var item = written[0].items;
+            assert(item['text/plain'] && item['text/html'],
+              'Copy must provide plain-text and HTML flavors.');
+            return Promise.all([
+              item['text/plain'].text(),
+              item['text/html'].text()
+            ]);
+          });
+        });
+      }).then(function (flavors) {
+        equal(flavors[0],
+          '# 複製標題\n第二行 & <b>\n![copied.png](copied.png)\n');
+        assert(flavors[1].indexOf('<h1>複製標題</h1>') !== -1,
+          'Rich HTML must render headings.');
+        assert(flavors[1].indexOf('第二行 &amp; &lt;b&gt;') !== -1,
+          'Rich HTML must escape literal block text.');
+        assert(/<img src="data:image\/png;base64,[^"]+" alt="copied\.png"/
+          .test(flavors[1]), 'Rich HTML must embed the local image.');
+        assert(byId(win, 'toast-region').textContent
+          .indexOf('已複製 Markdown 與圖片。') !== -1,
+        'Copy must confirm what was copied.');
+        equal(state.dirty, true, 'Copying must not change the dirty state.');
+      });
+    });
+  });
+
+  test('US3 Copy keeps exact Markdown but reports images missing from rich HTML', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var first = commitComposer(win, '缺圖測試');
+      addBelow(win, first, '![遠端](https://example.com/remote.png)');
+      equal(state.document.blocks.length, 2);
+      var written = null;
+      return withClipboardStub(win, {
+        asyncWrite: function (items) {
+          written = items;
+          return Promise.resolve();
+        }
+      }, function () {
+        byId(win, 'copy-button').click();
+        return waitFor(function () {
+          return written && byId(win, 'alert-region').textContent
+            .indexOf('已複製 Markdown，但圖片無法包含。') !== -1;
+        }, 8000).then(function () {
+          return Promise.all([
+            written[0].items['text/plain'].text(),
+            written[0].items['text/html'].text()
+          ]);
+        });
+      }).then(function (flavors) {
+        equal(flavors[0], '缺圖測試\n![遠端](https://example.com/remote.png)\n');
+        assert(flavors[1].indexOf('missing-image') !== -1,
+          'Missing images must render as placeholders in rich HTML.');
+        equal(flavors[1].indexOf('src="https://example.com/remote.png"'), -1,
+          'Remote URLs must stay out of rich HTML image sources.');
+        assert(byId(win, 'toast-region').textContent
+          .indexOf('已複製 Markdown，但圖片無法包含。') !== -1,
+        'Copy must warn when images were omitted.');
+        assert(byId(win, 'alert-region').textContent
+          .indexOf('https://example.com/remote.png') !== -1,
+        'Copy feedback must list the images that were omitted.');
+      });
+    });
+  });
+
+  test('US3 Copy falls back to execCommand when the async clipboard fails', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      commitComposer(win, '備援複製');
+      var captured = {};
+      var result = null;
+      return withClipboardStub(win, {
+        asyncWrite: function () {
+          return Promise.reject(new Error('Async clipboard blocked.'));
+        },
+        execCommand: function (command) {
+          if (command !== 'copy') {
+            return false;
+          }
+          var event = new win.Event('copy', { bubbles: true, cancelable: true });
+          win.Object.defineProperty(event, 'clipboardData', {
+            value: {
+              setData: function (type, data) {
+                captured[type] = data;
+              }
+            }
+          });
+          win.document.dispatchEvent(event);
+          return true;
+        }
+      }, function () {
+        return win.Prompter.clipboard.copy().then(function (value) {
+          result = value;
+        });
+      }).then(function () {
+        assert(result && result.ok, 'The execCommand fallback must succeed.');
+        equal(result.method, 'execCommand');
+        equal(captured['text/plain'], '備援複製\n');
+        assert(captured['text/html'].indexOf('<p>備援複製</p>') !== -1,
+          'The fallback must include rich HTML.');
+      });
+    });
+  });
+
+  test('US3 Copy opens the manual dialog when both clipboard paths fail', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      commitComposer(win, '手動複製');
+      var copyButton = byId(win, 'copy-button');
+      var result = null;
+      copyButton.focus();
+      return withClipboardStub(win, {
+        execCommand: function () {
+          return false;
+        }
+      }, function () {
+        return win.Prompter.clipboard.copy().then(function (value) {
+          result = value;
+        });
+      }).then(function () {
+        equal(result.ok, false);
+        equal(result.manual, true);
+        var dialog = byId(win, 'manual-copy-dialog');
+        assert(dialog.open, 'The manual-copy dialog must open.');
+        var textarea = byId(win, 'manual-copy-text');
+        equal(textarea.value, '手動複製\n');
+        equal(win.document.activeElement, textarea,
+          'The manual-copy content must be focused.');
+        equal(textarea.selectionStart, 0);
+        equal(textarea.selectionEnd, textarea.value.length);
+        byId(win, 'manual-copy-close').click();
+        return waitFor(function () {
+          return !dialog.open &&
+            win.document.activeElement === copyButton;
+        }, 5000);
+      }).then(function () {
+        equal(win.document.activeElement, copyButton,
+          'Closing the manual dialog must return focus to Copy.');
+      });
     });
   });
 

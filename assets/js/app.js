@@ -905,6 +905,9 @@
       if (global.Prompter.editor && typeof global.Prompter.editor.init === 'function') {
         global.Prompter.editor.init();
       }
+      if (global.Prompter.preview && typeof global.Prompter.preview.init === 'function') {
+        global.Prompter.preview.init();
+      }
       if (global.Prompter.clipboard && typeof global.Prompter.clipboard.init === 'function') {
         global.Prompter.clipboard.init();
       }

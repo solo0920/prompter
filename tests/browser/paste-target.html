@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompter 剪貼簿驗證</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: #f6f1e7;
+      --panel: #fffdf8;
+      --border: #d8ccba;
+      --ink: #2c261f;
+      --muted: #6d6255;
+      --accent: #7a4d1d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--page);
+      color: var(--ink);
+      font: 16px/1.55 "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+    header, main, footer { max-width: 1120px; margin: 0 auto; }
+    header { margin-bottom: 20px; }
+    h1 { margin: 0 0 6px; font-size: 26px; }
+    p { margin: 0 0 12px; }
+    .muted { color: var(--muted); }
+    a { color: var(--accent); }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 14px 0 20px;
+    }
+    button {
+      padding: 7px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+    }
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel);
+    }
+    h2 { margin: 0; font-size: 18px; }
+    .hint { margin: 0; color: var(--muted); font-size: 14px; }
+    textarea, .rich-target {
+      width: 100%;
+      min-height: 320px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: #1c1915;
+      font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow: auto;
+    }
+    textarea { resize: vertical; }
+    .rich-target {
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+    .rich-target:focus, textarea:focus {
+      outline: 2px solid #b58a52;
+      outline-offset: 1px;
+    }
+    .count { color: var(--muted); font-size: 13px; }
+    footer {
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #1d1a16;
+        --panel: #27231d;
+        --border: #4a4136;
+        --ink: #f1eadf;
+        --muted: #b9ad9c;
+        --accent: #e0b070;
+      }
+      textarea, .rich-target { background: #171410; color: #f4eee6; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Prompter 剪貼簿驗證</h1>
+    <p>在 Prompter 按下「複製」，再分別貼到下面的純文字與富文字目標。</p>
+    <p class="muted">純文字目標應與儲存的 Markdown 完全相同；富文字目標應保留標題、清單、引用、表格與可顯示的本機圖片。</p>
+    <div class="toolbar">
+      <a href="../../index.html">回到 Prompter</a>
+      <button id="clear-all" type="button">清空兩個目標</button>
+      <button id="focus-plain" type="button">聚焦純文字</button>
+      <button id="focus-rich" type="button">聚焦富文字</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section aria-labelledby="plain-title">
+      <h2 id="plain-title">純文字目標</h2>
+      <p class="hint">貼到這個 textarea，檢查 Markdown 是否逐字保留，包括標記、空行、圖片參照與結尾換行。</p>
+      <label class="hint" for="plain-target">純文字貼上區</label>
+      <textarea id="plain-target" spellcheck="false" placeholder="在這裡貼上純文字…"></textarea>
+      <span id="plain-count" class="count" role="status" aria-live="polite">0 個字元</span>
+    </section>
+
+    <section aria-labelledby="rich-title">
+      <h2 id="rich-title">富文字目標</h2>
+      <p class="hint">貼到這個 contenteditable 區域，檢查標題、清單、引用、表格與圖片是否一併出現。</p>
+      <div id="rich-target" class="rich-target" contenteditable="true" role="textbox"
+           aria-multiline="true" aria-labelledby="rich-title"
+           data-placeholder="在這裡貼上富文字…"></div>
+      <span id="rich-count" class="count" role="status" aria-live="polite">0 個字元</span>
+    </section>
+  </main>
+
+  <footer>
+    <p>這個頁面只供手動驗證，不會上傳或儲存任何內容。若瀏覽器封鎖自動寫入剪貼簿，Prompter 會改用備援或開啟「手動複製」對話框。</p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var plain = document.getElementById('plain-target');
+      var rich = document.getElementById('rich-target');
+      var plainCount = document.getElementById('plain-count');
+      var richCount = document.getElementById('rich-count');
+
+      function updateCounts() {
+        plainCount.textContent = plain.value.length + ' 個字元';
+        richCount.textContent = (rich.textContent || '').length + ' 個字元';
+      }
+
+      function clearTargets() {
+        plain.value = '';
+        rich.textContent = '';
+        updateCounts();
+        plain.focus();
+      }
+
+      plain.addEventListener('input', updateCounts);
+      rich.addEventListener('input', updateCounts);
+      plain.addEventListener('paste', function () {
+        setTimeout(updateCounts, 0);
+      });
+      rich.addEventListener('paste', function () {
+        setTimeout(updateCounts, 0);
+      });
+
+      document.getElementById('clear-all').addEventListener('click', clearTargets);
+      document.getElementById('focus-plain').addEventListener('click', function () {
+        plain.focus();
+      });
+      document.getElementById('focus-rich').addEventListener('click', function () {
+        rich.focus();
+      });
+
+      updateCounts();
+    }());
+  </script>
+</body>
+</html>

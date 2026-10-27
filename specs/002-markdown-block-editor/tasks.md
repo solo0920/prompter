@@ -150,18 +150,18 @@ US2.
 
 ### Tests for User Story 3
 
-- [ ] T044 [P] [US3] Add `tests/unit/renderer.test.js` for headings, grouped lists with literal `<li value="N">`, quotes, images, fenced code, basic pipe tables, paragraphs, and escaped raw HTML; confirm it fails before implementation.
-- [ ] T045 [P] [US3] Add `tests/unit/clipboard.test.js` for `text/plain` byte equality with Save, HTML escaping, data-URL embedding, missing/remote image placeholders, omitted-image reporting, and empty-document rejection.
+- [x] T044 [P] [US3] Add `tests/unit/renderer.test.js` for headings, grouped lists with literal `<li value="N">`, quotes, images, fenced code, basic pipe tables, paragraphs, and escaped raw HTML; confirm it fails before implementation.
+- [x] T045 [P] [US3] Add `tests/unit/clipboard.test.js` for `text/plain` byte equality with Save, HTML escaping, data-URL embedding, missing/remote image placeholders, omitted-image reporting, and empty-document rejection.
 
 ### Implementation for User Story 3
 
-- [ ] T046 [US3] Implement the Markdown renderer in `assets/js/preview.js` for the documented subset, using escaped text and local asset URLs; never render user HTML, never fetch remote images, and leave unsupported constructs literal.
-- [ ] T047 [US3] Implement the Preview `<dialog>` in `assets/js/preview.js` and `assets/js/app.js`: render current unsaved content, show missing-image warnings and an empty state, close by control/Escape, restore focus to Preview, and fall back to selectable raw Markdown on render failure.
-- [ ] T048 [US3] Implement the copy payload builder in `assets/js/clipboard.js`: canonical Markdown for `text/plain`, rendered HTML for `text/html`, local images as data URLs, escaped text/alt text, and an `omittedImages` list; optionally add `text/markdown` only when supported.
-- [ ] T049 [US3] Implement Copy in `assets/js/clipboard.js`: async Clipboard with `ClipboardItem`, `execCommand('copy')` fallback with a one-time `copy` listener, and a manual-copy dialog with exact Markdown; clean up hidden DOM/listeners and never report false success.
-- [ ] T050 [US3] Wire Copy in `assets/js/app.js`: disable for an empty document, show success/omission/failure feedback, list missing images, and preserve exact Markdown text even when rich images are omitted.
-- [ ] T051 [US3] Create `tests/browser/paste-target.html` with plain-text and contenteditable targets for manual clipboard verification without third-party apps.
-- [ ] T052 [US3] Run quickstart scenarios 5–6 using `tests/browser/paste-target.html` plus a rich-text destination and a plain-text destination; fix preview rendering, clipboard fallbacks, focus return, and omission messaging in `assets/js/clipboard.js`.
+- [x] T046 [US3] Implement the Markdown renderer in `assets/js/preview.js` for the documented subset, using escaped text and local asset URLs; never render user HTML, never fetch remote images, and leave unsupported constructs literal.
+- [x] T047 [US3] Implement the Preview `<dialog>` in `assets/js/preview.js` and `assets/js/app.js`: render current unsaved content, show missing-image warnings and an empty state, close by control/Escape, restore focus to Preview, and fall back to selectable raw Markdown on render failure.
+- [x] T048 [US3] Implement the copy payload builder in `assets/js/clipboard.js`: canonical Markdown for `text/plain`, rendered HTML for `text/html`, local images as data URLs, escaped text/alt text, and an `omittedImages` list; optionally add `text/markdown` only when supported.
+- [x] T049 [US3] Implement Copy in `assets/js/clipboard.js`: async Clipboard with `ClipboardItem`, `execCommand('copy')` fallback with a one-time `copy` listener, and a manual-copy dialog with exact Markdown; clean up hidden DOM/listeners and never report false success.
+- [x] T050 [US3] Wire Copy in `assets/js/app.js`: disable for an empty document, show success/omission/failure feedback, list missing images, and preserve exact Markdown text even when rich images are omitted.
+- [x] T051 [US3] Create `tests/browser/paste-target.html` with plain-text and contenteditable targets for manual clipboard verification without third-party apps.
+- [x] T052 [US3] Run quickstart scenarios 5–6 using `tests/browser/paste-target.html` plus a rich-text destination and a plain-text destination; fix preview rendering, clipboard fallbacks, focus return, and omission messaging in `assets/js/clipboard.js`.
 
 **Checkpoint**: Preview, Save, and Copy all consume the same canonical Markdown string.
 
