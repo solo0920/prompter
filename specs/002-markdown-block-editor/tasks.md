@@ -232,18 +232,18 @@ empty, preferences remain, and saved files on disk are untouched.
 **Purpose**: Harden correctness, security, accessibility, performance, and offline behavior
 across all stories.
 
-- [ ] T069 Run the full golden-fixture round trip from `tests/fixtures/`: markers, marker-only lines, blank lines, CRLF/BOM, no final newline, unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate image basenames; fix any loss.
-- [ ] T070 Run `tests/browser/harness.html` from `file://` and require a full PASS; fix all DOM, storage, renderer, settings, search, and storage-warning banner failures.
-- [ ] T071 Audit security in `assets/js/`: escape all user text, never render raw HTML, never fetch remote images, sanitize filenames, reject traversal/absolute paths, avoid `eval`/`new Function`, and ensure no network requests.
-- [ ] T072 Verify performance targets in `assets/js/` and `assets/css/`: 500-document search under 300 ms, 500-document initial directory render under 1 s, 500-block preview under 1 s, image visibility under 1 s, and drag updates near 60 fps; optimize indexing, rendering, and object-URL caching as needed.
-- [ ] T073 Audit accessibility across `index.html` and `assets/js/`: accessible names, visible focus, keyboard-only create/edit/add/move/preview/copy/save, screen-reader order, live-region announcements, dialog focus, and reduced-motion behavior.
-- [ ] T074 Verify responsive layouts at 1280×720, 768 px, and 360×800 in `assets/css/`: no horizontal page scrolling, reachable header actions, directory drawer behavior, wrapped text, and scaled images.
-- [ ] T075 Verify offline operation in at least two supported browsers with networking disabled: open `index.html` from `file://`, author, insert/paste images, preview, copy, save, reopen, search, and change settings.
-- [ ] T076 Verify storage degradation in `assets/js/storage.js` and the quickstart steps: IndexedDB blocked (localStorage fallback), both blocked (memory mode with warning), quota failure (rollback with no document change), and corrupt payload (empty library with warning); confirm the non-blocking banner shows the active mode/reason, can be dismissed, and that unsaved edits are never silently discarded.
-- [ ] T077 Verify clipboard degradation in `assets/js/clipboard.js` and `tests/browser/paste-target.html`: async clipboard denied, `execCommand` path, manual-copy dialog, missing images, destination that strips images, and exact Markdown equality with Save.
-- [ ] T078 Update `specs/002-markdown-block-editor/checklists/requirements.md` and the quickstart acceptance checklist with final verification results and any recorded exceptions, including the native tab-close prompt limitation.
-- [ ] T079 Re-run the Constitution Check against `.specify/memory/constitution.md`: no server/build/install/network, classic scripts only, no ES modules/local `fetch()`, local storage only, deterministic copy-ready output, and no runtime dependencies.
-- [ ] T080 Complete the full manual browser matrix in `quickstart.md` for Chrome/Edge plus Firefox and Safari, recording exact versions and pass/fail notes; resolve or document every exception.
+- [x] T069 Run the full golden-fixture round trip from `tests/fixtures/`: markers, marker-only lines, blank lines, CRLF/BOM, no final newline, unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate image basenames; fix any loss.
+- [x] T070 Run `tests/browser/harness.html` from `file://` and require a full PASS; fix all DOM, storage, renderer, settings, search, and storage-warning banner failures.
+- [x] T071 Audit security in `assets/js/`: escape all user text, never render raw HTML, never fetch remote images, sanitize filenames, reject traversal/absolute paths, avoid `eval`/`new Function`, and ensure no network requests.
+- [x] T072 Verify performance targets in `assets/js/` and `assets/css/`: 500-document search under 300 ms, 500-document initial directory render under 1 s, 500-block preview under 1 s, image visibility under 1 s, and drag updates near 60 fps; optimize indexing, rendering, and object-URL caching as needed.
+- [x] T073 Audit accessibility across `index.html` and `assets/js/`: accessible names, visible focus, keyboard-only create/edit/add/move/preview/copy/save, screen-reader order, live-region announcements, dialog focus, and reduced-motion behavior.
+- [x] T074 Verify responsive layouts at 1280×720, 768 px, and 360×800 in `assets/css/`: no horizontal page scrolling, reachable header actions, directory drawer behavior, wrapped text, and scaled images.
+- [x] T075 Verify offline operation in at least two supported browsers with networking disabled: open `index.html` from `file://`, author, insert/paste images, preview, copy, save, reopen, search, and change settings.
+- [x] T076 Verify storage degradation in `assets/js/storage.js` and the quickstart steps: IndexedDB blocked (localStorage fallback), both blocked (memory mode with warning), quota failure (rollback with no document change), and corrupt payload (empty library with warning); confirm the non-blocking banner shows the active mode/reason, can be dismissed, and that unsaved edits are never silently discarded.
+- [x] T077 Verify clipboard degradation in `assets/js/clipboard.js` and `tests/browser/paste-target.html`: async clipboard denied, `execCommand` path, manual-copy dialog, missing images, destination that strips images, and exact Markdown equality with Save.
+- [x] T078 Update `specs/002-markdown-block-editor/checklists/requirements.md` and the quickstart acceptance checklist with final verification results and any recorded exceptions, including the native tab-close prompt limitation.
+- [x] T079 Re-run the Constitution Check against `.specify/memory/constitution.md`: no server/build/install/network, classic scripts only, no ES modules/local `fetch()`, local storage only, deterministic copy-ready output, and no runtime dependencies.
+- [x] T080 Complete the full manual browser matrix in `quickstart.md` for Chrome/Edge plus Firefox and Safari, recording exact versions and pass/fail notes; resolve or document every exception.
 
 ---
 

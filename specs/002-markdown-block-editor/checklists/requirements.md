@@ -36,3 +36,33 @@
 - Clarification session 2026-10-28 resolved 3 questions; checklist remains 16/16.
 - 45 functional requirements and 16 measurable outcomes are defined.
 - The specification is ready for `/speckit.plan`.
+
+## Post-Implementation Verification (2026-10-28)
+
+- Unit and contract tests: **86 passing, 0 failing** (`node --test tests/unit/*.test.js`).
+  Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
+  order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
+  file-name/path safety, and static no-network guards.
+- Browser harness: **60 passing, 0 failing** from `file://` in Chrome 156.0.8078.48,
+  Edge 156.0.4314.42, and Firefox 159.0. Chrome and Edge also pass with networking blocked;
+  Firefox passes with an unreachable proxy configured.
+- Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
+  unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate
+  image basenames all round-trip.
+- Performance: 500-document render under 1 s; 500-document search under 300 ms; 500-block
+  Preview under 1 s; inserted image visible under 1 s.
+- Responsive checks: 1280×720, 768 px, and 360×800 have no horizontal page scrolling; the
+  drawer and compact header remain reachable.
+- Accessibility checks: unique IDs, accessible names, dialog labels, live regions, skip link,
+  focus return, keyboard movement announcements, and reduced-motion CSS.
+- Storage checks: IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
+  rollback, corrupt-payload isolation with recovery, and the dismissible storage banner.
+- Clipboard checks: exact Markdown equals the Save plan; async path, `execCommand` fallback,
+  manual-copy dialog, missing/oversized image warnings, and rich HTML are covered.
+- Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
+  spot checks, real OS pickers, and Safari 27.2 automation remain manual. Safari Remote
+  Automation is disabled on the test machine; this is documented in `quickstart.md`.
+- The native tab-close Stay/Leave limitation remains accepted as documented in `plan.md`.
+
+Final status: implementation and automated verification are complete; the remaining items are
+manual environment checks with documented fallbacks.

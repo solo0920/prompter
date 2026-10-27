@@ -88,6 +88,8 @@ test('Open round-trips every fixture and keeps source-order placement', async fu
     ['blank-lines.md', 'blank-lines.expected.md', []],
     ['no-final-newline.md', 'no-final-newline.expected.md', []],
     ['crlf-bom.md', 'crlf-bom.expected.md', []],
+    ['data-url.md', 'data-url.expected.md', []],
+    ['images.md', 'images.expected.md', [fixtureFile('pixel.png')]],
     ['mixed.md', 'mixed.expected.md', [fixtureFile('pixel.png')]]
   ];
   for (const entry of fixtures) {
@@ -142,6 +144,15 @@ test('Open resolves ./ and URL-encoded image references and leaves remote/absolu
   assert.ok(parsed.warnings.some(function (warning) {
     return warning.indexOf('not-selected.png') !== -1;
   }));
+  assert.equal(Markdown.serializeDocument(parsed.document, { assets: parsed.assets }), [
+    '![one](pixel.png)',
+    '![two](pixel-2.png)',
+    '![absolute](/tmp/pixel.png)',
+    '![remote](https://example.com/pixel.png)',
+    '![file](file:///tmp/pixel.png)',
+    '![missing](not-selected.png)',
+    ''
+  ].join('\n'), 'Duplicate image basenames must round-trip with unique relative names.');
 });
 
 test('Open decodes data-URL images and rejects unsupported embedded data', async function () {

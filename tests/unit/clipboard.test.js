@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const Clipboard = require('../../assets/js/clipboard.js');
+const Files = require('../../assets/js/files.js');
 const Markdown = require('../../assets/js/markdown.js');
 const Model = require('../../assets/js/model.js');
 
@@ -91,6 +92,20 @@ test('omits oversized image data from the rich HTML but keeps exact text', async
   assert.match(payload.html, /class="missing-image"/);
   assert.equal(payload.html.includes('data:image/png'), false);
   assert.deepEqual(payload.omittedImages, ['pixel.png']);
+});
+
+test('clipboard Markdown is byte-identical to the Save plan', async function () {
+  const document = documentWith([
+    Model.createTextBlock({ id: 'h', marker: '##', text: '角色', y: 0, seq: 1, blankLinesAfter: 1 }),
+    Model.createTextBlock({ id: 'p', text: '限制一', y: 24, seq: 2 }),
+    Model.createImageBlock({ id: 'i', assetId: 'asset-1', alt: '像素', y: 48, seq: 3 })
+  ]);
+  const assets = [imageAsset()];
+  const payload = await Clipboard.buildClipboardPayload(document, assets);
+  const plan = await Files.buildSavePlan(document, assets, { fileName: 'copy-test.md' });
+  assert.equal(payload.markdown, plan.markdown);
+  assert.equal(payload.markdown,
+    '## 角色\n\n限制一\n![像素](pixel.png)\n');
 });
 
 test('rejects empty documents', async function () {

@@ -236,7 +236,8 @@
       <button id="manual-copy-close" class="button button-small" type="button">關閉</button>
     </div>
     <p>瀏覽器無法自動寫入剪貼簿。以下是完整的 Markdown，請選取後手動複製。圖片無法包含在手動複製路徑中。</p>
-    <textarea id="manual-copy-text" class="manual-copy-text" readonly></textarea>
+    <textarea id="manual-copy-text" class="manual-copy-text" readonly
+              aria-label="完整 Markdown"></textarea>
     <div class="dialog-actions">
       <button id="manual-copy-select" class="button button-primary" type="button">選取全部</button>
     </div>
@@ -269,9 +270,11 @@
     </form>
   </dialog>
 
-  <input id="open-input" class="visually-hidden" type="file" multiple
+  <input id="open-input" class="visually-hidden" type="file" multiple tabindex="-1"
+         aria-hidden="true"
          accept=".md,.markdown,text/markdown,image/png,image/jpeg,image/gif,image/webp">
-  <input id="image-input" class="visually-hidden" type="file" multiple
+  <input id="image-input" class="visually-hidden" type="file" multiple tabindex="-1"
+         aria-hidden="true"
          accept="image/png,image/jpeg,image/gif,image/webp">
 
   <script defer src="assets/js/utils.js"></script>

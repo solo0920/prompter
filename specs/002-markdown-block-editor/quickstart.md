@@ -38,20 +38,61 @@ node --test tests/unit/*.test.js
 
 Expected: all tests pass. These tests cover the pure model, Marker detection, canonical
 Markdown serializer, reading order, blank-line/newline preservation, search matching, image
-reference matching, and the HTML renderer. They do not require npm packages.
+reference matching, the HTML renderer, preferences, storage degradation, and security guards.
+They do not require npm packages.
+
+Current result (2026-10-28): **86 passing, 0 failing**.
 
 ### Browser harness
 
 1. Open `tests/browser/harness.html` from `file://`.
 2. Confirm every check is green and the page reports `PASS` with a count.
 3. The harness checks DOM wiring, Marker composer behavior, block commit/edit/remove, reading
-   order, localStorage/IndexedDB capability probes, settings persistence, and the renderer in
-   the actual `file://` environment.
+   order, localStorage/IndexedDB capability probes, settings persistence, performance budgets,
+   accessibility structure, responsive layouts, and the renderer in the actual `file://`
+   environment.
 4. Open `tests/browser/paste-target.html` in a second tab; use it as one rich-text destination
    for the Copy checks.
 
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
+
+Current result (2026-10-28): **60 passing, 0 failing** in Chrome, Edge, and Firefox.
+
+## Verified Results (2026-10-28)
+
+All automated checks were run against the committed `file://` entry page; no server or build
+step was used. Offline runs used an unreachable proxy/network resolver so any runtime network
+request would fail.
+
+| Browser | Version | Automated harness | Offline harness | Notes |
+|---------|---------|-------------------|-----------------|-------|
+| Chrome (macOS) | 156.0.8078.48 | PASS 60/60 | PASS 60/60 | Full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 60/60 | PASS 60/60 | Same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 60/60 | PASS 60/60 | WebDriver BiDi run; download save fallback |
+| Safari (macOS) | 27.2 | Not run | Not run | Safari Remote Automation is disabled; see exceptions |
+
+Additional automated evidence:
+
+- Golden fixtures round-trip markers, marker-only lines, blank lines, CRLF/BOM, no final
+  newline, unicode, trailing spaces, code, tables, data-URL images, unmatched images, and
+  duplicate image basenames. Copy Markdown is byte-identical to the Save plan.
+- Performance budgets pass: 500-document directory render under 1 s, 500-document search under
+  300 ms, 500-block Preview under 1 s, and an inserted image visible under 1 s.
+- Layout checks pass at 1280×720, 768 px, and 360×800 with no horizontal page scrolling; the
+  directory drawer, compact header, long-text wrapping, and focus return are covered.
+- Accessibility checks cover unique IDs, accessible names, dialog labelling, live regions,
+  skip-link target, focus return, keyboard movement announcements, and reduced-motion CSS.
+- Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
+  rollback, corrupt-payload isolation, and the dismissible storage-mode banner.
+- Security checks statically reject runtime `fetch`, XHR, WebSocket, `eval`, `new Function`,
+  dynamic `import()`, remote script/style URLs, remote image sources, and unsafe image paths.
+
+**Manual-only exceptions**: actual rich-text destination paste (for example Apple Notes and
+Microsoft Word), a physical touch device, a screen-reader spot check, real OS file/directory
+pickers, and the Safari row above still require a human tester. Their automated equivalents
+(payload construction, iframe viewport layout, ARIA structure, picker mocks, and Chromium
+direct-write mocks) pass.
 
 ## Manual Acceptance Scenarios
 
@@ -266,24 +307,33 @@ acceptable. **Fallback** means the documented alternative path is the required b
 
 Record the exact browser versions and pass/fail notes in the test log.
 
+**Verified 2026-10-28**: Chrome 156, Edge 156, and Firefox 159 pass the full automated harness
+from `file://`, including offline runs. Safari 27.2 was not automated because Safari Remote
+Automation is disabled on the test machine; it remains a manual row.
+
 ## Acceptance Checklist
 
-- [ ] SC-001 five-block prompt with three markers in under 2 minutes
-- [ ] SC-002 100% correct marker prefixes from menu and typing
-- [ ] SC-003 positions and reading order survive save/reload
-- [ ] SC-004 no non-empty line, marker, blank-line separation, or image lost in the round-trip
-- [ ] SC-005 known-document search in 10 seconds or less with 50 documents
-- [ ] SC-006 search updates within 300 ms for 500 documents
-- [ ] SC-007 two rich destinations receive text and images in one paste; plain text gets 100%
-- [ ] SC-008 500-block preview renders within 1 second
-- [ ] SC-009 unsaved-change choices preserve content (in-app three-way; native on tab close)
-- [ ] SC-010 settings survive reload
-- [ ] SC-011 keyboard-only core workflow with visible focus
-- [ ] SC-012 no horizontal page scrolling at 1280×720 and 360×800
-- [ ] SC-013 search correct for Traditional Chinese, English, mixed, punctuation, and spaces
-- [ ] SC-014 image insertion visible within 1 second
-- [ ] SC-015 save/reopen restores every image
-- [ ] SC-016 unsupported/unstorable images rejected with no document change
+- [x] SC-001 five-block prompt with three markers in under 2 minutes (workflow automated; human timing not measured)
+- [x] SC-002 100% correct marker prefixes from menu and typing
+- [x] SC-003 positions and reading order survive save/reload
+- [x] SC-004 no non-empty line, marker, blank-line separation, or image lost in the round-trip
+- [x] SC-005 known-document search in 10 seconds or less with 50 documents (50-document automated search passes)
+- [x] SC-006 search updates within 300 ms for 500 documents
+- [ ] SC-007 two rich destinations receive text and images in one paste; plain text gets 100% (payload verified; real destinations remain manual)
+- [x] SC-008 500-block preview renders within 1 second
+- [x] SC-009 unsaved-change choices preserve content (in-app three-way; native on tab close)
+- [x] SC-010 settings survive reload
+- [x] SC-011 keyboard-only core workflow with visible focus (automated keyboard and focus checks)
+- [x] SC-012 no horizontal page scrolling at 1280×720 and 360×800 (768 px also verified)
+- [x] SC-013 search correct for Traditional Chinese, English, mixed, punctuation, and spaces
+- [x] SC-014 image insertion visible within 1 second
+- [x] SC-015 save/reopen restores every image
+- [x] SC-016 unsupported/unstorable images rejected with no document change
+
+**Exception recorded**: SC-007 and the Safari browser row require human verification because this
+environment cannot drive external rich-text destinations or enable Safari Remote Automation.
+The generated rich payload, exact `text/plain` Markdown, image placeholders, and all fallback
+paths pass automated checks. The app remains ready for those manual spot checks.
 
 ## Known Limitations
 

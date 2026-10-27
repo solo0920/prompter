@@ -540,6 +540,68 @@
     });
   });
 
+  test('T076 the storage warning names the fallback mode and can be dismissed', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var originalInfo = state.storage.info;
+      var originalDismissed = state.storageWarningDismissed;
+      var warning = byId(win, 'storage-warning');
+      var text = byId(win, 'storage-warning-text');
+      function restore() {
+        state.storage.info = originalInfo;
+        state.storageWarningDismissed = originalDismissed;
+        app.refreshStorageInfo();
+      }
+      state.storage.info = function () {
+        return {
+          mode: 'memory',
+          reason: 'localstorage-unavailable',
+          detail: '測試原因：本機持久儲存不可用。',
+          modeLabel: '僅限本次工作階段（記憶體）'
+        };
+      };
+      state.storageWarningDismissed = false;
+      app.refreshStorageInfo();
+      equal(warning.hidden, false, 'A degraded storage mode must show the warning.');
+      equal(warning.getAttribute('role'), 'status');
+      assert(text.textContent.indexOf('本次工作階段記憶體') !== -1,
+        'The warning must name the active storage mode.');
+      assert(text.textContent.indexOf('測試原因') !== -1,
+        'The warning must explain why persistence is degraded.');
+      equal(byId(win, 'storage-mode-label').textContent,
+        '僅限本次工作階段（記憶體）');
+
+      byId(win, 'storage-warning-dismiss').click();
+      equal(warning.hidden, true);
+      equal(state.storageWarningDismissed, true,
+        'Dismissing the warning must last for the session.');
+      restore();
+      equal(state.storageWarningDismissed, originalDismissed);
+    });
+  });
+
+  test('T075 the file:// app requests no network resources', function () {
+    return appReady().then(function (win) {
+      var resources = win.performance.getEntriesByType('resource').map(function (entry) {
+        return entry.name;
+      });
+      var remoteResources = resources.filter(function (name) {
+        return /^https?:/i.test(name);
+      });
+      assert(remoteResources.length === 0,
+        'Runtime network requests are forbidden: ' + remoteResources.join(', '));
+      var remoteMarkup = Array.prototype.filter.call(
+        win.document.querySelectorAll('[src], [href]'),
+        function (element) {
+          var value = element.getAttribute('src') || element.getAttribute('href') || '';
+          return /^(?:https?:)?\/\//i.test(value);
+        });
+      equal(remoteMarkup.length, 0,
+        'The document must not reference remote src/href values.');
+    });
+  });
+
   test('application bootstrap shows the real empty workspace', function () {
     return appReady().then(function (win) {
       var state = win.Prompter.app.state;
@@ -1521,6 +1583,76 @@
       }).then(function () {
         equal(win.document.activeElement, byId(win, 'preview-button'),
           'Closing the empty Preview must return focus to its trigger.');
+      });
+    });
+  });
+
+  test('T072 Preview renders five hundred blocks within one second', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var Model = win.Prompter.model;
+      var markers = ['none', '#', '##', '###', '-', '1.', '>', '.'];
+      var list = [];
+      for (var index = 0; index < 500; index += 1) {
+        list.push(Model.createTextBlock({
+          id: 'perf-text-' + index,
+          text: '第 ' + index + ' 個區塊內容',
+          marker: markers[index % markers.length],
+          x: 12 + (index % 4) * 220,
+          y: Math.floor(index / 4) * 24,
+          seq: index + 1
+        }));
+      }
+      app.setDocument(Model.createPromptDocument({
+        id: 'perf-preview-document',
+        title: '五百區塊預覽',
+        fileName: 'perf-preview.md',
+        blocks: list
+      }), [], { persisted: false, dirty: true });
+      var started = win.performance.now();
+      byId(win, 'preview-button').click();
+      return waitFor(function () {
+        var content = byId(win, 'preview-content');
+        return byId(win, 'preview-dialog').open &&
+          content.textContent.indexOf('第 499 個區塊內容') !== -1
+          ? content
+          : null;
+      }, 10000).then(function (content) {
+        var elapsed = win.performance.now() - started;
+        assert(elapsed < 1000,
+          'Rendering a 500-block Preview took ' + Math.round(elapsed) + ' ms.');
+        assert(content.querySelectorAll('h1, h2, h3, blockquote, pre, table, p, li').length >= 300,
+          'The 500-block Preview must render the document content.');
+        byId(win, 'preview-close').click();
+        return waitFor(function () {
+          return byId(win, 'preview-dialog').open ? null : true;
+        }, 5000);
+      });
+    });
+  });
+
+  test('T072 an inserted image becomes visible within one second', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      var state = win.Prompter.app.state;
+      var input = byId(win, 'image-input');
+      var data = new win.DataTransfer();
+      data.items.add(pngFile(win, 'perf-image.png'));
+      input.files = data.files;
+      var started = win.performance.now();
+      input.dispatchEvent(new win.Event('change', { bubbles: true }));
+      return waitFor(function () {
+        var image = win.document.querySelector('#canvas .block-image-block img.block-image');
+        return image && image.complete && image.naturalWidth > 0 ? image : null;
+      }, 8000).then(function (image) {
+        var elapsed = win.performance.now() - started;
+        assert(elapsed < 1000,
+          'Making an inserted image visible took ' + Math.round(elapsed) + ' ms.');
+        assert(/^(?:data:|blob:)/.test(image.getAttribute('src')),
+          'The visible image must use a local data or blob URL.');
+        equal(state.assets.length, 1);
+        equal(state.document.blocks.length, 1);
+        equal(state.document.blocks[0].type, 'image');
       });
     });
   });
@@ -2678,6 +2810,171 @@
             state.storage.clearLibrary = originalClear;
             throw error;
           });
+      });
+    });
+  });
+
+  test('T073 interactive controls expose accessible names and dialogs are labelled', function () {
+    return appReady().then(function (win) {
+      var document = win.document;
+      var seenIds = {};
+      Array.prototype.forEach.call(document.querySelectorAll('[id]'), function (element) {
+        assert(!seenIds[element.id], 'Duplicate id: ' + element.id);
+        seenIds[element.id] = true;
+      });
+
+      var labels = Array.prototype.slice.call(document.querySelectorAll('label[for]'));
+      function labelTextFor(element) {
+        var direct = '';
+        labels.forEach(function (label) {
+          if (label.getAttribute('for') === element.id) {
+            direct += ' ' + label.textContent;
+          }
+        });
+        if (element.labels && element.labels.length) {
+          Array.prototype.forEach.call(element.labels, function (label) {
+            direct += ' ' + label.textContent;
+          });
+        }
+        return direct.trim();
+      }
+
+      Array.prototype.forEach.call(
+        document.querySelectorAll('button, select, input, textarea'),
+        function (element) {
+          if (element.classList.contains('visually-hidden') ||
+              element.closest('[hidden]') ||
+              element.type === 'hidden') {
+            return;
+          }
+          var name = (element.getAttribute('aria-label') || '').trim();
+          if (!name) {
+            name = labelTextFor(element);
+          }
+          if (!name) {
+            name = (element.textContent || '').trim();
+          }
+          if (!name) {
+            name = (element.getAttribute('title') || '').trim();
+          }
+          assert(name.length > 0,
+            'Interactive element needs an accessible name: ' +
+            (element.id || element.className || element.tagName));
+        });
+
+      Array.prototype.forEach.call(document.querySelectorAll('dialog'), function (dialog) {
+        var labelledBy = dialog.getAttribute('aria-labelledby');
+        assert(labelledBy, 'Dialog must use aria-labelledby: ' + dialog.id);
+        var title = document.getElementById(labelledBy);
+        assert(title && title.textContent.trim().length > 0,
+          'Dialog label target must have text: ' + dialog.id);
+      });
+
+      var skip = document.querySelector('.skip-link');
+      equal(skip.getAttribute('href'), '#canvas');
+      assert(document.getElementById('canvas'), 'The skip link target must exist.');
+      assert(document.getElementById('toast-region').getAttribute('aria-live') === 'polite',
+        'Toasts must use a polite live region.');
+      assert(document.getElementById('alert-region').getAttribute('role') === 'alert',
+        'Errors must use an alert region.');
+      assert(document.getElementById('move-announcer').getAttribute('aria-live') === 'polite',
+        'Keyboard movement must have a polite announcement region.');
+
+      var reducedMotion = false;
+      Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+        var rules;
+        try {
+          rules = sheet.cssRules;
+        } catch (error) {
+          return;
+        }
+        Array.prototype.forEach.call(rules || [], function (rule) {
+          if (rule.cssText && rule.cssText.indexOf('prefers-reduced-motion') !== -1) {
+            reducedMotion = true;
+          }
+        });
+      });
+      assert(reducedMotion, 'The styles must honor prefers-reduced-motion.');
+    });
+  });
+
+  test('T074 the 768 px layout keeps the header reachable and the drawer usable', function () {
+    return appReady().then(function (win) {
+      frame.style.width = '768px';
+      frame.style.height = '1024px';
+      function restoreSize() {
+        frame.style.width = '';
+        frame.style.height = '';
+      }
+      return waitFor(function () {
+        return win.innerWidth === 768 &&
+          byId(win, 'directory-toggle').offsetParent !== null
+          ? true
+          : null;
+      }, 5000).then(function () {
+        var app = win.Prompter.app;
+        var toggle = byId(win, 'directory-toggle');
+        var directory = byId(win, 'directory');
+        var overlay = byId(win, 'directory-overlay');
+        freshDocument(win);
+        if (directory.classList.contains('open')) {
+          overlay.click();
+          return waitFor(function () {
+            return !directory.classList.contains('open') ? true : null;
+          }, 5000).then(afterClose);
+        }
+        return afterClose();
+
+        function afterClose() {
+          assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
+            'The 768 px layout must not scroll horizontally.');
+          ['file-menu-button', 'directory-toggle', 'preview-button', 'copy-button',
+            'style-select', 'theme-toggle', 'settings-button'].forEach(function (id) {
+            var rect = byId(win, id).getBoundingClientRect();
+            assert(rect.width > 0 && rect.height > 0, id + ' must stay visible at 768 px.');
+            assert(rect.left >= 0 && rect.right <= win.innerWidth + 1,
+              id + ' must stay inside the 768 px viewport.');
+          });
+          assert(directory.getBoundingClientRect().right <= 0 ||
+            !directory.classList.contains('open'),
+          'The directory drawer must start off-screen at 768 px.');
+          return waitFor(function () {
+            return directory.getBoundingClientRect().right <= 0 ? true : null;
+          }, 5000).then(function () {
+            toggle.click();
+            return waitFor(function () {
+              return directory.classList.contains('open') ? true : null;
+            }, 5000).then(function () {
+              equal(toggle.getAttribute('aria-expanded'), 'true');
+              equal(overlay.hidden, false);
+              return waitFor(function () {
+                return directory.getBoundingClientRect().left >= 0 ? true : null;
+              }, 5000);
+            }).then(function () {
+              var rect = directory.getBoundingClientRect();
+              assert(rect.left >= 0 && rect.right <= win.innerWidth + 1,
+                'The open drawer must fit inside the 768 px viewport.');
+              var longText = '長'.repeat(120) + 'word'.repeat(40);
+              var block = commitComposer(win, longText);
+              var blockRect = block.getBoundingClientRect();
+              assert(blockRect.right <= win.innerWidth + 1,
+                'Long block text must wrap inside the 768 px viewport.');
+              assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
+                'Long block text must not create horizontal scrolling.');
+              press(win, win.document, 'Escape');
+              return waitFor(function () {
+                return !directory.classList.contains('open') &&
+                  toggle.getAttribute('aria-expanded') === 'false' &&
+                  overlay.hidden && win.document.activeElement === toggle;
+              }, 5000);
+            });
+          });
+        }
+      }).then(function () {
+        restoreSize();
+      }, function (error) {
+        restoreSize();
+        throw error;
       });
     });
   });

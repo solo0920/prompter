@@ -74,6 +74,17 @@ desktop-first with a 360 px responsive layout.
 `fetch()`, or runtime dependency. The browser tab-close limitation below is documented and
 does not violate the constitution.
 
+**Final Implementation Re-check (2026-10-28)**: PASS. The shipped app remains classic scripts
+only, opens from `file://`, and uses no server, build step, package install, ES module,
+service worker, local `fetch()`, telemetry, remote asset, or runtime dependency. Storage is
+browser-local and degrades through IndexedDB, localStorage, and session memory; preferences
+survive clear-library while disk files are untouched. Copy `text/plain` is byte-identical to
+Save via the shared canonical serializer; output is deterministic. Automated static checks
+reject network and dynamic-code primitives, and offline harness runs pass in Chrome, Edge, and
+Firefox. The documented manual-only exceptions (external rich-text destinations, physical
+touch, screen reader, OS pickers, and Safari automation) do not violate a principle; the
+required fallbacks exist.
+
 ## Platform Constraints and Deviations
 
 - **Tab-close confirmation**: browsers only permit a native Stay/Leave confirmation from
