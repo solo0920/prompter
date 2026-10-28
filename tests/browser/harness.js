@@ -1108,6 +1108,7 @@
       var ids = state.document.blocks.map(function (block) { return block.id; });
       var aElement = blockById(win, ids[0]);
       var marker = aElement.querySelector('.block-marker');
+      var content = aElement.querySelector('.block-content');
       var plus = aElement.querySelector('.block-plus');
       var handle = aElement.querySelector('.drag-handle');
 
@@ -1116,8 +1117,11 @@
       equal(win.document.activeElement, marker,
         'Tab from a block must land on its title area.');
       press(win, marker, 'Tab');
+      equal(win.document.activeElement, content,
+        'Tab must reach the block text area.');
+      press(win, content, 'Tab');
       equal(win.document.activeElement, plus,
-        'Tab must stay within the current block.');
+        'Tab must continue within the current block.');
       press(win, plus, 'Tab');
       equal(win.document.activeElement, handle,
         'Tab must continue through the current block controls.');
@@ -1140,6 +1144,32 @@
         'Shift+Tab must wrap within the composer.');
       assert(byId(win, 'canvas').contains(win.document.activeElement),
         'Tab focus must stay inside the editor canvas.');
+    });
+  });
+
+  test('US1 Tab reaches the block text area and Enter starts editing', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      commitComposer(win, 'Edit through the text area');
+      var block = state.document.blocks[0];
+      var element = blockById(win, block.id);
+      var content = element.querySelector('.block-content');
+      assert(content, 'The block text area is missing.');
+      equal(content.tabIndex, 0, 'The block text area must be tabbable.');
+
+      element.focus();
+      press(win, element, 'Tab');
+      press(win, element.querySelector('.block-marker'), 'Tab');
+      equal(win.document.activeElement, content,
+        'Tab must reach the block text area.');
+
+      press(win, content, 'Enter');
+      var input = blockById(win, block.id).querySelector('.block-edit-input');
+      assert(input, 'Enter in the text area must start editing.');
+      equal(win.document.activeElement, input,
+        'The block editor must receive focus.');
+      press(win, input, 'Escape');
+      assert(blockById(win, block.id), 'Escape must keep the block.');
     });
   });
 
@@ -1207,6 +1237,7 @@
         'B must be selected before the Tab check.');
       var bElement = blockById(win, bId);
       var marker = bElement.querySelector('.block-marker');
+      var content = bElement.querySelector('.block-content');
       var plus = bElement.querySelector('.block-plus');
       var handle = bElement.querySelector('.drag-handle');
 
@@ -1215,6 +1246,9 @@
       equal(win.document.activeElement, marker,
         'Tab from the selected block must move to its title area.');
       press(win, marker, 'Tab');
+      equal(win.document.activeElement, content,
+        'Tab must reach the selected block text area.');
+      press(win, content, 'Tab');
       equal(win.document.activeElement, plus,
         'Tab must stay within the selected block.');
       press(win, plus, 'Tab');
@@ -1272,8 +1306,8 @@
       equal(win.document.querySelector('.marker-menu'), null,
         'Tab from the Marker menu must close the menu.');
       equal(win.document.activeElement,
-        blockById(win, aId).querySelector('.block-plus'),
-        'Tab from the Marker menu must move to the next editor control.');
+        blockById(win, aId).querySelector('.block-content'),
+        'Tab from the Marker menu must move to the text area.');
 
       var handle = blockById(win, bId).querySelector('.drag-handle');
       handle.focus();

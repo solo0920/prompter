@@ -295,6 +295,11 @@ body {
   user-select: text;
   padding-top: 1px;
 }
+.block-content:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 .block-edit-input {
   flex: 1 1 auto;
   width: 100%;

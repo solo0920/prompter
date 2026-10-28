@@ -132,7 +132,8 @@ Each text block is a floating box showing:
   the Marker. Markers are always visible without hover; when no Marker is set, the prefix is a
   blank clickable area with no `×` or text. The flyout opens when the pointer enters anywhere
   from the block's left border through this prefix, on click, or on keyboard activation.
-- The text, wrapped visually but representing one Markdown line.
+- The text, wrapped visually but representing one Markdown line. The text area is a Tab stop;
+  Enter/F2 while it is focused starts block editing.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
   right half of the block is hovered or keyboard-focused, and always visible on touch devices.
@@ -218,8 +219,8 @@ Each image block shows:
 - With focus on a block or the canvas, Up/Down moves through the previous/next sequence item and
   wraps at the ends. The composer participates at its own sequence slot; focusing it clears the
   block selection and places the caret in the composer input.
-- While focus is inside a block, Tab/Shift+Tab cycles only that block's own root, title, action,
-  and drag-handle controls and wraps within them. While focus is inside the composer, it cycles
+- While focus is inside a block, Tab/Shift+Tab cycles only that block's own root, title, text,
+  action, and drag-handle controls and wraps within them. While focus is inside the composer, it cycles
   only the composer's marker, input, and handle. When focus is on the canvas, it uses the selected
   block if one exists; otherwise it cycles editor items. It never moves to the header or left
   rail, and both directions wrap.

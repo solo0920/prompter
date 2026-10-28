@@ -476,6 +476,8 @@
     }
     var content = global.document.createElement('span');
     content.className = 'block-content';
+    content.tabIndex = 0;
+    content.setAttribute('aria-keyshortcuts', 'Enter F2');
     content.textContent = block.text;
     return content;
   }
