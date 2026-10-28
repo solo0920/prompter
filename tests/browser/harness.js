@@ -3329,6 +3329,23 @@
       }, 5000).then(function () {
         assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
           'The 1280 px layout must not scroll horizontally.');
+        var header = win.document.querySelector('.app-header');
+        var title = byId(win, 'document-title');
+        assert(header.contains(title), 'The document title must sit inside the header.');
+        var titleRect = title.getBoundingClientRect();
+        assert(titleRect.width > 0 && titleRect.height > 0,
+          'The document title must be visible in the header.');
+        var rightOrder = Array.prototype.map.call(
+          header.querySelectorAll('.header-right > *'),
+          function (element) { return element.id; }
+        ).filter(Boolean);
+        equal(rightOrder.join(','),
+          'preview-button,copy-button,style-select,theme-toggle,settings-button',
+          'Preview and Copy must precede Style in the header.');
+        assert(byId(win, 'app-main').contains(toggle),
+          'The directory toggle must sit in the far-left body rail.');
+        assert(!header.contains(toggle),
+          'The directory toggle must not remain in the header.');
         equal(toggle.getAttribute('aria-expanded'), 'false');
         assert(directory.getBoundingClientRect().width === 0,
           'The directory must start collapsed at 1280 px.');
@@ -3354,6 +3371,14 @@
         assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
           'The 360 px header must not scroll horizontally: ' +
           win.document.documentElement.scrollWidth + ' > ' + win.innerWidth);
+        var compactHeader = win.document.querySelector('.app-header');
+        var compactTitle = byId(win, 'document-title');
+        var compactTitleRect = compactTitle.getBoundingClientRect();
+        assert(compactHeader.contains(compactTitle) &&
+          compactTitleRect.width > 0 && compactTitleRect.height > 0,
+          'The document title must remain visible in the compact header.');
+        assert(compactTitleRect.left >= 0 && compactTitleRect.right <= win.innerWidth + 1,
+          'The document title must stay inside the 360 px viewport.');
         ['file-menu-button', 'directory-toggle', 'preview-button', 'copy-button',
           'theme-toggle', 'settings-button'].forEach(function (id) {
           var element = byId(win, id);

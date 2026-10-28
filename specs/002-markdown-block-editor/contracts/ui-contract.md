@@ -9,29 +9,27 @@ behavior so tests can be written against it.
 ## Layout
 
 ```text
-+--------------------------------------------------------------------------------+
-| File | [directory toggle] |        Preview   Copy        | Style Theme Settings |
-+--------------------------------------------------------------------------------+
-| Document title                                                       [status]  |
-+----------------------+---------------------------------------------------------+
-| Search documents     |                                                         |
-| [................]   |                  Editor canvas                          |
-| N results            |      +----------------+    +------------------+         |
-|                      |      | # Heading      |    |  image           |         |
-| Document A           |      | +              |    |  +      [remove] |         |
-| 2026-10-28 01:00     |      +----------------+    +------------------+         |
-| Document B           |                                                         |
-| ...                  |                                                         |
-+----------------------+---------------------------------------------------------+
++----------------------------------------------------------------------------------+
+| File |            Document title [status]           | Preview Copy Style Theme Settings |
++------+-----------------------------------------------------------------------------+
+| Dir  |                                                                             |
+| rail |                              Editor canvas                                  |
+| [=]  |      +----------------+    +------------------+                             |
+|      |      | # Heading      |    |  image           |                             |
+|      |      | +              |    |  +      [remove] |                             |
+|      |      +----------------+    +------------------+                             |
+|      |                                                                             |
++------+-----------------------------------------------------------------------------+
 ```
 
-- Header: File menu far left; Preview/Edit and Copy centered; style selector, light/dark toggle,
-  and settings on the right.
-- Below the header: a document title field (metadata, not Markdown) and a status area.
+- Header: File menu far left; the document title and status centered; Preview/Edit, Copy,
+  style selector, light/dark toggle, and settings on the right in that order.
+- The document title is part of the header; there is no separate title row.
+- Left body rail: a narrow, always-visible `文件目錄` button at the far left of the workspace.
 - Left: a collapsible directory with search, match count, and document list; it starts collapsed.
 - Center: scrollable workspace containing the editor canvas, or the inline preview while active.
-- The directory toggle is available at every width: it pushes the sidebar open on wide screens
-  and opens an off-canvas drawer below 768 px.
+- The directory toggle sits in the body rail at every width: it pushes the sidebar open on wide
+  screens and opens an off-canvas drawer below 768 px.
 
 ## Header Controls
 
@@ -48,7 +46,7 @@ behavior so tests can be written against it.
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
 | Settings | `設定` | Opens the settings dialog. |
-| Directory toggle | `文件目錄` | Shows/hides the document directory at every width. Collapsed by default; `aria-expanded` reflects state. |
+| Directory toggle | `文件目錄` | Located in the far-left body rail. Shows/hides the document directory at every width. Collapsed by default; `aria-expanded` reflects state. |
 
 ### File menu keyboard behavior
 
@@ -60,10 +58,11 @@ behavior so tests can be written against it.
 
 ## Directory
 
-- Starts collapsed on every page load; the `文件目錄` toggle expands it.
-- On wide screens the open directory occupies a left column and pushes the workspace.
-- At 768 px and below it opens as an off-canvas drawer with an overlay; Escape or the overlay
-  closes it and returns focus to the toggle.
+- Starts collapsed on every page load; the `文件目錄` button in the far-left body rail expands it.
+- On wide screens the open directory occupies a left column next to the rail and pushes the
+  workspace.
+- At 768 px and below it opens as an off-canvas drawer beside the rail with an overlay; Escape or
+  the overlay closes it and returns focus to the rail toggle.
 - Search input label: `搜尋提示詞文件`.
 - Placeholder: `搜尋標題或內容…`.
 - Results count: `N 個文件` or `N 個結果`.
@@ -83,7 +82,8 @@ behavior so tests can be written against it.
 
 ## Document Title
 
-- A single-line text input labeled `文件標題` above the canvas.
+- A single-line text input labeled `文件標題` in the header center, with the status text beside
+  it on wide screens.
 - Default `Untitled` for a new document; opened documents use the file name without extension.
 - Editing the title marks the document dirty and updates its default save file name.
 - Empty title falls back to `Untitled` on blur/save.
@@ -273,13 +273,15 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 
 ## Responsive Behavior
 
-- 1280×720: header and canvas visible without horizontal scrolling; directory starts collapsed
-  and opens as a left column when toggled.
-- 768 px and below: directory becomes a labeled off-canvas drawer; header actions remain
-  reachable.
-- 360×800: compact icon buttons for File, drawer, Preview/Edit, Copy, Style, Theme, Settings;
-  product name and non-essential labels hidden; 44 px touch targets where possible; no horizontal
-  page scrolling; canvas width fits the viewport.
+- 1280×720: header and canvas visible without horizontal scrolling; the document title is in
+  the header center, the directory starts collapsed, and the body rail opens it as a left column.
+- 1100 px and below: the header wraps the title onto its own full-width row while the actions
+  remain in the first row.
+- 768 px and below: directory becomes a labeled off-canvas drawer beside the rail; header
+  actions remain reachable.
+- 360×800: compact icon buttons for File, Preview/Edit, Copy, Style, Theme, Settings and the body
+  rail toggle; product name and non-essential labels hidden; 44 px touch targets where possible;
+  no horizontal page scrolling; canvas width fits the viewport.
 - Blocks clamp to the current canvas width; long text wraps; images scale down.
 - The header may wrap to two rows if needed at 360 px, but all actions must remain reachable
   without horizontal scrolling.

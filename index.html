@@ -63,19 +63,16 @@
           <button class="menu-item" type="button" role="menuitem" data-action="insert-image" disabled>插入圖片</button>
         </div>
       </div>
-      <button id="directory-toggle" class="button button-quiet button-with-icon directory-toggle"
-              type="button" aria-expanded="false" aria-controls="directory">
-        <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none"
-                stroke="currentColor" stroke-width="1.8"/>
-          <path d="M9 4.8v14.4M11.5 9h6M11.5 12h6M11.5 15h4" fill="none"
-                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <span class="button-label">文件目錄</span>
-      </button>
     </div>
 
     <div class="header-group header-center">
+      <label class="visually-hidden" for="document-title">文件標題</label>
+      <input id="document-title" class="title-input" type="text" maxlength="200"
+             placeholder="Untitled" aria-label="文件標題" autocomplete="off">
+      <span id="document-status" class="document-status" role="status" aria-live="polite"></span>
+    </div>
+
+    <div class="header-group header-right">
       <button id="preview-button" class="button button-with-icon" type="button"
               aria-pressed="false" aria-label="預覽">
         <svg class="button-icon preview-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -99,9 +96,6 @@
         </svg>
         <span class="button-label">複製</span>
       </button>
-    </div>
-
-    <div class="header-group header-right">
       <label class="visually-hidden" for="style-select">視覺風格</label>
       <select id="style-select" class="select" aria-label="視覺風格">
         <option value="apple">簡約留白</option>
@@ -136,14 +130,19 @@
     </div>
   </header>
 
-  <div class="title-bar">
-    <label class="visually-hidden" for="document-title">文件標題</label>
-    <input id="document-title" class="title-input" type="text" maxlength="200"
-           placeholder="Untitled" aria-label="文件標題" autocomplete="off">
-    <span id="document-status" class="document-status" role="status" aria-live="polite"></span>
-  </div>
-
   <div id="app-main" class="app-main">
+    <div class="directory-rail">
+      <button id="directory-toggle" class="button button-quiet directory-toggle directory-rail-button"
+              type="button" aria-expanded="false" aria-controls="directory"
+              aria-label="文件目錄" title="文件目錄">
+        <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none"
+                stroke="currentColor" stroke-width="1.8"/>
+          <path d="M9 4.8v14.4M11.5 9h6M11.5 12h6M11.5 15h4" fill="none"
+                stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
     <aside id="directory" class="directory" aria-label="文件目錄">
       <div id="storage-warning" class="storage-warning" role="status" hidden>
         <p id="storage-warning-text"></p>

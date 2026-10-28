@@ -207,8 +207,9 @@ settings panel and clear the local library after confirming the warning.
 
 **Acceptance Scenarios**:
 
-1. **Given** the homepage is open, **When** the header is displayed, **Then** the right side
-   shows a style selector, a light/dark toggle, and a settings button.
+1. **Given** the homepage is open, **When** the header is displayed, **Then** the document title
+   is centered and the right side shows Preview, Copy, a style selector, a light/dark toggle,
+   and a settings button in that order.
 2. **Given** the user changes the light/dark mode, **When** the toggle is activated, **Then**
    the interface changes immediately and the choice is retained after reload.
 3. **Given** no explicit appearance choice has been made, **When** the page loads, **Then**
@@ -223,7 +224,7 @@ settings panel and clear the local library after confirming the warning.
    local documents and layouts are removed, workspace preferences remain, and files already
    saved on disk are not deleted.
 7. **Given** a 360px-wide viewport, **When** the homepage is displayed, **Then** the sidebar
-   is hidden behind a labeled toggle, all header actions remain reachable, and the page does
+   is hidden in the far-left body rail, all header actions remain reachable, and the page does
    not require horizontal scrolling.
 
 ---
@@ -277,15 +278,15 @@ settings panel and clear the local library after confirming the warning.
 
 ### Functional Requirements
 
-- **FR-001**: The homepage MUST provide a top header, a collapsible left document directory,
-  and a central editor area.
-- **FR-002**: The header MUST place the File menu at the far left, the Preview/Edit toggle and
-  Copy in the center, and the style selector, light/dark toggle, and settings button on the
-  right.
+- **FR-001**: The homepage MUST provide a top header, a collapsible left document directory
+  with a far-left body rail toggle, and a central editor area.
+- **FR-002**: The header MUST place the File menu at the far left, the document title and status
+  in the center, and Preview/Edit, Copy, style selector, light/dark toggle, and settings on the
+  right in that order.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
-- **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at every
-  width, and list saved documents in reverse last-modified order with title and last-modified
-  date/time.
+- **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
+  left of the body at every width, and list saved documents in reverse last-modified order with
+  title and last-modified date/time.
 - **FR-005**: The directory MUST provide a search field that matches titles and content using
   case-insensitive partial matching, ignores leading and trailing whitespace, and supports
   Traditional Chinese and English.
@@ -386,8 +387,8 @@ settings panel and clear the local library after confirming the warning.
   after a reload in the same browser on the same device.
 - **FR-037**: All header, directory, editor, preview, and settings controls MUST be operable by
   keyboard alone, expose accessible names, and show a visible focus indicator.
-- **FR-038**: At a 360px-wide viewport, the directory MUST remain collapsed behind a labeled
-  toggle, all header actions MUST remain reachable, and the page MUST NOT require horizontal
+- **FR-038**: At a 360px-wide viewport, the directory MUST remain collapsed in the far-left
+  body rail, all header actions MUST remain reachable, and the page MUST NOT require horizontal
   scrolling.
 - **FR-039**: If local persistence is unavailable or full, the system MUST show a non-blocking
   warning in the document directory, identify the active storage mode and reason, offer a
