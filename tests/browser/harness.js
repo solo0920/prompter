@@ -829,35 +829,60 @@
     });
   });
 
-  test('US1 keyboard movement uses 24 px and 1 px steps with announcements', function () {
+  test('US1 keyboard movement reorders one position at a time with announcements', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
-      var block = commitComposer(win, 'Move me');
-      var x = state.document.blocks[0].x;
-      var y = state.document.blocks[0].y;
-      var element = blockById(win, state.document.blocks[0].id);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      state.dirty = false;
 
-      press(win, element, 'ArrowDown', { altKey: true });
-      equal(state.document.blocks[0].y, y + 24);
-      var announcement = byId(win, 'move-announcer').textContent;
-      equal(announcement, '區塊已移動到第 3 列，第 1 欄。');
+      press(win, blockById(win, aId), 'ArrowDown', { altKey: true });
+      var ordered = readingOrder(win);
+      equal(ordered[0].id, bId, 'B should move into the first position.');
+      equal(ordered[1].id, aId, 'A should take the second position.');
+      equal(ordered[2].id, cId, 'C should remain third.');
+      equal(byId(win, 'move-announcer').textContent,
+        '區塊已移到第 2 個位置，共 3 個區塊。');
+      equal(state.dirty, true);
 
-      element = blockById(win, state.document.blocks[0].id);
-      press(win, element, 'ArrowRight', { altKey: true, shiftKey: true });
-      equal(state.document.blocks[0].x, x + 1);
+      var aElement = blockById(win, aId);
+      var bElement = blockById(win, bId);
+      assert(ordered[0].y + bElement.offsetHeight + 1 < ordered[1].y,
+        'Reordered blocks must not overlap.');
+
+      press(win, aElement, 'ArrowUp', { altKey: true });
+      ordered = readingOrder(win);
+      equal(ordered[0].id, aId, 'A should return to the first position.');
+      equal(ordered[1].id, bId);
+      equal(ordered[2].id, cId);
+      equal(byId(win, 'move-announcer').textContent,
+        '區塊已移到第 1 個位置，共 3 個區塊。');
+
+      var beforeNoop = readingOrder(win).map(function (block) { return block.id; }).join(',');
+      press(win, blockById(win, aId), 'ArrowUp', { altKey: true });
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        beforeNoop, 'Moving the first block up must not change the order.');
+      equal(state.document.blocks[0].x, win.Prompter.files.COLUMN_X,
+        'Sequence blocks must remain in the shared column.');
     });
   });
 
-  test('US1 pointer dragging clamps the full box and only dirties after movement', function () {
+  test('US1 pointer dragging shifts intervening blocks in sequence', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
-      commitComposer(win, 'Drag me');
-      var canvas = byId(win, 'canvas');
-      var element = blocks(win)[0];
+      createSequence(win, ['A', 'B', 'C', 'D']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      var dId = ids[3];
       state.dirty = false;
 
-      function pointer(elementNode, type, x, y) {
-        var event = new win.PointerEvent(type, {
+      function pointer(target, type, x, y) {
+        target.dispatchEvent(new win.PointerEvent(type, {
           bubbles: true,
           cancelable: true,
           pointerId: 7,
@@ -865,49 +890,119 @@
           button: 0,
           clientX: x,
           clientY: y
-        });
-        elementNode.dispatchEvent(event);
+        }));
       }
 
-      var rect = element.getBoundingClientRect();
-      var content = element.querySelector('.block-content');
-      pointer(content, 'pointerdown', rect.left + 10, rect.top + 10);
-      win.dispatchEvent(new win.PointerEvent('pointerup', {
-        bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0,
-        clientX: rect.left + 10, clientY: rect.top + 10
-      }));
+      function pointerUp(x, y) {
+        win.dispatchEvent(new win.PointerEvent('pointerup', {
+          bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0,
+          clientX: x, clientY: y
+        }));
+      }
+
+      var canvasRect = byId(win, 'canvas').getBoundingClientRect();
+
+      function modelBlock(blockId) {
+        return state.document.blocks.filter(function (block) {
+          return block.id === blockId;
+        })[0];
+      }
+
+      function clientLeftOf(blockId) {
+        return canvasRect.left + modelBlock(blockId).x;
+      }
+
+      function clientTopOf(blockId) {
+        return canvasRect.top + modelBlock(blockId).y;
+      }
+
+      function blockHeight(blockId) {
+        return blockById(win, blockId).offsetHeight;
+      }
+
+      function pointerDownOn(blockId) {
+        var element = blockById(win, blockId);
+        var content = element.querySelector('.block-content');
+        pointer(content, 'pointerdown', clientLeftOf(blockId) + 10, clientTopOf(blockId) + 10);
+      }
+
+      pointerDownOn(aId);
+      pointerUp(clientLeftOf(aId) + 10, clientTopOf(aId) + 10);
       equal(state.dirty, false, 'A click without movement must not mark the document dirty.');
 
-      var block = state.document.blocks[0];
-      pointer(content, 'pointerdown', rect.left + 10, rect.top + 10);
-      win.dispatchEvent(new win.PointerEvent('pointermove', {
-        bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0,
-        clientX: rect.left - 800, clientY: rect.top - 800
+      var bTopBefore = parseFloat(blockById(win, bId).style.top);
+      var cTopBefore = parseFloat(blockById(win, cId).style.top);
+      var moveY = clientTopOf(cId) + blockHeight(cId) / 2 + 10 - blockHeight(aId) / 2;
+
+      pointerDownOn(aId);
+      pointer(win, 'pointermove', clientLeftOf(cId) + 10, moveY);
+      assert(parseFloat(blockById(win, bId).style.top) < bTopBefore,
+        'B should move up during the drag preview.');
+      assert(parseFloat(blockById(win, cId).style.top) < cTopBefore,
+        'C should move up during the drag preview.');
+      pointerUp(clientLeftOf(cId) + 10, moveY);
+
+      var ordered = readingOrder(win);
+      equal(ordered.map(function (block) { return block.id; }).join(','),
+        [bId, cId, aId, dId].join(','),
+        'Dragging A onto C must produce B, C, A, D.');
+      equal(state.dirty, true);
+      equal(win.document.activeElement.dataset.blockId, aId,
+        'Focus must remain on the moved block.');
+      equal(byId(win, 'move-announcer').textContent,
+        '區塊已移到第 3 個位置，共 4 個區塊。');
+      equal(win.Prompter.markdown.serializeDocument(state.document), 'B\nC\nA\nD\n',
+        'Markdown output must follow the new sequence.');
+
+      ordered.forEach(function (block, index) {
+        if (index === ordered.length - 1) {
+          return;
+        }
+        var current = blockById(win, block.id);
+        assert(block.y + current.offsetHeight + 1 < ordered[index + 1].y,
+          'Reordered blocks must not overlap.');
+      });
+
+      state.dirty = false;
+      var cancelY = clientTopOf(aId) + blockHeight(aId) / 2 + 10 - blockHeight(bId) / 2;
+      pointerDownOn(bId);
+      pointer(win, 'pointermove', clientLeftOf(aId) + 10, cancelY);
+      win.dispatchEvent(new win.KeyboardEvent('keydown', {
+        key: 'Escape', bubbles: true, cancelable: true
       }));
-      win.dispatchEvent(new win.PointerEvent('pointerup', {
-        bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0,
-        clientX: rect.left - 800, clientY: rect.top - 800
-      }));
-      equal(block.x, 0);
-      equal(block.y, 0);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [bId, cId, aId, dId].join(','), 'Escape must restore the pre-drag sequence.');
+      equal(state.dirty, false, 'A canceled drag must not mark the document dirty.');
+
+      var upwardY = clientTopOf(bId) + blockHeight(bId) / 2 + 10 - blockHeight(aId) / 2;
+      pointerDownOn(aId);
+      pointer(win, 'pointermove', clientLeftOf(bId) + 10, upwardY);
+      pointerUp(clientLeftOf(bId) + 10, upwardY);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [aId, bId, cId, dId].join(','),
+        'Dragging A up onto B must produce A, B, C, D.');
       equal(state.dirty, true);
 
-      element = blockById(win, block.id);
-      rect = element.getBoundingClientRect();
-      content = element.querySelector('.block-content');
-      var maxX = canvas.clientWidth - element.offsetWidth;
-      var maxY = canvas.clientHeight - element.offsetHeight;
-      pointer(content, 'pointerdown', rect.left + 10, rect.top + 10);
-      win.dispatchEvent(new win.PointerEvent('pointermove', {
-        bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0,
-        clientX: rect.left + 5000, clientY: rect.top + 5000
-      }));
-      win.dispatchEvent(new win.PointerEvent('pointerup', {
-        bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0,
-        clientX: rect.left + 5000, clientY: rect.top + 5000
-      }));
-      equal(block.x, maxX);
-      equal(block.y, maxY);
+      state.dirty = false;
+      pointerDownOn(cId);
+      pointer(win, 'pointermove', canvasRect.left - 120, clientTopOf(aId) + 10);
+      pointerUp(canvasRect.left - 120, clientTopOf(aId) + 10);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [aId, bId, cId, dId].join(','), 'Dropping outside the canvas must not reorder.');
+      equal(state.dirty, false, 'An out-of-bounds drop must not mark the document dirty.');
+
+      var appendY = clientTopOf(dId) + blockHeight(dId) + 20;
+      pointerDownOn(aId);
+      pointer(win, 'pointermove', clientLeftOf(dId) + 10, appendY);
+      pointerUp(clientLeftOf(dId) + 10, appendY);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [bId, cId, dId, aId].join(','),
+        'Dragging past the last block must append it.');
+      equal(win.Prompter.markdown.serializeDocument(state.document), 'B\nC\nD\nA\n');
     });
   });
 
@@ -2115,12 +2210,12 @@
             equal(byId(win, 'document-title').value, '甲文件');
             equal(byId(win, 'document-status').textContent, '已儲存');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
-            equal(loaded.blocks[0].x, 12);
-            equal(loaded.blocks[0].y, 24);
+            equal(loaded.blocks[0].x, win.Prompter.files.COLUMN_X);
+            equal(loaded.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
             var element = blockById(win, 'first-block');
             assert(element, 'The opened block must render.');
-            equal(element.style.left, '12px');
-            equal(element.style.top, '24px');
+            equal(element.style.left, win.Prompter.files.COLUMN_X + 'px');
+            equal(element.style.top, win.Prompter.files.COLUMN_START_Y + 'px');
             state.document.blocks[0].text = '未儲存變更';
             app.setDirty(true);
             directoryButton(win, second.id).click();
@@ -2156,12 +2251,12 @@
             equal(byId(win, 'document-status').textContent, '已儲存');
             equal(directoryButton(win, second.id).getAttribute('aria-current'), 'true');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), null);
-            equal(loaded.blocks[0].x, 320);
-            equal(loaded.blocks[0].y, 48);
+            equal(loaded.blocks[0].x, win.Prompter.files.COLUMN_X);
+            equal(loaded.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
             var element = blockById(win, 'second-block');
             assert(element, 'The second opened block must render.');
-            equal(element.style.left, '320px');
-            equal(element.style.top, '48px');
+            equal(element.style.left, win.Prompter.files.COLUMN_X + 'px');
+            equal(element.style.top, win.Prompter.files.COLUMN_START_Y + 'px');
           });
       });
     });
@@ -2277,13 +2372,13 @@
             equal(state.documentPersisted, true);
             equal(byId(win, 'document-title').value, '上次開啟');
             equal(byId(win, 'document-status').textContent, '已儲存');
-            equal(state.document.blocks[0].x, 40);
-            equal(state.document.blocks[0].y, 72);
+            equal(state.document.blocks[0].x, win.Prompter.files.COLUMN_X);
+            equal(state.document.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
             equal(directoryButton(win, document.id).getAttribute('aria-current'), 'true');
             var element = blockById(win, 'restore-first');
             assert(element, 'The restored block must render.');
-            equal(element.style.left, '40px');
-            equal(element.style.top, '72px');
+            equal(element.style.left, win.Prompter.files.COLUMN_X + 'px');
+            equal(element.style.top, win.Prompter.files.COLUMN_START_Y + 'px');
             state.storage.setLastDocumentId('missing-document');
             app.clearDocument();
             return app.restoreLastDocument();
@@ -3155,15 +3250,23 @@
   test('storage saves and reloads a document without leaking session state', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
-      commitComposer(win, 'Storage round-trip');
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      press(win, blockById(win, ids[0]), 'ArrowDown', { altKey: true });
       var document = win.Prompter.utils.deepClone(state.document);
       return state.storage.saveDocument(document, state.assets).then(function () {
         return state.storage.getDocument(document.id);
       }).then(function (loaded) {
         assert(loaded, 'The saved document could not be reloaded.');
         equal(loaded.document.title, 'Untitled');
-        equal(loaded.document.blocks.length, 1);
-        equal(loaded.document.blocks[0].text, 'Storage round-trip');
+        equal(loaded.document.blocks.length, 3);
+        equal(loaded.document.layoutVersion, 2);
+        equal(loaded.document.blocks.map(function (block) { return block.id; }).join(','),
+          [ids[1], ids[0], ids[2]].join(','),
+          'The reordered sequence must survive storage.');
+        equal(loaded.document.blocks.map(function (block) { return block.seq; }).join(','),
+          '1,2,3');
+        equal(win.Prompter.markdown.serializeDocument(loaded.document), 'B\nA\nC\n');
         return state.storage.deleteDocument(document.id);
       });
     });

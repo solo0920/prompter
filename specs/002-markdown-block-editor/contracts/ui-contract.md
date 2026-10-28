@@ -160,26 +160,26 @@ Each image block shows:
 
 - Pointer drag starts on the block body (not on an interactive control) or on the visible drag
   handle. A movement threshold prevents accidental drags on click.
-- During drag, the block follows the pointer with a transform; the reading order is not
-  recalculated until pointerup.
-- The block is clamped so its entire box remains within the canvas at all times.
-- The selected/dragged block is raised above overlapping blocks.
-- On pointerup, commit `x`/`y`, recalculate reading order and DOM order, and mark dirty.
-- Alt+Arrow moves the selected block by 24 px in that direction; Alt+Shift+Arrow moves it by
-  1 px. Movement is clamped and announced in a polite live region (for example
-  `區塊已移動到第 2 列，第 1 欄`).
+- During drag, the dragged block follows the pointer while the intervening blocks shift live
+  into their previewed sequence positions. Releasing commits the sequential shift; canceling
+  restores the pre-drag sequence.
+- Every block occupies a contiguous sequence position; there are no free-floating coordinates
+  or empty gaps.
+- The selected/dragged block is raised above the other blocks while dragging.
+- Alt+Arrow moves the selected block one position earlier or later in the sequence and is
+  announced in a polite live region (for example `區塊已移到第 2 個位置，共 3 個區塊`).
 - Touch drag uses `touch-action: none` only on the drag handle so vertical page scrolling still
   works elsewhere.
 - Dragging never changes Markdown text content.
 
 ## Reading Order
 
-- Reading order is derived from position: row (`round(y/24)`), then x, then creation sequence,
-  then id.
+- Reading order is the visible sequence order. The editor lays blocks out top to bottom with no
+  empty positions, so the same order drives Preview, Copy, and Save.
 - The DOM order of blocks matches reading order after each commit so screen readers follow the
   same order as Preview/Save.
 - There is no separate manual reading-order control in this feature.
-- Moving a block never rewrites or reorders text in place; it only changes the derived order.
+- Moving a block never rewrites or reorders text in place; it only changes the sequence order.
 
 ## Preview
 

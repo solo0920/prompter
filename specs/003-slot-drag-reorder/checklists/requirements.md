@@ -93,6 +93,11 @@
   font files, or implied affiliation.
 - Apple (`apple`, 簡約留白) is the default for new users. Stored Paper or Graphite preferences
   fall back to Apple without changing the other preferences.
+- As implemented, committed blocks occupy a contiguous vertical sequence. Dragging previews the
+  sequential shift, Escape/blur/out-of-bounds drops cancel it, and legacy documents migrate on
+  their first render without being marked dirty.
+- Verification: **92 unit tests** and **63 browser tests** pass in Chrome, Edge, and Firefox,
+  online and offline.
 
 ## Notes
 
@@ -100,5 +105,5 @@
 - No open clarifications remain; the sequential-shift interpretation is recorded in the spec's
   Assumptions section.
 - Reviewed against Prompter Constitution version 1.0.0 (2026-10-28).
-- Ready for `/speckit.plan`.
+- Implemented and verified.
 - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`.

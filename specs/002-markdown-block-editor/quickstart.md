@@ -43,7 +43,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-28): **91 passing, 0 failing**.
+Current result (2026-10-28): **92 passing, 0 failing**.
 
 ### Browser harness
 
@@ -141,13 +141,14 @@ Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes 
 
 ### 4. Drag and keyboard movement (US1, FR-023..FR-026, SC-011)
 
-1. Drag a block to a new position; confirm it stays inside the canvas and is raised above
-   overlapping blocks.
-2. Focus a block and use Alt+Arrow and Alt+Shift+Arrow. Confirm movement is clamped and
-   announced by a live region.
-3. Create two blocks on the same visual row or within the same 24 px band, one left and one
-   right. Confirm Preview/Save order is left-to-right; a block in a lower band comes later.
-4. Drag a block to a new row and confirm Preview/Save/Copy orders update consistently.
+1. Drag a block past the center of a later or earlier block; confirm the intervening blocks
+   shift one position and the dragged block takes the target position with no overlap.
+2. Focus a block and use Alt+Arrow. Confirm it moves one position earlier or later, stays
+   focused, and the live region announces its new position.
+3. Create several blocks and confirm Preview/Save order follows the visible top-to-bottom
+   sequence with no gaps.
+4. Drag a block beyond the last block and confirm it appends while the intervening blocks shift
+   toward its former position.
 5. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
    unsaved draft is not restored.
 
@@ -183,8 +184,8 @@ session-only.
    the insertion point, is draggable, and has a remove control.
 2. Repeat with JPEG, GIF, and WebP.
 3. Copy an image in another app and paste it onto the canvas. Confirm an image block appears.
-4. Overlap an image block with a lower block, then insert or paste another image above it.
-   Confirm the lower overlapping blocks shift down just enough to preserve reading order.
+4. Insert or paste another image above a lower block. Confirm the lower blocks shift down and
+   no blocks overlap.
 5. Copy mixed text and an image, paste onto the canvas. Confirm text blocks precede image blocks
    in reading order.
 6. Double-click a text block, paste an image while editing. Confirm the image appears below the
@@ -271,7 +272,7 @@ session-only.
 
 1. At 1280×720, confirm no horizontal page scrolling and all regions visible.
 2. Resize to 360×800. Confirm the directory is behind a labeled toggle, all header actions are
-   reachable, blocks clamp to the canvas, and there is no horizontal page scrolling.
+   reachable, blocks stay within the sequence column, and there is no horizontal page scrolling.
 3. On touch, confirm dragging uses the handle and vertical scrolling still works.
 4. Complete create, edit, add, move, preview, copy, and save using only the keyboard. Confirm a
    visible focus indicator on every control.

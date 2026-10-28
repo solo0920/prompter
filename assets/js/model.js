@@ -421,7 +421,7 @@
     if (index === -1) {
       return null;
     }
-    var ordered = Markdown.blocksInReadingOrder(document.blocks);
+    var ordered = sequenceBlocks(document);
     var orderedIndex = -1;
     for (var k = 0; k < ordered.length; k += 1) {
       if (ordered[k].id === blockId) {
@@ -439,6 +439,96 @@
     }
     document.blocks.splice(index, 1);
     return removed;
+  }
+
+  function sequenceBlocks(document) {
+    if (!document || !document.blocks) {
+      return [];
+    }
+    if (document.layoutVersion === 2) {
+      return document.blocks.slice().sort(function (left, right) {
+        var seqDifference = Number(left.seq || 0) - Number(right.seq || 0);
+        if (seqDifference !== 0) {
+          return seqDifference;
+        }
+        var leftId = String(left.id || '');
+        var rightId = String(right.id || '');
+        return leftId < rightId ? -1 : (leftId > rightId ? 1 : 0);
+      });
+    }
+    return Markdown.blocksInReadingOrder(document.blocks);
+  }
+
+  function normalizeSequence(document) {
+    if (!document || !document.blocks) {
+      return [];
+    }
+    var ordered = sequenceBlocks(document);
+    document.blocks = ordered.slice();
+    ordered.forEach(function (block, index) {
+      block.seq = index + 1;
+    });
+    document.layoutVersion = 2;
+    return ordered;
+  }
+
+  function insertBlocksAfter(document, blocks, anchorId) {
+    if (!document) {
+      return [];
+    }
+    var incoming = Object.prototype.toString.call(blocks) === '[object Array]'
+      ? blocks.slice()
+      : [];
+    var ordered = normalizeSequence(document);
+    var index = ordered.length;
+    if (anchorId) {
+      for (var i = 0; i < ordered.length; i += 1) {
+        if (ordered[i].id === anchorId) {
+          index = i + 1;
+          break;
+        }
+      }
+    }
+    var result = ordered.slice();
+    Array.prototype.splice.apply(result, [index, 0].concat(incoming));
+    document.blocks = result;
+    result.forEach(function (block, position) {
+      block.seq = position + 1;
+    });
+    document.layoutVersion = 2;
+    return result;
+  }
+
+  function moveBlockToIndex(document, blockId, targetIndex) {
+    var ordered = normalizeSequence(document);
+    var index = -1;
+    for (var i = 0; i < ordered.length; i += 1) {
+      if (ordered[i].id === blockId) {
+        index = i;
+        break;
+      }
+    }
+    if (index === -1) {
+      return false;
+    }
+    var target = Math.floor(Number(targetIndex));
+    if (!isFinite(target)) {
+      return false;
+    }
+    target = Math.max(0, Math.min(ordered.length - 1, target));
+    if (target === index) {
+      return false;
+    }
+    var moved = ordered.slice();
+    var block = moved[index];
+    moved.splice(index, 1);
+    moved.splice(target, 0, block);
+    document.blocks = moved;
+    moved.forEach(function (entry, position) {
+      entry.seq = position + 1;
+    });
+    document.layoutVersion = 2;
+    return true;
   }
 
   function cloneDocumentForSaveAs(document, overrides) {
@@ -490,6 +580,10 @@
     getAssetById: getAssetById,
     touchDocument: touchDocument,
     removeBlock: removeBlock,
+    sequenceBlocks: sequenceBlocks,
+    normalizeSequence: normalizeSequence,
+    insertBlocksAfter: insertBlocksAfter,
+    moveBlockToIndex: moveBlockToIndex,
     cloneDocumentForSaveAs: cloneDocumentForSaveAs
   };
 

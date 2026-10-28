@@ -209,12 +209,13 @@ body {
   cursor: grab;
   user-select: none;
   touch-action: pan-y;
+  transition: top .12s ease, left .12s ease;
 }
 .block:focus-visible, .block.selected {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
-.block.dragging { cursor: grabbing; box-shadow: var(--shadow); }
+.block.dragging { cursor: grabbing; box-shadow: var(--shadow); transition: none; }
 .block.editing { cursor: default; }
 .block-text { display: flex; align-items: flex-start; gap: 7px; min-height: 24px; }
 .block-marker {

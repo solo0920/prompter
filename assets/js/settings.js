@@ -75,6 +75,9 @@
       elements['theme-toggle'].setAttribute('title', nextLabel);
       elements['theme-toggle'].setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
     }
+    if (global.Prompter.editor && typeof global.Prompter.editor.reflowLayout === 'function') {
+      global.Prompter.editor.reflowLayout();
+    }
   }
 
   function savePreferences() {

@@ -152,6 +152,69 @@
     canvas.style.height = height + 'px';
   }
 
+  function computeSequenceLayout(ordered, composer, heights) {
+    var positions = {};
+    var y = Files.COLUMN_START_Y;
+    var composerTop = null;
+    var anchorId = composer ? composer.anchorBlockId : null;
+    ordered.forEach(function (block) {
+      var height = heights && heights[block.id] !== undefined
+        ? heights[block.id]
+        : elementHeightFor(block);
+      positions[block.id] = { x: Files.COLUMN_X, y: y };
+      y += height + GAP;
+      if (anchorId && anchorId === block.id) {
+        composerTop = y;
+        y += (composer.height || 0) + GAP;
+      }
+    });
+    if (composer && composerTop === null) {
+      composerTop = y;
+    }
+    return { positions: positions, composerTop: composerTop, nextY: y };
+  }
+
+  function applySequenceLayout() {
+    var state = getState();
+    var canvas = getCanvas();
+    if (!state || !canvas || !state.document) {
+      updateCanvasSize();
+      return;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    var composerElement = canvas.querySelector('.composer');
+    var composer = state.composer ? {
+      anchorBlockId: state.composer.anchorBlockId,
+      height: composerElement ? composerElement.offsetHeight : 0
+    } : null;
+    var layout = computeSequenceLayout(ordered, composer);
+    ordered.forEach(function (block, index) {
+      var point = layout.positions[block.id];
+      block.x = point.x;
+      block.y = point.y;
+      block.seq = index + 1;
+      var element = blockElement(block.id);
+      if (element) {
+        element.style.left = point.x + 'px';
+        element.style.top = point.y + 'px';
+      }
+    });
+    if (composer && composerElement && layout.composerTop !== null) {
+      state.composer.x = Files.COLUMN_X;
+      state.composer.y = layout.composerTop;
+      composerElement.style.left = Files.COLUMN_X + 'px';
+      composerElement.style.top = layout.composerTop + 'px';
+    }
+    updateCanvasSize();
+  }
+
+  function reflowSequenceLayout() {
+    if (dragState) {
+      return;
+    }
+    applySequenceLayout();
+  }
+
   function revokeObjectUrls() {
     Object.keys(objectUrls).forEach(function (id) {
       try {
@@ -287,14 +350,16 @@
     image.className = 'block-image';
     image.alt = block.alt || (asset && asset.originalName) || '圖片';
     image.src = url;
-    image.addEventListener('load', updateCanvasSize);
+    image.addEventListener('load', function () {
+      reflowSequenceLayout();
+    });
     image.addEventListener('error', function () {
       var placeholder = global.document.createElement('div');
       placeholder.className = 'block-image-placeholder';
       placeholder.textContent = '圖片無法載入：' + (block.alt || '未命名圖片');
       wrapper.textContent = '';
       wrapper.appendChild(placeholder);
-      updateCanvasSize();
+      reflowSequenceLayout();
     });
     wrapper.appendChild(image);
     return wrapper;
@@ -506,7 +571,7 @@
       empty.hidden = true;
     }
     ensureInitialComposer(state);
-    var blocks = Markdown.blocksInReadingOrder(state.document.blocks);
+    var blocks = Model.normalizeSequence(state.document);
     blocks.forEach(function (block) {
       canvas.appendChild(createBlockElement(block));
     });
@@ -514,7 +579,7 @@
     if (composerElement) {
       canvas.appendChild(composerElement);
     }
-    updateCanvasSize();
+    applySequenceLayout();
 
     if (state.editingBlockId) {
       var editingElement = blockElement(state.editingBlockId);
@@ -578,6 +643,72 @@
     }
   }
 
+  function dragCenters(ordered) {
+    var centers = {};
+    var canvas = getCanvas();
+    var canvasTop = canvas ? canvas.getBoundingClientRect().top : 0;
+    ordered.forEach(function (block) {
+      centers[block.id] = canvasTop + block.y + elementHeightFor(block) / 2;
+    });
+    return centers;
+  }
+
+  function targetIndexForDrag(drag, clientY) {
+    var pointerCenter = clientY - drag.grabOffsetY + drag.element.offsetHeight / 2;
+    var target = 0;
+    var movingUp = pointerCenter < drag.startCenter;
+    drag.order.forEach(function (block) {
+      if (block.id === drag.blockId) {
+        return;
+      }
+      var center = drag.centers[block.id];
+      if (center === undefined) {
+        return;
+      }
+      if (movingUp ? center < pointerCenter : center <= pointerCenter) {
+        target += 1;
+      }
+    });
+    return Utils.clamp(target, 0, drag.order.length - 1);
+  }
+
+  function previewDragLayout(drag) {
+    var canvas = getCanvas();
+    if (!canvas) {
+      return;
+    }
+    var composerElement = canvas.querySelector('.composer');
+    var composer = drag.composer ? {
+      anchorBlockId: drag.composer.anchorBlockId,
+      height: drag.composer.height
+    } : null;
+    var layout = computeSequenceLayout(drag.previewOrder, composer, drag.heights);
+    drag.previewOrder.forEach(function (block) {
+      var point = layout.positions[block.id];
+      var element = blockElement(block.id);
+      if (element) {
+        element.style.left = point.x + 'px';
+        element.style.top = point.y + 'px';
+      }
+    });
+    if (composer && composerElement && layout.composerTop !== null) {
+      composerElement.style.left = Files.COLUMN_X + 'px';
+      composerElement.style.top = layout.composerTop + 'px';
+    }
+    drag.layout = layout;
+  }
+
+  function applyDragTransform(drag) {
+    var point = drag.layout && drag.layout.positions[drag.blockId];
+    if (!point) {
+      drag.element.style.transform = '';
+      return;
+    }
+    drag.element.style.transform = 'translate(' +
+      (drag.currentX - point.x) + 'px, ' +
+      (drag.currentY - point.y) + 'px)';
+  }
+
   function beginDrag(event, blockId, element, fromHandle) {
     if (event.button !== undefined && event.button !== 0) {
       return;
@@ -594,16 +725,40 @@
       return;
     }
     selectBlock(blockId);
+    var ordered = Model.normalizeSequence(state.document);
+    var startIndex = ordered.indexOf(block);
+    var rect = element.getBoundingClientRect();
+    var canvas = getCanvas();
+    var canvasTop = canvas ? canvas.getBoundingClientRect().top : 0;
+    var composerElement = canvas ? canvas.querySelector('.composer') : null;
+    var heights = {};
+    ordered.forEach(function (entry) {
+      heights[entry.id] = elementHeightFor(entry);
+    });
     dragState = {
       blockId: blockId,
       element: element,
       pointerId: event.pointerId,
       startClientX: event.clientX,
       startClientY: event.clientY,
+      grabOffsetY: event.clientY - (canvasTop + block.y),
       startX: block.x,
       startY: block.y,
       currentX: block.x,
       currentY: block.y,
+      startIndex: startIndex,
+      startCenter: canvasTop + block.y + rect.height / 2,
+      order: ordered.slice(),
+      centers: dragCenters(ordered),
+      heights: heights,
+      previewOrder: ordered.slice(),
+      targetIndex: startIndex,
+      composer: state.composer && composerElement ? {
+        anchorBlockId: state.composer.anchorBlockId,
+        height: composerElement.offsetHeight
+      } : null,
+      layout: null,
+      validDrop: true,
       moved: false,
       frame: null,
       pointerType: event.pointerType || 'mouse'
@@ -616,36 +771,65 @@
     global.addEventListener('pointermove', onDragMove, true);
     global.addEventListener('pointerup', onDragEnd, true);
     global.addEventListener('pointercancel', onDragCancel, true);
+    global.addEventListener('keydown', onDragKeydown, true);
   }
 
   function onDragMove(event) {
     if (!dragState || event.pointerId !== dragState.pointerId) {
       return;
     }
-    var dx = event.clientX - dragState.startClientX;
-    var dy = event.clientY - dragState.startClientY;
-    if (!dragState.moved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
+    var drag = dragState;
+    var dx = event.clientX - drag.startClientX;
+    var dy = event.clientY - drag.startClientY;
+    if (!drag.moved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
       return;
     }
-    dragState.moved = true;
-    dragState.element.classList.add('dragging');
+    drag.moved = true;
+    drag.element.classList.add('dragging');
     var canvas = getCanvas();
-    var maxX = Math.max(0, canvas.clientWidth - dragState.element.offsetWidth);
-    var maxY = Math.max(0, canvas.clientHeight - dragState.element.offsetHeight);
-    dragState.currentX = Utils.clamp(dragState.startX + dx, 0, maxX);
-    dragState.currentY = Utils.clamp(dragState.startY + dy, 0, maxY);
+    if (!canvas) {
+      return;
+    }
+    var maxX = Math.max(0, canvas.clientWidth - drag.element.offsetWidth);
+    var maxY = Math.max(0, canvas.clientHeight - drag.element.offsetHeight);
+    drag.currentX = Utils.clamp(drag.startX + dx, 0, maxX);
+    drag.currentY = Utils.clamp(drag.startY + dy, 0, maxY);
+    var canvasRect = canvas.getBoundingClientRect();
+    drag.validDrop = event.clientX >= canvasRect.left && event.clientX <= canvasRect.right &&
+      event.clientY >= canvasRect.top && event.clientY <= canvasRect.bottom;
+    var targetIndex = targetIndexForDrag(drag, event.clientY);
+    if (targetIndex !== drag.targetIndex) {
+      drag.targetIndex = targetIndex;
+      var remaining = drag.order.filter(function (block) {
+        return block.id !== drag.blockId;
+      });
+      remaining.splice(targetIndex, 0, findBlock(drag.blockId));
+      drag.previewOrder = remaining;
+      previewDragLayout(drag);
+      applyDragTransform(drag);
+    } else if (!drag.layout) {
+      previewDragLayout(drag);
+      applyDragTransform(drag);
+    }
     event.preventDefault();
-    if (dragState.frame === null) {
-      dragState.frame = global.requestAnimationFrame(function () {
+    if (drag.frame === null) {
+      drag.frame = global.requestAnimationFrame(function () {
         if (!dragState) {
           return;
         }
         dragState.frame = null;
-        dragState.element.style.transform = 'translate(' +
-          (dragState.currentX - dragState.startX) + 'px, ' +
-          (dragState.currentY - dragState.startY) + 'px)';
+        applyDragTransform(dragState);
       });
     }
+  }
+
+  function onDragKeydown(event) {
+    if (!dragState || event.key !== 'Escape') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    finishDrag(false);
   }
 
   function finishDrag(commit) {
@@ -657,6 +841,7 @@
     global.removeEventListener('pointermove', onDragMove, true);
     global.removeEventListener('pointerup', onDragEnd, true);
     global.removeEventListener('pointercancel', onDragCancel, true);
+    global.removeEventListener('keydown', onDragKeydown, true);
     if (drag.frame !== null) {
       global.cancelAnimationFrame(drag.frame);
     }
@@ -667,24 +852,24 @@
     }
     drag.element.classList.remove('dragging');
     drag.element.style.transform = '';
-    if (!commit || !drag.moved) {
-      if (!drag.moved) {
-        selectBlock(drag.blockId, { focus: false });
-      }
+    if (!drag.moved) {
+      selectBlock(drag.blockId, { focus: false });
       return;
     }
-    var block = findBlock(drag.blockId);
-    if (!block) {
-      return;
-    }
-    var changed = block.x !== drag.currentX || block.y !== drag.currentY;
+    var changed = commit && drag.validDrop && drag.targetIndex !== drag.startIndex;
     if (changed) {
-      block.x = drag.currentX;
-      block.y = drag.currentY;
-      markDirty();
+      var document = currentDocument();
+      if (document && Model.moveBlockToIndex(document, drag.blockId, drag.targetIndex)) {
+        markDirty();
+        render();
+        selectBlock(drag.blockId, { focus: true });
+        announceSequencePosition(drag.blockId);
+        return;
+      }
+    }
+    if (drag.targetIndex !== drag.startIndex) {
       render();
       selectBlock(drag.blockId, { focus: true });
-      announcePosition(block);
     }
   }
 
@@ -702,40 +887,43 @@
     finishDrag(false);
   }
 
-  function announcePosition(block) {
+  function announceSequencePosition(blockId) {
     var document = currentDocument();
     if (!document) {
       return;
     }
-    var row = Math.round(block.y / Markdown.ROW_HEIGHT) + 1;
-    var ordered = Markdown.blocksInReadingOrder(document.blocks);
-    var rowBlocks = ordered.filter(function (entry) {
-      return Math.round(entry.y / Markdown.ROW_HEIGHT) === Math.round(block.y / Markdown.ROW_HEIGHT);
-    });
-    var column = rowBlocks.indexOf(block) + 1;
-    announce('區塊已移動到第 ' + row + ' 列，第 ' + column + ' 欄。');
+    var ordered = Model.normalizeSequence(document);
+    var index = -1;
+    for (var i = 0; i < ordered.length; i += 1) {
+      if (ordered[i].id === blockId) {
+        index = i;
+        break;
+      }
+    }
+    if (index === -1) {
+      return;
+    }
+    announce('區塊已移到第 ' + (index + 1) + ' 個位置，共 ' + ordered.length + ' 個區塊。');
   }
 
-  function moveBlockByKeyboard(block, dx, dy) {
-    var element = blockElement(block.id);
-    var canvas = getCanvas();
-    if (!element || !canvas) {
+  function moveBlockByKeyboard(block, delta) {
+    var document = currentDocument();
+    if (!document) {
       return false;
     }
-    var maxX = Math.max(0, canvas.clientWidth - element.offsetWidth);
-    var maxY = Math.max(0, canvas.clientHeight - element.offsetHeight);
-    var nextX = Utils.clamp(block.x + dx, 0, maxX);
-    var nextY = Utils.clamp(block.y + dy, 0, maxY);
-    if (nextX === block.x && nextY === block.y) {
+    var ordered = Model.normalizeSequence(document);
+    var index = ordered.indexOf(block);
+    var target = index + delta;
+    if (index === -1 || target < 0 || target >= ordered.length) {
       return false;
     }
-    block.x = nextX;
-    block.y = nextY;
-    block.z = Model.nextZ(currentDocument());
+    if (!Model.moveBlockToIndex(document, block.id, target)) {
+      return false;
+    }
     markDirty();
     render();
     selectBlock(block.id, { focus: true });
-    announcePosition(block);
+    announceSequencePosition(block.id);
     return true;
   }
 
@@ -891,70 +1079,13 @@
     if (!document) {
       return null;
     }
-    var ordered = Markdown.blocksInReadingOrder(document.blocks);
+    var ordered = Model.normalizeSequence(document);
     return ordered.length ? ordered[ordered.length - 1] : null;
   }
 
   function elementHeightFor(block) {
     var element = block ? blockElement(block.id) : null;
     return element ? element.offsetHeight : DEFAULT_BLOCK_HEIGHT;
-  }
-
-  function elementWidthFor(block) {
-    var element = block ? blockElement(block.id) : null;
-    return element ? element.offsetWidth : 160;
-  }
-
-  function blocksOverlap(left, right) {
-    return left.x < right.x + right.width + GAP &&
-      left.x + left.width + GAP > right.x &&
-      left.y < right.y + right.height + GAP &&
-      left.y + left.height + GAP > right.y;
-  }
-
-  function pushOverlappingBlocksBelow(document, firstBlock) {
-    if (!document || !firstBlock) {
-      return false;
-    }
-    var firstElement = blockElement(firstBlock.id);
-    if (!firstElement) {
-      return false;
-    }
-    var ordered = Markdown.blocksInReadingOrder(document.blocks);
-    var index = ordered.indexOf(firstBlock);
-    if (index < 0) {
-      return false;
-    }
-    var placed = [{
-      x: firstBlock.x,
-      y: firstBlock.y,
-      width: firstElement.offsetWidth,
-      height: firstElement.offsetHeight
-    }];
-    var changed = false;
-    for (var i = index + 1; i < ordered.length; i += 1) {
-      var block = ordered[i];
-      var rect = {
-        x: block.x,
-        y: block.y,
-        width: elementWidthFor(block),
-        height: elementHeightFor(block)
-      };
-      var targetY = null;
-      placed.forEach(function (entry) {
-        if (blocksOverlap(rect, entry)) {
-          var candidate = entry.y + entry.height + GAP;
-          targetY = targetY === null ? candidate : Math.max(targetY, candidate);
-        }
-      });
-      if (targetY !== null && targetY > block.y) {
-        block.y = targetY;
-        rect.y = targetY;
-        placed.push(rect);
-        changed = true;
-      }
-    }
-    return changed;
   }
 
   function insertionPoint(anchor) {
@@ -967,34 +1098,13 @@
     };
   }
 
-  function shiftLowerBlocks(document, anchorId, insertY) {
-    var row = Math.round(insertY / Markdown.ROW_HEIGHT);
-    var ordered = Markdown.blocksInReadingOrder(document.blocks);
-    var anchorIndex = ordered.length - 1;
-    if (anchorId) {
-      for (var i = 0; i < ordered.length; i += 1) {
-        if (ordered[i].id === anchorId) {
-          anchorIndex = i;
-          break;
-        }
-      }
-    }
-    for (var k = anchorIndex + 1; k < ordered.length; k += 1) {
-      var block = ordered[k];
-      var blockRow = Math.round(block.y / Markdown.ROW_HEIGHT);
-      if (blockRow <= row) {
-        block.y += (row + 1 - blockRow) * Markdown.ROW_HEIGHT;
-      }
-    }
-  }
-
   function insertBlockWithShift(block, anchorId) {
     var document = currentDocument();
     if (!document) {
       return;
     }
-    shiftLowerBlocks(document, anchorId, block.y);
-    document.blocks.push(block);
+    Model.insertBlocksAfter(document, [block], anchorId);
+    render();
   }
 
   function openComposer(anchorId) {
@@ -1072,21 +1182,17 @@
       id: Utils.randomUUID(),
       text: text,
       marker: marker,
-      x: composer.x,
-      y: composer.y,
+      x: Files.COLUMN_X,
+      y: Files.COLUMN_START_Y,
       z: Model.nextZ(document),
-      seq: Model.nextSeq(document),
+      seq: 0,
       blankLinesAfter: 0
     });
     var anchorId = composer.anchorBlockId || null;
-    shiftLowerBlocks(document, anchorId, block.y);
-    document.blocks.push(block);
+    Model.insertBlocksAfter(document, [block], anchorId);
     state.composer = null;
     markDirty();
     render();
-    if (pushOverlappingBlocksBelow(document, block)) {
-      render();
-    }
     selectBlock(block.id);
     openComposer(block.id);
   }
@@ -1223,7 +1329,6 @@
 
     return validateAndCreateAssets(files, existingNames).then(function (newAssets) {
       var newBlocks = [];
-      var usedAnchor = anchor;
 
       if (!editingBlockId && text) {
         text.split(/\r?\n/).forEach(function (line) {
@@ -1235,8 +1340,8 @@
             id: Utils.randomUUID(),
             text: detected.marker === 'none' ? line : detected.text,
             marker: detected.marker,
-            x: usedAnchor ? usedAnchor.x : Files.COLUMN_X,
-            y: 0,
+            x: Files.COLUMN_X,
+            y: Files.COLUMN_START_Y,
             z: 0,
             seq: 0,
             blankLinesAfter: 0
@@ -1249,8 +1354,8 @@
           id: Utils.randomUUID(),
           assetId: asset.id,
           alt: asset.originalName || asset.fileName,
-          x: usedAnchor ? usedAnchor.x : Files.COLUMN_X,
-          y: 0,
+          x: Files.COLUMN_X,
+          y: Files.COLUMN_START_Y,
           z: 0,
           seq: 0,
           blankLinesAfter: 0
@@ -1262,25 +1367,12 @@
       }
 
       newAssets.forEach(function (asset) { state.assets.push(asset); });
-      var nextY = null;
-      newBlocks.forEach(function (block) {
-        block.seq = Model.nextSeq(document);
-        block.z = Model.nextZ(document);
-        if (nextY === null) {
-          var point = usedAnchor
-            ? insertionPoint(usedAnchor)
-            : { x: Files.COLUMN_X, y: Files.COLUMN_START_Y };
-          block.x = point.x;
-          block.y = point.y;
-        } else {
-          block.x = usedAnchor ? usedAnchor.x : Files.COLUMN_X;
-          block.y = nextY;
-        }
-        shiftLowerBlocks(document, usedAnchor ? usedAnchor.id : null, block.y);
-        document.blocks.push(block);
-        usedAnchor = block;
-        nextY = block.y + DEFAULT_BLOCK_HEIGHT + GAP;
+      var nextZ = Model.nextZ(document);
+      newBlocks.forEach(function (block, index) {
+        block.seq = index + 1;
+        block.z = nextZ + index;
       });
+      Model.insertBlocksAfter(document, newBlocks, anchor ? anchor.id : null);
 
       markDirty();
       render();
@@ -1306,9 +1398,6 @@
         parts.push(imageCount + ' 張圖片');
       }
       return waitForBlockImages(newBlocks).then(function () {
-        if (pushOverlappingBlocksBelow(document, newBlocks[0])) {
-          render();
-        }
         announce('已插入' + parts.join('與') + '。');
         return true;
       });
@@ -1445,10 +1534,8 @@
     if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight' ||
         event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
-      var step = event.shiftKey ? 1 : Markdown.ROW_HEIGHT;
-      var dx = event.key === 'ArrowLeft' ? -step : (event.key === 'ArrowRight' ? step : 0);
-      var dy = event.key === 'ArrowUp' ? -step : (event.key === 'ArrowDown' ? step : 0);
-      moveBlockByKeyboard(block, dx, dy);
+      var delta = (event.key === 'ArrowLeft' || event.key === 'ArrowUp') ? -1 : 1;
+      moveBlockByKeyboard(block, delta);
       return;
     }
     if (event.key === 'Enter' || event.key === 'F2') {
@@ -1543,7 +1630,17 @@
         }
       }
     });
-    global.addEventListener('resize', updateCanvasSize);
+    global.addEventListener('resize', function () {
+      if (dragState) {
+        finishDrag(false);
+      }
+      reflowSequenceLayout();
+    });
+    global.addEventListener('blur', function () {
+      if (dragState) {
+        finishDrag(false);
+      }
+    });
     global.document.addEventListener('pointerdown', function (event) {
       var state = getState();
       if (!state || !state.editingBlockId) {
@@ -1577,9 +1674,9 @@
     selectBlock: selectBlock,
     openComposer: openComposer,
     insertBlockWithShift: insertBlockWithShift,
-    shiftLowerBlocks: shiftLowerBlocks,
     insertImageFiles: insertImageFiles,
     insertPastedContent: insertPastedContent,
+    reflowLayout: reflowSequenceLayout,
     getEditingBlockId: function () {
       var state = getState();
       return state ? state.editingBlockId : null;

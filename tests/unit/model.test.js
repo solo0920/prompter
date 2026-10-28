@@ -241,6 +241,67 @@ test('empty documents are valid and Save As clones ids', function () {
   assert.equal(copy.blocks[0].text, 'A');
 });
 
+test('sequence helpers migrate, insert, and move blocks in reading order', function () {
+  const legacy = Model.createPromptDocument({
+    blocks: [
+      Model.createTextBlock({ id: 'legacy-c', text: 'C', x: 0, y: 48, seq: 3 }),
+      Model.createTextBlock({ id: 'legacy-a', text: 'A', x: 0, y: 0, seq: 1 }),
+      Model.createTextBlock({ id: 'legacy-b', text: 'B', x: 0, y: 24, seq: 2 })
+    ]
+  });
+  assert.equal(legacy.layoutVersion, undefined);
+  assert.deepEqual(
+    Model.sequenceBlocks(legacy).map(function (block) { return block.id; }),
+    ['legacy-a', 'legacy-b', 'legacy-c']
+  );
+  Model.normalizeSequence(legacy);
+  assert.equal(legacy.layoutVersion, 2);
+  assert.deepEqual(
+    legacy.blocks.map(function (block) { return block.id; }),
+    ['legacy-a', 'legacy-b', 'legacy-c']
+  );
+  assert.deepEqual(
+    legacy.blocks.map(function (block) { return block.seq; }),
+    [1, 2, 3]
+  );
+
+  const sequence = Model.createPromptDocument({
+    blocks: [
+      Model.createTextBlock({ id: 'a', text: 'A', seq: 1 }),
+      Model.createTextBlock({ id: 'b', text: 'B', seq: 2 }),
+      Model.createTextBlock({ id: 'c', text: 'C', seq: 3 })
+    ]
+  });
+  sequence.layoutVersion = 2;
+  Model.insertBlocksAfter(sequence, [
+    Model.createTextBlock({ id: 'x', text: 'X' })
+  ], 'a');
+  assert.deepEqual(
+    sequence.blocks.map(function (block) { return block.id; }),
+    ['a', 'x', 'b', 'c']
+  );
+  assert.deepEqual(
+    sequence.blocks.map(function (block) { return block.seq; }),
+    [1, 2, 3, 4]
+  );
+
+  assert.equal(Model.moveBlockToIndex(sequence, 'a', 2), true);
+  assert.deepEqual(
+    sequence.blocks.map(function (block) { return block.id; }),
+    ['x', 'b', 'a', 'c']
+  );
+  assert.equal(Model.moveBlockToIndex(sequence, 'a', 2), false);
+  assert.equal(Model.moveBlockToIndex(sequence, 'c', 0), true);
+  assert.deepEqual(
+    sequence.blocks.map(function (block) { return block.id; }),
+    ['c', 'x', 'b', 'a']
+  );
+  assert.deepEqual(
+    sequence.blocks.map(function (block) { return block.seq; }),
+    [1, 2, 3, 4]
+  );
+});
+
 test('nextSeq and nextZ use the highest existing values', function () {
   const document = Model.createPromptDocument({
     blocks: [

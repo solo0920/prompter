@@ -39,7 +39,7 @@
 
 ## Post-Implementation Verification (2026-10-28)
 
-- Unit and contract tests: **91 passing, 0 failing** (`node --test tests/unit/*.test.js`).
+- Unit and contract tests: **92 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.

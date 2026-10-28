@@ -48,6 +48,7 @@ A saved prompt. A new, unsaved document exists only in session state until Save 
 | `leadingBlankLines` | integer | yes | `>= 0`; blank lines before the first block in source order. |
 | `trailingBlankLines` | integer | yes | `>= 0`; blank lines after the last block. |
 | `trailingNewline` | boolean | yes | `true` if the source ended with a newline; new documents default to `true`. |
+| `layoutVersion` | integer | no | `2` once the document uses the contiguous sequence model. Missing values migrate from the previous reading order without changing content or dirty state. |
 | `createdAt` | ISO string | yes | Creation time. |
 | `updatedAt` | ISO string | yes | Last successful save time; directory sort key. Session edits update the in-memory copy until saved. |
 
@@ -75,14 +76,14 @@ Validation:
 |-------|------|----------|-------|
 | `id` | string | yes | UUID, unique within the document. |
 | `type` | `"text"` \| `"image"` | yes | Discriminator. |
-| `x` | number | yes | Finite; `>= 0`; clamped to the canvas at render/drag time. |
-| `y` | number | yes | Finite; `>= 0`; clamped to the canvas at render/drag time. |
-| `z` | integer | yes | Stacking order for overlap; higher is in front. Not used for reading order. |
-| `seq` | integer | yes | Creation/source sequence; stable tie-break for equal rows and x positions. |
+| `x` | number | yes | Derived layout column. Committed blocks use the shared sequence column (`32`). |
+| `y` | number | yes | Derived layout top. Assigned from sequence order and measured block heights. |
+| `z` | integer | yes | Stacking order while dragging; committed blocks never overlap. Not used for reading order. |
+| `seq` | integer | yes | 1-based canonical sequence index; reassigned whenever blocks are inserted, removed, or reordered. |
 | `blankLinesAfter` | integer | yes | `>= 0`; blank lines between this block and the next block in source order. |
 
-The base fields are stored on both text and image blocks. The transient drag delta is not
-stored; only the committed `x`/`y` are persisted.
+The base fields are stored on both text and image blocks. Layout coordinates are derived from
+the sequence and persisted; the sequence is authoritative.
 
 ### TextBlock
 
@@ -278,15 +279,15 @@ persisted.
 
 ## Reading Order
 
-Reading order is derived from geometry and is never stored as a separate manual order.
+Reading order is the canonical block sequence, not a value derived from geometry. The editor
+lays blocks out top to bottom in that sequence with no empty positions, so the visible order,
+DOM order, Preview, Save, and Copy all agree.
 
 ```text
-row(block) = round(block.y / 24)
-sort by:
-  1. row ascending
-  2. x ascending
-  3. seq ascending
-  4. id ascending (final deterministic tie-break)
+if layoutVersion === 2:
+  sort by seq ascending, then id
+else (legacy migration):
+  previous reading order: round(y / 24), then x, then seq, then id
 ```
 
 The same ordered array is used for:
@@ -298,10 +299,13 @@ The same ordered array is used for:
 - Image-before/after decisions in mixed paste
 - Search content generation (order does not affect matching, only generation)
 
-The 24 px row height matches the optional alignment grid. Blocks whose `y` values fall in the
-same 24 px band are ordered by `x`, even when their `y` values differ by less than 24 px; this
-is intentional and normative. Dragging changes `x`/`y` and therefore can change reading order.
-`z` only affects overlap and never reading order.
+Dragging or keyboard movement changes `seq`, then reflows `x`/`y`; it never changes block
+content. The optional 24 px grid affects appearance only. `z` only affects stacking during a
+drag and never reading order.
+
+Legacy documents without `layoutVersion` migrate on their first render: the previous row-band
+reading order becomes consecutive sequence positions, content and block identity are preserved,
+and migration alone does not mark the document dirty.
 
 ## Blank-Line and Newline Semantics
 
