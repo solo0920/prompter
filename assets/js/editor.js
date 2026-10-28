@@ -109,7 +109,7 @@
   }
 
   function markerToken(marker) {
-    return marker === 'none' ? '無' : marker;
+    return marker === 'none' ? '×' : marker;
   }
 
   function markerLabel(marker) {
@@ -1576,11 +1576,8 @@
     var menuHeight = menu.offsetHeight;
     var left = rect.left - menuWidth - 6;
     left = Math.max(8, Math.min(left, global.innerWidth - menuWidth - 8));
-    var top = rect.top;
-    if (top + menuHeight > global.innerHeight - 8) {
-      top = global.innerHeight - menuHeight - 8;
-    }
-    top = Math.max(8, top);
+    var top = rect.top + rect.height / 2 - menuHeight / 2;
+    top = Math.max(4, Math.min(top, global.innerHeight - menuHeight - 4));
     menu.style.left = Math.round(left) + 'px';
     menu.style.top = Math.round(top) + 'px';
     markerMenu = {

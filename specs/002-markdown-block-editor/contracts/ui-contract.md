@@ -104,11 +104,11 @@ The composer is the only input box that creates a new block.
   - Inserted via "+": dismiss the composer; no block.
   - Initial blank-document composer: keep it (a blank document always has an input).
 - Hovering the Marker control opens a symbol-only flyout to its left; clicking or pressing
-  Enter/Space also opens it for keyboard and touch input. The flyout lists `無`, `#`, `##`,
-  `###`, `-`, `1.`, `>`, and `.` with descriptive accessible names but no visible title text.
-  Arrow Up/Down navigates, Home/End jump to the first/last option, Escape closes, and selecting
-  an option applies it, returns focus to the composer text input, and preserves the caret or
-  selection.
+  Enter/Space also opens it for keyboard and touch input. The flyout lists `×` (no Marker),
+  `#`, `##`, `###`, `-`, `1.`, `>`, and `.` with descriptive accessible names but no visible
+  title text. Arrow Up/Down navigates, Home/End jump to the first/last option, Escape closes,
+  and selecting an option applies it, returns focus to the composer text input, and preserves
+  the caret or selection.
 - Typing a recognized marker token followed by exactly one space at the start shows a live
   detection label (for example `偵測到： ##`). On Enter the marker is stored once and removed
   from the text. If the user selects a different marker from the menu after typing, the menu

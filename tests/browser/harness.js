@@ -758,7 +758,7 @@
         menu.querySelectorAll('.marker-menu-item'),
         function (item) { return item.textContent.trim(); }
       );
-      equal(symbols.join(','), '無,#,##,###,-,1.,>,.',
+      equal(symbols.join(','), '×,#,##,###,-,1.,>,.',
         'The flyout must show Marker symbols only.');
       assert(menu.textContent.indexOf('標題') === -1,
         'The flyout must not show descriptive Marker labels.');
@@ -766,6 +766,11 @@
       var menuRect = menu.getBoundingClientRect();
       assert(menuRect.right <= markerRect.left + 0.5,
         'The flyout must open to the left of the Marker.');
+      var secondLevel = menu.querySelector('[data-marker="##"]').getBoundingClientRect();
+      var thirdLevel = menu.querySelector('[data-marker="###"]').getBoundingClientRect();
+      var levelBoundary = (secondLevel.bottom + thirdLevel.top) / 2;
+      assert(Math.abs(levelBoundary - (markerRect.top + markerRect.height / 2)) <= 10,
+        'The input should align between the ## and ### options.');
       equal(win.document.activeElement, composerInput(win),
         'Hovering the Marker must not move focus out of the composer.');
 
