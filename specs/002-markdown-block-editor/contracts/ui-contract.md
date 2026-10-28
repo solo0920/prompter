@@ -109,10 +109,14 @@ The composer is the only input box that creates a new block.
   across the composer shifts the composer one position like any other intervening item.
 - When the composer handle is focused, Up/Down moves the composer one slot earlier/later and
   keeps focus on the handle; the composer stays open and the block order is unchanged.
+- The composer is a multi-line text area. It grows wider as text exceeds its current width,
+  up to the composer maximum, and grows taller when the text wraps so the full text remains
+  visible.
 - Enter:
   - With non-empty text: create a text block at the composer slot, mark dirty, keep the next
     composer focused, and do not leave the committed block selected or outlined.
   - With empty/whitespace-only text: no block, no error.
+- Shift+Enter inserts a line break without committing the composer.
 - Escape:
   - Inserted via "+": dismiss the composer; no block.
   - Initial blank-document composer: keep it (a blank document always has an input).
@@ -143,8 +147,8 @@ Each text block is a floating box showing:
   the Marker. Markers are always visible without hover; when no Marker is set, the prefix is a
   blank clickable area with no `×` or text. The flyout opens when the pointer enters anywhere
   from the block's left border through this prefix, on click, or on keyboard activation.
-- The text, wrapped visually but representing one Markdown line. The text area is a Tab stop;
-  Enter/F2 while it is focused starts block editing.
+- The text, wrapped visually and representing one or more Markdown lines. The text area is a
+  Tab stop; Enter/F2 while it is focused starts block editing.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
   right half of the block is hovered or keyboard-focused, and always visible on touch devices.
@@ -181,9 +185,11 @@ Each image block shows:
 
 - Double-click a text block (double-tap on touch), or focus it and press Enter/F2, to enter
   edit mode.
-- Edit mode shows a text input containing the block text and the Marker button.
-- Enter commits and exits edit mode; Escape cancels and restores the original text and marker;
-  clicking outside commits.
+- Edit mode shows a multi-line text area containing the block text and the Marker button. The
+  text area grows wider with its content up to the block maximum and grows taller as text
+  wraps.
+- Enter commits and exits edit mode; Shift+Enter inserts a line break; Escape cancels and
+  restores the original text and marker; clicking outside commits.
 - After committing a text block, the next composer inherits that block's Marker.
 - Marker detection applies on commit: a recognized prefix typed at the start is extracted once.
   If the block already has a marker, a second typed marker is treated as literal text.

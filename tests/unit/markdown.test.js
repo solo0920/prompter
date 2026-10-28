@@ -264,6 +264,21 @@ test('parses image lines and leaves malformed image syntax as text', function ()
   assert.equal(parsed.lines[1].kind, 'text');
 });
 
+test('preserves newlines in multi-line block text and detects a leading marker', function () {
+  const plain = textBlock({ marker: 'none', text: '第一行\n第二行' });
+  assert.equal(Markdown.serializeBlockLine(plain), '第一行\n第二行');
+
+  const document = Model.createPromptDocument({ blocks: [plain] });
+  assert.equal(Markdown.serializeDocument(document), '第一行\n第二行\n');
+
+  const marked = textBlock({ marker: '#', text: '標題\n內容' });
+  assert.equal(Markdown.serializeBlockLine(marked), '# 標題\n內容');
+
+  const detected = Markdown.detectMarker('# 標題\n內容');
+  assert.equal(detected.marker, '#');
+  assert.equal(detected.text, '標題\n內容');
+});
+
 test('serializes a blank-only document exactly', function () {
   const source = '\n\n';
   const parsed = Markdown.parseMarkdown(source);

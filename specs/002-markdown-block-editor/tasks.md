@@ -245,6 +245,7 @@ across all stories.
 - [x] T079 Re-run the Constitution Check against `.specify/memory/constitution.md`: no server/build/install/network, classic scripts only, no ES modules/local `fetch()`, local storage only, deterministic copy-ready output, and no runtime dependencies.
 - [x] T080 Complete the manual browser matrix in `quickstart.md` with Chrome as the required release gate and Firefox as the supplementary compatibility check, recording exact versions and pass/fail notes; Safari is outside the test scope.
 - [x] T081 Add offline KaTeX 0.19.1 math rendering to Preview for `$...$`, `$$...$$`, `\(...\)`, and `\[...\]`, including local fonts, multi-line display math, fenced-code exclusion, and automated coverage.
+- [x] T082 Make composer and block-edit inputs auto-growing multi-line text areas: Shift+Enter inserts a line break, Enter commits, width grows up to the maximum before wrapping, and height grows to keep all lines visible.
 
 ---
 

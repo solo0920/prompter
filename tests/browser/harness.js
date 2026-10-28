@@ -1099,6 +1099,70 @@
     });
   });
 
+  test('US1 multi-line inputs grow and Shift+Enter inserts a line break', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var composer = composerInput(win);
+      equal(composer.tagName, 'TEXTAREA');
+      var initialWidth = composer.getBoundingClientRect().width;
+      var initialHeight = composer.getBoundingClientRect().height;
+      var composerText = '這是一段很長的文字'.repeat(8) + '\n第二行\n第三行';
+      setValue(win, composer, composerText);
+      var grownWidth = composer.getBoundingClientRect().width;
+      var grownHeight = composer.getBoundingClientRect().height;
+      assert(grownWidth > initialWidth,
+        'The composer must grow wider as the text gets longer.');
+      assert(grownHeight > initialHeight,
+        'The composer must grow taller when its text wraps onto multiple lines.');
+      var shiftEnter = new win.KeyboardEvent('keydown', {
+        key: 'Enter', shiftKey: true, bubbles: true, cancelable: true
+      });
+      assert(composer.dispatchEvent(shiftEnter),
+        'Shift+Enter must allow the browser default line break.');
+      equal(state.document.blocks.length, 0,
+        'Shift+Enter must insert a line break instead of committing the block.');
+      equal(composerInput(win).value, composerText);
+      press(win, composerInput(win), 'Enter');
+      equal(state.document.blocks.length, 1);
+      equal(state.document.blocks[0].text, composerText);
+      var block = blockById(win, state.document.blocks[0].id);
+      assert(block, 'The multi-line block must render.');
+      assert(block.getBoundingClientRect().height > 40,
+        'The committed block must grow to show every line.');
+
+      block.querySelector('.block-content').dispatchEvent(
+        new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
+      var input = blockById(win, state.document.blocks[0].id)
+        .querySelector('.block-edit-input');
+      equal(input.tagName, 'TEXTAREA');
+      setValue(win, input, '短');
+      var shortBlockWidth = blockById(win, state.document.blocks[0].id)
+        .getBoundingClientRect().width;
+      var shortHeight = input.getBoundingClientRect().height;
+      var longLine = '長'.repeat(120);
+      setValue(win, input, longLine);
+      assert(input.getBoundingClientRect().height > shortHeight,
+        'A long unwrapped line must grow taller after it wraps.');
+      assert(blockById(win, state.document.blocks[0].id).getBoundingClientRect().width >
+        shortBlockWidth, 'The block editor must grow wider as the text gets longer.');
+      var longEdit = longLine + '\n乙\n丙\n丁';
+      setValue(win, input, longEdit);
+      assert(input.getBoundingClientRect().height > shortHeight,
+        'The block editor must grow with its multi-line content.');
+      var editShiftEnter = new win.KeyboardEvent('keydown', {
+        key: 'Enter', shiftKey: true, bubbles: true, cancelable: true
+      });
+      assert(input.dispatchEvent(editShiftEnter),
+        'Shift+Enter must allow the default line break while editing.');
+      equal(state.editingBlockId, state.document.blocks[0].id,
+        'Shift+Enter must keep the block editor open.');
+      equal(input.value, longEdit);
+      press(win, input, 'Enter');
+      equal(state.document.blocks[0].text, longEdit);
+      equal(win.document.querySelector('.block-edit-input'), null);
+    });
+  });
+
   test('US1 empty editing removes only the edited block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

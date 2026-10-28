@@ -148,20 +148,23 @@ Layers:
 ### Authoring model
 
 - A document is an ordered set of absolutely positioned text and image blocks. Text blocks
-  hold one line, a Marker, `x`, `y`, stacking order, creation sequence, and blank-line count
-  after the block; image blocks hold an asset reference, alternative text, and the same layout
-  fields.
+  hold one or more lines, a Marker, `x`, `y`, stacking order, creation sequence, and blank-line
+  count after the block; image blocks hold an asset reference, alternative text, and the same
+  layout fields.
 - A blank document shows one composer at the top-left with the Marker control on its left.
-  Enter commits a non-empty composer into a block and removes the composer. The new block's
-  "+" control creates the next composer directly below it. Escape dismisses a composer opened
-  with "+" and leaves the initial blank-document composer in place.
+  Enter commits a non-empty composer into a block and removes the composer; Shift+Enter
+  inserts a line break. The composer grows wider with its content up to a maximum and grows
+  taller as text wraps. The new block's "+" control creates the next composer directly below
+  it. Escape dismisses a composer opened with "+" and leaves the initial blank-document
+  composer in place.
 - The Marker menu offers None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`. Typing a recognised
   Marker followed by one space shows a live detection label; on commit the prefix is stored
   once as the Marker and removed from the text. A typed prefix wins over a menu selection.
-- Double-click or Enter/F2 on a selected text block enters edit mode. Enter commits, Escape
-  cancels, and clicking outside commits. Clearing the text removes the block and transfers its
-  blank-line separation to the preceding block or document leading blanks. If the last block is
-  removed, the blank-document composer reappears.
+- Double-click or Enter/F2 on a selected text block enters edit mode. Enter commits,
+  Shift+Enter inserts a line break, Escape cancels, and clicking outside commits. The editor
+  grows with its content like the composer. Clearing the text removes the block and transfers
+  its blank-line separation to the preceding block or document leading blanks. If the last
+  block is removed, the blank-document composer reappears.
 - Every block exposes a small lower-left "+" control. Image blocks also expose their image,
   a file-name-based alternative text, a remove control, and the same "+" and drag behavior.
 - Dragging uses Pointer Events and `requestAnimationFrame`, clamps the block inside the canvas,
@@ -195,8 +198,9 @@ silently deletes a line.
 ### Canvas and interaction
 
 The center area is a vertically scrollable workspace with an absolutely positioned canvas.
-Text block width is content-driven with a maximum, so long lines wrap visually while remaining
-one Markdown line. Image blocks scale to fit the available width while preserving aspect ratio
+Text block width is content-driven with a maximum, so long lines grow the input and wrap
+visually; explicit Shift+Enter line breaks within a block serialize as consecutive Markdown
+lines. Image blocks scale to fit the available width while preserving aspect ratio
 and original bytes. The canvas height is the viewport height or the lowest block bottom plus a
 working margin.
 

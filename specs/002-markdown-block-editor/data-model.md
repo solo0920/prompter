@@ -90,14 +90,16 @@ the sequence and persisted; the sequence is authoritative.
 | Field | Type | Required | Rules |
 |-------|------|----------|-------|
 | `type` | `"text"` | yes | Discriminator. |
-| `text` | string | yes | Committed text is non-empty after whitespace trimming; may contain leading/trailing spaces and Traditional Chinese/English/emoji; one logical line. |
+| `text` | string | yes | Committed text is non-empty after whitespace trimming; may contain leading/trailing spaces, Traditional Chinese/English/emoji, and line breaks. |
 | `marker` | Marker | yes | One of the supported marker values; `"none"` means no prefix. |
 
 Rules:
 
-- A text block holds one Markdown line. Enter commits rather than inserting a newline.
-- The serialized line is `markerPrefix + text`, where `markerPrefix` is empty for `"none"` and
-  otherwise the marker token plus one space.
+- A text block holds one or more Markdown lines. Enter commits; Shift+Enter inserts a line
+  break without committing.
+- The serialized block is `markerPrefix + text`, where `markerPrefix` is empty for `"none"` and
+  otherwise the marker token plus one space. The marker prefix appears once, at the start of
+  the block's first line.
 - A recognized marker prefix typed at the start of a composer or edit is extracted into
   `marker` and removed from `text`; it is never duplicated.
 - If a commit would leave the text empty after trimming, the block is removed instead of
@@ -106,7 +108,8 @@ Rules:
 - Marker-only lines read from an opened file are preserved as text blocks whose text is the
   literal line (for example `"- "`), with marker `"none"`, rather than creating an invalid empty
   block. This preserves round trips without treating the line as an editable marker block.
-- Long text wraps visually but remains one Markdown line and one block.
+- Long text grows the input up to its maximum width and then wraps visually, growing taller
+  while remaining one block.
 
 ### ImageBlock
 

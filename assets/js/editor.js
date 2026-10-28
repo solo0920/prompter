@@ -16,6 +16,7 @@
   var currentDocumentId = null;
   var markerMenu = null;
   var markerCloseTimer = null;
+  var measureCanvas = null;
   var dragState = null;
   var marqueeState = null;
   var ignoreNextCanvasClick = false;
@@ -143,7 +144,7 @@
     if (block.type === 'image') {
       label = '圖片區塊：' + (block.alt || '未命名圖片');
     } else {
-      var preview = String(block.text || '').slice(0, 80);
+      var preview = String(block.text || '').replace(/\s+/g, ' ').trim().slice(0, 80);
       label = '文字區塊，' + (block.marker === 'none' ? '無標記' : '標記 ' + block.marker) +
         '：' + preview;
     }
@@ -204,6 +205,10 @@
       updateCanvasSize();
       return;
     }
+    Array.prototype.forEach.call(
+      canvas.querySelectorAll('.composer-input, .block-edit-input'),
+      autoResizeTextarea
+    );
     var ordered = Model.normalizeSequence(state.document);
     var composerElement = canvas.querySelector('.composer');
     var composer = state.composer ? {
@@ -458,18 +463,25 @@
   function createTextContent(block) {
     var isEditing = getState() && getState().editingBlockId === block.id;
     if (isEditing) {
-      var input = global.document.createElement('input');
-      input.type = 'text';
+      var input = global.document.createElement('textarea');
+      input.rows = 1;
       input.className = 'block-edit-input';
       input.setAttribute('aria-label', '編輯區塊內容');
+      input.setAttribute('aria-keyshortcuts', 'Enter Shift+Enter');
       input.value = editDraft && editDraft.id === block.id ? editDraft.draftText : block.text;
       input.addEventListener('input', function () {
         if (editDraft && editDraft.id === block.id) {
           editDraft.draftText = input.value;
         }
+        if (autoResizeTextarea(input)) {
+          reflowSequenceLayout();
+        }
       });
       input.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
+        if (event.isComposing || event.keyCode === 229) {
+          return;
+        }
+        if (event.key === 'Enter' && !event.shiftKey) {
           event.preventDefault();
           event.stopPropagation();
           commitEditing();
@@ -629,11 +641,12 @@
 
     var body = global.document.createElement('div');
     body.className = 'composer-body';
-    var input = global.document.createElement('input');
-    input.type = 'text';
+    var input = global.document.createElement('textarea');
+    input.rows = 1;
     input.className = 'composer-input';
     input.setAttribute('aria-label', '新增區塊內容');
-    input.placeholder = '輸入內容，按 Enter 建立區塊';
+    input.setAttribute('aria-keyshortcuts', 'Enter Shift+Enter');
+    input.placeholder = '輸入內容';
     input.value = composer.text || '';
     input.addEventListener('input', function () {
       composer.text = input.value;
@@ -642,9 +655,15 @@
       if (input.value !== '') {
         markDirty();
       }
+      if (autoResizeTextarea(input)) {
+        reflowSequenceLayout();
+      }
     });
     input.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter') {
+      if (event.isComposing || event.keyCode === 229) {
+        return;
+      }
+      if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         event.stopPropagation();
         commitComposer();
@@ -686,7 +705,9 @@
       return;
     }
     var detected = Markdown.detectMarker(composer.text || '');
-    if (detected.marker !== 'none' && !composer.markerOverride) {
+    if (String(composer.text || '') === '') {
+      detection.textContent = 'Enter 建立 · Shift+Enter 換行';
+    } else if (detected.marker !== 'none' && !composer.markerOverride) {
       detection.textContent = '偵測到： ' + detected.marker;
     } else {
       detection.textContent = '';
@@ -1816,6 +1837,51 @@
   function elementHeightFor(block) {
     var element = block ? blockElement(block.id) : null;
     return element ? element.offsetHeight : DEFAULT_BLOCK_HEIGHT;
+  }
+
+  function autoResizeTextarea(input) {
+    if (!input || input.tagName !== 'TEXTAREA') {
+      return false;
+    }
+    var previous = input.style.height;
+    var container = input.closest('.composer, .block');
+    if (container && container.offsetWidth > 0 && input.clientWidth > 0) {
+      var style = global.getComputedStyle(input);
+      var font = style.font ||
+        [style.fontStyle, style.fontVariant, style.fontWeight, style.fontSize,
+          style.fontFamily].join(' ');
+      if (!measureCanvas && global.document && global.document.createElement) {
+        measureCanvas = global.document.createElement('canvas');
+      }
+      var context = measureCanvas && measureCanvas.getContext
+        ? measureCanvas.getContext('2d')
+        : null;
+      var textWidth = 0;
+      if (context) {
+        context.font = font;
+        String(input.value || '').split('\n').forEach(function (line) {
+          textWidth = Math.max(textWidth, context.measureText(line || ' ').width);
+        });
+      }
+      var chromeWidth = container.offsetWidth - input.clientWidth;
+      var hint = container.querySelector('.composer-detection');
+      var hintWidth = 0;
+      if (context && hint && hint.textContent) {
+        var hintStyle = global.getComputedStyle(hint);
+        context.font = hintStyle.font ||
+          [hintStyle.fontStyle, hintStyle.fontVariant, hintStyle.fontWeight,
+            hintStyle.fontSize, hintStyle.fontFamily].join(' ');
+        hintWidth = context.measureText(hint.textContent).width;
+      }
+      container.style.width =
+        Math.ceil(Math.max(textWidth, hintWidth) + chromeWidth + 2) + 'px';
+    }
+    input.style.height = 'auto';
+    var height = input.scrollHeight;
+    if (height > 0) {
+      input.style.height = height + 'px';
+    }
+    return input.style.height !== previous;
   }
 
   function insertionPoint(anchor) {

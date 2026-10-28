@@ -166,7 +166,9 @@
       return true;
     }
     return block.type === 'text' &&
-      !!Markdown.matchImageLine(String(block.text == null ? '' : block.text));
+      String(block.text == null ? '' : block.text).split('\n').some(function (line) {
+        return !!Markdown.matchImageLine(line);
+      });
   }
 
   function documentHasImages(document) {

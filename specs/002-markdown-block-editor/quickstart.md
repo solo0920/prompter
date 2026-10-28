@@ -42,7 +42,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-29): **99 passing, 0 failing**.
+Current result (2026-10-29): **101 passing, 0 failing**.
 
 ### Browser harness
 
@@ -58,8 +58,8 @@ Current result (2026-10-29): **99 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **90 passing, 0 failing** (required gate). Firefox also
-reports 90 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **91 passing, 0 failing** (required gate). Firefox also
+reports 91 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -69,8 +69,8 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 90/90 | PASS 90/90 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 90/90 | PASS 90/90 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 91/91 | PASS 91/91 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 91/91 | PASS 91/91 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -90,6 +90,8 @@ Additional automated evidence:
 - Math checks cover inline and display delimiters, headings, lists, quotes, tables, multi-line
   display math, common AMS environments, fenced-code exclusion, currency/escaped-dollar
   literals, and untrusted commands or surrounding raw HTML.
+- Input checks cover multi-line composer and block editing, Shift+Enter line breaks, Enter
+  commit, and auto-growing width and height.
 - Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
   rollback, corrupt-payload isolation, and the dismissible storage-mode banner.
 - Security checks statically reject runtime `fetch`, XHR, WebSocket, `eval`, `new Function`,
@@ -152,9 +154,23 @@ Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes 
 selected group moves as one unit; the marquee selects the covered blocks; the left border hover
 opens the Marker flyout without showing a grab cursor.
 
+### 2a. Multi-line input and auto-growing inputs (FR-017, FR-021, FR-022)
+
+1. With a composer focused, type a long line. Confirm the input grows wider up to its maximum
+   and then grows taller as the line wraps, keeping the full text visible.
+2. Press Shift+Enter, type a second line, and confirm the composer stays open with both lines
+   and no block is created.
+3. Press Enter. Confirm one block contains both lines, grows to show them, and Preview renders
+   them as consecutive Markdown lines.
+4. Double-click the block, add another line with Shift+Enter, confirm the editor grows, then
+   press Enter to commit.
+5. Create a multi-line fenced code block or display formula in one composer using Shift+Enter;
+   confirm Preview renders it as one code block or formula rather than separate lines.
+
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
-1. Double-click a text block; change the text; press Enter. Confirm the new text is shown.
+1. Double-click a text block; change the text; press Shift+Enter and type a second line;
+   confirm the editor stays open and grows; press Enter. Confirm both lines are kept.
 2. Double-click again; change the text; press Escape. Confirm the original text returns.
 3. Double-click; clear all text; press Enter. Confirm the block disappears.
 4. Confirm the blank-line separation of surrounding blocks remains sensible.

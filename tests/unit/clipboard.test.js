@@ -63,6 +63,21 @@ test('uses self-contained MathML for math in rich HTML copy', async function () 
   assert.equal(payload.html.includes('<script>'), false);
 });
 
+test('detects image references on later lines of a multi-line text block', async function () {
+  const document = documentWith([
+    Model.createTextBlock({
+      id: 'multi',
+      text: '第一行\n![像素](pixel.png)',
+      y: 0,
+      seq: 1
+    })
+  ]);
+  const payload = await Clipboard.buildClipboardPayload(document, [imageAsset()]);
+  assert.equal(payload.hasImages, true);
+  assert.match(payload.html, /<img src="data:image\/png;base64,AAAA" alt="像素"[^>]*>/);
+  assert.match(payload.markdown, /第一行\n!\[像素\]\(pixel\.png\)/);
+});
+
 test('marks text-only documents so Copy can avoid a rich HTML flavor', async function () {
   const textOnly = documentWith([
     Model.createTextBlock({ id: 'h', marker: '##', text: '標題', y: 0, seq: 1 })

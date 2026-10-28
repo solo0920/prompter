@@ -59,6 +59,7 @@ and confirm the unsaved draft is not restored.
    shown in the editing area with the Marker control on its left.
 2. **Given** an empty input box, **When** the user types text and presses Enter, **Then** a
    new block is created containing that text and the input box becomes the new block.
+   Shift+Enter inserts a line break and keeps the input open.
 3. **Given** the input box, **When** the user opens the Marker control and selects a Marker,
    **Then** the selected Marker is displayed in front of the block text and included in the
    Markdown output.
@@ -69,8 +70,8 @@ and confirm the unsaved draft is not restored.
    input box is inserted directly below that block, and typing text followed by Enter creates
    a new block at that position.
 6. **Given** an existing block, **When** the user double-clicks it, **Then** the block enters
-   edit mode; pressing Enter commits the edit and exits edit mode, and pressing Escape cancels
-   the edit.
+   edit mode; pressing Enter commits the edit and exits edit mode, pressing Shift+Enter inserts
+   a line break, and pressing Escape cancels the edit.
 7. **Given** two or more blocks, **When** the user drags a block to a new position, **Then**
    the block moves within the canvas, the position is retained with the document, and the
    Markdown reading order is updated according to the new position.
@@ -259,8 +260,9 @@ settings panel and clear the local library after confirming the warning.
 - When a Marker is typed without a following space, it is treated as ordinary text until the
   space is entered.
 - When a line contains only a Marker and no text, the block is removed when editing ends.
-- When a block contains a very long single line, the block wraps visually but remains one
-  Markdown line.
+- When a block contains a very long line, the input grows to its maximum width and wraps
+  visually, growing taller so the full text remains visible; each explicit line break becomes
+  a Markdown line.
 - When blocks overlap, the selected block is brought to the front and the reading order stays
   deterministic.
 - When two blocks fall within the same 24 px row band, left-to-right `x` order determines
@@ -353,9 +355,9 @@ settings panel and clear the local library after confirming the warning.
 - **FR-016**: Cancelled file operations MUST leave the current document and its changes
   intact; failed file operations MUST show an error, preserve the content, and leave the
   document editable.
-- **FR-017**: A blank document MUST show one input box with a Marker control on its left; typing
-  text and pressing Enter MUST create a block, while pressing Enter with empty text MUST do
-  nothing.
+- **FR-017**: A blank document MUST show one multi-line input box with a Marker control on its
+  left; typing text and pressing Enter MUST create a block, Shift+Enter MUST insert a line
+  break without committing, and pressing Enter with empty text MUST do nothing.
 - **FR-018**: The Marker control MUST offer None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`
   options (None is represented by `×` in the flyout), and the selected Marker MUST be displayed
   in front of the block and included once in Markdown output. Block Markers MUST be visible
@@ -375,9 +377,13 @@ settings panel and clear the local library after confirming the warning.
   half of the block is hovered; activating it MUST insert a new input box directly below that
   block, and Escape MUST dismiss the inserted input without creating a block.
 - **FR-021**: Double-clicking a text block MUST enter edit mode; Enter MUST commit and exit
-  edit mode, Escape MUST cancel the edit, and clicking outside MUST commit the edit.
-- **FR-022**: A text block MUST hold a single line of text; Enter MUST commit rather than
-  insert a line break, and a text block whose text is empty after editing MUST be removed.
+  edit mode, Shift+Enter MUST insert a line break, Escape MUST cancel the edit, and clicking
+  outside MUST commit the edit.
+- **FR-022**: A text block MUST hold one or more lines of text. Enter MUST commit rather than
+  insert a line break; Shift+Enter MUST insert a line break. The input box MUST grow wider as
+  text exceeds its current width, up to its maximum width, and MUST grow taller as content
+  wraps so the full text remains visible. A text block whose text is empty after editing MUST
+  be removed.
 - **FR-023**: Each block MUST be draggable to a new two-dimensional position within the
   canvas, MUST remain within the canvas bounds, and its position MUST persist with the
   document.
@@ -504,9 +510,9 @@ settings panel and clear the local library after confirming the warning.
 
 - **Prompt Document**: A saved prompt with a unique identifier, title, file name, ordered
   text and image blocks, locally stored image assets, creation time, and last-modified time.
-- **Block**: A text or image unit within a document. A text block contains one line of text,
-  a Marker, a canvas position, and a stacking order. An image block contains an image asset,
-  alternative text, a canvas position, and a stacking order.
+- **Block**: A text or image unit within a document. A text block contains one or more lines
+  of text, a Marker, a canvas position, and a stacking order. An image block contains an image
+  asset, alternative text, a canvas position, and a stacking order.
 - **Marker**: The optional line prefix chosen from None, `#`, `##`, `###`, `-`, `1.`, `>`, or
   `.`. It is displayed with a text block and included once in Markdown output.
 - **Image Asset**: An image inserted from a file, pasted from the clipboard, or imported with
