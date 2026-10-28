@@ -632,6 +632,86 @@
     });
   });
 
+  test('US2 document tabs switch and close independent documents', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      app.clearDocument();
+      var first = Model.createPromptDocument({
+        id: 'tab-first',
+        title: '甲文件',
+        blocks: [Model.createTextBlock({ id: 'tab-first-block', text: '甲內容', seq: 1 })]
+      });
+      var second = Model.createPromptDocument({
+        id: 'tab-second',
+        title: '乙文件',
+        blocks: [Model.createTextBlock({ id: 'tab-second-block', text: '乙內容', seq: 1 })]
+      });
+      app.setDocument(first, [], { newTab: true });
+      app.setDocument(second, [], { newTab: true });
+
+      equal(state.tabs.length, 2, 'Two documents must be open in tabs.');
+      var tabElements = Array.prototype.slice.call(
+        win.document.querySelectorAll('#document-tabs .document-tab')
+      );
+      equal(tabElements.length, 2);
+      equal(tabElements[1].getAttribute('data-document-id'), 'tab-second');
+      equal(tabElements[1].classList.contains('active'), true);
+      equal(byId(win, 'document-title').value, '乙文件');
+      tabElements.forEach(function (tab) {
+        var close = tab.querySelector('.document-tab-close');
+        assert(close, 'Each tab must include a close control.');
+        equal(close.textContent, '×');
+        assert(close.getAttribute('aria-label').indexOf('關閉文件') !== -1);
+      });
+
+      tabElements[0].querySelector('.document-tab-label').click();
+      return waitFor(function () {
+        return state.document && state.document.id === 'tab-first' ? true : null;
+      }, 5000).then(function () {
+        equal(byId(win, 'document-title').value, '甲文件');
+        equal(win.document.querySelector(
+          '.document-tab[data-document-id="tab-first"]').classList.contains('active'), true);
+        var firstClose = win.document.querySelector(
+          '.document-tab[data-document-id="tab-first"] .document-tab-close');
+        firstClose.click();
+        return waitFor(function () {
+          return state.tabs.length === 1 ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(state.document.id, 'tab-second');
+        equal(byId(win, 'document-title').value, '乙文件');
+        var secondClose = win.document.querySelector(
+          '.document-tab[data-document-id="tab-second"] .document-tab-close');
+        secondClose.click();
+        return waitFor(function () {
+          return state.tabs.length === 0 && state.document === null ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(byId(win, 'document-tabs').hidden, true);
+        equal(app.elements['document-title'].hidden, true);
+        equal(byId(win, 'canvas-empty').hidden, false);
+      });
+    });
+  });
+
+  test('US2 the active tab title remains editable', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      commitComposer(win, 'Tab title');
+      var input = byId(win, 'document-title');
+      assert(input.closest('.document-tab.active'),
+        'The editable title must sit inside the active tab.');
+      setValue(win, input, '新標題');
+      equal(state.document.title, '新標題');
+      equal(input.value, '新標題');
+      equal(state.dirty, true, 'Editing the tab title must mark the document dirty.');
+      input.blur();
+      equal(input.value, '新標題');
+    });
+  });
+
   test('US1 the initial composer uses the default Marker preference', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
@@ -770,11 +850,10 @@
       var menuRect = menu.getBoundingClientRect();
       assert(menuRect.right <= markerRect.left + 0.5,
         'The flyout must open to the left of the Marker.');
-      var secondLevel = menu.querySelector('[data-marker="##"]').getBoundingClientRect();
-      var thirdLevel = menu.querySelector('[data-marker="###"]').getBoundingClientRect();
-      var levelBoundary = (secondLevel.bottom + thirdLevel.top) / 2;
-      assert(Math.abs(levelBoundary - (markerRect.top + markerRect.height / 2)) <= 10,
-        'The input should align between the ## and ### options.');
+      var menuCenter = menuRect.top + menuRect.height / 2;
+      var markerCenter = markerRect.top + markerRect.height / 2;
+      assert(Math.abs(menuCenter - markerCenter) <= 8,
+        'The flyout must stay vertically centered on the Marker when viewport-clamped.');
       equal(win.document.activeElement, composerInput(win),
         'Hovering the Marker must not move focus out of the composer.');
 
@@ -2373,60 +2452,49 @@
     });
   });
 
-  test('US2 the unsaved-changes guard can cancel or discard a pending New', function () {
+  test('US2 New opens a new tab and preserves the dirty document', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = freshDocument(win);
       commitComposer(win, '未儲存');
       var originalId = state.document.id;
+      var originalTab = app.findTab(originalId);
+      assert(originalTab, 'The original document tab is missing.');
 
-      var pending = app.requestNewDocument();
-      return waitFor(function () {
-        return byId(win, 'unsaved-dialog').open;
-      }, 5000).then(function () {
-        byId(win, 'unsaved-cancel').click();
-        return pending;
-      }).then(function (proceed) {
-        equal(proceed, false);
-        equal(state.document.id, originalId);
-        equal(state.dirty, true);
-        equal(state.document.blocks.length, 1);
-
-        var next = app.requestNewDocument();
-        return waitFor(function () {
-          return byId(win, 'unsaved-dialog').open;
-        }, 5000).then(function () {
-          byId(win, 'unsaved-discard').click();
-          return next;
-        });
-      }).then(function (proceed) {
+      return app.requestNewDocument().then(function (proceed) {
         equal(proceed, true);
-        assert(state.document, 'New should create a document after Discard.');
+        equal(state.tabs.length, 2, 'New must open a second tab.');
+        assert(state.document.id !== originalId, 'The new tab must become active.');
         equal(state.document.blocks.length, 0);
         equal(state.dirty, false);
         equal(byId(win, 'document-status').textContent, '新文件');
+        equal(originalTab.dirty, true, 'The first tab must keep its unsaved state.');
+        equal(originalTab.document.blocks.length, 1);
         assert(composerInput(win), 'The blank document composer is missing.');
+        return app.activateTab(originalId);
+      }).then(function () {
+        equal(state.document.id, originalId, 'The first tab must be restorable.');
+        equal(state.dirty, true);
+        equal(state.document.blocks[0].text, '未儲存');
+        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
       });
     });
   });
 
-  test('US2 canceling Open from the unsaved guard keeps the document', function () {
+  test('US2 Open keeps the dirty document while the picker opens', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = freshDocument(win);
       commitComposer(win, '保持開啟');
       var originalId = state.document.id;
-      var pending = app.requestOpenPicker();
-      return waitFor(function () {
-        return byId(win, 'unsaved-dialog').open;
-      }, 5000).then(function () {
-        byId(win, 'unsaved-cancel').click();
-        return pending;
-      }).then(function (result) {
-        equal(result.ok, false);
-        equal(result.canceled, true);
+      return app.requestOpenPicker().then(function (result) {
+        assert(result && result.ok, 'Opening the file picker must be allowed.');
+        equal(result.pickerOpened, true);
+        equal(byId(win, 'unsaved-dialog').open, false,
+          'Open must not discard or prompt for the dirty tab.');
         equal(state.document.id, originalId);
         equal(state.dirty, true);
+        equal(state.tabs.length, 1);
       });
     });
   });
@@ -2736,11 +2804,11 @@
     });
   });
 
-  test('US2 the unsaved guard saves before continuing to a new document', function () {
+  test('US2 closing a dirty tab can save before closing', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = freshDocument(win);
-      commitComposer(win, '儲存後新增');
+      commitComposer(win, '儲存後關閉');
       var originalId = state.document.id;
       var directory = fakeDirectory(win);
       var originalPicker = win.showDirectoryPicker;
@@ -2755,7 +2823,7 @@
         throw error;
       }
 
-      var pending = app.requestNewDocument();
+      var pending = app.closeTab(originalId);
       return waitFor(function () {
         return byId(win, 'unsaved-dialog').open ? true : null;
       }, 5000).then(function () {
@@ -2767,15 +2835,14 @@
         equal(proceed, true);
         assert(directory.files['guard-save.md'] instanceof win.Blob,
           'The guarded save must write the Markdown file.');
-        equal(state.document.id !== originalId, true);
-        equal(state.document.title, 'Untitled');
-        equal(state.document.blocks.length, 0);
+        equal(state.tabs.length, 0, 'The saved tab must close.');
+        equal(state.document, null);
         equal(state.dirty, false);
         equal(byId(win, 'unsaved-dialog').open, false);
         return state.storage.getDocument(originalId);
       }).then(function (loaded) {
         assert(loaded && loaded.document, 'The saved document must stay in the library.');
-        equal(loaded.document.blocks[0].text, '儲存後新增');
+        equal(loaded.document.blocks[0].text, '儲存後關閉');
         equal(loaded.document.fileName, 'guard-save.md');
         restore();
         return state.storage.deleteDocument(originalId);
@@ -2783,7 +2850,7 @@
     });
   });
 
-  test('US2 a failed guarded save keeps the unsaved dialog and current content', function () {
+  test('US2 a failed guarded tab-close save keeps the tab open', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = freshDocument(win);
@@ -2802,7 +2869,7 @@
         throw error;
       }
 
-      var pending = app.requestNewDocument();
+      var pending = app.closeTab(originalId);
       return waitFor(function () {
         return byId(win, 'unsaved-dialog').open ? true : null;
       }, 5000).then(function () {
@@ -2816,6 +2883,7 @@
         equal(state.document.id, originalId);
         equal(state.document.blocks[0].text, '失敗保留');
         equal(state.dirty, true);
+        equal(state.tabs.length, 1, 'A failed save must keep the tab open.');
         equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
         byId(win, 'unsaved-cancel').click();
         return pending;
@@ -2823,6 +2891,7 @@
         equal(proceed, false);
         equal(state.document.id, originalId);
         equal(state.dirty, true);
+        equal(state.tabs.length, 1);
         equal(byId(win, 'unsaved-dialog').open, false);
         restore();
       }, restoreOnError);
@@ -2859,7 +2928,7 @@
     });
   });
 
-  test('US3 Preview renders canonical content, warns about missing images and restores focus', function () {
+  test('US3 Preview renders canonical content live in the right pane', function () {
     return appReady().then(function (win) {
       freshDocument(win);
       var heading = commitComposer(win, '# 預覽標題');
@@ -2876,15 +2945,18 @@
         }, 8000);
       }).then(function (content) {
         equal(content.querySelector('h1').textContent, '預覽標題');
-        equal(byId(win, 'canvas').hidden, true,
-          'Preview must replace the editor canvas in place.');
-        equal(byId(win, 'preview-button').textContent.trim(), '編輯');
+        equal(byId(win, 'canvas').hidden, false,
+          'The editor canvas must stay visible beside the preview.');
+        equal(byId(win, 'workspace').classList.contains('preview-open'), true,
+          'The workspace must show the right preview pane.');
+        var paneRect = byId(win, 'preview-view').getBoundingClientRect();
+        var editorRect = byId(win, 'editor-pane').getBoundingClientRect();
+        assert(paneRect.left >= editorRect.right - 1,
+          'The preview pane must sit to the right of the editor.');
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'true');
-        var previewButton = byId(win, 'preview-button');
-        assert(previewButton.querySelector('.preview-icon').hasAttribute('hidden'),
-          'The eye icon must be hidden in preview mode.');
-        assert(!previewButton.querySelector('.edit-icon').hasAttribute('hidden'),
-          'The edit icon must be shown in preview mode.');
+        equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
+        assert(!byId(win, 'preview-button').querySelector('.edit-icon'),
+          'The preview toggle must stay an eye icon.');
         assert(!byId(win, 'preview-dialog'), 'Preview must not use a dialog.');
         var quoteElement = content.querySelector('blockquote');
         assert(quoteElement, 'Quote lines must render as a blockquote.');
@@ -2904,21 +2976,32 @@
         var warning = content.querySelector('.preview-warning');
         assert(warning && warning.textContent.indexOf('https://example.com/remote.png') !== -1,
           'Preview must list images that could not be displayed.');
+
+        var headingId = heading.dataset.blockId;
+        var headingElement = blockById(win, headingId);
+        headingElement.querySelector('.block-content')
+          .dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
+        var editInput = blockById(win, headingId).querySelector('.block-edit-input');
+        assert(editInput, 'The heading must enter edit mode.');
+        setValue(win, editInput, '即時標題');
+        press(win, editInput, 'Enter');
+        return waitFor(function () {
+          var title = byId(win, 'preview-content').querySelector('h1');
+          return title && title.textContent === '即時標題' ? true : null;
+        }, 5000);
+      }).then(function () {
         byId(win, 'preview-button').click();
         return waitFor(function () {
-          return byId(win, 'preview-view').hidden && !byId(win, 'canvas').hidden
-            ? true
-            : null;
+          return byId(win, 'preview-view').hidden &&
+            !byId(win, 'workspace').classList.contains('preview-open') &&
+            !byId(win, 'canvas').hidden ? true : null;
         }, 5000);
       }).then(function () {
         equal(win.document.activeElement, byId(win, 'preview-button'),
-          'Returning to edit must restore focus to the toggle.');
-        equal(byId(win, 'preview-button').textContent.trim(), '預覽');
+          'Closing the preview must keep focus on the eye toggle.');
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
-        assert(!byId(win, 'preview-button').querySelector('.preview-icon').hasAttribute('hidden'),
-          'The eye icon must return in edit mode.');
-        assert(byId(win, 'preview-button').querySelector('.edit-icon').hasAttribute('hidden'),
-          'The edit icon must be hidden in edit mode.');
+        equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
+        equal(byId(win, 'preview-content').textContent, '');
       });
     });
   });
@@ -3434,7 +3517,7 @@
     });
   });
 
-  test('US4 selecting a document restores its layout and guards unsaved changes', function () {
+  test('US4 selecting documents opens tabs and preserves dirty content', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = app.state;
@@ -3504,33 +3587,14 @@
             app.setDirty(true);
             directoryButton(win, second.id).click();
             return waitFor(function () {
-              return byId(win, 'unsaved-dialog').open ? true : null;
-            }, 5000);
-          })
-          .then(function () {
-            byId(win, 'unsaved-cancel').click();
-            return waitFor(function () {
-              return byId(win, 'unsaved-dialog').open ? null : true;
-            }, 5000);
-          })
-          .then(function () {
-            equal(state.document.id, first.id);
-            equal(state.dirty, true);
-            equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
-            equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
-            directoryButton(win, second.id).click();
-            return waitFor(function () {
-              return byId(win, 'unsaved-dialog').open ? true : null;
-            }, 5000);
-          })
-          .then(function () {
-            byId(win, 'unsaved-discard').click();
-            return waitFor(function () {
               return state.document && state.document.id === second.id &&
                 !state.dirty ? state.document : null;
             }, 8000);
           })
           .then(function (loaded) {
+            equal(byId(win, 'unsaved-dialog').open, false,
+              'Opening another document must not prompt; it opens a tab.');
+            equal(state.tabs.length, 2, 'Both opened documents must remain in tabs.');
             equal(byId(win, 'document-title').value, '乙文件');
             equal(byId(win, 'document-status').textContent, '已儲存');
             equal(directoryButton(win, second.id).getAttribute('aria-current'), 'true');
@@ -3539,8 +3603,23 @@
             equal(loaded.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
             var element = blockById(win, 'second-block');
             assert(element, 'The second opened block must render.');
-            equal(element.style.left, win.Prompter.files.COLUMN_X + 'px');
-            equal(element.style.top, win.Prompter.files.COLUMN_START_Y + 'px');
+            directoryButton(win, first.id).click();
+            return waitFor(function () {
+              return state.document && state.document.id === first.id &&
+                state.dirty ? state.document : null;
+            }, 8000);
+          })
+          .then(function (loaded) {
+            equal(byId(win, 'unsaved-dialog').open, false,
+              'Returning to an open tab must not prompt.');
+            equal(byId(win, 'document-title').value, '甲文件');
+            equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+            equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
+            equal(loaded.blocks[0].text, '未儲存變更',
+              'The dirty tab content must be preserved.');
+            var element = blockById(win, 'first-block');
+            assert(element, 'The preserved block must render.');
+            equal(element.querySelector('.block-content').textContent, '未儲存變更');
           });
       });
     });
@@ -4482,11 +4561,12 @@
         assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
           'The 1280 px layout must not scroll horizontally.');
         var header = win.document.querySelector('.app-header');
+        var tabs = byId(win, 'document-tabs');
         var title = byId(win, 'document-title');
-        assert(header.contains(title), 'The document title must sit inside the header.');
+        assert(tabs.contains(title), 'The document title must sit inside the tab bar.');
         var titleRect = title.getBoundingClientRect();
         assert(titleRect.width > 0 && titleRect.height > 0,
-          'The document title must be visible in the header.');
+          'The document title must be visible in the tab bar.');
         var rightOrder = Array.prototype.map.call(
           header.querySelectorAll('.header-right > *'),
           function (element) { return element.id; }
@@ -4523,12 +4603,12 @@
         assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
           'The 360 px header must not scroll horizontally: ' +
           win.document.documentElement.scrollWidth + ' > ' + win.innerWidth);
-        var compactHeader = win.document.querySelector('.app-header');
+        var compactTabs = byId(win, 'document-tabs');
         var compactTitle = byId(win, 'document-title');
         var compactTitleRect = compactTitle.getBoundingClientRect();
-        assert(compactHeader.contains(compactTitle) &&
+        assert(compactTabs.contains(compactTitle) &&
           compactTitleRect.width > 0 && compactTitleRect.height > 0,
-          'The document title must remain visible in the compact header.');
+          'The document title must remain visible in the compact tab bar.');
         assert(compactTitleRect.left >= 0 && compactTitleRect.right <= win.innerWidth + 1,
           'The document title must stay inside the 360 px viewport.');
         ['file-menu-button', 'directory-toggle', 'preview-button', 'copy-button',
@@ -4556,7 +4636,8 @@
         assert(railIcon && railIcon.getBoundingClientRect().width >= 36,
           'The directory rail icon must fill the rail button.');
         equal(byId(win, 'file-menu-button').getAttribute('aria-haspopup'), 'menu');
-        equal(byId(win, 'preview-button').textContent.trim(), '預覽');
+        equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
+        equal(byId(win, 'preview-button').textContent.trim(), '');
         equal(byId(win, 'copy-button').textContent.trim(), '複製');
         equal(byId(win, 'settings-button').textContent.trim(), '設定');
 

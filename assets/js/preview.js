@@ -12,7 +12,7 @@
   var lastTrigger = null;
   var renderToken = 0;
   var active = false;
-  var editorScrollTop = 0;
+  var refreshTimer = null;
 
   function getApp() {
     return global.Prompter && global.Prompter.app ? global.Prompter.app : null;
@@ -394,45 +394,34 @@
     content.insertBefore(warning, content.firstChild);
   }
 
+  function reflowEditor() {
+    if (global.Prompter.editor && typeof global.Prompter.editor.reflowLayout === 'function') {
+      global.setTimeout(function () {
+        global.Prompter.editor.reflowLayout();
+      }, 0);
+    }
+  }
+
   function setPreviewMode(on) {
     var app = getApp();
     if (!app || !app.elements) {
       return;
     }
-    var canvas = app.elements.canvas;
     var view = app.elements['preview-view'];
-    if (canvas) {
-      canvas.hidden = !!on;
-    }
     if (view) {
       view.hidden = !on;
     }
+    var workspace = app.elements.workspace;
+    if (workspace) {
+      workspace.classList.toggle('preview-open', !!on);
+    }
     var button = app.elements['preview-button'];
-    if (!button) {
-      return;
+    if (button) {
+      button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      button.setAttribute('aria-label', on ? '關閉即時預覽' : '即時預覽');
+      button.title = on ? '關閉即時預覽' : '即時預覽';
     }
-    button.setAttribute('aria-pressed', on ? 'true' : 'false');
-    button.setAttribute('aria-label', on ? '切換回編輯' : '預覽');
-    var label = button.querySelector('.button-label');
-    if (label) {
-      label.textContent = on ? '編輯' : '預覽';
-    }
-    var eye = button.querySelector('.preview-icon');
-    var edit = button.querySelector('.edit-icon');
-    if (eye) {
-      if (on) {
-        eye.setAttribute('hidden', '');
-      } else {
-        eye.removeAttribute('hidden');
-      }
-    }
-    if (edit) {
-      if (on) {
-        edit.removeAttribute('hidden');
-      } else {
-        edit.setAttribute('hidden', '');
-      }
-    }
+    reflowEditor();
   }
 
   function clearPreviewContent() {
@@ -443,29 +432,16 @@
     }
   }
 
-  function open(trigger) {
+  function renderCurrent() {
     var app = getApp();
     if (!app || !app.state || !app.elements) {
       return Promise.resolve({ ok: false, empty: true });
     }
     var content = app.elements['preview-content'];
-    var view = app.elements['preview-view'];
-    if (!content || !view) {
+    if (!content) {
       app.toast('預覽功能尚未就緒。');
       return Promise.resolve({ ok: false });
     }
-    var wasActive = active;
-    active = true;
-    lastTrigger = trigger || app.elements['preview-button'] ||
-      (global.document ? global.document.activeElement : null);
-    if (!wasActive) {
-      var workspace = app.elements.workspace;
-      editorScrollTop = workspace ? workspace.scrollTop : 0;
-      if (workspace) {
-        workspace.scrollTop = 0;
-      }
-    }
-    setPreviewMode(true);
     var document = app.state.document;
     if (!document || !document.blocks || document.blocks.length === 0) {
       renderToken += 1;
@@ -474,12 +450,12 @@
     }
 
     var markdown = Markdown.serializeDocument(document, { assets: app.state.assets });
-    content.textContent = '';
-    var loading = global.document.createElement('p');
-    loading.className = 'preview-empty';
-    loading.textContent = '正在準備預覽…';
-    content.appendChild(loading);
-
+    if (!content.firstChild) {
+      var loading = global.document.createElement('p');
+      loading.className = 'preview-empty';
+      loading.textContent = '正在準備預覽…';
+      content.appendChild(loading);
+    }
     var token = renderToken + 1;
     renderToken = token;
     return buildImageDataUrlMap(app.state.assets).then(function (urls) {
@@ -506,27 +482,58 @@
     });
   }
 
+  function open(trigger) {
+    var app = getApp();
+    if (!app || !app.state || !app.elements) {
+      return Promise.resolve({ ok: false, empty: true });
+    }
+    var view = app.elements['preview-view'];
+    if (!view) {
+      app.toast('預覽功能尚未就緒。');
+      return Promise.resolve({ ok: false });
+    }
+    active = true;
+    lastTrigger = trigger || app.elements['preview-button'] ||
+      (global.document ? global.document.activeElement : null);
+    setPreviewMode(true);
+    return renderCurrent();
+  }
+
+  function refresh() {
+    if (!active) {
+      return Promise.resolve({ ok: false, inactive: true });
+    }
+    return renderCurrent();
+  }
+
+  function scheduleRefresh() {
+    if (!active) {
+      return;
+    }
+    if (refreshTimer !== null) {
+      global.clearTimeout(refreshTimer);
+    }
+    refreshTimer = global.setTimeout(function () {
+      refreshTimer = null;
+      refresh();
+    }, 80);
+  }
+
   function close() {
     if (!active) {
       return;
     }
     active = false;
+    if (refreshTimer !== null) {
+      global.clearTimeout(refreshTimer);
+      refreshTimer = null;
+    }
     renderToken += 1;
     setPreviewMode(false);
-    var app = getApp();
-    if (app && app.elements) {
-      var workspace = app.elements.workspace;
-      if (workspace) {
-        workspace.scrollTop = editorScrollTop;
-      }
-    }
     clearPreviewContent();
-    if (app && global.Prompter.editor && typeof global.Prompter.editor.reflowLayout === 'function') {
-      global.Prompter.editor.reflowLayout();
-    }
     var target = lastTrigger;
     lastTrigger = null;
-    if (target && typeof target.focus === 'function') {
+    if (target && typeof target.focus === 'function' && !target.disabled) {
       try {
         target.focus();
       } catch (error) {
@@ -561,6 +568,8 @@
     close: close,
     toggle: toggle,
     isOpen: isOpen,
+    refresh: refresh,
+    scheduleRefresh: scheduleRefresh,
     renderMarkdown: renderMarkdown,
     buildImageDataUrlMap: buildImageDataUrlMap,
     escapeHtml: escapeHtml

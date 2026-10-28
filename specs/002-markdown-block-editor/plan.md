@@ -132,13 +132,14 @@ Layers:
   naming, conflict handling.
 - `clipboard.js`: Paste handler, `text/plain` Markdown plus `text/html` rich copy when images
   are present, async and fallback copy paths, manual-copy dialog.
-- `preview.js`: `<dialog>` preview, rendered Markdown, image resolution and placeholder
-  handling.
+- `preview.js`: live right-side preview, rendered Markdown, image resolution, refresh
+  scheduling, and placeholder handling.
 - `editor.js`: composer, marker detection, block editing, dragging, keyboard movement,
   selection, and canvas rendering.
 - `settings.js`: appearance, default Marker, grid, clear-library confirmation, version info.
-- `app.js`: bootstrap, header actions, directory, unsaved-changes coordination, toasts,
-  warnings, and focus management.
+- `app.js`: bootstrap, document tabs and per-tab session state, right-preview coordination,
+  header actions, directory, unsaved-changes coordination, toasts, warnings, and focus
+  management.
 
 ### Authoring model
 

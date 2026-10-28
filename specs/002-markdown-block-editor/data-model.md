@@ -207,6 +207,8 @@ leaves, the draft is not restored.
 
 | Field | Type | Purpose |
 |-------|------|---------|
+| `tabs` | `DocumentTab[]` | Open document sessions shown as tabs; each keeps its document, assets, dirty flag, composer, selection, editing state, persistence flag, and file target. |
+| `activeTabId` | string \| null | Document id of the active tab; `null` for the empty workspace. |
 | `currentDocumentId` | string \| null | Open document; `null` for the empty workspace. |
 | `selectedBlockIds` | string[] | All blocks selected by Cmd/Ctrl-click, group drag, or marquee range selection. |
 | `selectedBlockId` | string \| null | Front-most/active selected block. |

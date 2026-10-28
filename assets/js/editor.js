@@ -41,7 +41,9 @@
 
   function getWorkspace() {
     var app = getApp();
-    return app && app.elements ? app.elements.workspace : null;
+    return app && app.elements
+      ? (app.elements['editor-pane'] || app.elements.workspace)
+      : null;
   }
 
   function currentDocument() {

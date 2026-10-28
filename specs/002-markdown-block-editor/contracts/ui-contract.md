@@ -9,25 +9,27 @@ behavior so tests can be written against it.
 ## Layout
 
 ```text
-+----------------------------------------------------------------------------------+
-| File |            Document title [status]           | Preview Copy Style Theme Settings |
-+------+-----------------------------------------------------------------------------+
-| Dir  |                                                                             |
-| rail |                              Editor canvas                                  |
-| [=]  |      +----------------+    +------------------+                             |
-|      |      | # Heading      |    |  image           |                             |
-|      |      | +              |    |  +      [remove] |                             |
-|      |      +----------------+    +------------------+                             |
-|      |                                                                             |
-+------+-----------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------+
+| File |                        [status]                        | Eye Copy Style Theme Settings |
++------+------------------------------------------------------------------------------------+
+| Dir  | [ Document A × ][ Document B × ]                                                  |
+| rail +---------------------------------------------+------------------------------------+
+| [=]  |                                             |  Live preview                      |
+|      |              Editor canvas                  |  +------------------------------+  |
+|      |      +----------------+    +-------------+  |  | rendered Markdown            |  |
+|      |      | # Heading      |    |  image      |  |  |                              |  |
+|      |      +----------------+    +-------------+  |  +------------------------------+  |
++------+---------------------------------------------+------------------------------------+
 ```
 
-- Header: File menu far left; the document title and status centered; Preview/Edit, Copy,
-  style selector, light/dark toggle, and settings on the right in that order.
-- The document title is part of the header; there is no separate title row.
+- Header: File menu far left; document status in the center; icon-only live-preview toggle,
+  Copy, style selector, light/dark toggle, and settings on the right in that order.
+- Document names are shown as tabs above the editor; the active tab's title is editable.
+- Each tab has a small `×` close control. Tabs can be opened, switched, and closed independently.
 - Left body rail: a narrow, always-visible `文件目錄` button at the far left of the workspace.
 - Left: a collapsible directory with search, match count, and document list; it starts collapsed.
-- Center: scrollable workspace containing the editor canvas, or the inline preview while active.
+- Center: scrollable editor canvas. Right: an optional live preview pane that stays visible while
+  editing and updates after edits and tab switches.
 - The directory toggle sits in the body rail at every width: it pushes the sidebar open on wide
   screens and opens an off-canvas drawer below 768 px.
 
@@ -36,12 +38,12 @@ behavior so tests can be written against it.
 | Control | Accessible name | Behavior |
 |---------|-----------------|----------|
 | File | `檔案` | Opens the File menu. |
-| File > New | `新增文件` | Unsaved-changes check, then a blank document titled `Untitled` with one composer. |
-| File > Open | `開啟檔案` | Unsaved-changes check, then the multi-file picker. |
+| File > New | `新增文件` | Opens a new tab with a blank document titled `Untitled` and one composer; existing tabs stay open. |
+| File > Open | `開啟檔案` | Opens the multi-file picker; opened Markdown files appear in new tabs. |
 | File > Save | `儲存` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
 | File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
-| Preview / Edit | `預覽` / `編輯` | Shows the rendered preview in the workspace and changes the toggle to `編輯`; activating `編輯` returns to the same editor state. Disabled when no document. |
+| Preview | `即時預覽` | Eye icon toggles the live preview pane on the right; the editor canvas stays visible. Disabled when no document. |
 | Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images. |
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
@@ -80,12 +82,17 @@ behavior so tests can be written against it.
   with leading/trailing query whitespace ignored and punctuation treated literally.
 - Results update without a page reload and within 300 ms for 500 documents.
 
-## Document Title
+## Document Tabs
 
-- A single-line text input labeled `文件標題` in the header center, with the status text beside
-  it on wide screens.
+- Open documents appear as a horizontal tab bar above the editor and preview pane.
+- The active tab embeds the labeled `文件標題` text input; inactive tabs show their title text.
+- Each tab includes a close `×` control; closing the active tab activates a neighboring tab.
+- Closing a dirty tab asks Save, Discard, or Cancel. Closing the last tab returns to the empty
+  workspace.
+- File > New, File > Open, and directory selection open or activate a tab without discarding
+  other open tabs.
 - Default `Untitled` for a new document; opened documents use the file name without extension.
-- Editing the title marks the document dirty and updates its default save file name.
+- Editing the title marks the active document dirty and updates its default save file name.
 - Empty title falls back to `Untitled` on blur/save.
 - The title is not included in Markdown output.
 - Maximum 200 characters; longer input is truncated with a message.
@@ -255,18 +262,18 @@ Each image block shows:
 
 ## Preview
 
-- Preview replaces the editor canvas inside the same workspace; it is not a dialog or a new
-  window.
-- The header toggle changes from `預覽` to `編輯` with `aria-pressed="true"` while preview is
-  active; activating `編輯` restores the editor exactly as it was.
-- Renders the canonical Markdown for the current document, including unsaved edits.
+- Preview opens as a live pane on the right side of the workspace; the editor canvas remains
+  visible on the left. It is not a dialog or a new window.
+- The header eye icon toggles the pane and uses `aria-pressed="true"` while open.
+- Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
+  after edits and tab switches.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,
   plain text, fenced code, and basic pipe tables.
 - Raw HTML is shown as text; other unsupported constructs remain literal.
 - Local images render from local assets. Missing images show alt text or a placeholder plus a
   warning. Remote images are not fetched.
-- Activating `編輯` restores the editor and focus to the toggle; the editor selection, composer,
-  and scroll position are preserved.
+- Closing the pane keeps the editor unchanged and focus on the eye toggle; the editor selection,
+  composer, and scroll position are preserved.
 - Preview never modifies the document or marks it dirty.
 - If rendering fails, show an error and the raw Markdown in a selectable `<pre>` block.
 
@@ -303,8 +310,8 @@ Settings changes apply immediately and persist; there is no Apply button.
 
 ## Save/Discard/Cancel Flow
 
-Triggered by New, Open, switching documents, or another action that would replace the current
-document when `dirty` is true.
+Triggered by closing a dirty document tab, or another action that would discard that tab's
+changes. New, Open, and tab switching preserve open tabs and do not prompt.
 
 Dialog title: `尚未儲存的變更`.
 
@@ -313,8 +320,9 @@ Dialog title: `尚未儲存的變更`.
 - `捨棄`: discard changes and continue the pending action.
 - `取消`: close the dialog and stay on the current document.
 
-Tab close/reload uses the browser's native confirmation because browsers do not permit a custom
-three-way unload dialog. This limitation is recorded in `../plan.md`.
+Closing a dirty document tab uses the in-app three-way dialog. Closing or reloading the browser
+tab uses the native confirmation when any open document is dirty, because browsers do not permit
+a custom unload dialog. This limitation is recorded in `../plan.md`.
 
 ## States and Feedback
 
@@ -322,9 +330,9 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 |-------|----|
 | No documents | Directory empty state with `新增文件`; canvas empty state `建立第一個提示詞區塊`. |
 | Blank document | One composer at top-left; Save enabled; Copy disabled; Preview shows empty state. |
-| Document open | Blocks in reading order; title field populated; Copy enabled when non-empty. |
-| Preview active | Canvas replaced inline by rendered Markdown; header toggle reads `編輯`. |
-| Dirty | Unsaved indicator near the title/status area; no modal until navigation. |
+| Document open | Blocks in reading order; tab title populated; Copy enabled when non-empty. |
+| Preview active | Editor canvas remains visible; live rendered Markdown appears in the right pane; eye toggle is pressed. |
+| Dirty | Unsaved indicator in the header status area and on the tab; no modal until tab close/reload. |
 | Saving | Save/Save As disabled with busy label; no duplicate writes. |
 | Storage warning | Non-blocking banner in the directory with details and a dismiss action. |
 | Missing images | Block/preview placeholder plus a warning listing the missing files. |
@@ -333,15 +341,15 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 
 ## Responsive Behavior
 
-- 1280×720: header and canvas visible without horizontal scrolling; the document title is in
-  the header center, the directory starts collapsed, and the body rail opens it as a left column.
-- 1100 px and below: the header wraps the title onto its own full-width row while the actions
-  remain in the first row.
+- 1280×720: header, tab bar, canvas, and optional right preview are visible without horizontal
+  scrolling; the directory starts collapsed, and the body rail opens it as a left column.
+- 1100 px and below: the header keeps the actions reachable while the document title stays in
+  the tab bar.
 - 768 px and below: directory becomes a labeled off-canvas drawer beside the rail; header
-  actions remain reachable.
-- 360×800: compact icon buttons for File, Preview/Edit, Copy, Style, Theme, Settings and the body
+  actions remain reachable, and the preview pane overlays the editor when opened.
+- 360×800: compact icon buttons for File, Preview, Copy, Style, Theme, Settings and the body
   rail toggle; product name and non-essential labels hidden; 44 px touch targets where possible;
-  no horizontal page scrolling; canvas width fits the viewport.
+  no horizontal page scrolling; tab bar scrolls horizontally; canvas width fits the viewport.
 - Blocks clamp to the current canvas width; long text wraps; images scale down.
 - The header may wrap to two rows if needed at 360 px, but all actions must remain reachable
   without horizontal scrolling.
@@ -353,7 +361,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Global | Tab / Shift+Tab | Move focus through controls in visual order; while focus is in the editor, cycle only within the current block or composer's controls and wrap. |
 | File menu | Enter/Space, Arrow Up/Down, Home/End, Escape | Open/navigate/close. |
 | Directory | Tab, Enter/Space | Focus/open a document. |
-| Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
+| Preview | Enter/Space | Toggle the live right-side preview pane. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
 | Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. |
@@ -380,8 +388,8 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 - Status toasts use `role="status"`; errors use `role="alert"`.
 - The selected block, dirty state, busy state, and storage warning are exposed programmatically.
 - Image blocks use meaningful alt text; decorative icons use `aria-hidden="true"`.
-- Native `<dialog>` provides focus containment for settings and confirmation dialogs; the inline
-  preview keeps focus on its toggle.
+- Native `<dialog>` provides focus containment for settings and confirmation dialogs; the
+  right-side preview keeps focus on its toggle.
 - Reduced-motion preference disables non-essential transitions.
 - A keyboard-only user can create, edit, add, move, preview, copy, and save without a pointer.
 

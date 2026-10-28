@@ -125,8 +125,8 @@ confirm the content, Markers, and images are preserved.
 1. **Given** the homepage is open, **When** the user opens the File menu, **Then** New, Open,
    Save, Save As, and Insert Image are available.
 2. **Given** the user chooses New, **When** the action completes, **Then** a blank document
-   with the title "Untitled" and one empty input box is opened and is not added to the
-   document directory until it is saved.
+   with the title "Untitled" and one empty input box opens in a new tab, existing tabs remain
+   open, and the new document is not added to the directory until it is saved.
 3. **Given** a Markdown file and its related images, **When** the user opens them, **Then**
    every non-empty line becomes a block or image block, recognized Markers are extracted,
    blank lines are retained as separators in the saved output, image references are associated
@@ -138,9 +138,10 @@ confirm the content, Markers, and images are preserved.
 5. **Given** an open document, **When** the user chooses Save As, **Then** the user is asked
    for a new file name or location, a new document and its image files are created, a new
    directory entry is added, and the original document remains unchanged.
-6. **Given** unsaved changes, **When** the user chooses New or Open or switches documents,
-   **Then** the user is asked to Save, Discard, or Cancel before the action proceeds; when the
-   user closes or reloads the tab, **Then** the browser's native leave confirmation appears.
+6. **Given** unsaved changes, **When** the user chooses New, Open, another document, or another
+   tab, **Then** the current tab stays open with its changes and a new tab opens or activates.
+   Closing a dirty tab MUST ask Save, Discard, or Cancel; when the user closes or reloads the
+   browser tab, the native leave confirmation appears if any open document is dirty.
 7. **Given** a file operation is cancelled, **When** the dialog closes, **Then** the current
    document and its unsaved changes remain intact.
 8. **Given** a save operation fails, **When** the failure is reported, **Then** the document
@@ -163,20 +164,21 @@ expected content.
 
 **Acceptance Scenarios**:
 
-1. **Given** an open document, **When** the user activates Preview, **Then** the rendered
-   Markdown replaces the editor canvas in the same workspace, including unsaved edits, and the
-   header toggle becomes `編輯`.
-2. **Given** the preview is active, **When** the user activates `編輯`, **Then** the editor
-   returns exactly as it was, the document is unchanged, and focus remains on the toggle.
-3. **Given** an open document with content, **When** the user activates Copy, **Then** the
+1. **Given** an open document, **When** the user activates the eye icon, **Then** a live
+   rendered preview opens on the right side while the editor canvas remains visible.
+2. **Given** the preview pane is open, **When** the user edits the document or switches tabs,
+   **Then** the preview updates to the active document without hiding the editor.
+3. **Given** the preview pane is open, **When** the user activates the eye icon again, **Then**
+   the pane closes, the editor is unchanged, and focus remains on the toggle.
+4. **Given** an open document with content, **When** the user activates Copy, **Then** the
    Markdown source is placed on the clipboard exactly as it would be saved, preserving line
    order, Markers, and line breaks.
-4. **Given** a document with opened, inserted, or pasted images, **When** the user copies it,
+5. **Given** a document with opened, inserted, or pasted images, **When** the user copies it,
    **Then** a single paste into a rich-text destination includes both the Markdown text and
    the images.
-5. **Given** the destination cannot accept images, **When** the user pastes, **Then** the
+6. **Given** the destination cannot accept images, **When** the user pastes, **Then** the
    Markdown text is still available and the system explains that images could not be included.
-6. **Given** an empty document, **When** the homepage is displayed, **Then** Copy is disabled.
+7. **Given** an empty document, **When** the homepage is displayed, **Then** Copy is disabled.
 
 ---
 
@@ -227,9 +229,10 @@ settings panel and clear the local library after confirming the warning.
 
 **Acceptance Scenarios**:
 
-1. **Given** the homepage is open, **When** the header is displayed, **Then** the document title
-   is centered and the right side shows Preview, Copy, a style selector, a light/dark toggle,
-   and a settings button in that order.
+1. **Given** the homepage is open, **When** the header is displayed, **Then** the status is
+   centered and the right side shows an icon-only live-preview toggle, Copy, a style selector,
+   a light/dark toggle, and a settings button in that order; document titles appear in the tab
+   bar above the editor.
 2. **Given** the user changes the light/dark mode, **When** the toggle is activated, **Then**
    the interface changes immediately and the choice is retained after reload.
 3. **Given** no explicit appearance choice has been made, **When** the page loads, **Then**
@@ -299,10 +302,12 @@ settings panel and clear the local library after confirming the warning.
 ### Functional Requirements
 
 - **FR-001**: The homepage MUST provide a top header, a collapsible left document directory
-  with a far-left body rail toggle, and a central editor area.
-- **FR-002**: The header MUST place the File menu at the far left, the document title and status
-  in the center, and Preview/Edit, Copy, style selector, light/dark toggle, and settings on the
-  right in that order.
+  with a far-left body rail toggle, a document tab bar, a central editor area, and an optional
+  live preview pane on the right side.
+- **FR-002**: The header MUST place the File menu at the far left, the document status in the
+  center, and an icon-only preview toggle, Copy, style selector, light/dark toggle, and settings
+  on the right in that order. Open document names MUST be shown as tabs above the editor, not as
+  a separate title field in the header.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
@@ -317,8 +322,9 @@ settings panel and clear the local library after confirming the warning.
   mark it as selected.
 - **FR-008**: The directory MUST show an empty state with a New document action when no
   documents are saved.
-- **FR-009**: New MUST open a blank document titled "Untitled" with one empty input box; the
-  document MUST NOT be added to the directory until it is saved.
+- **FR-009**: New MUST open a blank document titled "Untitled" with one empty input box in a
+  new tab; existing tabs MUST stay open, and the new document MUST NOT be added to the directory
+  until it is saved.
 - **FR-010**: Open MUST accept a Markdown file and optional related image files. Each
   non-empty line MUST become a text block, recognized Markers MUST be extracted, blank lines
   MUST be retained as separators in saved output, and Markdown image references MUST become
@@ -336,10 +342,10 @@ settings panel and clear the local library after confirming the warning.
   unchanged, and make the new document the current target.
 - **FR-014**: Save and Save As MUST be disabled when no document is open; New and Open MUST
   always be available.
-- **FR-015**: When unsaved changes exist, New, Open, switching documents, and other in-app
-  navigation MUST ask the user to Save, Discard, or Cancel before continuing. Closing or
-  reloading the page MUST trigger the browser's native leave confirmation; the last explicit
-  save MUST remain intact.
+- **FR-015**: New, Open, and switching documents MUST preserve other open tabs without
+  prompting. Closing a dirty document tab MUST ask the user to Save, Discard, or Cancel before
+  removing it. Closing or reloading the browser page MUST trigger the native leave confirmation
+  when any open document is dirty; the last explicit save MUST remain intact.
 - **FR-016**: Cancelled file operations MUST leave the current document and its changes
   intact; failed file operations MUST show an error, preserve the content, and leave the
   document editable.
@@ -386,11 +392,12 @@ settings panel and clear the local library after confirming the warning.
   occupy a fixed sequence slot that does not move with its source block when blocks are moved;
   it MUST be draggable by a handle, and a block dragged across it MUST shift it one position
   like any intervening item.
-- **FR-028**: Preview MUST render the current document's Markdown in place of the editor canvas
-  within the same workspace, including headings, lists, quotes, fenced code, basic pipe tables,
-  images, and plain text, with raw HTML-looking text escaped, without modifying the document.
-  While preview is active the header toggle MUST read `編輯` and activate the unchanged editor
-  when selected; preview MUST NOT open a dialog or a new window.
+- **FR-028**: Preview MUST render the current document's Markdown in a live pane on the right
+  side of the workspace while the editor canvas remains visible, including headings, lists,
+  quotes, fenced code, basic pipe tables, images, and plain text, with raw HTML-looking text
+  escaped, without modifying the document. The header eye icon MUST toggle the pane; edits and
+  tab switches MUST refresh it without closing it. Preview MUST NOT open a dialog or a new
+  window.
 - **FR-029**: Copy MUST place the Markdown source on the clipboard exactly as it would be
   saved, preserving line order, Markers, and line breaks, and MUST show success or failure
   feedback.
@@ -471,6 +478,16 @@ settings panel and clear the local library after confirming the warning.
   Up/Down on the composer's right drag handle MUST move the composer one slot earlier or later
   and keep focus on that handle. Arrow and Tab navigation MUST be ignored while typing in a block
   editor.
+- **FR-050**: Open documents MUST be represented as tabs above the editor. Each tab MUST show
+  the document title/file name and a close control. File > New and opening a file or saved
+  document MUST open or activate a tab while preserving other open tabs and their unsaved state.
+  Switching tabs MUST restore each document's blocks, assets, dirty state, composer, selection,
+  and file target. Closing a dirty tab MUST offer Save, Discard, or Cancel; closing a clean tab
+  MUST remove it and activate a neighboring tab, and closing the last tab MUST return to the
+  empty workspace. The active tab's title MUST remain editable.
+- **FR-051**: The preview pane MUST remain open across tab switches and updates, and MUST show
+  the empty state when the active document has no previewable content.
+
 
 ### Key Entities *(include if feature involves data)*
 

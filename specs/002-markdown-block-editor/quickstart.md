@@ -43,7 +43,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-28): **93 passing, 0 failing**.
+Current result (2026-10-29): **93 passing, 0 failing**.
 
 ### Browser harness
 
@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **86 passing, 0 failing** (required gate). Edge and Firefox
-also report 86 passing, 0 failing as supplementary checks.
+Current result (2026-10-29): Chrome **88 passing, 0 failing** (required gate). Edge and Firefox
+also report 88 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 86/86 | PASS 86/86 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 86/86 | PASS 86/86 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 86/86 | PASS 86/86 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 88/88 | PASS 88/88 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 88/88 | PASS 88/88 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 88/88 | PASS 88/88 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -111,8 +111,8 @@ scope.
 2. Open `index.html`. The directory starts collapsed; use the `文件目錄` button in the far-left
    body rail to open it and see the empty state with `新增文件`.
 3. Choose `新增文件` from the File menu.
-4. Confirm the title field is centered in the header, reads `Untitled`, one composer appears at
-   the top-left with the Marker control, and Copy is disabled.
+4. Confirm a tab appears above the editor with the editable title `Untitled`, one composer
+   appears at the top-left with the Marker control, and Copy is disabled.
 
 Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 
@@ -202,17 +202,25 @@ opens the Marker flyout without showing a grab cursor.
 Expected: positions are layout-only; Markdown never contains coordinates; unsaved drafts are
 session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the editor.
 
-### 5. Preview (US3, FR-028, SC-008)
+### 5. Live preview and document tabs (US2, US3, FR-028, FR-050, FR-051, SC-008)
 
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
    pipe table, and a long wrapped line.
-2. Activate Preview. Confirm the rendered content replaces the editor canvas in the same
-   workspace, includes images, renders the code block and table, and does not execute raw
-   HTML-looking text.
-3. Confirm the header button now reads `編輯`; activate it and confirm the editor returns with
-   its selection, composer, and scroll position unchanged and focus on the toggle.
-4. Confirm raw HTML-looking text is displayed as text, not executed.
-5. Confirm a document with 500 blocks renders in under 1 second on a mid-range laptop.
+2. Activate the eye icon in the header. Confirm a live preview pane opens on the right while
+   the editor canvas remains visible on the left, includes images, renders the code block and
+   table, and does not execute raw HTML-looking text.
+3. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
+   editor.
+4. Choose File > New twice. Confirm each document opens in a new tab above the editor, each tab
+   has a small `×`, and the active tab title is editable.
+5. Switch tabs. Confirm blocks, dirty state, composer, and selection are restored per tab, and
+   the preview updates to the active document.
+6. Close a clean tab with `×`; confirm the neighboring tab becomes active. Make a tab dirty and
+   close it; confirm Save, Discard, or Cancel appears.
+7. Close the last tab. Confirm the empty workspace returns and the preview pane closes.
+8. Activate the eye icon again with a document open; confirm the editor is unchanged, focus stays
+   on the eye toggle, and the preview closes.
+9. Confirm a document with 500 blocks renders in under 1 second on a mid-range laptop.
 
 ### 6. Copy exact Markdown and rich content (US3, FR-029..FR-031, SC-007)
 
@@ -284,14 +292,17 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 
 ### 9. Unsaved changes (US2, FR-015, FR-016, SC-009)
 
-1. Edit a saved document, then choose New, Open, or another document. Confirm the
-   Save/Discard/Cancel dialog appears.
-2. Choose Cancel; confirm the document and edits remain.
-3. Choose Discard; confirm the target action proceeds.
-4. Choose Save; confirm the save completes before the target action.
-5. Try closing or reloading the tab with unsaved changes. Confirm the browser's native
-   Stay/Leave prompt appears. (A custom three-way dialog is not possible on tab close.)
-6. Cancel a picker or fail a save; confirm the document remains open and editable.
+1. Edit a saved document, then choose New, Open, or another document. Confirm a new tab opens
+   or an existing tab activates without a prompt, and the dirty tab remains open with a dirty
+   marker.
+2. Return to the dirty tab and confirm its edits are preserved.
+3. Click its tab `×`. Confirm the Save/Discard/Cancel dialog appears.
+4. Choose Cancel; confirm the tab and edits remain.
+5. Click `×` again and choose Discard; confirm the tab closes and a neighboring tab activates.
+   Repeat with Save and confirm the save completes before the tab closes.
+6. With any dirty tab open, reload the browser page. Confirm the native Stay/Leave prompt
+   appears.
+7. Cancel a picker or fail a save; confirm the document remains open and editable.
 
 ### 10. Library and search (US4, FR-004..FR-008, SC-003, SC-005, SC-006, SC-013)
 
@@ -327,9 +338,9 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 
 ### 12. Responsive and accessibility (FR-037, FR-038, SC-011, SC-012)
 
-1. At 1280×720, confirm no horizontal page scrolling, the title is centered in the header,
-   Preview/Copy precede Style on the right, and the `文件目錄` rail opens the directory as a
-   left column.
+1. At 1280×720, confirm no horizontal page scrolling, the title is in the tab bar above the
+   editor, the eye preview and Copy precede Style on the right, and the `文件目錄` rail opens
+   the directory as a left column.
 2. Resize to 360×800. Confirm the directory remains collapsed in the far-left body rail, all
    header actions are reachable, blocks stay within the sequence column, and there is no
    horizontal page scrolling.
@@ -406,8 +417,8 @@ automated checks. The app remains ready for those manual spot checks.
 
 ## Known Limitations
 
-- **Tab close**: browsers provide only a native Stay/Leave prompt, not a custom Save/Discard/
-  Cancel dialog. In-app navigation uses the three-way dialog.
+- **Browser tab close**: browsers provide only a native Stay/Leave prompt, not a custom
+  Save/Discard/Cancel dialog. In-app document-tab close uses the three-way dialog.
 - **Rich image paste**: some destinations strip data-URL images. Exact Markdown is always
   available via `text/plain`; the app reports omitted images.
 - **Direct file writing**: Firefox does not support the directory picker used for multi-file

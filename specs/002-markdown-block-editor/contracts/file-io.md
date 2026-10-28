@@ -21,8 +21,8 @@ enhancement; downloads are the baseline.
 
 ## Open
 
-1. If the current document has unsaved changes, show the Save/Discard/Cancel dialog first.
-2. Open the multi-file input. If cancelled, the current document remains unchanged.
+1. Open the multi-file input. If cancelled, the current document and tabs remain unchanged.
+2. A successful Open creates a new document tab; other open tabs keep their unsaved state.
 3. Read the Markdown file as UTF-8, strip a leading BOM, normalize CRLF/CR to LF, and split
    into lines.
 4. For each line:
@@ -38,9 +38,8 @@ enhancement; downloads are the baseline.
    distinguished, the first match is used and the other is flagged.
 6. Add the new document to the local library with a new id, title derived from the file name
    without its extension, and `updatedAt` set to now. Duplicate titles are allowed.
-7. Arrange blocks in a single column in source order (the initial layout) and mark the document
-   clean. A successful Open replaces the workspace; the previous document remains in the
-   library.
+7. Arrange blocks in a single column in source order (the initial layout), mark the document
+   clean, and activate its new tab. The previous document remains in the library and in its tab.
 8. If image storage fails, keep the document open with session-only assets and show a
    non-blocking warning; do not discard the parsed content.
 

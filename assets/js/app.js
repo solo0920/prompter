@@ -22,6 +22,8 @@
     assets: [],
     fileTarget: null,
     documentPersisted: false,
+    tabs: [],
+    activeTabId: null,
     selectedBlockId: null,
     selectedBlockIds: [],
     editingBlockId: null,
@@ -51,7 +53,8 @@
       'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
-      'no-results-clear', 'workspace', 'canvas', 'canvas-empty', 'canvas-new-button',
+      'no-results-clear', 'workspace', 'editor-pane', 'document-tabs', 'document-tab-items',
+      'canvas', 'canvas-empty', 'canvas-new-button',
       'toast-region', 'alert-region', 'move-announcer', 'preview-view', 'preview-content',
       'settings-dialog', 'settings-close', 'default-marker', 'show-grid',
       'follow-system-button', 'clear-library-button', 'app-version', 'schema-version',
@@ -150,20 +153,175 @@
   function setDirty(dirty) {
     state.dirty = !!dirty;
     updateStatus();
+    updateActiveTabDirtyClass();
+    if (global.Prompter.preview && typeof global.Prompter.preview.scheduleRefresh === 'function') {
+      global.Prompter.preview.scheduleRefresh();
+    }
+  }
+
+  function activeTab() {
+    if (!state.activeTabId) {
+      return null;
+    }
+    for (var i = 0; i < state.tabs.length; i += 1) {
+      var tab = state.tabs[i];
+      if (tab.document && tab.document.id === state.activeTabId) {
+        return tab;
+      }
+    }
+    return null;
+  }
+
+  function findTab(documentId) {
+    for (var i = 0; i < state.tabs.length; i += 1) {
+      if (state.tabs[i].document && state.tabs[i].document.id === documentId) {
+        return state.tabs[i];
+      }
+    }
+    return null;
+  }
+
+  function makeTab(document, assets, options) {
+    var opts = options || {};
+    return {
+      document: document,
+      assets: assets ? assets.slice() : [],
+      fileTarget: opts.fileTarget || null,
+      documentPersisted: opts.persisted === true,
+      dirty: opts.dirty === true,
+      composer: opts.composer || null,
+      selectedBlockId: null,
+      selectedBlockIds: [],
+      editingBlockId: null
+    };
+  }
+
+  function captureActiveTab() {
+    var tab = activeTab();
+    if (!tab || !state.document) {
+      return tab;
+    }
+    tab.document = state.document;
+    tab.assets = state.assets.slice();
+    tab.fileTarget = state.fileTarget;
+    tab.documentPersisted = state.documentPersisted;
+    tab.dirty = state.dirty;
+    tab.composer = state.composer;
+    tab.selectedBlockId = state.selectedBlockId;
+    tab.selectedBlockIds = state.selectedBlockIds.slice();
+    tab.editingBlockId = state.editingBlockId;
+    return tab;
+  }
+
+  function applyTab(tab) {
+    if (!tab || !tab.document) {
+      return;
+    }
+    state.document = tab.document;
+    state.assets = tab.assets ? tab.assets.slice() : [];
+    state.fileTarget = tab.fileTarget || null;
+    state.documentPersisted = tab.documentPersisted === true;
+    state.dirty = tab.dirty === true;
+    state.composer = tab.composer || null;
+    state.selectedBlockId = tab.selectedBlockId || null;
+    state.selectedBlockIds = tab.selectedBlockIds ? tab.selectedBlockIds.slice() : [];
+    state.editingBlockId = tab.editingBlockId || null;
+    state.activeTabId = tab.document.id;
+  }
+
+  function updateActiveTabDirtyClass() {
+    var bar = elements['document-tabs'];
+    if (!bar) {
+      return;
+    }
+    var active = bar.querySelector('.document-tab.active');
+    if (active) {
+      active.classList.toggle('dirty', !!state.dirty);
+    }
+  }
+
+  function renderDocumentTabs() {
+    var tabs = elements['document-tabs'];
+    var items = elements['document-tab-items'];
+    var input = elements['document-title'];
+    if (!tabs || !items || !input) {
+      return;
+    }
+    items.textContent = '';
+    if (!state.tabs.length) {
+      tabs.hidden = true;
+      input.hidden = true;
+      if (input.parentNode) {
+        input.parentNode.removeChild(input);
+      }
+      return;
+    }
+    tabs.hidden = false;
+    state.tabs.forEach(function (tab) {
+      var title = (tab.document && tab.document.title) || 'Untitled';
+      var active = tab.document && tab.document.id === state.activeTabId;
+      var wrapper = global.document.createElement('div');
+      wrapper.className = 'document-tab' + (active ? ' active' : '');
+      if (active ? state.dirty : tab.dirty) {
+        wrapper.classList.add('dirty');
+      }
+      wrapper.setAttribute('role', 'presentation');
+      wrapper.setAttribute('data-document-id', tab.document.id);
+      if (active) {
+        input.hidden = false;
+        input.disabled = false;
+        input.value = state.document ? state.document.title : title;
+        input.setAttribute('role', 'tab');
+        input.setAttribute('aria-selected', 'true');
+        wrapper.appendChild(input);
+      } else {
+        var label = global.document.createElement('button');
+        label.type = 'button';
+        label.className = 'document-tab-label';
+        label.setAttribute('role', 'tab');
+        label.setAttribute('aria-selected', 'false');
+        label.title = title;
+        label.textContent = title;
+        label.addEventListener('click', function () {
+          activateTab(tab.document.id, { focus: 'canvas' });
+        });
+        wrapper.appendChild(label);
+      }
+      var close = global.document.createElement('button');
+      close.type = 'button';
+      close.className = 'document-tab-close';
+      close.setAttribute('aria-label', '關閉文件「' + title + '」');
+      close.title = '關閉';
+      close.textContent = '×';
+      close.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeTab(tab.document.id);
+      });
+      wrapper.appendChild(close);
+      items.appendChild(wrapper);
+    });
+    if (!input.parentNode && state.tabs.length) {
+      input.hidden = true;
+    }
   }
 
   function updateTitleInput() {
-    if (!elements['document-title']) {
+    var input = elements['document-title'];
+    if (!input) {
       return;
     }
     if (!state.document) {
-      elements['document-title'].value = '';
-      elements['document-title'].disabled = true;
-      elements['document-title'].placeholder = 'Untitled';
+      input.value = '';
+      input.disabled = true;
+      input.placeholder = 'Untitled';
+      input.hidden = true;
     } else {
-      elements['document-title'].disabled = false;
-      elements['document-title'].value = state.document.title;
+      input.disabled = false;
+      input.value = state.document.title;
+      input.hidden = false;
     }
+    renderDocumentTabs();
   }
 
   function toast(message) {
@@ -279,46 +437,187 @@
     }
   }
 
-  function setDocument(document, assets, options) {
+  function rememberDocument(documentId) {
+    if (!state.storage || typeof state.storage.setLastDocumentId !== 'function') {
+      return;
+    }
+    try {
+      var saved = state.storage.setLastDocumentId(documentId || null);
+      if (saved && typeof saved.catch === 'function') {
+        saved.catch(function () {});
+      }
+    } catch (error) {
+      // Remembering the last document is optional.
+    }
+  }
+
+  function renderActiveDocument(options) {
     var opts = options || {};
-    closePreviewIfOpen();
-    state.document = document || null;
-    state.assets = assets ? assets.slice() : [];
-    state.documentPersisted = opts.persisted === true;
-    state.selectedBlockId = null;
-    state.selectedBlockIds = [];
-    state.editingBlockId = null;
-    state.composer = null;
-    state.dirty = opts.dirty === true;
     updateTitleInput();
     updateStatus();
-    if (opts.persisted && document) {
-      try {
-        var saved = state.storage.setLastDocumentId(document.id);
-        if (saved && typeof saved.catch === 'function') {
-          saved.catch(function () {});
-        }
-      } catch (error) {
-        // Remembering the last document is optional; keep the open flow usable.
-      }
-    }
     if (global.Prompter.editor && typeof global.Prompter.editor.render === 'function') {
       global.Prompter.editor.render();
     }
     renderDirectory();
+    if (global.Prompter.preview && typeof global.Prompter.preview.isOpen === 'function' &&
+        global.Prompter.preview.isOpen() &&
+        typeof global.Prompter.preview.refresh === 'function') {
+      global.Prompter.preview.refresh();
+    }
+    if (opts.focus === 'composer' && global.Prompter.editor &&
+        typeof global.Prompter.editor.focusComposer === 'function') {
+      global.Prompter.editor.focusComposer();
+    } else if (opts.focus === 'canvas' && elements.canvas) {
+      elements.canvas.focus();
+    }
   }
 
-  function clearDocument() {
-    setDocument(null, [], { persisted: false });
+  function activateTab(documentId, options) {
+    var tab = findTab(documentId);
+    if (!tab) {
+      return Promise.resolve(false);
+    }
+    if (state.activeTabId !== documentId) {
+      captureActiveTab();
+      applyTab(tab);
+      renderActiveDocument(options);
+    } else {
+      renderDocumentTabs();
+      updateStatus();
+    }
+    if (state.documentPersisted) {
+      rememberDocument(documentId);
+    }
+    return Promise.resolve(true);
+  }
+
+  function clearAllTabs(forgetLast) {
+    state.tabs = [];
+    state.activeTabId = null;
+    state.document = null;
+    state.assets = [];
+    state.fileTarget = null;
+    state.documentPersisted = false;
+    state.selectedBlockId = null;
+    state.selectedBlockIds = [];
+    state.editingBlockId = null;
+    state.composer = null;
+    state.dirty = false;
+    if (forgetLast) {
+      rememberDocument(null);
+    }
+    updateTitleInput();
+    updateStatus();
+    if (global.Prompter.preview && typeof global.Prompter.preview.isOpen === 'function' &&
+        global.Prompter.preview.isOpen() &&
+        typeof global.Prompter.preview.close === 'function') {
+      global.Prompter.preview.close();
+    }
     if (elements['canvas-empty']) {
       elements['canvas-empty'].hidden = false;
     }
     if (global.Prompter.editor && typeof global.Prompter.editor.render === 'function') {
       global.Prompter.editor.render();
     }
+    renderDirectory();
     if (global.Prompter.search && typeof global.Prompter.search.refreshDirectory === 'function') {
       global.Prompter.search.refreshDirectory();
     }
+  }
+
+  function setDocument(document, assets, options) {
+    var opts = options || {};
+    if (!document) {
+      clearAllTabs();
+      return;
+    }
+    var existing = findTab(document.id);
+    if (opts.newTab && existing) {
+      return activateTab(document.id, opts);
+    }
+    if (opts.newTab || !activeTab()) {
+      captureActiveTab();
+      var tab = makeTab(document, assets, opts);
+      state.tabs.push(tab);
+      applyTab(tab);
+    } else {
+      var active = activeTab();
+      active.document = document;
+      active.assets = assets ? assets.slice() : [];
+      active.fileTarget = opts.fileTarget !== undefined ? opts.fileTarget : active.fileTarget;
+      active.documentPersisted = opts.persisted === true;
+      active.dirty = opts.dirty === true;
+      active.composer = null;
+      active.selectedBlockId = null;
+      active.selectedBlockIds = [];
+      active.editingBlockId = null;
+      state.activeTabId = document.id;
+      applyTab(active);
+    }
+    if (state.documentPersisted) {
+      rememberDocument(document.id);
+    }
+    renderActiveDocument({ focus: opts.focus });
+  }
+
+  function closeTab(documentId) {
+    if (state.fileBusy) {
+      return Promise.resolve(false);
+    }
+    var tab = findTab(documentId);
+    if (!tab) {
+      return Promise.resolve(false);
+    }
+    var previousActiveId = state.activeTabId;
+    if (previousActiveId !== documentId && !tab.dirty) {
+      var cleanIndex = state.tabs.indexOf(tab);
+      if (cleanIndex !== -1) {
+        state.tabs.splice(cleanIndex, 1);
+        renderDocumentTabs();
+        updateStatus();
+        return Promise.resolve(true);
+      }
+    }
+    var temporaryActivation = previousActiveId !== documentId;
+    if (temporaryActivation) {
+      activateTab(documentId, { focus: 'canvas' });
+    }
+
+    function finish(proceed) {
+      if (!proceed) {
+        if (temporaryActivation && previousActiveId && findTab(previousActiveId)) {
+          activateTab(previousActiveId, { focus: 'canvas' });
+        }
+        return false;
+      }
+      var index = state.tabs.indexOf(tab);
+      if (index === -1) {
+        return false;
+      }
+      state.tabs.splice(index, 1);
+      if (!state.tabs.length) {
+        clearAllTabs(true);
+        return true;
+      }
+      if (temporaryActivation && previousActiveId && findTab(previousActiveId)) {
+        activateTab(previousActiveId, { focus: 'canvas' });
+      } else {
+        var next = state.tabs[Math.min(index, state.tabs.length - 1)];
+        applyTab(next);
+        rememberDocument(next.documentPersisted ? next.document.id : null);
+        renderActiveDocument({ focus: 'canvas' });
+      }
+      return true;
+    }
+
+    if (state.dirty) {
+      return confirmUnsaved().then(finish);
+    }
+    return Promise.resolve(finish(true));
+  }
+
+  function clearDocument() {
+    clearAllTabs();
   }
 
   function sortedDocuments(documents) {
@@ -564,9 +863,9 @@
       blocks: [],
       trailingNewline: true
     });
-    setDocument(document, [], { persisted: false });
-    state.fileTarget = null;
-    state.composer = Model.createComposer({
+    captureActiveTab();
+    var tab = makeTab(document, [], { persisted: false, dirty: false });
+    tab.composer = Model.createComposer({
       mode: 'initial',
       anchorBlockId: null,
       x: Files.COLUMN_X,
@@ -574,19 +873,13 @@
       marker: preferences.defaultMarker,
       text: ''
     });
+    state.tabs.push(tab);
+    applyTab(tab);
     if (elements['canvas-empty']) {
       elements['canvas-empty'].hidden = true;
     }
-    if (global.Prompter.editor && typeof global.Prompter.editor.render === 'function') {
-      global.Prompter.editor.render();
-    }
-    if (global.Prompter.editor && typeof global.Prompter.editor.focusComposer === 'function') {
-      global.Prompter.editor.focusComposer();
-    }
     clearDirectorySearch();
-    renderDirectory();
-    updateTitleInput();
-    updateStatus();
+    renderActiveDocument({ focus: 'composer' });
   }
 
   function toggleFileMenu(open) {
@@ -658,52 +951,28 @@
   }
 
   function requestNewDocument() {
-    if (!state.dirty) {
-      newDocument();
-      return Promise.resolve(true);
-    }
-    return confirmUnsaved().then(function (proceed) {
-      if (!proceed) {
-        return false;
-      }
-      newDocument();
-      return true;
-    });
+    newDocument();
+    return Promise.resolve(true);
   }
 
   function requestOpenPicker() {
-    if (!state.dirty) {
-      return (Files && typeof Files.requestOpenPicker === 'function')
-        ? Files.requestOpenPicker()
-        : Promise.resolve({ ok: false, error: new Error('開啟功能尚未就緒。') });
-    }
-    return confirmUnsaved().then(function (proceed) {
-      if (!proceed) {
-        return { ok: false, canceled: true };
-      }
-      if (Files && typeof Files.requestOpenPicker === 'function') {
-        return Files.requestOpenPicker();
-      }
-      return { ok: false, error: new Error('開啟功能尚未就緒。') };
-    });
+    return (Files && typeof Files.requestOpenPicker === 'function')
+      ? Files.requestOpenPicker()
+      : Promise.resolve({ ok: false, error: new Error('開啟功能尚未就緒。') });
   }
 
   function requestOpenSavedDocument(documentId) {
-    if (!state.dirty) {
-      if (Files && typeof Files.openSavedDocument === 'function') {
-        return Files.openSavedDocument(documentId);
-      }
-      return Promise.resolve({ ok: false, error: new Error('開啟功能尚未就緒。') });
+    if (findTab(documentId)) {
+      return activateTab(documentId, { focus: 'canvas' }).then(function (activated) {
+        return activated
+          ? { ok: true, document: state.document, assets: state.assets }
+          : { ok: false };
+      });
     }
-    return confirmUnsaved().then(function (proceed) {
-      if (!proceed) {
-        return { ok: false, canceled: true };
-      }
-      if (Files && typeof Files.openSavedDocument === 'function') {
-        return Files.openSavedDocument(documentId);
-      }
-      return { ok: false, error: new Error('開啟功能尚未就緒。') };
-    });
+    if (Files && typeof Files.openSavedDocument === 'function') {
+      return Files.openSavedDocument(documentId);
+    }
+    return Promise.resolve({ ok: false, error: new Error('開啟功能尚未就緒。') });
   }
 
   function wireUnsavedDialog() {
@@ -1016,11 +1285,12 @@
       setDirty(true);
     });
     elements['document-title'].addEventListener('blur', function () {
-      if (!state.document) {
+      if (!state.document || !elements['document-title'].isConnected) {
         return;
       }
       state.document.title = Model.normalizeTitle(elements['document-title'].value);
       elements['document-title'].value = state.document.title;
+      renderDirectory();
     });
   }
 
@@ -1042,7 +1312,8 @@
       showError(event && event.reason ? event.reason : new Error('未處理的錯誤。'));
     });
     global.addEventListener('beforeunload', function (event) {
-      if (!state.dirty) {
+      captureActiveTab();
+      if (!state.tabs.some(function (tab) { return tab.dirty; })) {
         return undefined;
       }
       event.preventDefault();
@@ -1119,6 +1390,9 @@
     newDocument: newDocument,
     setDocument: setDocument,
     clearDocument: clearDocument,
+    activateTab: activateTab,
+    closeTab: closeTab,
+    findTab: findTab,
     setDirty: setDirty,
     setFileBusy: setFileBusy,
     updateStatus: updateStatus,

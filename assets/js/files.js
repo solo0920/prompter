@@ -1379,7 +1379,10 @@
         storageError = error;
         return null;
       }).then(function () {
-        app.setDocument(result.document, result.assets, { persisted: !storageError });
+        app.setDocument(result.document, result.assets, {
+          persisted: !storageError,
+          newTab: true
+        });
         app.state.fileTarget = null;
         if (global.Prompter.search && typeof global.Prompter.search.refreshDirectory === 'function') {
           global.Prompter.search.refreshDirectory();
@@ -1438,7 +1441,7 @@
         missing.code = 'DOCUMENT_NOT_FOUND';
         throw missing;
       }
-      app.setDocument(loaded.document, loaded.assets, { persisted: true });
+      app.setDocument(loaded.document, loaded.assets, { persisted: true, newTab: true });
       return app.state.storage.getFileTarget(documentId).catch(function () {
         return null;
       }).then(function (target) {

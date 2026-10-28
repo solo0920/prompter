@@ -43,7 +43,7 @@
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **86 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **88 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Edge 156.0.4314.42 and Firefox 159.0 also pass as supplementary checks. Chrome and
   Edge pass with networking blocked; Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
@@ -65,6 +65,9 @@
   relative-order preservation, and Escape restoration are covered.
 - Hover checks: the left border-to-Marker hover zone opens the flyout without a grab cursor,
   while the right side retains the grab cursor and add control.
+- Workspace checks: the right-side live preview refreshes after edits and tab switches without
+  hiding the canvas; document tabs open, switch, keep their active title editable, close with an
+  `×`, prompt on dirty close, and restore the empty workspace after the last tab.
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.
