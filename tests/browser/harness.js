@@ -680,8 +680,8 @@
         'The preview filename must sit to the left of the preview icon.');
         var previewLabelRect = byId(win, 'preview-label').getBoundingClientRect();
         var previewPaneRect = byId(win, 'preview-view').getBoundingClientRect();
-        assert(Math.abs(previewLabelRect.left - previewPaneRect.left) <= 2,
-          'The preview tab must align with the left edge of the preview pane.');
+        assert(Math.abs(previewLabelRect.left - previewPaneRect.left) <= 0.5,
+          'The preview tab must align exactly with the left edge of the preview pane.');
         var activeDocTab = win.document.querySelector('.document-tab.active');
         equal(win.getComputedStyle(byId(win, 'preview-label')).backgroundColor,
           win.getComputedStyle(activeDocTab).backgroundColor,

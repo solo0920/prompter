@@ -219,7 +219,7 @@ body {
   overflow: auto;
 }
 .workspace.preview-open .editor-pane {
-  border-right: 1px solid var(--border);
+  border-right: 0;
 }
 
 .document-tabs {
@@ -618,6 +618,9 @@ body {
 .preview-toggle[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent-strong);
+}
+.workspace.preview-open .preview-view:not([hidden]) {
+  border-left: 1px solid var(--border);
 }
 .preview-view {
   grid-row: 2;
