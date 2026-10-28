@@ -9,6 +9,7 @@
   var GAP = 8;
   var DEFAULT_BLOCK_HEIGHT = 72;
   var DRAG_THRESHOLD = 4;
+  var COMPOSER_ITEM_ID = '__prompter_composer__';
 
   var initialized = false;
   var objectUrls = {};
@@ -557,6 +558,13 @@
     body.appendChild(detection);
     element.appendChild(body);
 
+    var handle = createButton('composer-handle', '拖曳輸入框', '⠿');
+    handle.addEventListener('pointerdown', function (event) {
+      event.stopPropagation();
+      beginComposerDrag(event, element);
+    });
+    element.appendChild(handle);
+
     element.addEventListener('pointerdown', function (event) {
       event.stopPropagation();
     });
@@ -711,12 +719,61 @@
     }
   }
 
-  function dragCenters(ordered) {
+  function isComposerItem(item) {
+    return !!(item && item.id === COMPOSER_ITEM_ID);
+  }
+
+  function dragItemsFor(state) {
+    var ordered = Model.normalizeSequence(state.document);
+    var items = ordered.slice();
+    if (state.composer) {
+      var index = Math.max(0, Math.min(items.length, Number(state.composer.insertIndex) || 0));
+      items.splice(index, 0, { id: COMPOSER_ITEM_ID, type: 'composer' });
+    }
+    return items;
+  }
+
+  function blocksFromItems(items) {
+    return items.filter(function (item) {
+      return !isComposerItem(item);
+    });
+  }
+
+  function composerIndexFromItems(items) {
+    for (var i = 0; i < items.length; i += 1) {
+      if (isComposerItem(items[i])) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  function sameBlockOrder(left, right) {
+    if (!left || !right || left.length !== right.length) {
+      return false;
+    }
+    for (var i = 0; i < left.length; i += 1) {
+      if (left[i].id !== right[i].id) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function dragCenters(items) {
     var centers = {};
+    var state = getState();
     var canvas = getCanvas();
     var canvasTop = canvas ? canvas.getBoundingClientRect().top : 0;
-    ordered.forEach(function (block) {
-      centers[block.id] = canvasTop + block.y + elementHeightFor(block) / 2;
+    var composerElement = canvas ? canvas.querySelector('.composer') : null;
+    items.forEach(function (item) {
+      if (isComposerItem(item)) {
+        if (state && state.composer && composerElement) {
+          centers[item.id] = canvasTop + state.composer.y + composerElement.offsetHeight / 2;
+        }
+        return;
+      }
+      centers[item.id] = canvasTop + item.y + elementHeightFor(item) / 2;
     });
     return centers;
   }
@@ -725,11 +782,11 @@
     var pointerCenter = clientY - drag.grabOffsetY + drag.element.offsetHeight / 2;
     var target = 0;
     var movingUp = pointerCenter < drag.startCenter;
-    drag.order.forEach(function (block) {
-      if (block.id === drag.blockId) {
+    drag.items.forEach(function (item) {
+      if (item.id === drag.itemId) {
         return;
       }
-      var center = drag.centers[block.id];
+      var center = drag.centers[item.id];
       if (center === undefined) {
         return;
       }
@@ -737,7 +794,7 @@
         target += 1;
       }
     });
-    return Utils.clamp(target, 0, drag.order.length - 1);
+    return Utils.clamp(target, 0, drag.items.length - 1);
   }
 
   function previewDragLayout(drag) {
@@ -746,12 +803,16 @@
       return;
     }
     var composerElement = canvas.querySelector('.composer');
-    var composer = drag.composer ? {
-      insertIndex: drag.composer.insertIndex,
-      height: drag.composer.height
+    var blockOrder = blocksFromItems(drag.previewItems);
+    var composerIndex = composerIndexFromItems(drag.previewItems);
+    var composer = composerIndex >= 0 ? {
+      insertIndex: composerIndex,
+      height: drag.composerHeight
     } : null;
-    var layout = computeSequenceLayout(drag.previewOrder, composer, drag.heights);
-    drag.previewOrder.forEach(function (block) {
+    var layout = computeSequenceLayout(blockOrder, composer, drag.heights);
+    drag.previewBlockOrder = blockOrder;
+    drag.previewComposerIndex = composerIndex;
+    blockOrder.forEach(function (block) {
       var point = layout.positions[block.id];
       var element = blockElement(block.id);
       if (element) {
@@ -767,7 +828,14 @@
   }
 
   function applyDragTransform(drag) {
-    var point = drag.layout && drag.layout.positions[drag.blockId];
+    var point;
+    if (drag.kind === 'composer') {
+      point = drag.layout && drag.layout.composerTop !== null
+        ? { x: Files.COLUMN_X, y: drag.layout.composerTop }
+        : null;
+    } else {
+      point = drag.layout && drag.layout.positions[drag.itemId];
+    }
     if (!point) {
       drag.element.style.transform = '';
       return;
@@ -775,6 +843,72 @@
     drag.element.style.transform = 'translate(' +
       (drag.currentX - point.x) + 'px, ' +
       (drag.currentY - point.y) + 'px)';
+  }
+
+  function startDrag(event, config) {
+    var state = getState();
+    var canvas = getCanvas();
+    if (!state || !canvas) {
+      return;
+    }
+    var items = dragItemsFor(state);
+    var startIndex = -1;
+    for (var i = 0; i < items.length; i += 1) {
+      if (items[i].id === config.itemId) {
+        startIndex = i;
+        break;
+      }
+    }
+    if (startIndex === -1) {
+      return;
+    }
+    var rect = config.element.getBoundingClientRect();
+    var canvasTop = canvas.getBoundingClientRect().top;
+    var composerElement = canvas.querySelector('.composer');
+    var heights = {};
+    blocksFromItems(items).forEach(function (block) {
+      heights[block.id] = elementHeightFor(block);
+    });
+    dragState = {
+      kind: config.kind,
+      item: config.item,
+      itemId: config.itemId,
+      blockId: config.kind === 'block' ? config.itemId : null,
+      element: config.element,
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      grabOffsetY: event.clientY - (canvasTop + config.startY),
+      startX: config.startX,
+      startY: config.startY,
+      currentX: config.startX,
+      currentY: config.startY,
+      startIndex: startIndex,
+      startCenter: canvasTop + config.startY + rect.height / 2,
+      items: items,
+      centers: dragCenters(items),
+      heights: heights,
+      previewItems: items.slice(),
+      targetIndex: startIndex,
+      startBlockOrder: blocksFromItems(items),
+      composerHeight: composerElement ? composerElement.offsetHeight : 0,
+      previewBlockOrder: null,
+      previewComposerIndex: -1,
+      layout: null,
+      validDrop: true,
+      moved: false,
+      frame: null,
+      pointerType: event.pointerType || 'mouse'
+    };
+    try {
+      config.element.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // Synthetic pointer events and some touch environments do not allow capture.
+    }
+    global.addEventListener('pointermove', onDragMove, true);
+    global.addEventListener('pointerup', onDragEnd, true);
+    global.addEventListener('pointercancel', onDragCancel, true);
+    global.addEventListener('keydown', onDragKeydown, true);
   }
 
   function beginDrag(event, blockId, element, fromHandle) {
@@ -794,53 +928,34 @@
     }
     clearBlockHover();
     selectBlock(blockId);
-    var ordered = Model.normalizeSequence(state.document);
-    var startIndex = ordered.indexOf(block);
-    var rect = element.getBoundingClientRect();
-    var canvas = getCanvas();
-    var canvasTop = canvas ? canvas.getBoundingClientRect().top : 0;
-    var composerElement = canvas ? canvas.querySelector('.composer') : null;
-    var heights = {};
-    ordered.forEach(function (entry) {
-      heights[entry.id] = elementHeightFor(entry);
-    });
-    dragState = {
-      blockId: blockId,
+    startDrag(event, {
+      kind: 'block',
+      item: block,
+      itemId: blockId,
       element: element,
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      grabOffsetY: event.clientY - (canvasTop + block.y),
       startX: block.x,
-      startY: block.y,
-      currentX: block.x,
-      currentY: block.y,
-      startIndex: startIndex,
-      startCenter: canvasTop + block.y + rect.height / 2,
-      order: ordered.slice(),
-      centers: dragCenters(ordered),
-      heights: heights,
-      previewOrder: ordered.slice(),
-      targetIndex: startIndex,
-      composer: state.composer && composerElement ? {
-        insertIndex: state.composer.insertIndex,
-        height: composerElement.offsetHeight
-      } : null,
-      layout: null,
-      validDrop: true,
-      moved: false,
-      frame: null,
-      pointerType: event.pointerType || 'mouse'
-    };
-    try {
-      element.setPointerCapture(event.pointerId);
-    } catch (error) {
-      // Synthetic pointer events and some touch environments do not allow capture.
+      startY: block.y
+    });
+  }
+
+  function beginComposerDrag(event, element) {
+    if (event.button !== undefined && event.button !== 0) {
+      return;
     }
-    global.addEventListener('pointermove', onDragMove, true);
-    global.addEventListener('pointerup', onDragEnd, true);
-    global.addEventListener('pointercancel', onDragCancel, true);
-    global.addEventListener('keydown', onDragKeydown, true);
+    var state = getState();
+    if (!state || !state.composer) {
+      return;
+    }
+    clearBlockHover();
+    event.preventDefault();
+    startDrag(event, {
+      kind: 'composer',
+      item: { id: COMPOSER_ITEM_ID, type: 'composer' },
+      itemId: COMPOSER_ITEM_ID,
+      element: element,
+      startX: state.composer.x,
+      startY: state.composer.y
+    });
   }
 
   function onDragMove(event) {
@@ -869,11 +984,11 @@
     var targetIndex = targetIndexForDrag(drag, event.clientY);
     if (targetIndex !== drag.targetIndex) {
       drag.targetIndex = targetIndex;
-      var remaining = drag.order.filter(function (block) {
-        return block.id !== drag.blockId;
+      var remaining = drag.items.filter(function (item) {
+        return item.id !== drag.itemId;
       });
-      remaining.splice(targetIndex, 0, findBlock(drag.blockId));
-      drag.previewOrder = remaining;
+      remaining.splice(targetIndex, 0, drag.item);
+      drag.previewItems = remaining;
       previewDragLayout(drag);
       applyDragTransform(drag);
     } else if (!drag.layout) {
@@ -922,23 +1037,53 @@
     drag.element.classList.remove('dragging');
     drag.element.style.transform = '';
     if (!drag.moved) {
-      selectBlock(drag.blockId, { focus: false });
+      if (drag.kind === 'block') {
+        selectBlock(drag.blockId, { focus: false });
+      } else {
+        focusComposer();
+      }
       return;
     }
     var changed = commit && drag.validDrop && drag.targetIndex !== drag.startIndex;
     if (changed) {
-      var document = currentDocument();
-      if (document && Model.moveBlockToIndex(document, drag.blockId, drag.targetIndex)) {
-        markDirty();
-        render();
-        selectBlock(drag.blockId, { focus: true });
-        announceSequencePosition(drag.blockId);
+      var state = getState();
+      if (drag.kind === 'composer') {
+        if (state && state.composer) {
+          if (drag.previewComposerIndex >= 0) {
+            state.composer.insertIndex = drag.previewComposerIndex;
+          }
+          render();
+          focusComposer();
+        }
         return;
       }
+      var blockOrder = drag.previewBlockOrder || blocksFromItems(drag.previewItems);
+      var orderChanged = !sameBlockOrder(blockOrder, drag.startBlockOrder);
+      if (state && state.composer && drag.previewComposerIndex >= 0) {
+        state.composer.insertIndex = drag.previewComposerIndex;
+      }
+      if (orderChanged && state && state.document) {
+        state.document.blocks = blockOrder.slice();
+        blockOrder.forEach(function (block, index) {
+          block.seq = index + 1;
+        });
+        state.document.layoutVersion = 2;
+        markDirty();
+      }
+      render();
+      selectBlock(drag.blockId, { focus: true });
+      if (orderChanged) {
+        announceSequencePosition(drag.blockId);
+      }
+      return;
     }
     if (drag.targetIndex !== drag.startIndex) {
       render();
-      selectBlock(drag.blockId, { focus: true });
+      if (drag.kind === 'block') {
+        selectBlock(drag.blockId, { focus: true });
+      } else {
+        focusComposer();
+      }
     }
   }
 

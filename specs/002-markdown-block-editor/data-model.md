@@ -225,7 +225,7 @@ The transient input box shown for a blank document or after activating "+".
 |-------|------|-------|
 | `mode` | `"initial"` \| `"inserted"` | Initial is the blank-document composer; inserted is opened by "+". |
 | `anchorBlockId` | string \| null | Source block for Marker inheritance and focus return; `null` for initial. It does not control layout after opening. |
-| `insertIndex` | integer | Fixed sequence slot where the composer stays while blocks move; a committed block is inserted at this index. |
+| `insertIndex` | integer | Fixed sequence slot where the composer stays while blocks move; a committed block is inserted at this index. Dragging the composer changes only this index and does not dirty the document. |
 | `x`, `y` | number | Derived preview position, below the source block or at the canvas start. |
 | `marker` | Marker | Inherited from the source text block, or the nearest preceding text block for an image source; falls back to the settings default. `none` renders as a blank prefix. Live detection may override it until commit. |
 | `text` | string | Current input text; not persisted until committed. |

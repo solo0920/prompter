@@ -59,8 +59,8 @@ Current result (2026-10-28): **92 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **68 passing, 0 failing** (required gate). Edge and Firefox
-also report 68 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **69 passing, 0 failing** (required gate). Edge and Firefox
+also report 69 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 68/68 | PASS 68/68 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 68/68 | PASS 68/68 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 68/68 | PASS 68/68 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 69/69 | PASS 69/69 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 69/69 | PASS 69/69 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 69/69 | PASS 69/69 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -157,7 +157,10 @@ Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes 
    toward its former position.
 5. With a composer open after the last block, move that block and confirm the composer stays in
    its own sequence slot instead of following it.
-6. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
+6. Drag the composer by its handle to another slot; confirm blocks shift to make room and the
+   Markdown order remains unchanged. Then drag a block across the composer and confirm the
+   composer shifts one position.
+7. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
    unsaved draft is not restored.
 
 Expected: positions are layout-only; Markdown never contains coordinates; unsaved drafts are

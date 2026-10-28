@@ -98,6 +98,8 @@ The composer is the only input box that creates a new block.
 - The composer shows the selected or detected Marker as a prefix pill.
 - The composer occupies a fixed sequence slot. Moving its source block or reordering other
   blocks does not drag the composer along.
+- A drag handle at the composer's right edge moves the composer between slots. Dragging a block
+  across the composer shifts the composer one position like any other intervening item.
 - Enter:
   - With non-empty text: create a text block at the composer position, remove the composer,
     mark dirty, and select the new block.

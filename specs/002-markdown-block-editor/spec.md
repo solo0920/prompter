@@ -360,8 +360,10 @@ settings panel and clear the local library after confirming the warning.
   the last block; lower overlapping blocks MUST shift down by the minimum amount needed to
   preserve the resulting reading order; a new composer MUST inherit the Marker of its source
   text block, or the nearest preceding text block for an image source, falling back to the
-  default Marker selected in settings when no text block precedes it; and an open composer MUST
-  occupy a fixed sequence slot that does not move with its source block when blocks are moved.
+  default Marker selected in settings when no text block precedes it; an open composer MUST
+  occupy a fixed sequence slot that does not move with its source block when blocks are moved;
+  it MUST be draggable by a handle, and a block dragged across it MUST shift it one position
+  like any intervening item.
 - **FR-028**: Preview MUST render the current document's Markdown in place of the editor canvas
   within the same workspace, including headings, lists, quotes, fenced code, basic pipe tables,
   images, and plain text, with raw HTML-looking text escaped, without modifying the document.

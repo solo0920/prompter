@@ -1242,6 +1242,101 @@
     });
   });
 
+  test('US1 the composer can be dragged and shifts for a block dragged across it', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var canvas = byId(win, 'canvas');
+      var canvasRect = canvas.getBoundingClientRect();
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+
+      function pointer(target, type, x, y) {
+        target.dispatchEvent(new win.PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 13,
+          pointerType: 'mouse',
+          button: 0,
+          clientX: x,
+          clientY: y
+        }));
+      }
+
+      function pointerUp(x, y) {
+        win.dispatchEvent(new win.PointerEvent('pointerup', {
+          bubbles: true, cancelable: true, pointerId: 13, pointerType: 'mouse', button: 0,
+          clientX: x, clientY: y
+        }));
+      }
+
+      function modelBlock(id) {
+        return state.document.blocks.filter(function (block) {
+          return block.id === id;
+        })[0];
+      }
+
+      var composerElement = win.document.querySelector('#canvas .composer');
+      var handle = composerElement.querySelector('.composer-handle');
+      assert(handle, 'The composer drag handle is missing.');
+      equal(handle.getAttribute('aria-label'), '拖曳輸入框');
+      var composerRect = composerElement.getBoundingClientRect();
+      var handleRect = handle.getBoundingClientRect();
+      var startX = composerRect.left + 10;
+      var startY = handleRect.top + handleRect.height / 2;
+      var grabOffset = startY - (canvasRect.top + state.composer.y);
+      var a = modelBlock(ids[0]);
+      var b = modelBlock(ids[1]);
+      var aCenter = canvasRect.top + a.y + blockById(win, a.id).offsetHeight / 2;
+      var bCenter = canvasRect.top + b.y + blockById(win, b.id).offsetHeight / 2;
+      var moveY = (aCenter + bCenter) / 2 + grabOffset - composerElement.offsetHeight / 2;
+
+      pointer(handle, 'pointerdown', startX, startY);
+      pointer(win, 'pointermove', startX, moveY);
+      pointerUp(startX, moveY);
+
+      equal(state.composer.insertIndex, 1,
+        'Dragging the composer upward must change its insertion slot.');
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        ids.join(','), 'Composer movement must not reorder blocks.');
+      composerElement = win.document.querySelector('#canvas .composer');
+      a = modelBlock(ids[0]);
+      b = modelBlock(ids[1]);
+      assert(parseFloat(composerElement.style.top) >=
+        a.y + blockById(win, a.id).offsetHeight + 4,
+      'The composer must stay after A.');
+      assert(parseFloat(composerElement.style.top) < b.y,
+        'The composer must stay before B.');
+
+      var c = modelBlock(ids[2]);
+      var cElement = blockById(win, c.id);
+      var cContent = cElement.querySelector('.block-content');
+      var cStartX = canvasRect.left + c.x + 10;
+      var cStartY = canvasRect.top + c.y + 10;
+      var cGrabOffset = cStartY - (canvasRect.top + c.y);
+      a = modelBlock(ids[0]);
+      aCenter = canvasRect.top + a.y + blockById(win, a.id).offsetHeight / 2;
+      var cMoveY = aCenter - 2 + cGrabOffset - cElement.offsetHeight / 2;
+
+      pointer(cContent, 'pointerdown', cStartX, cStartY);
+      pointer(win, 'pointermove', cStartX, cMoveY);
+      pointerUp(cStartX, cMoveY);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [ids[2], ids[0], ids[1]].join(','),
+        'Dragging C above A must cross and shift the composer.');
+      equal(state.composer.insertIndex, 2,
+        'The composer must shift toward the dragged block source.');
+      composerElement = win.document.querySelector('#canvas .composer');
+      a = modelBlock(ids[0]);
+      b = modelBlock(ids[1]);
+      assert(parseFloat(composerElement.style.top) >=
+        a.y + blockById(win, a.id).offsetHeight + 4,
+      'The shifted composer must stay after A.');
+      assert(parseFloat(composerElement.style.top) < b.y,
+        'The shifted composer must stay before B.');
+    });
+  });
+
   test('US1 the image picker inserts a validated image block and remove deletes it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
