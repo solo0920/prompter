@@ -117,7 +117,8 @@ Each text block is a floating box showing:
   the Marker.
 - The text, wrapped visually but representing one Markdown line.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
-- A small lower-left `+` button with accessible name `在此區塊下方新增`.
+- A small lower-left `+` button with accessible name `在此區塊下方新增`, revealed while the block
+  is hovered or keyboard-focused, and always visible on touch devices.
 - A selected/focus style with a visible outline.
 
 Each image block shows:
@@ -147,7 +148,8 @@ Each image block shows:
 
 ## "+" Insertion
 
-- Every block has a "+" control at its lower-left.
+- Every block has a "+" control at its lower-left, revealed on block hover or keyboard focus and
+  kept visible on touch devices.
 - Activating it creates one composer directly below the source block, aligned to the source x.
 - The composer uses the default Marker from settings.
 - Escape dismisses the inserted composer without creating a block.
