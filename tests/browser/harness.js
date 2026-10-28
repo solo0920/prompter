@@ -1585,12 +1585,54 @@
         equal(element.classList.contains('hover-left'), false);
         equal(element.classList.contains('hover-right'), false);
         equal(opacity(marker), '1', 'The Marker must remain visible after hover.');
-        if (hoverCapable) {
-          return waitFor(function () {
-            return opacity(plus) === '0' ? true : null;
-          }, 1000);
-        }
+        return waitFor(function () {
+          var menuGone = !win.document.querySelector('.marker-menu');
+          var plusHidden = !hoverCapable || opacity(plus) === '0';
+          return menuGone && plusHidden ? true : null;
+        }, 2000);
       });
+    });
+  });
+
+  test('US1 left border hover opens the Marker flyout without a grab cursor', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win, '##');
+      commitComposer(win, 'Hover border');
+      var element = blockById(win, state.document.blocks[0].id);
+      var marker = element.querySelector('.block-marker');
+      var rect = element.getBoundingClientRect();
+
+      function move(x, y) {
+        element.dispatchEvent(new win.PointerEvent('pointermove', {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 25,
+          pointerType: 'mouse',
+          clientX: x,
+          clientY: y
+        }));
+      }
+
+      move(rect.left + 1, rect.top + rect.height / 2);
+      equal(element.classList.contains('hover-left'), true,
+        'Hovering the left border must set the left hover state.');
+      equal(win.getComputedStyle(element).cursor, 'default',
+        'The left side must not show a grab cursor.');
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Hovering the left border must open the Marker flyout.');
+      var markerRect = marker.getBoundingClientRect();
+      var menuRect = menu.getBoundingClientRect();
+      assert(menuRect.right <= markerRect.left + 0.5,
+        'The flyout must still open to the left of the Marker.');
+
+      move(rect.right - 6, rect.top + 2);
+      equal(element.classList.contains('hover-right'), true,
+        'Hovering the right side must set the right hover state.');
+      equal(win.getComputedStyle(element).cursor, 'grab',
+        'The right side must keep the grab cursor.');
+      return waitFor(function () {
+        return win.document.querySelector('.marker-menu') ? null : true;
+      }, 2000);
     });
   });
 

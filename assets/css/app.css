@@ -239,10 +239,11 @@ body {
   border-radius: var(--radius-block);
   background: var(--block-bg);
   box-shadow: var(--shadow-small);
-  cursor: grab;
+  cursor: default;
   user-select: none;
   touch-action: pan-y;
 }
+.block.hover-right { cursor: grab; }
 .canvas.reordering .block:not(.dragging) {
   transition: top .12s ease, left .12s ease;
 }

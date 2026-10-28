@@ -335,10 +335,12 @@ settings panel and clear the local library after confirming the warning.
 - **FR-018**: The Marker control MUST offer None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`
   options (None is represented by `×` in the flyout), and the selected Marker MUST be displayed
   in front of the block and included once in Markdown output. Block Markers MUST be visible
-  without hover; when no Marker is set, the prefix MUST be blank with no `×` or text. Hovering
-  the control MUST open a symbol-only flyout to its left; clicking or pressing Enter/Space MUST
-  also open it for keyboard and touch input. Choosing an option MUST return focus to the
-  composer text input and preserve its caret or selection.
+  without hover; when no Marker is set, the prefix MUST be blank with no `×` or text. Moving the
+  pointer anywhere from the block's left border through the Marker prefix MUST open a
+  symbol-only flyout to its left; clicking or pressing Enter/Space MUST also open it for keyboard
+  and touch input. The left Marker area MUST NOT show a grab cursor; the right side of the block
+  retains the drag cursor and drag handle. Choosing an option MUST return focus to the composer
+  text input and preserve its caret or selection.
 - **FR-019**: When the user types a recognized Marker followed by a space in an input box, the
   Marker MUST be detected live and shown as a prefix; on commit it MUST become the block
   Marker without being duplicated in the block text.

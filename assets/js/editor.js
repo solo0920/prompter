@@ -22,6 +22,7 @@
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
   var hoveredBlock = null;
+  var hoveredMarkerAnchor = null;
 
   function getApp() {
     return global.Prompter.app;
@@ -236,7 +237,15 @@
     applySequenceLayout();
   }
 
+  function closeHoveredMarkerMenu() {
+    if (hoveredMarkerAnchor && hoveredMarkerAnchor._prompterMarkerHover) {
+      hoveredMarkerAnchor._prompterMarkerHover.close();
+    }
+    hoveredMarkerAnchor = null;
+  }
+
   function clearBlockHover() {
+    closeHoveredMarkerMenu();
     if (hoveredBlock) {
       hoveredBlock.classList.remove('hover-left', 'hover-right');
       hoveredBlock = null;
@@ -255,16 +264,29 @@
     }
     if (hoveredBlock && hoveredBlock !== block) {
       hoveredBlock.classList.remove('hover-left', 'hover-right');
+      closeHoveredMarkerMenu();
     }
     hoveredBlock = block;
+    var rect = block.getBoundingClientRect();
     var side;
     if (target.closest('.block-marker')) {
       side = 'left';
     } else if (target.closest('.block-plus, .drag-handle, .block-remove')) {
       side = 'right';
     } else {
-      var rect = block.getBoundingClientRect();
       side = event.clientX < rect.left + rect.width / 2 ? 'left' : 'right';
+    }
+    var markerButton = block.querySelector('.block-marker');
+    var markerZone = false;
+    if (markerButton) {
+      var markerRect = markerButton.getBoundingClientRect();
+      markerZone = event.clientX >= rect.left && event.clientX <= markerRect.right + 6;
+    }
+    if (markerZone && markerButton && markerButton._prompterMarkerHover) {
+      hoveredMarkerAnchor = markerButton;
+      markerButton._prompterMarkerHover.open();
+    } else {
+      closeHoveredMarkerMenu();
     }
     block.classList.toggle('hover-left', side === 'left');
     block.classList.toggle('hover-right', side === 'right');
@@ -322,6 +344,19 @@
         hoverOpened: hoverOpened
       });
     }
+    function openHoverMenu() {
+      cancelMarkerMenuClose();
+      show(false, true);
+    }
+    function closeHoverMenu() {
+      if (markerMenu && markerMenu.anchor === anchor && markerMenu.hoverOpened) {
+        scheduleMarkerMenuClose();
+      }
+    }
+    anchor._prompterMarkerHover = {
+      open: openHoverMenu,
+      close: closeHoverMenu
+    };
     anchor.addEventListener('click', function (event) {
       event.stopPropagation();
       show(true, false);
@@ -330,16 +365,13 @@
       if (event.pointerType === 'touch') {
         return;
       }
-      cancelMarkerMenuClose();
-      show(false, true);
+      openHoverMenu();
     });
     anchor.addEventListener('pointerleave', function (event) {
       if (event.pointerType === 'touch') {
         return;
       }
-      if (markerMenu && markerMenu.anchor === anchor && markerMenu.hoverOpened) {
-        scheduleMarkerMenuClose();
-      }
+      closeHoverMenu();
     });
   }
 

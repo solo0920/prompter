@@ -107,8 +107,10 @@ The composer is the only input box that creates a new block.
 - Escape:
   - Inserted via "+": dismiss the composer; no block.
   - Initial blank-document composer: keep it (a blank document always has an input).
-- Hovering the Marker control opens a symbol-only flyout to its left; clicking or pressing
-  Enter/Space also opens it for keyboard and touch input. The flyout lists `×` (no Marker),
+- Moving the pointer anywhere from the block's left border through the Marker prefix opens a
+  symbol-only flyout to its left; clicking or pressing Enter/Space also opens it for keyboard
+  and touch input. The left side uses the default cursor, while the right side keeps the grab
+  cursor and drag handle. The flyout lists `×` (no Marker),
   `#`, `##`, `###`, `-`, `1.`, `>`, and `.` with descriptive accessible names but no visible
   title text. Arrow Up/Down navigates, Home/End jump to the first/last option, Escape closes,
   and selecting an option applies it, returns focus to the composer text input, and preserves
@@ -128,8 +130,8 @@ Each text block is a floating box showing:
 
 - The Marker prefix (if any) as a non-editable visual prefix that is also a button for changing
   the Marker. Markers are always visible without hover; when no Marker is set, the prefix is a
-  blank clickable area with no `×` or text. The flyout opens from this area on hover, click, or
-  keyboard activation.
+  blank clickable area with no `×` or text. The flyout opens when the pointer enters anywhere
+  from the block's left border through this prefix, on click, or on keyboard activation.
 - The text, wrapped visually but representing one Markdown line.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
@@ -206,6 +208,8 @@ Each image block shows:
   and releasing inserts the group at the previewed position.
 - A drag that starts on empty canvas draws an orange selection rectangle instead of moving
   blocks; blocks are selected as soon as the rectangle intersects them.
+- The grab cursor and drag affordance apply to the right side of a block. The left Marker area
+  uses the default cursor so it is clear that it opens the Marker flyout instead of dragging.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.

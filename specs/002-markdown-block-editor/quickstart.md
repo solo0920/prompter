@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **76 passing, 0 failing** (required gate). Edge and Firefox
-also report 76 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **77 passing, 0 failing** (required gate). Edge and Firefox
+also report 77 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 76/76 | PASS 76/76 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 76/76 | PASS 76/76 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 76/76 | PASS 76/76 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 77/77 | PASS 77/77 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 77/77 | PASS 77/77 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 77/77 | PASS 77/77 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -116,7 +116,7 @@ scope.
 
 Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 
-### 2. Create blocks with markers (US1, FR-018, FR-019, FR-046, SC-001, SC-002)
+### 2. Create blocks with markers (US1, FR-018, FR-019, FR-046, FR-047, SC-001, SC-002)
 
 1. With the composer focused, type `# 角色` and press Enter.
 2. Confirm one heading block appears with a single `#` prefix and the composer closes.
@@ -143,9 +143,13 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 14. Drag on empty canvas around several blocks. Confirm the orange selection rectangle appears,
     every intersected block becomes selected, and the group can then be dragged together.
     Cmd-drag on empty canvas must add to the existing selection; click empty canvas to clear it.
+15. Move the pointer to a block's left border or padding, not directly over the Marker symbol.
+    Confirm the Marker flyout opens and the cursor is not the grab cursor. Move to the right
+    side and confirm the grab cursor and drag handle behavior remain available there.
 
 Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes enabled; the
-selected group moves as one unit; the marquee selects the covered blocks.
+selected group moves as one unit; the marquee selects the covered blocks; the left border hover
+opens the Marker flyout without showing a grab cursor.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022)
 

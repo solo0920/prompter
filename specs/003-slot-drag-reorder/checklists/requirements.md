@@ -98,7 +98,7 @@
   their first render without being marked dirty. A multi-selected group drags as one contiguous
   group and stays selected after the drop. A marquee dragged on empty canvas selects the blocks
   it intersects, including additive Cmd/Ctrl selection.
-- Verification: **93 unit tests** and **76 browser tests** pass in Chrome, Edge, and Firefox,
+- Verification: **93 unit tests** and **77 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 
 ## Notes
