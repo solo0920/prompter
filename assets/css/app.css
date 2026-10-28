@@ -232,7 +232,12 @@ body {
   cursor: grab;
   user-select: none;
   touch-action: pan-y;
+}
+.canvas.reordering .block:not(.dragging) {
   transition: top .12s ease, left .12s ease;
+}
+.canvas.reordering .composer:not(.dragging) {
+  transition: top .12s ease;
 }
 .block:focus-visible {
   outline: 2px solid var(--focus);

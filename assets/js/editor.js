@@ -963,6 +963,7 @@
     if (startIndex === -1) {
       return;
     }
+    canvas.classList.add('reordering');
     var rect = config.element.getBoundingClientRect();
     var canvasTop = canvas.getBoundingClientRect().top;
     var composerElement = canvas.querySelector('.composer');
@@ -1130,6 +1131,10 @@
     global.removeEventListener('pointerup', onDragEnd, true);
     global.removeEventListener('pointercancel', onDragCancel, true);
     global.removeEventListener('keydown', onDragKeydown, true);
+    var dragCanvas = getCanvas();
+    if (dragCanvas) {
+      dragCanvas.classList.remove('reordering');
+    }
     if (drag.frame !== null) {
       global.cancelAnimationFrame(drag.frame);
     }

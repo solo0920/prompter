@@ -664,6 +664,8 @@
       assert(state.dirty, 'Committing a block must mark the document dirty.');
       equal(blockById(win, state.document.blocks[0].id).classList.contains('selected'), false,
         'The committed block must not stay selected while the composer is focused.');
+      equal(win.getComputedStyle(blockById(win, state.document.blocks[0].id)).transitionDuration,
+        '0s', 'Adding a block must not animate or flash the sequence.');
       equal(win.document.activeElement, nextInput,
         'Only the composer input should hold focus after committing.');
     });
