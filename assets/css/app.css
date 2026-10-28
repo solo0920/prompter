@@ -225,18 +225,27 @@ body {
 .document-tabs {
   grid-row: 1;
   grid-column: 1 / -1;
+  display: flex;
+  align-items: stretch;
   min-width: 0;
   min-height: 36px;
   background: var(--surface-2);
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 .document-tab-items {
   display: flex;
+  flex: 1 1 auto;
   align-items: stretch;
-  min-width: min-content;
+  min-width: 0;
   height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.document-tabs .preview-toggle {
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0 6px;
 }
 .document-tab {
   display: flex;
@@ -758,4 +767,9 @@ body {
   .block-image-wrap { max-width: calc(100vw - 44px); }
   .preview-content { padding: 14px 14px 0; }
   .document-tab { min-width: 110px; max-width: 200px; }
+  .document-tabs .preview-toggle {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
 }

@@ -230,9 +230,9 @@ settings panel and clear the local library after confirming the warning.
 **Acceptance Scenarios**:
 
 1. **Given** the homepage is open, **When** the header is displayed, **Then** the status is
-   centered and the right side shows an icon-only live-preview toggle, Copy, a style selector,
-   a light/dark toggle, and a settings button in that order; document titles appear in the tab
-   bar above the editor.
+   centered and the right side shows Copy, a style selector, a light/dark toggle, and a settings
+   button in that order; document titles appear in the tab bar above the editor, with the
+   icon-only live-preview toggle at the tab bar's right edge.
 2. **Given** the user changes the light/dark mode, **When** the toggle is activated, **Then**
    the interface changes immediately and the choice is retained after reload.
 3. **Given** no explicit appearance choice has been made, **When** the page loads, **Then**
@@ -305,9 +305,9 @@ settings panel and clear the local library after confirming the warning.
   with a far-left body rail toggle, a document tab bar, a central editor area, and an optional
   live preview pane on the right side.
 - **FR-002**: The header MUST place the File menu at the far left, the document status in the
-  center, and an icon-only preview toggle, Copy, style selector, light/dark toggle, and settings
-  on the right in that order. Open document names MUST be shown as tabs above the editor, not as
-  a separate title field in the header.
+  center, and Copy, style selector, light/dark toggle, and settings on the right in that order.
+  Open document names MUST be shown as tabs above the editor, not as a separate title field in
+  the header, and the icon-only preview toggle MUST sit at the right edge of that tab bar.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
@@ -398,7 +398,7 @@ settings panel and clear the local library after confirming the warning.
 - **FR-028**: Preview MUST render the current document's Markdown in a live pane on the right
   side of the workspace while the editor canvas remains visible, including headings, lists,
   quotes, fenced code, basic pipe tables, images, and plain text, with raw HTML-looking text
-  escaped, without modifying the document. The header preview icon MUST toggle the pane; edits and
+  escaped, without modifying the document. The preview icon at the right edge of the tab bar MUST toggle the pane; edits and
   tab switches MUST refresh it without closing it. Preview MUST NOT open a dialog or a new
   window.
 - **FR-029**: Copy MUST place the Markdown source on the clipboard exactly as it would be

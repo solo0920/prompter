@@ -70,26 +70,6 @@
     </div>
 
     <div class="header-group header-right">
-      <button id="preview-button" class="button button-quiet button-with-icon preview-toggle"
-              type="button" aria-pressed="false" aria-label="即時預覽" title="即時預覽" disabled>
-        <svg class="button-icon preview-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <defs>
-            <mask id="preview-icon-mask" maskUnits="userSpaceOnUse" x="0" y="0"
-                  width="24" height="24">
-              <rect width="24" height="24" fill="white"/>
-              <circle cx="16.5" cy="16.5" r="4.4" fill="black"/>
-            </mask>
-          </defs>
-          <rect x="4" y="4" width="13.5" height="13" rx="2.2" fill="none"
-                stroke="currentColor" stroke-width="1.8" mask="url(#preview-icon-mask)"/>
-          <path d="M4 9h13.5" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" mask="url(#preview-icon-mask)"/>
-          <circle cx="16.5" cy="16.5" r="3.5" fill="none"
-                  stroke="currentColor" stroke-width="1.8"/>
-          <path d="m19 19 2.4 2.4" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </button>
       <button id="copy-button" class="button button-with-icon" type="button" disabled>
         <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <rect x="8" y="8" width="11" height="11" rx="2" fill="none"
@@ -177,6 +157,26 @@
     <main id="workspace" class="workspace" aria-label="提示詞編輯區">
       <nav id="document-tabs" class="document-tabs" aria-label="文件頁籤" hidden>
         <div id="document-tab-items" class="document-tab-items" role="tablist"></div>
+        <button id="preview-button" class="button button-quiet button-with-icon preview-toggle"
+                type="button" aria-pressed="false" aria-label="即時預覽" title="即時預覽" disabled>
+          <svg class="button-icon preview-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <defs>
+              <mask id="preview-icon-mask" maskUnits="userSpaceOnUse" x="0" y="0"
+                    width="24" height="24">
+                <rect width="24" height="24" fill="white"/>
+                <circle cx="16.5" cy="16.5" r="4.4" fill="black"/>
+              </mask>
+            </defs>
+            <rect x="4" y="4" width="13.5" height="13" rx="2.2" fill="none"
+                  stroke="currentColor" stroke-width="1.8" mask="url(#preview-icon-mask)"/>
+            <path d="M4 9h13.5" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" mask="url(#preview-icon-mask)"/>
+            <circle cx="16.5" cy="16.5" r="3.5" fill="none"
+                    stroke="currentColor" stroke-width="1.8"/>
+            <path d="m19 19 2.4 2.4" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
         <label class="visually-hidden" for="document-title">文件標題</label>
         <input id="document-title" class="tab-title-input" type="text" maxlength="200"
                placeholder="Untitled" aria-label="文件標題" autocomplete="off" hidden>

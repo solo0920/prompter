@@ -10,9 +10,9 @@ behavior so tests can be written against it.
 
 ```text
 +-----------------------------------------------------------------------------------+
-| File |                        [status]                        | Preview Copy Style Theme Settings |
+| File |                        [status]                        | Copy Style Theme Settings |
 +------+------------------------------------------------------------------------------------+
-| Dir  | [ Document A × ][ Document B × ]                                                  |
+| Dir  | [ Document A × ][ Document B × ]                                   [ Preview ]    |
 | rail +---------------------------------------------+------------------------------------+
 | [=]  |                                             |  Live preview                      |
 |      |              Editor canvas                  |  +------------------------------+  |
@@ -43,7 +43,7 @@ behavior so tests can be written against it.
 | File > Save | `儲存` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
 | File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
-| Preview | `即時預覽` | Preview-window icon toggles the live preview pane on the right; the editor canvas stays visible. Disabled when no document. |
+| Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane; the editor canvas stays visible. Disabled when no document. |
 | Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images. |
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
@@ -266,7 +266,7 @@ Each image block shows:
 
 - Preview opens as a live pane on the right side of the workspace; the editor canvas remains
   visible on the left. It is not a dialog or a new window.
-- The header preview icon toggles the pane and uses `aria-pressed="true"` while open.
+- The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open.
 - Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
   after edits and tab switches.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,

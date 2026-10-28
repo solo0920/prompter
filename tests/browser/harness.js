@@ -4605,8 +4605,10 @@
           function (element) { return element.id; }
         ).filter(Boolean);
         equal(rightOrder.join(','),
-          'preview-button,copy-button,style-select,theme-toggle,settings-button',
-          'Preview and Copy must precede Style in the header.');
+          'copy-button,style-select,theme-toggle,settings-button',
+          'Copy and Style must stay in the header.');
+        assert(byId(win, 'document-tabs').contains(byId(win, 'preview-button')),
+          'The preview icon must sit at the right edge of the tab bar.');
         assert(byId(win, 'app-main').contains(toggle),
           'The directory toggle must sit in the far-left body rail.');
         assert(!header.contains(toggle),
