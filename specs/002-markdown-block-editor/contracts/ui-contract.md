@@ -100,6 +100,8 @@ The composer is the only input box that creates a new block.
   blocks does not drag the composer along.
 - A drag handle at the composer's right edge moves the composer between slots. Dragging a block
   across the composer shifts the composer one position like any other intervening item.
+- When the composer handle is focused, Up/Down moves the composer one slot earlier/later and
+  keeps focus on the handle; the composer stays open and the block order is unchanged.
 - Enter:
   - With non-empty text: create a text block at the composer slot, mark dirty, keep the next
     composer focused, and do not leave the committed block selected or outlined.
@@ -228,10 +230,11 @@ Each image block shows:
   the Marker options and Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
   the handle, with the move announced.
-- Up/Down anywhere in the composer—whether the title control, text input, or drag handle is
-  active—moves to the sequence item immediately before or after the composer's slot, wrapping at
-  the ends; the composer remains open. Other keys keep normal text editing, and the block editor
-  input retains its normal caret behavior.
+- Up/Down on the composer title control or text input moves to the sequence item immediately
+  before or after the composer's slot, wrapping at the ends; the composer remains open. Up/Down
+  on the composer drag handle moves the composer one slot earlier or later and keeps focus on the
+  handle. Other keys keep normal text editing, and the block editor input retains its normal
+  caret behavior.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.
@@ -362,7 +365,8 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Block | `+` button | Insert composer below. |
 | Editing | Enter | Commit and exit. |
 | Editing | Escape | Cancel edit. |
-| Composer (any control) | Up/Down | Select the item before/after the composer slot; wraps at the ends and leaves the composer open. |
+| Composer title/input | Up/Down | Select the item before/after the composer slot; wraps at the ends and leaves the composer open. |
+| Composer drag handle | Up/Down | Move the composer one sequence slot earlier/later; focus stays on the handle. |
 | Composer | Enter | Create block (non-empty). |
 | Composer | Escape | Dismiss inserted composer. |
 | Dialog | Escape | Close (native dialog). |

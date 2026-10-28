@@ -1483,6 +1483,34 @@
     return true;
   }
 
+  function moveComposerByKeyboard(delta) {
+    var state = getState();
+    if (!state || !state.document || !state.composer) {
+      return false;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    var current = Number(state.composer.insertIndex);
+    if (!isFinite(current)) {
+      current = ordered.length;
+    }
+    current = Math.max(0, Math.min(ordered.length, current));
+    var next = current + delta;
+    if (next < 0 || next > ordered.length || next === current) {
+      return false;
+    }
+    state.composer.insertIndex = next;
+    state.composer.anchorBlockId = next > 0 ? ordered[next - 1].id : null;
+    render();
+    var canvas = getCanvas();
+    var handle = canvas ? canvas.querySelector('.composer-handle') : null;
+    if (handle) {
+      handle.focus();
+    } else {
+      focusComposer();
+    }
+    return true;
+  }
+
   function selectAdjacentItem(currentItem, delta) {
     var state = getState();
     if (!state || !state.document) {
@@ -2350,10 +2378,17 @@
     }
     var plainArrow = !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey &&
       (event.key === 'ArrowUp' || event.key === 'ArrowDown');
+    var arrowDelta = event.key === 'ArrowDown' ? 1 : -1;
+    if (plainArrow && target.closest('.composer-handle')) {
+      event.preventDefault();
+      event.stopPropagation();
+      moveComposerByKeyboard(arrowDelta);
+      return;
+    }
     if (plainArrow && target.closest('.composer')) {
       event.preventDefault();
       event.stopPropagation();
-      selectAdjacentItem('composer', event.key === 'ArrowDown' ? 1 : -1);
+      selectAdjacentItem('composer', arrowDelta);
       return;
     }
     if (target.closest('input, textarea, select, [contenteditable="true"]') ||
@@ -2367,16 +2402,15 @@
     var blockElementNode = target.closest('.block');
     var block = blockElementNode ? findBlock(blockElementNode.dataset.blockId) : null;
     if (plainArrow) {
-      var delta = event.key === 'ArrowDown' ? 1 : -1;
       if (block && target.closest('.drag-handle')) {
         event.preventDefault();
         event.stopPropagation();
-        moveBlockByKeyboard(block, delta, { focusHandle: true });
+        moveBlockByKeyboard(block, arrowDelta, { focusHandle: true });
         return;
       }
       event.preventDefault();
       event.stopPropagation();
-      selectAdjacentItem(block ? block.id : (state ? state.selectedBlockId : null), delta);
+      selectAdjacentItem(block ? block.id : (state ? state.selectedBlockId : null), arrowDelta);
       return;
     }
     if (!block) {

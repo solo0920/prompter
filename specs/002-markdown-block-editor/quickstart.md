@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **85 passing, 0 failing** (required gate). Edge and Firefox
-also report 85 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **86 passing, 0 failing** (required gate). Edge and Firefox
+also report 86 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 85/85 | PASS 85/85 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 85/85 | PASS 85/85 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 85/85 | PASS 85/85 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 86/86 | PASS 86/86 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 86/86 | PASS 86/86 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 86/86 | PASS 86/86 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -193,8 +193,9 @@ opens the Marker flyout without showing a grab cursor.
     earlier/later, focus stays on the handle, and the move is announced.
 11. Focus the composer input, type some text, and press Up/Down. Confirm the item before/after
     the composer slot is selected, wrapping at the ends, while the composer and its text remain.
-    Repeat with the composer title control and drag handle focused; Up/Down must navigate from
-    every part of the composer.
+    Repeat with the composer title control focused. Then focus the composer drag handle and press
+    Up/Down; confirm the composer itself moves one sequence slot, focus stays on the handle, and
+    the block order is unchanged.
 12. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
     unsaved draft is not restored.
 

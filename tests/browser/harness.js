@@ -1215,12 +1215,44 @@
       press(win, composerMarker, 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), aId,
         'Up must navigate when the composer title control is active.');
+    });
+  });
 
-      var composerHandle = win.document.querySelector('#canvas .composer-handle');
-      composerHandle.focus();
-      press(win, composerHandle, 'ArrowDown');
-      equal(win.Prompter.editor.getSelectedBlockId(), bId,
-        'Down must navigate when the composer drag handle is active.');
+  test('US1 Up/Down on the composer handle moves the composer slot', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      state.dirty = false;
+
+      function handle() {
+        return win.document.querySelector('#canvas .composer-handle');
+      }
+
+      handle().focus();
+      press(win, handle(), 'ArrowUp');
+      equal(state.composer.insertIndex, 2,
+        'Up on the composer handle must move the composer one slot earlier.');
+      equal(win.document.activeElement, handle(),
+        'Focus must stay on the composer handle.');
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        ids.join(','), 'Moving the composer must not reorder blocks.');
+
+      press(win, handle(), 'ArrowUp');
+      equal(state.composer.insertIndex, 1);
+      equal(win.document.activeElement, handle());
+
+      press(win, handle(), 'ArrowDown');
+      equal(state.composer.insertIndex, 2);
+
+      press(win, handle(), 'ArrowDown');
+      equal(state.composer.insertIndex, 3);
+
+      press(win, handle(), 'ArrowDown');
+      equal(state.composer.insertIndex, 3,
+        'Down at the last composer slot must not move further.');
+      equal(win.document.activeElement, handle());
+      equal(state.dirty, false, 'Moving the composer must not mark the document dirty.');
     });
   });
 

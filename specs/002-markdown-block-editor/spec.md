@@ -101,8 +101,9 @@ and confirm the unsaved draft is not restored.
     focus on the canvas they use the selected block if one exists. Enter/F2 on the focused text
     area starts editing. Space on a title control opens the Marker menu for arrow-key selection,
     and Up/Down on a drag handle moves the block one position while keeping focus on that handle.
-    Up/Down anywhere in the composer—whether its title control, input, or drag handle is
-    active—moves to the adjacent item with the same first/last wrap.
+    Up/Down on the composer title control or input moves to the adjacent item with the same
+    first/last wrap; Up/Down on the composer drag handle moves the composer one slot and keeps
+    focus on the handle.
 
 ---
 
@@ -465,9 +466,10 @@ settings panel and clear the local library after confirming the warning.
   editor items; they MUST NOT move to the header or left rail. Space or Enter on a block's
   title/Marker control MUST open the Marker menu, whose Up/Down keys choose an option.
   Up/Down on a block's right drag handle MUST move that block one sequence position earlier or
-  later while keeping focus on the handle. Up/Down anywhere within the composer (title control,
-  text input, or drag handle) MUST select the adjacent sequence item, wrapping at the ends, while
-  leaving the composer open. Arrow and Tab navigation MUST be ignored while typing in a block
+  later while keeping focus on the handle. Up/Down on the composer title control or text input
+  MUST select the adjacent sequence item, wrapping at the ends, while leaving the composer open.
+  Up/Down on the composer's right drag handle MUST move the composer one slot earlier or later
+  and keep focus on that handle. Arrow and Tab navigation MUST be ignored while typing in a block
   editor.
 
 ### Key Entities *(include if feature involves data)*
