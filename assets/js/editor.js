@@ -15,7 +15,6 @@
   var objectUrls = {};
   var currentDocumentId = null;
   var markerMenu = null;
-  var markerCloseTimer = null;
   var dragState = null;
   var marqueeState = null;
   var ignoreNextCanvasClick = false;
@@ -23,7 +22,6 @@
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
   var hoveredBlock = null;
-  var hoveredMarkerAnchor = null;
 
   function getApp() {
     return global.Prompter.app;
@@ -240,15 +238,7 @@
     applySequenceLayout();
   }
 
-  function closeHoveredMarkerMenu() {
-    if (hoveredMarkerAnchor && hoveredMarkerAnchor._prompterMarkerHover) {
-      hoveredMarkerAnchor._prompterMarkerHover.close();
-    }
-    hoveredMarkerAnchor = null;
-  }
-
   function clearBlockHover() {
-    closeHoveredMarkerMenu();
     if (hoveredBlock) {
       hoveredBlock.classList.remove('hover-left', 'hover-right');
       hoveredBlock = null;
@@ -267,7 +257,6 @@
     }
     if (hoveredBlock && hoveredBlock !== block) {
       hoveredBlock.classList.remove('hover-left', 'hover-right');
-      closeHoveredMarkerMenu();
     }
     hoveredBlock = block;
     var rect = block.getBoundingClientRect();
@@ -286,10 +275,7 @@
       markerZone = event.clientX >= rect.left && event.clientX <= markerRect.right + 6;
     }
     if (markerZone && markerButton && markerButton._prompterMarkerHover) {
-      hoveredMarkerAnchor = markerButton;
       markerButton._prompterMarkerHover.open();
-    } else {
-      closeHoveredMarkerMenu();
     }
     block.classList.toggle('hover-left', side === 'left');
     block.classList.toggle('hover-right', side === 'right');
@@ -348,17 +334,10 @@
       });
     }
     function openHoverMenu() {
-      cancelMarkerMenuClose();
       show(false, true);
     }
-    function closeHoverMenu() {
-      if (markerMenu && markerMenu.anchor === anchor && markerMenu.hoverOpened) {
-        scheduleMarkerMenuClose();
-      }
-    }
     anchor._prompterMarkerHover = {
-      open: openHoverMenu,
-      close: closeHoverMenu
+      open: openHoverMenu
     };
     anchor.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -376,12 +355,6 @@
         return;
       }
       openHoverMenu();
-    });
-    anchor.addEventListener('pointerleave', function (event) {
-      if (event.pointerType === 'touch') {
-        return;
-      }
-      closeHoverMenu();
     });
   }
 
@@ -703,6 +676,7 @@
       return;
     }
     clearBlockHover();
+    closeMarkerMenu();
     if (state.document && currentDocumentId !== state.document.id) {
       revokeObjectUrls();
       editDraft = null;
@@ -1214,6 +1188,7 @@
       return;
     }
     clearBlockHover();
+    closeMarkerMenu();
     var selected = selectedBlockIds(state);
     var groupIds;
     if (selected.indexOf(blockId) === -1) {
@@ -1244,6 +1219,7 @@
       return;
     }
     clearBlockHover();
+    closeMarkerMenu();
     event.preventDefault();
     startDrag(event, {
       kind: 'composer',
@@ -2261,14 +2237,6 @@
     if (onToggle) {
       onToggle(true);
     }
-    menu.addEventListener('pointerenter', function () {
-      cancelMarkerMenuClose();
-    });
-    menu.addEventListener('pointerleave', function () {
-      if (markerMenu && markerMenu.hoverOpened) {
-        scheduleMarkerMenuClose();
-      }
-    });
     var items = Array.prototype.slice.call(menu.querySelectorAll('.marker-menu-item'));
     var checked = menu.querySelector('[aria-checked="true"]') || items[0];
     if (focusMenu && checked) {
@@ -2325,24 +2293,6 @@
     closeMarkerMenu();
   }
 
-  function cancelMarkerMenuClose() {
-    if (markerCloseTimer !== null) {
-      global.clearTimeout(markerCloseTimer);
-      markerCloseTimer = null;
-    }
-  }
-
-  function scheduleMarkerMenuClose() {
-    cancelMarkerMenuClose();
-    if (!markerMenu || !markerMenu.hoverOpened) {
-      return;
-    }
-    markerCloseTimer = global.setTimeout(function () {
-      markerCloseTimer = null;
-      closeMarkerMenu();
-    }, 200);
-  }
-
   function onMarkerOutside(event) {
     if (!markerMenu) {
       return;
@@ -2357,7 +2307,6 @@
     if (!markerMenu) {
       return;
     }
-    cancelMarkerMenuClose();
     var menu = markerMenu;
     markerMenu = null;
     global.document.removeEventListener('keydown', onMarkerEscape, true);
@@ -2883,6 +2832,7 @@
     });
     global.addEventListener('blur', function () {
       clearBlockHover();
+      closeMarkerMenu();
       if (dragState) {
         finishDrag(false);
       }

@@ -869,9 +869,15 @@
       assert(composerMenuRect.right <= composerMarkerRect.left + 0.5,
         'The composer flyout must open to the left of its Marker.');
       leave(composerMarker);
-      return waitFor(function () {
-        return win.document.querySelector('.marker-menu') ? null : true;
-      }, 2000);
+      return new Promise(function (resolve) {
+        setTimeout(resolve, 300);
+      }).then(function () {
+        assert(win.document.querySelector('.marker-menu'),
+          'Leaving the Marker must not close the hover flyout before selection.');
+        composerMenu.querySelector('[data-marker="#"]').click();
+        equal(win.document.querySelector('.marker-menu'), null,
+          'Selecting a Marker option must close the flyout.');
+      });
     });
   });
 
@@ -2067,6 +2073,13 @@
         equal(element.classList.contains('hover-left'), false);
         equal(element.classList.contains('hover-right'), false);
         equal(opacity(marker), '1', 'The Marker must remain visible after hover.');
+        win.document.body.dispatchEvent(new win.PointerEvent('pointerdown', {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 27,
+          pointerType: 'mouse',
+          button: 0
+        }));
         return waitFor(function () {
           var menuGone = !win.document.querySelector('.marker-menu');
           var plusHidden = !hoverCapable || opacity(plus) === '0';
@@ -2112,9 +2125,21 @@
         'Hovering the right side must set the right hover state.');
       equal(win.getComputedStyle(element).cursor, 'grab',
         'The right side must keep the grab cursor.');
-      return waitFor(function () {
-        return win.document.querySelector('.marker-menu') ? null : true;
-      }, 2000);
+      return new Promise(function (resolve) {
+        setTimeout(resolve, 300);
+      }).then(function () {
+        assert(win.document.querySelector('.marker-menu'),
+          'Moving away from the Marker must keep the flyout open until an outside click.');
+        win.document.body.dispatchEvent(new win.PointerEvent('pointerdown', {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 26,
+          pointerType: 'mouse',
+          button: 0
+        }));
+        equal(win.document.querySelector('.marker-menu'), null,
+          'Clicking outside the flyout must close it.');
+      });
     });
   });
 

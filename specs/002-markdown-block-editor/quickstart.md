@@ -126,8 +126,8 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
    appears directly below.
 5. Type `- 限制一` and press Enter.
 6. Add another block and type `> 只輸出結果` and press Enter.
-7. Add another block, hover the Marker control, choose `.` from the symbol-only flyout, type
-   `literal`, and press Enter.
+7. Add another block, hover the Marker control, move the pointer into the flyout and pause;
+   confirm it stays open until you choose `.`, then type `literal` and press Enter.
 8. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
    shows `##`; press Enter.
 9. Press Enter in an empty composer; confirm nothing is created.

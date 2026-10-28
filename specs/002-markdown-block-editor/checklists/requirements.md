@@ -64,7 +64,8 @@
   marquee range selection with additive Cmd/Ctrl behavior, whole-group pointer dragging with
   relative-order preservation, and Escape restoration are covered.
 - Hover checks: the left border-to-Marker hover zone opens the flyout without a grab cursor,
-  while the right side retains the grab cursor and add control.
+  while the right side retains the grab cursor and add control; hover flyouts stay open until
+  selection, Escape/Tab, or an outside click.
 - Workspace checks: the right-side live preview refreshes after edits and tab switches without
   hiding the canvas; document tabs open, switch, keep their active title editable, close with an
   `×`, prompt on dirty close, and restore the empty workspace after the last tab.
