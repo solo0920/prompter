@@ -17,6 +17,7 @@
   var dragState = null;
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
+  var hoveredBlock = null;
 
   function getApp() {
     return global.Prompter.app;
@@ -214,6 +215,40 @@
       return;
     }
     applySequenceLayout();
+  }
+
+  function clearBlockHover() {
+    if (hoveredBlock) {
+      hoveredBlock.classList.remove('hover-left', 'hover-right');
+      hoveredBlock = null;
+    }
+  }
+
+  function handleBlockHover(event) {
+    if (dragState || event.pointerType === 'touch') {
+      return;
+    }
+    var target = event.target;
+    var block = target && target.closest ? target.closest('.block') : null;
+    if (!block) {
+      clearBlockHover();
+      return;
+    }
+    if (hoveredBlock && hoveredBlock !== block) {
+      hoveredBlock.classList.remove('hover-left', 'hover-right');
+    }
+    hoveredBlock = block;
+    var side;
+    if (target.closest('.block-marker')) {
+      side = 'left';
+    } else if (target.closest('.block-plus, .drag-handle, .block-remove')) {
+      side = 'right';
+    } else {
+      var rect = block.getBoundingClientRect();
+      side = event.clientX < rect.left + rect.width / 2 ? 'left' : 'right';
+    }
+    block.classList.toggle('hover-left', side === 'left');
+    block.classList.toggle('hover-right', side === 'right');
   }
 
   function revokeObjectUrls() {
@@ -548,6 +583,7 @@
     if (!state || !canvas) {
       return;
     }
+    clearBlockHover();
     if (state.document && currentDocumentId !== state.document.id) {
       revokeObjectUrls();
       editDraft = null;
@@ -728,6 +764,7 @@
     if (!block) {
       return;
     }
+    clearBlockHover();
     selectBlock(blockId);
     var ordered = Model.normalizeSequence(state.document);
     var startIndex = ordered.indexOf(block);
@@ -1657,6 +1694,9 @@
     canvas.addEventListener('dblclick', handleCanvasDoubleClick);
     canvas.addEventListener('pointerdown', handleCanvasPointerDown);
     canvas.addEventListener('keydown', handleBlockKeydown);
+    global.document.addEventListener('pointermove', handleBlockHover);
+    global.document.addEventListener('pointerleave', clearBlockHover);
+    global.addEventListener('pointerleave', clearBlockHover);
     canvas.addEventListener('pointerup', function (event) {
       if (event.pointerType === 'touch' && !dragState) {
         var block = event.target.closest ? event.target.closest('.block') : null;
@@ -1682,6 +1722,7 @@
       reflowSequenceLayout();
     });
     global.addEventListener('blur', function () {
+      clearBlockHover();
       if (dragState) {
         finishDrag(false);
       }

@@ -1056,6 +1056,69 @@
     });
   });
 
+  test('US1 left and right block hover reveal the Marker and add controls', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win, '##');
+      commitComposer(win, 'Hover me');
+      var block = state.document.blocks[0];
+      var element = blockById(win, block.id);
+      var marker = element.querySelector('.block-marker');
+      var plus = element.querySelector('.block-plus');
+      var content = element.querySelector('.block-content');
+      var hoverCapable = win.matchMedia('(hover: hover)').matches;
+      var rect = element.getBoundingClientRect();
+
+      function move(target, x, y) {
+        target.dispatchEvent(new win.PointerEvent('pointermove', {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 9,
+          pointerType: 'mouse',
+          clientX: x,
+          clientY: y
+        }));
+      }
+
+      move(byId(win, 'document-title'), 10, 10);
+      move(content, rect.left + rect.width * 0.2, rect.top + 10);
+      equal(element.classList.contains('hover-left'), true);
+      equal(element.classList.contains('hover-right'), false);
+
+      var leftReady = function () {
+        var markerOpacity = win.getComputedStyle(marker).opacity;
+        var plusOpacity = win.getComputedStyle(plus).opacity;
+        if (hoverCapable) {
+          return markerOpacity === '1' && plusOpacity === '0';
+        }
+        return markerOpacity === '1' && plusOpacity === '1';
+      };
+      return waitFor(function () {
+        return leftReady() ? true : null;
+      }, 1000).then(function () {
+        move(content, rect.left + rect.width * 0.8, rect.top + 10);
+        equal(element.classList.contains('hover-left'), false);
+        equal(element.classList.contains('hover-right'), true);
+        if (!hoverCapable) {
+          return;
+        }
+        return waitFor(function () {
+          return win.getComputedStyle(marker).opacity === '0' &&
+            win.getComputedStyle(plus).opacity === '1' ? true : null;
+        }, 1000);
+      }).then(function () {
+        var plusRect = plus.getBoundingClientRect();
+        var blockRect = element.getBoundingClientRect();
+        assert(Math.abs(plusRect.right - (blockRect.right + 12)) <= 2,
+          'The add control must sit at the lower-right corner.');
+        assert(Math.abs(plusRect.bottom - (blockRect.bottom + 12)) <= 2,
+          'The add control must sit at the lower-right corner.');
+        move(byId(win, 'document-title'), 10, 10);
+        equal(element.classList.contains('hover-left'), false);
+        equal(element.classList.contains('hover-right'), false);
+      });
+    });
+  });
+
   test('US1 the image picker inserts a validated image block and remove deletes it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

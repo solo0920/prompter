@@ -122,11 +122,12 @@ The composer is the only input box that creates a new block.
 Each text block is a floating box showing:
 
 - The Marker prefix (if any) as a non-editable visual prefix that is also a button for changing
-  the Marker.
+  the Marker. Hovering the left half of the block reveals it; keyboard focus or an open Marker
+  menu also keeps it visible, and it is always visible on touch devices.
 - The text, wrapped visually but representing one Markdown line.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
-- A small lower-left `+` button with accessible name `在此區塊下方新增`, revealed while the block
-  is hovered or keyboard-focused, and always visible on touch devices.
+- A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
+  right half of the block is hovered or keyboard-focused, and always visible on touch devices.
 - A selected/focus style with a visible outline.
 
 Each image block shows:
@@ -157,8 +158,8 @@ Each image block shows:
 
 ## "+" Insertion
 
-- Every block has a "+" control at its lower-left, revealed on block hover or keyboard focus and
-  kept visible on touch devices.
+- Every block has a "+" control at its lower-right, revealed while the right half of the block
+  is hovered or keyboard-focused, and kept visible on touch devices.
 - Activating it creates one composer directly below the source block, aligned to the source x.
 - The composer inherits the Marker of the source text block. For an image source, it inherits the
   nearest preceding text block's Marker; with no preceding text block it falls back to the

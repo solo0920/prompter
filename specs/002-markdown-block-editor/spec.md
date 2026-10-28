@@ -332,9 +332,9 @@ settings panel and clear the local library after confirming the warning.
 - **FR-019**: When the user types a recognized Marker followed by a space in an input box, the
   Marker MUST be detected live and shown as a prefix; on commit it MUST become the block
   Marker without being duplicated in the block text.
-- **FR-020**: Every block MUST expose a "+" control at its lower-left; activating it MUST
-  insert a new input box directly below that block, and Escape MUST dismiss the inserted input
-  without creating a block.
+- **FR-020**: Every block MUST expose a "+" control at its lower-right, revealed when the right
+  half of the block is hovered; activating it MUST insert a new input box directly below that
+  block, and Escape MUST dismiss the inserted input without creating a block.
 - **FR-021**: Double-clicking a text block MUST enter edit mode; Enter MUST commit and exit
   edit mode, Escape MUST cancel the edit, and clicking outside MUST commit the edit.
 - **FR-022**: A text block MUST hold a single line of text; Enter MUST commit rather than
