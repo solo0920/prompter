@@ -307,7 +307,8 @@ settings panel and clear the local library after confirming the warning.
 - **FR-002**: The header MUST place the File menu at the far left, the document status in the
   center, and Copy, style selector, light/dark toggle, and settings on the right in that order.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
-  the header, and the icon-only preview toggle MUST sit at the right edge of that tab bar.
+  the header. The icon-only preview toggle MUST sit at the right edge of that tab bar, with the
+  active document name and a file icon immediately to its left.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
@@ -470,11 +471,14 @@ settings panel and clear the local library after confirming the warning.
 - **FR-049**: With focus within the editor canvas, Up/Down MUST move through the sequence items
   (blocks plus the composer at its own slot) and wrap from the first item to the last and from
   the last to the first. Tab and Shift+Tab MUST cycle focus only among the controls of the
-  current item (the focused block or composer) and wrap within it. A text block's text area MUST
-  be a Tab stop, and Enter/F2 while it is focused MUST enter edit mode. When focus is on the
-  canvas, Tab/Shift+Tab MUST use the selected block if one exists, otherwise cycle only among
-  editor items; they MUST NOT move to the header or left rail. Space or Enter on a block's
-  title/Marker control MUST open the Marker menu, whose Up/Down keys choose an option.
+  current item (the focused block or composer) and wrap within it. Within a text block, the Tab
+  order MUST be text area, title/Marker, drag handle, then the remaining action controls and the
+  block root. Enter/F2 on the focused text area MUST enter edit mode. When focus is on the canvas,
+  Tab/Shift+Tab MUST use the selected block if one exists, otherwise cycle only among editor
+  items; they MUST NOT move to the header or left rail. Up/Down that changes the selected item
+  MUST preserve the active focus zone (text, title, action, handle, or root) in the destination
+  item when that zone exists. Space or Enter on a block's title/Marker control MUST open the
+  Marker menu, whose Up/Down keys choose an option.
   Up/Down on a block's right drag handle MUST move that block one sequence position earlier or
   later while keeping focus on the handle. Up/Down on the composer title control or text input
   MUST select the adjacent sequence item, wrapping at the ends, while leaving the composer open.

@@ -43,7 +43,7 @@
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **88 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **89 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Edge 156.0.4314.42 and Firefox 159.0 also pass as supplementary checks. Chrome and
   Edge pass with networking blocked; Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
@@ -69,15 +69,16 @@
   or an outside click.
 - Workspace checks: the right-side live preview refreshes after edits and tab switches without
   hiding the canvas; document tabs open, switch, keep their active title editable, close with an
-  `×`, prompt on dirty close, and restore the empty workspace after the last tab.
+  `×`, prompt on dirty close, and restore the empty workspace after the last tab. The active
+  filename and file icon sit immediately left of the preview toggle in the tab bar.
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.
-- Keyboard navigation checks: Up/Down sequence-item selection from the composer title/input with
-  first/last wrap, composer-handle Up/Down slot movement, Tab/Shift+Tab cycling confined to the
-  current block or composer item including the block text area and Enter/F2 editing,
-  Space-opened Marker menu with arrow selection, and drag-handle Up/Down reordering with retained
-  handle focus.
+- Keyboard navigation checks: Up/Down sequence-item selection including the composer at its slot
+  with first/last wrap, focus-zone preservation across items, Tab/Shift+Tab cycling confined to
+  the current block or composer with text → title → drag handle → actions → root order and
+  Enter/F2 editing, composer-handle Up/Down slot movement, Space-opened Marker menu with arrow
+  selection, and drag-handle Up/Down reordering with retained handle focus.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
   spot checks, and real OS pickers remain manual. Safari is outside the automated and manual
   acceptance scope; Chrome is the required release gate.

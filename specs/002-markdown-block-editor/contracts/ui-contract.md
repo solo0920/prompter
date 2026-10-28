@@ -12,7 +12,7 @@ behavior so tests can be written against it.
 +-----------------------------------------------------------------------------------+
 | File |                        [status]                        | Copy Style Theme Settings |
 +------+------------------------------------------------------------------------------------+
-| Dir  | [ Document A × ][ Document B × ]                                   [ Preview ]    |
+| Dir  | [ Document A × ][ Document B × ]                       [ File icon Document B ] [ Preview ] |
 | rail +---------------------------------------------+------------------------------------+
 | [=]  |                                             |  Live preview                      |
 |      |              Editor canvas                  |  +------------------------------+  |
@@ -43,7 +43,7 @@ behavior so tests can be written against it.
 | File > Save | `儲存` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
 | File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
-| Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane; the editor canvas stays visible. Disabled when no document. |
+| Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane; the active document name with a file icon sits immediately to its left. The editor canvas stays visible. Disabled when no document. |
 | Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images. |
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
@@ -230,11 +230,14 @@ Each image block shows:
 - With focus on a block or the canvas, Up/Down moves through the previous/next sequence item and
   wraps at the ends. The composer participates at its own sequence slot; focusing it clears the
   block selection and places the caret in the composer input.
-- While focus is inside a block, Tab/Shift+Tab cycles only that block's own root, title, text,
-  action, and drag-handle controls and wraps within them. While focus is inside the composer, it cycles
-  only the composer's marker, input, and handle. When focus is on the canvas, it uses the selected
-  block if one exists; otherwise it cycles editor items. It never moves to the header or left
-  rail, and both directions wrap.
+- While focus is inside a text block, the Tab order is text area → title/Marker → drag handle →
+  remaining action controls → block root, wrapping within that block. While focus is inside the
+  composer, it cycles only the composer's marker, input, and handle. When focus is on the canvas,
+  it uses the selected block if one exists; otherwise it cycles editor items. It never moves to
+  the header or left rail, and both directions wrap.
+- Up/Down select the previous/next item and preserve the active focus zone (text, title, action,
+  handle, or root) in the destination item when available, so repeated navigation keeps the same
+  control type active.
 - Space/Enter on the title/Marker control opens the symbol-only flyout; Up/Down moves through
   the Marker options and Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
@@ -267,6 +270,8 @@ Each image block shows:
 - Preview opens as a live pane on the right side of the workspace; the editor canvas remains
   visible on the left. It is not a dialog or a new window.
 - The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open.
+- The active document name with a file icon appears immediately to the left of the preview icon; the
+  pane itself has no separate `即時預覽` heading.
 - Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
   after edits and tab switches.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,

@@ -54,7 +54,7 @@
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
       'no-results-clear', 'workspace', 'editor-pane', 'document-tabs', 'document-tab-items',
-      'canvas', 'canvas-empty', 'canvas-new-button',
+      'preview-label', 'preview-file-name', 'canvas', 'canvas-empty', 'canvas-new-button',
       'toast-region', 'alert-region', 'move-announcer', 'preview-view', 'preview-content',
       'settings-dialog', 'settings-close', 'default-marker', 'show-grid',
       'follow-system-button', 'clear-library-button', 'app-version', 'schema-version',
@@ -240,6 +240,24 @@
     }
   }
 
+  function updatePreviewLabel() {
+    var label = elements['preview-label'];
+    var name = elements['preview-file-name'];
+    if (!label || !name) {
+      return;
+    }
+    if (!state.document) {
+      label.hidden = true;
+      name.textContent = '';
+      return;
+    }
+    var title = state.document.title || 'Untitled';
+    label.hidden = false;
+    label.title = title;
+    label.setAttribute('aria-label', '預覽文件：' + title);
+    name.textContent = title;
+  }
+
   function renderDocumentTabs() {
     var tabs = elements['document-tabs'];
     var items = elements['document-tab-items'];
@@ -247,6 +265,7 @@
     if (!tabs || !items || !input) {
       return;
     }
+    updatePreviewLabel();
     items.textContent = '';
     if (!state.tabs.length) {
       tabs.hidden = true;
@@ -1282,6 +1301,7 @@
         return;
       }
       state.document.title = elements['document-title'].value;
+      updatePreviewLabel();
       setDirty(true);
     });
     elements['document-title'].addEventListener('blur', function () {
@@ -1290,6 +1310,7 @@
       }
       state.document.title = Model.normalizeTitle(elements['document-title'].value);
       elements['document-title'].value = state.document.title;
+      updatePreviewLabel();
       renderDirectory();
     });
   }

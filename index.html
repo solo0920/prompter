@@ -157,6 +157,15 @@
     <main id="workspace" class="workspace" aria-label="提示詞編輯區">
       <nav id="document-tabs" class="document-tabs" aria-label="文件頁籤" hidden>
         <div id="document-tab-items" class="document-tab-items" role="tablist"></div>
+        <div id="preview-label" class="preview-label" hidden>
+          <svg class="preview-file-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 3.5h7l4.5 4.5v12.5H6z" fill="none"
+                  stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M13 3.5V8h4.5" fill="none" stroke="currentColor"
+                  stroke-width="1.7" stroke-linejoin="round"/>
+          </svg>
+          <span id="preview-file-name" class="preview-file-name"></span>
+        </div>
         <button id="preview-button" class="button button-quiet button-with-icon preview-toggle"
                 type="button" aria-pressed="false" aria-label="即時預覽" title="即時預覽" disabled>
           <svg class="button-icon preview-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -190,7 +199,6 @@
         </div>
       </div>
       <section id="preview-view" class="preview-view" aria-label="提示詞預覽" tabindex="-1" hidden>
-        <div class="preview-pane-header">即時預覽</div>
         <div id="preview-content" class="preview-content"></div>
       </section>
     </main>

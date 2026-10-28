@@ -659,6 +659,12 @@
       equal(tabElements[1].getAttribute('data-document-id'), 'tab-second');
       equal(tabElements[1].classList.contains('active'), true);
       equal(byId(win, 'document-title').value, '乙文件');
+      equal(byId(win, 'preview-file-name').textContent, '乙文件');
+      assert(byId(win, 'preview-label').querySelector('.preview-file-icon'),
+        'The preview label must include a file icon.');
+      assert(byId(win, 'preview-label').getBoundingClientRect().right <=
+        byId(win, 'preview-button').getBoundingClientRect().left + 1,
+      'The preview filename must sit to the left of the preview icon.');
       tabElements.forEach(function (tab) {
         var close = tab.querySelector('.document-tab-close');
         assert(close, 'Each tab must include a close control.');
@@ -671,6 +677,7 @@
         return state.document && state.document.id === 'tab-first' ? true : null;
       }, 5000).then(function () {
         equal(byId(win, 'document-title').value, '甲文件');
+        equal(byId(win, 'preview-file-name').textContent, '甲文件');
         equal(win.document.querySelector(
           '.document-tab[data-document-id="tab-first"]').classList.contains('active'), true);
         var firstClose = win.document.querySelector(
@@ -1183,7 +1190,9 @@
       press(win, composerInput(win), 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), cId,
         'Up from the composer must select the previous block.');
-      equal(win.document.activeElement, blockById(win, cId));
+      equal(win.document.activeElement,
+        blockById(win, cId).querySelector('.block-content'),
+        'Up from the composer must focus the previous block text area.');
 
       press(win, blockById(win, cId), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), null,
@@ -1193,12 +1202,70 @@
       press(win, composerInput(win), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), aId,
         'Down from the end composer must wrap to the first item.');
-      equal(win.document.activeElement, blockById(win, aId));
+      equal(win.document.activeElement,
+        blockById(win, aId).querySelector('.block-content'),
+        'Down from the composer must focus the first block text area.');
 
       press(win, blockById(win, aId), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), bId,
         'Down must select the next block.');
       equal(state.dirty, false, 'Arrow selection must not mark the document dirty.');
+    });
+  });
+
+  test('US1 Up/Down preserves the focused zone across items', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      state.dirty = false;
+
+      var aContent = blockById(win, aId).querySelector('.block-content');
+      aContent.focus();
+      press(win, aContent, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), bId);
+      equal(win.document.activeElement,
+        blockById(win, bId).querySelector('.block-content'),
+        'Down from the text area must keep focus in the next text area.');
+
+      var bMarker = blockById(win, bId).querySelector('.block-marker');
+      bMarker.focus();
+      press(win, bMarker, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), cId);
+      equal(win.document.activeElement,
+        blockById(win, cId).querySelector('.block-marker'),
+        'Down from the title area must keep focus in the next title area.');
+
+      var cPlus = blockById(win, cId).querySelector('.block-plus');
+      cPlus.focus();
+      press(win, cPlus, 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), bId);
+      equal(win.document.activeElement,
+        blockById(win, bId).querySelector('.block-plus'),
+        'Up from an action control must keep focus on the same action control.');
+
+      var bRoot = blockById(win, bId);
+      bRoot.focus();
+      press(win, bRoot, 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), aId);
+      equal(win.document.activeElement, blockById(win, aId),
+        'Up from the block root must focus the previous block root.');
+
+      var composer = composerInput(win);
+      composer.focus();
+      press(win, composer, 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), cId);
+      equal(win.document.activeElement,
+        blockById(win, cId).querySelector('.block-content'),
+        'Up from the composer must enter the previous block text area.');
+
+      press(win, win.document.activeElement, 'ArrowDown');
+      equal(win.document.activeElement, composerInput(win),
+        'Down from the block text area must return to the composer input.');
+      equal(state.dirty, false, 'Zone-preserving navigation must not mark the document dirty.');
     });
   });
 
@@ -1215,18 +1282,18 @@
 
       aElement.focus();
       press(win, aElement, 'Tab');
-      equal(win.document.activeElement, marker,
-        'Tab from a block must land on its title area.');
-      press(win, marker, 'Tab');
       equal(win.document.activeElement, content,
-        'Tab must reach the block text area.');
+        'The first Tab stop must be the block text area.');
       press(win, content, 'Tab');
-      equal(win.document.activeElement, plus,
-        'Tab must continue within the current block.');
-      press(win, plus, 'Tab');
+      equal(win.document.activeElement, marker,
+        'The second Tab stop must be the title area.');
+      press(win, marker, 'Tab');
       equal(win.document.activeElement, handle,
-        'Tab must continue through the current block controls.');
+        'The third Tab stop must be the drag handle.');
       press(win, handle, 'Tab');
+      equal(win.document.activeElement, plus,
+        'Tab must continue through the remaining block controls.');
+      press(win, plus, 'Tab');
       equal(win.document.activeElement, aElement,
         'Tab must wrap back to the block root.');
 
@@ -1260,9 +1327,8 @@
 
       element.focus();
       press(win, element, 'Tab');
-      press(win, element.querySelector('.block-marker'), 'Tab');
       equal(win.document.activeElement, content,
-        'Tab must reach the block text area.');
+        'The first Tab must reach the block text area.');
 
       press(win, content, 'Enter');
       var input = blockById(win, block.id).querySelector('.block-edit-input');
@@ -1289,7 +1355,9 @@
       press(win, composer, 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), cId,
         'Up from the end composer must select the block before it.');
-      equal(win.document.activeElement, blockById(win, cId));
+      equal(win.document.activeElement,
+        blockById(win, cId).querySelector('.block-content'),
+        'Up from the composer must keep the text-area zone.');
       assert(state.composer, 'Moving from the composer must keep it open.');
 
       composer = composerInput(win);
@@ -1376,29 +1444,29 @@
 
       bElement.focus();
       press(win, bElement, 'Tab');
-      equal(win.document.activeElement, marker,
-        'Tab from the selected block must move to its title area.');
-      press(win, marker, 'Tab');
       equal(win.document.activeElement, content,
-        'Tab must reach the selected block text area.');
+        'The first Tab stop must be the selected block text area.');
       press(win, content, 'Tab');
+      equal(win.document.activeElement, marker,
+        'The second Tab stop must be the selected block title area.');
+      press(win, marker, 'Tab');
+      equal(win.document.activeElement, handle,
+        'The third Tab stop must be the selected block drag handle.');
+      press(win, handle, 'Tab');
       equal(win.document.activeElement, plus,
         'Tab must stay within the selected block.');
       press(win, plus, 'Tab');
-      equal(win.document.activeElement, handle,
-        'Tab must continue through the selected block controls.');
-      press(win, handle, 'Tab');
       equal(win.document.activeElement, bElement,
         'Tab must wrap back to the selected block root.');
 
       press(win, bElement, 'Tab', { shiftKey: true });
-      equal(win.document.activeElement, handle,
-        'Shift+Tab must wrap backward within the selected block.');
+      equal(win.document.activeElement, plus,
+        'Shift+Tab from the block root must enter the end of the block cycle.');
 
       byId(win, 'canvas').focus();
       press(win, byId(win, 'canvas'), 'Tab');
-      equal(win.document.activeElement, bElement,
-        'Tab from the canvas must enter the selected block, not another item.');
+      equal(win.document.activeElement, content,
+        'Tab from the canvas must enter the selected block text area.');
     });
   });
 
@@ -2991,6 +3059,8 @@
           previewIcon.querySelector('circle'),
         'The preview toggle must use the preview-window icon.');
         assert(!byId(win, 'preview-dialog'), 'Preview must not use a dialog.');
+        assert(!win.document.querySelector('.preview-pane-header'),
+          'The preview pane must not repeat the 即時預覽 heading.');
         var quoteElement = content.querySelector('blockquote');
         assert(quoteElement, 'Quote lines must render as a blockquote.');
         assert(quoteElement.textContent.indexOf('引言 <script>alert(1)</script>') !== -1,

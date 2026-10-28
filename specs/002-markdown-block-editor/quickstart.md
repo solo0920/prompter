@@ -59,8 +59,8 @@ Current result (2026-10-29): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **88 passing, 0 failing** (required gate). Edge and Firefox
-also report 88 passing, 0 failing as supplementary checks.
+Current result (2026-10-29): Chrome **89 passing, 0 failing** (required gate). Edge and Firefox
+also report 89 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 88/88 | PASS 88/88 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 88/88 | PASS 88/88 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 88/88 | PASS 88/88 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 89/89 | PASS 89/89 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 89/89 | PASS 89/89 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 89/89 | PASS 89/89 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -182,16 +182,18 @@ opens the Marker flyout without showing a grab cursor.
 7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next sequence
    item is selected, including the composer at its own slot, and that Up on the first item wraps
    to the last while Down on the last wraps to the first.
-8. Focus a block and press Tab repeatedly. Confirm focus cycles only through that block's own
-   root, title, text area, action controls, and drag handle, wrapping inside the block without
-   moving to another block, the composer, header, or left rail. With the text area focused,
-   press Enter or F2 and confirm edit mode starts. Focus the composer input and confirm Tab
-   cycles only its marker, input, and handle. Shift+Tab must wrap in the opposite direction.
-   With focus on the canvas, confirm Tab uses the selected block if one exists.
+8. Focus a block and press Tab repeatedly. Confirm the first stop is the text area, the second
+   is the title/Marker, the third is the drag handle, then the remaining controls and block root,
+   wrapping inside the block without moving to another block, composer, header, or left rail.
+   With the text area focused, press Enter or F2 and confirm edit mode starts. Focus the composer
+   input and confirm Tab cycles only its marker, input, and handle. Shift+Tab must wrap in the
+   opposite direction. With focus on the canvas, confirm Tab uses the selected block if one exists.
 9. Tab to a block's title area and press Space. Confirm the Marker menu opens, Up/Down moves
    through the heading options, and Enter/Space applies the focused option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
-    earlier/later, focus stays on the handle, and the move is announced.
+    earlier/later, focus stays on the handle, and the move is announced. From the text area or
+    title area, press Up/Down to change items and confirm focus stays in the same zone on the new
+    item.
 11. Focus the composer input, type some text, and press Up/Down. Confirm the item before/after
     the composer slot is selected, wrapping at the ends, while the composer and its text remain.
     Repeat with the composer title control focused. Then focus the composer drag handle and press
@@ -207,7 +209,8 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
    pipe table, and a long wrapped line.
-2. Activate the preview icon at the right edge of the document tab bar. Confirm a live preview pane opens on the right while
+2. Confirm the active document name and file icon appear immediately left of the preview icon at
+   the right edge of the tab bar. Activate the preview icon. Confirm a live preview pane opens on the right while
    the editor canvas remains visible on the left, includes images, renders the code block and
    table, and does not execute raw HTML-looking text.
 3. Edit a block and commit it. Confirm the right preview updates without closing or hiding the

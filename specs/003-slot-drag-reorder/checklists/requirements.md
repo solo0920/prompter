@@ -101,7 +101,7 @@
   block and closes the resulting gaps. Up/Down moves through blocks and the composer at its
   sequence slot with first/last wrap; Tab cycles within the current block or composer item; and
   Up/Down on a drag handle reorders the block while retaining focus.
-- Verification: **93 unit tests** and **88 browser tests** pass in Chrome, Edge, and Firefox,
+- Verification: **93 unit tests** and **89 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 
 ## Notes
