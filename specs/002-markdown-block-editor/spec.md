@@ -87,6 +87,9 @@ and confirm the unsaved draft is not restored.
 12. **Given** two or more selected blocks, **When** the user drags any selected block, **Then**
     the whole selection moves together as one contiguous group, its relative order is
     preserved, and the group stays selected after the drop.
+13. **Given** an empty area of the canvas, **When** the user drags a selection rectangle over
+    several blocks, **Then** every text or image block inside the rectangle is selected as a
+    group, and the selection remains after release.
 
 ---
 
@@ -428,6 +431,11 @@ settings panel and clear the local library after confirming the warning.
   keep the group selected after the drop. Dragging a non-selected block MUST move only that
   block. Canceling or dropping outside the canvas MUST restore the pre-drag sequence and
   selection.
+- **FR-047**: Dragging on empty canvas MUST draw a visible selection rectangle and select every
+  text or image block it intersects. The rectangle selection MUST replace the current selection,
+  except that holding Cmd (Ctrl on Windows) MUST add the intersected blocks to the existing
+  selection. Releasing MUST keep the selection; Escape or cancellation MUST restore the
+  pre-marquee selection; a plain empty-canvas click MUST clear the selection.
 
 ### Key Entities *(include if feature involves data)*
 

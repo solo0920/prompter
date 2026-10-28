@@ -208,7 +208,8 @@ leaves, the draft is not restored.
 | Field | Type | Purpose |
 |-------|------|---------|
 | `currentDocumentId` | string \| null | Open document; `null` for the empty workspace. |
-| `selectedBlockId` | string \| null | Front-most selected block. |
+| `selectedBlockIds` | string[] | All blocks selected by Cmd/Ctrl-click, group drag, or marquee range selection. |
+| `selectedBlockId` | string \| null | Front-most/active selected block. |
 | `editingBlockId` | string \| null | Text block in edit mode. |
 | `composer` | `Composer` \| null | The one active input box. |
 | `searchQuery` | string | Transient directory filter. |

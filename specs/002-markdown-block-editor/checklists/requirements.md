@@ -43,7 +43,7 @@
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **74 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **76 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Edge 156.0.4314.42 and Firefox 159.0 also pass as supplementary checks. Chrome and
   Edge pass with networking blocked; Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
@@ -61,8 +61,8 @@
   manual-copy dialog, missing/oversized image warnings, text-only Markdown-only flavors, and
   rich HTML when images are present are covered.
 - Selection checks: Cmd-click multi-selection, bright orange highlighting, batch Marker updates,
-  whole-group pointer dragging with relative-order preservation, and Escape restoration are
-  covered.
+  marquee range selection with additive Cmd/Ctrl behavior, whole-group pointer dragging with
+  relative-order preservation, and Escape restoration are covered.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
   spot checks, and real OS pickers remain manual. Safari is outside the automated and manual
   acceptance scope; Chrome is the required release gate.

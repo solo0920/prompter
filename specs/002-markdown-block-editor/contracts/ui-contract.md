@@ -155,6 +155,10 @@ Each image block shows:
   group stays highlighted during and after the drag. Dragging a non-selected block clears the
   selection and moves only that block. Escape or an out-of-bounds drop restores the pre-drag
   order and selection.
+- Dragging on empty canvas draws a selection rectangle and selects every text or image block it
+  intersects. Holding Cmd (Ctrl on Windows) while dragging adds the hits to the existing
+  selection. Releasing keeps the selection; Escape restores the pre-marquee selection; a plain
+  empty-canvas click clears it.
 - Hovering the Marker control of a selected text block opens the symbol flyout. Choosing a
   Marker applies it to every selected text block; unselected blocks and image blocks are
   unchanged, and the selection remains highlighted.
@@ -200,6 +204,8 @@ Each image block shows:
 - When multiple blocks are selected, dragging any one of them moves the whole selection as a
   contiguous group. The group follows the pointer as one unit, intervening blocks shift live,
   and releasing inserts the group at the previewed position.
+- A drag that starts on empty canvas draws an orange selection rectangle instead of moving
+  blocks; blocks are selected as soon as the rectangle intersects them.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.

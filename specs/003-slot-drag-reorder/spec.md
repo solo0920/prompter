@@ -89,6 +89,9 @@ direction and cancel once before release.
 11. **Given** two or more blocks are selected, **When** the user drags any selected block,
     **Then** the whole selection moves as one contiguous group, its relative order is
     preserved, and the group remains selected.
+12. **Given** an empty area of the canvas, **When** the user drags a selection rectangle over
+    several blocks, **Then** every intersected block becomes selected and can be dragged as a
+    group.
 
 ---
 
@@ -319,7 +322,10 @@ is introduced.
   360×800 without horizontal page scrolling.
 - **FR-022**: After a reorder, selection and focus MUST remain on the moved block, not on
   another block or on a position. When a multi-selected group is moved, every block in the
-  group MUST remain selected and focus MUST stay on the block used to start the drag.
+  group MUST remain selected and focus MUST stay on the block used to start the drag. A
+  selection rectangle dragged on empty canvas MUST select every text or image block it
+  intersects; Cmd/Ctrl MUST add to the selection, Escape MUST restore the pre-marquee selection,
+  and a plain empty-canvas click MUST clear it.
 
 ### Functional Requirements: Tech-Site Visual Styles
 
@@ -484,7 +490,7 @@ font, or remote asset is bundled.
 - Changing file open, save, download, or directory-location behavior.
 - Changing Preview, Copy, or clipboard payload formats.
 - Free pixel-level positioning, intentionally empty layout gaps, or arbitrary canvas placement.
-- Lasso selection or automatic group creation beyond the explicit multi-selection.
+- Automatic grouping beyond explicit Cmd/Ctrl selection or marquee range selection.
 - Automatic layout compaction by block type or automatic sorting.
 - Importing or fetching DESIGN.md files at runtime from getdesign.md or any other site.
 - A custom theme editor, color picker, or user-uploaded style files.

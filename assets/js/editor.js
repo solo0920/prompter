@@ -17,6 +17,8 @@
   var markerMenu = null;
   var markerCloseTimer = null;
   var dragState = null;
+  var marqueeState = null;
+  var ignoreNextCanvasClick = false;
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
   var hoveredBlock = null;
@@ -2177,10 +2179,207 @@
     }
   }
 
+  function selectionInReadingOrder(ids) {
+    var state = getState();
+    if (!state || !state.document) {
+      return ids.slice();
+    }
+    var wanted = {};
+    ids.forEach(function (id) {
+      wanted[id] = true;
+    });
+    var ordered = [];
+    state.document.blocks.forEach(function (block) {
+      if (wanted[block.id]) {
+        ordered.push(block.id);
+      }
+    });
+    return ordered;
+  }
+
+  function blocksInMarquee(left, top, right, bottom) {
+    var state = getState();
+    var canvas = getCanvas();
+    if (!state || !state.document || !canvas) {
+      return [];
+    }
+    var canvasRect = canvas.getBoundingClientRect();
+    var ids = [];
+    state.document.blocks.forEach(function (block) {
+      var element = blockElement(block.id);
+      if (!element) {
+        return;
+      }
+      var rect = element.getBoundingClientRect();
+      var blockLeft = rect.left - canvasRect.left;
+      var blockTop = rect.top - canvasRect.top;
+      if (blockLeft < right && blockLeft + rect.width > left &&
+          blockTop < bottom && blockTop + rect.height > top) {
+        ids.push(block.id);
+      }
+    });
+    return ids;
+  }
+
+  function beginMarquee(event) {
+    if (marqueeState || dragState) {
+      return;
+    }
+    if (event.pointerType === 'touch') {
+      return;
+    }
+    if (event.button !== undefined && event.button !== 0) {
+      return;
+    }
+    var canvas = getCanvas();
+    var state = getState();
+    if (!canvas || !state || !state.document) {
+      return;
+    }
+    closeMarkerMenu();
+    clearBlockHover();
+    var rect = canvas.getBoundingClientRect();
+    var element = global.document.createElement('div');
+    element.className = 'selection-marquee';
+    element.setAttribute('aria-hidden', 'true');
+    element.hidden = true;
+    canvas.appendChild(element);
+    var startX = Utils.clamp(event.clientX - rect.left, 0, canvas.clientWidth);
+    var startY = Utils.clamp(event.clientY - rect.top, 0, canvas.clientHeight);
+    marqueeState = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: startX,
+      startY: startY,
+      currentX: startX,
+      currentY: startY,
+      element: element,
+      baseSelection: selectedBlockIds(state).slice(),
+      baseActiveId: state.selectedBlockId,
+      additive: !!(event.metaKey || event.ctrlKey),
+      moved: false,
+      lastSelectionKey: null
+    };
+    try {
+      canvas.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // Synthetic pointer events and some environments do not allow capture.
+    }
+    global.addEventListener('pointermove', onMarqueeMove, true);
+    global.addEventListener('pointerup', onMarqueeEnd, true);
+    global.addEventListener('pointercancel', onMarqueeCancel, true);
+    global.addEventListener('keydown', onMarqueeKeydown, true);
+  }
+
+  function onMarqueeMove(event) {
+    if (!marqueeState || event.pointerId !== marqueeState.pointerId) {
+      return;
+    }
+    var marquee = marqueeState;
+    var dx = event.clientX - marquee.startClientX;
+    var dy = event.clientY - marquee.startClientY;
+    if (!marquee.moved && Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) {
+      return;
+    }
+    var canvas = getCanvas();
+    if (!canvas) {
+      return;
+    }
+    var rect = canvas.getBoundingClientRect();
+    marquee.currentX = Utils.clamp(event.clientX - rect.left, 0, canvas.clientWidth);
+    marquee.currentY = Utils.clamp(event.clientY - rect.top, 0, canvas.clientHeight);
+    marquee.moved = true;
+    var left = Math.min(marquee.startX, marquee.currentX);
+    var top = Math.min(marquee.startY, marquee.currentY);
+    var right = Math.max(marquee.startX, marquee.currentX);
+    var bottom = Math.max(marquee.startY, marquee.currentY);
+    marquee.element.hidden = false;
+    marquee.element.style.left = left + 'px';
+    marquee.element.style.top = top + 'px';
+    marquee.element.style.width = (right - left) + 'px';
+    marquee.element.style.height = (bottom - top) + 'px';
+
+    var hitIds = blocksInMarquee(left, top, right, bottom);
+    var combined = marquee.additive ? marquee.baseSelection.concat(hitIds) : hitIds;
+    var selection = selectionInReadingOrder(combined);
+    var key = selection.join(',');
+    if (key !== marquee.lastSelectionKey) {
+      marquee.lastSelectionKey = key;
+      var active = hitIds.length
+        ? hitIds[hitIds.length - 1]
+        : (selection.length ? selection[selection.length - 1] : null);
+      setBlockSelection(selection, active, { focus: false });
+    }
+    event.preventDefault();
+  }
+
+  function onMarqueeKeydown(event) {
+    if (!marqueeState || event.key !== 'Escape') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    finishMarquee(false);
+  }
+
+  function finishMarquee(commit) {
+    if (!marqueeState) {
+      return;
+    }
+    var marquee = marqueeState;
+    marqueeState = null;
+    global.removeEventListener('pointermove', onMarqueeMove, true);
+    global.removeEventListener('pointerup', onMarqueeEnd, true);
+    global.removeEventListener('pointercancel', onMarqueeCancel, true);
+    global.removeEventListener('keydown', onMarqueeKeydown, true);
+    var canvas = getCanvas();
+    if (canvas) {
+      try {
+        canvas.releasePointerCapture(marquee.pointerId);
+      } catch (error) {
+        // Ignore environments where capture was not established.
+      }
+    }
+    if (marquee.element.parentNode) {
+      marquee.element.parentNode.removeChild(marquee.element);
+    }
+    ignoreNextCanvasClick = true;
+    if (!marquee.moved) {
+      if (!marquee.additive) {
+        clearSelection();
+      }
+      return;
+    }
+    if (!commit) {
+      setBlockSelection(marquee.baseSelection, marquee.baseActiveId, { focus: false });
+    }
+  }
+
+  function onMarqueeEnd(event) {
+    if (!marqueeState || event.pointerId !== marqueeState.pointerId) {
+      return;
+    }
+    finishMarquee(true);
+  }
+
+  function onMarqueeCancel(event) {
+    if (!marqueeState || event.pointerId !== marqueeState.pointerId) {
+      return;
+    }
+    finishMarquee(false);
+  }
+
   function handleCanvasClick(event) {
+    if (ignoreNextCanvasClick) {
+      ignoreNextCanvasClick = false;
+      return;
+    }
     var target = event.target;
     if (target === event.currentTarget) {
-      clearSelection();
+      if (!(event.metaKey || event.ctrlKey)) {
+        clearSelection();
+      }
       return;
     }
     var control = target.closest && target.closest('button, input, .block-edit-input');
@@ -2216,6 +2415,10 @@
   }
 
   function handleCanvasPointerDown(event) {
+    ignoreNextCanvasClick = false;
+    if (marqueeState) {
+      return;
+    }
     if (event.target.closest && event.target.closest('.composer')) {
       return;
     }
@@ -2224,6 +2427,7 @@
     }
     var blockElementNode = event.target.closest ? event.target.closest('.block') : null;
     if (!blockElementNode) {
+      beginMarquee(event);
       return;
     }
     var state = getState();
@@ -2274,12 +2478,18 @@
       if (dragState) {
         finishDrag(false);
       }
+      if (marqueeState) {
+        finishMarquee(false);
+      }
       reflowSequenceLayout();
     });
     global.addEventListener('blur', function () {
       clearBlockHover();
       if (dragState) {
         finishDrag(false);
+      }
+      if (marqueeState) {
+        finishMarquee(false);
       }
     });
     global.document.addEventListener('pointerdown', function (event) {
