@@ -310,7 +310,11 @@
     element.style.left = block.x + 'px';
     element.style.top = block.y + 'px';
     element.style.zIndex = String(block.z || 1);
-    element.setAttribute('aria-current', state && state.selectedBlockId === block.id ? 'true' : 'false');
+    var selected = state && state.selectedBlockId === block.id;
+    element.setAttribute('aria-current', selected ? 'true' : 'false');
+    if (selected) {
+      element.classList.add('selected');
+    }
     element.setAttribute('aria-label', blockLabel(block));
     if (state && state.editingBlockId === block.id) {
       element.classList.add('editing');
@@ -1083,7 +1087,8 @@
     if (pushOverlappingBlocksBelow(document, block)) {
       render();
     }
-    selectBlock(block.id, { focus: true });
+    selectBlock(block.id);
+    openComposer(block.id);
   }
 
   function focusComposer() {

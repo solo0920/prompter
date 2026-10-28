@@ -43,7 +43,7 @@
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **60 passing, 0 failing** from `file://` in Chrome 156.0.8078.48,
+- Browser harness: **62 passing, 0 failing** from `file://` in Chrome 156.0.8078.49,
   Edge 156.0.4314.42, and Firefox 159.0. Chrome and Edge also pass with networking blocked;
   Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,

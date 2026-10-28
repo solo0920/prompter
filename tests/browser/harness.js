@@ -653,10 +653,45 @@
       equal(state.document.blocks.length, 1);
       equal(state.document.blocks[0].marker, '###');
       equal(state.document.blocks[0].text, '標題文字');
-      equal(composerInput(win), null);
+      var nextInput = composerInput(win);
+      assert(nextInput, 'A new composer should appear after committing.');
+      equal(nextInput.value, '', 'The new composer should start empty.');
+      equal(win.document.activeElement, nextInput,
+        'The new composer should receive focus.');
       assert(state.dirty, 'Committing a block must mark the document dirty.');
       assert(blockById(win, state.document.blocks[0].id).classList.contains('selected'),
         'The committed block should be selected.');
+    });
+  });
+
+  test('US1 Enter opens a focused composer below the committed block', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var firstInput = composerInput(win);
+      assert(firstInput, 'The initial composer is missing.');
+      setValue(win, firstInput, 'First');
+      press(win, firstInput, 'Enter');
+
+      var first = state.document.blocks[0];
+      var firstElement = blockById(win, first.id);
+      var nextInput = composerInput(win);
+      assert(nextInput, 'Enter should open a new composer.');
+      assert(nextInput !== firstInput, 'Enter should replace the composer input.');
+      equal(win.document.activeElement, nextInput,
+        'The follow-up composer should receive focus.');
+      var composer = nextInput.closest('.composer');
+      equal(parseFloat(composer.style.top),
+        first.y + firstElement.offsetHeight + 8,
+        'The follow-up composer should sit below the committed block.');
+      equal(parseFloat(composer.style.left), first.x);
+
+      setValue(win, nextInput, 'Second');
+      press(win, nextInput, 'Enter');
+      equal(state.document.blocks.length, 2);
+      var ordered = readingOrder(win);
+      equal(ordered[0].text, 'First');
+      equal(ordered[1].text, 'Second');
+      assert(composerInput(win), 'Continuous entry should keep a composer open.');
     });
   });
 
@@ -754,6 +789,8 @@
       createSequence(win, ['First', 'Second']);
       var first = state.document.blocks[0];
       var secondId = state.document.blocks[1].id;
+      press(win, composerInput(win), 'Escape');
+      equal(composerInput(win), null, 'Escape should dismiss the composer.');
       blockById(win, first.id).querySelector('.block-content')
         .dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
       var input = win.document.querySelector('#canvas .block-edit-input');
@@ -762,6 +799,33 @@
       equal(state.document.blocks.length, 1);
       equal(state.document.blocks[0].id, secondId);
       equal(composerInput(win), null);
+    });
+  });
+
+  test('US1 selected blocks use an inset highlight, compact padding and a centered handle', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      var element = commitComposer(win, 'Style check');
+      assert(element, 'The committed block is missing from the DOM.');
+      assert(element.classList.contains('selected'), 'The new block should be selected.');
+      var style = win.getComputedStyle(element);
+      equal(style.outlineStyle, 'solid');
+      equal(style.outlineWidth, '2px');
+      equal(style.outlineOffset, '-2px');
+      equal(style.paddingTop, '4.5px');
+      equal(style.paddingBottom, '5px');
+      equal(style.paddingLeft, '5px');
+
+      var handle = element.querySelector('.drag-handle');
+      var handleStyle = win.getComputedStyle(handle);
+      equal(handleStyle.display, 'flex');
+      equal(handleStyle.width, '24px');
+      equal(handleStyle.height, '24px');
+      var blockRect = element.getBoundingClientRect();
+      var handleRect = handle.getBoundingClientRect();
+      assert(Math.abs((handleRect.top + handleRect.height / 2) -
+        (blockRect.top + blockRect.height / 2)) <= 1,
+        'The drag handle should be vertically centered on the block.');
     });
   });
 

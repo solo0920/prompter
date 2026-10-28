@@ -57,7 +57,7 @@ Current result (2026-10-28): **86 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): **60 passing, 0 failing** in Chrome, Edge, and Firefox.
+Current result (2026-10-28): **62 passing, 0 failing** in Chrome, Edge, and Firefox.
 
 ## Verified Results (2026-10-28)
 
@@ -67,9 +67,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.48 | PASS 60/60 | PASS 60/60 | Full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 60/60 | PASS 60/60 | Same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 60/60 | PASS 60/60 | WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 62/62 | PASS 62/62 | Full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 62/62 | PASS 62/62 | Same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 62/62 | PASS 62/62 | WebDriver BiDi run; download save fallback |
 | Safari (macOS) | 27.2 | Not run | Not run | Safari Remote Automation is disabled; see exceptions |
 
 Additional automated evidence:
