@@ -2246,7 +2246,8 @@
         event.preventDefault();
         event.stopPropagation();
         closeMarkerMenu();
-        var focusables = canvasFocusables(getCanvas());
+        var item = anchor.closest ? (anchor.closest('.block') || anchor.closest('.composer')) : null;
+        var focusables = item ? focusablesForItem(item) : canvasFocusables(getCanvas());
         var index = focusables.indexOf(anchor);
         if (index === -1) {
           anchor.focus();
@@ -2407,14 +2408,14 @@
     removeSelectedBlocks();
   }
 
-  function canvasFocusables(canvas) {
-    if (!canvas) {
+  function canvasFocusables(container) {
+    if (!container) {
       return [];
     }
     var selector = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
       'textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
-    return Array.prototype.filter.call(canvas.querySelectorAll(selector), function (node) {
-      if (node === canvas || node.hidden || node.disabled) {
+    return Array.prototype.filter.call(container.querySelectorAll(selector), function (node) {
+      if (node.hidden || node.disabled) {
         return false;
       }
       if (node.getAttribute('aria-hidden') === 'true' || node.closest('[hidden]')) {
@@ -2426,6 +2427,42 @@
       var style = global.getComputedStyle(node);
       return style.display !== 'none' && style.visibility !== 'hidden';
     });
+  }
+
+  function focusablesForItem(item) {
+    if (!item) {
+      return [];
+    }
+    if (item.classList && item.classList.contains('block')) {
+      return [item].concat(canvasFocusables(item));
+    }
+    return canvasFocusables(item);
+  }
+
+  function selectedBlockForTab(active) {
+    var state = getState();
+    if (!state) {
+      return null;
+    }
+    var focusedBlock = active && active.closest ? active.closest('.block') : null;
+    if (focusedBlock) {
+      return isBlockSelected(state, focusedBlock.dataset.blockId) ? focusedBlock : null;
+    }
+    if (state.selectedBlockId) {
+      var selected = blockElement(state.selectedBlockId);
+      if (selected) {
+        return selected;
+      }
+    }
+    return null;
+  }
+
+  function tabFocusables(canvas, active) {
+    var selectedBlock = selectedBlockForTab(active);
+    if (selectedBlock) {
+      return focusablesForItem(selectedBlock);
+    }
+    return canvasFocusables(canvas);
   }
 
   function handleCanvasTabKeydown(event) {
@@ -2440,7 +2477,7 @@
     if (!canvas || !active || !canvas.contains(active)) {
       return;
     }
-    var focusables = canvasFocusables(canvas);
+    var focusables = tabFocusables(canvas, active);
     if (!focusables.length) {
       return;
     }

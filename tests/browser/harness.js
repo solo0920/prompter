@@ -1117,6 +1117,47 @@
     });
   });
 
+  test('US1 Tab cycles only within the selected block', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var bId = ids[1];
+
+      blockById(win, bId).querySelector('.block-content')
+        .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+      equal(win.Prompter.editor.getSelectedBlockId(), bId,
+        'B must be selected before the Tab check.');
+      var bElement = blockById(win, bId);
+      var marker = bElement.querySelector('.block-marker');
+      var plus = bElement.querySelector('.block-plus');
+      var handle = bElement.querySelector('.drag-handle');
+
+      bElement.focus();
+      press(win, bElement, 'Tab');
+      equal(win.document.activeElement, marker,
+        'Tab from the selected block must move to its title area.');
+      press(win, marker, 'Tab');
+      equal(win.document.activeElement, plus,
+        'Tab must stay within the selected block.');
+      press(win, plus, 'Tab');
+      equal(win.document.activeElement, handle,
+        'Tab must continue through the selected block controls.');
+      press(win, handle, 'Tab');
+      equal(win.document.activeElement, bElement,
+        'Tab must wrap back to the selected block root.');
+
+      press(win, bElement, 'Tab', { shiftKey: true });
+      equal(win.document.activeElement, handle,
+        'Shift+Tab must wrap backward within the selected block.');
+
+      byId(win, 'canvas').focus();
+      press(win, byId(win, 'canvas'), 'Tab');
+      equal(win.document.activeElement, bElement,
+        'Tab from the canvas must enter the selected block, not another item.');
+    });
+  });
+
   test('US1 Marker menu and drag-handle keyboard navigation', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

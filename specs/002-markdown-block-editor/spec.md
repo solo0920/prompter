@@ -96,9 +96,10 @@ and confirm the unsaved draft is not restored.
     or a block editor must edit text instead of removing blocks.
 15. **Given** focus is inside the editor, **When** the user presses Up/Down, **Then** the
     previous/next block is selected and the selection wraps between the first and last blocks.
-    Tab and Shift+Tab must cycle focus only among editor items and wrap at the ends. Space on a
-    title control opens the Marker menu for arrow-key selection, and Up/Down on a drag handle
-    moves the block one position while keeping focus on that handle.
+    When a block is selected, Tab and Shift+Tab must cycle only through that block's controls and
+    wrap within it; without a selection they must cycle only among editor items. Space on a title
+    control opens the Marker menu for arrow-key selection, and Up/Down on a drag handle moves the
+    block one position while keeping focus on that handle.
 
 ---
 
@@ -453,12 +454,13 @@ settings panel and clear the local library after confirming the warning.
   selection, and focus the canvas or the composer when the document becomes empty. Delete MUST
   be ignored while focus is in the composer, a block editor, or another input.
 - **FR-049**: With focus within the editor canvas, Up/Down MUST select the previous/next block
-  and wrap from the first block to the last and from the last to the first. Tab and Shift+Tab
-  MUST cycle focus only among editor items and wrap at the ends instead of moving to the header
-  or left rail. Space or Enter on a block's title/Marker control MUST open the Marker menu, whose
-  Up/Down keys choose an option. Up/Down on a block's right drag handle MUST move that block one
-  sequence position earlier or later while keeping focus on the handle. Arrow and Tab navigation
-  MUST be ignored while typing in the composer or block editor.
+  and wrap from the first block to the last and from the last to the first. When a block is
+  selected, Tab and Shift+Tab MUST cycle focus only among that block's own controls and wrap
+  within it; when no block is selected, they MUST cycle only among editor items and wrap instead
+  of moving to the header or left rail. Space or Enter on a block's title/Marker control MUST
+  open the Marker menu, whose Up/Down keys choose an option. Up/Down on a block's right drag
+  handle MUST move that block one sequence position earlier or later while keeping focus on the
+  handle. Arrow and Tab navigation MUST be ignored while typing in the composer or block editor.
 
 ### Key Entities *(include if feature involves data)*
 

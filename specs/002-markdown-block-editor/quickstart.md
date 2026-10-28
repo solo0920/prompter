@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **82 passing, 0 failing** (required gate). Edge and Firefox
-also report 82 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **83 passing, 0 failing** (required gate). Edge and Firefox
+also report 83 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 82/82 | PASS 82/82 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 82/82 | PASS 82/82 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 82/82 | PASS 82/82 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 83/83 | PASS 83/83 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 83/83 | PASS 83/83 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 83/83 | PASS 83/83 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -181,9 +181,10 @@ opens the Marker flyout without showing a grab cursor.
 7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next block is
    selected, and that Up on the first block wraps to the last while Down on the last wraps to
    the first.
-8. Press Tab repeatedly from a block and confirm focus cycles only through editor items (block,
-   title, action controls, drag handle, composer) without entering the header or left rail.
-   Shift+Tab must wrap in the opposite direction.
+8. Select a block and press Tab repeatedly. Confirm focus cycles only through that block's own
+   root, title, action controls, and drag handle, wrapping inside the block without moving to
+   another block, the composer, header, or left rail. Shift+Tab must wrap in the opposite
+   direction. With no block selected, confirm Tab still cycles only among editor items.
 9. Tab to a block's title area and press Space. Confirm the Marker menu opens, Up/Down moves
    through the heading options, and Enter/Space applies the focused option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position

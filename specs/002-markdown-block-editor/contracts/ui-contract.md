@@ -217,8 +217,10 @@ Each image block shows:
 
 - With focus on a block or the canvas, Up/Down selects the previous/next block and wraps at the
   ends. The focused block is selected and revealed in the reading order.
-- Tab/Shift+Tab while focus is inside the editor cycles the block, title, action, drag-handle,
-  and composer controls without leaving the canvas; the ends wrap.
+- When a block is selected, Tab/Shift+Tab cycles only that block's own root, title, action, and
+  drag-handle controls and wraps within them; it does not move to another block or the composer.
+  With no block selected, Tab/Shift+Tab cycles editor items without leaving the canvas; both
+  directions wrap.
 - Space/Enter on the title/Marker control opens the symbol-only flyout; Up/Down moves through
   the Marker options and Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
@@ -339,7 +341,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 
 | Context | Keys | Action |
 |---------|------|--------|
-| Global | Tab / Shift+Tab | Move focus through controls in visual order; while focus is in the editor, cycle only among editor items and wrap. |
+| Global | Tab / Shift+Tab | Move focus through controls in visual order; while focus is in the editor, cycle only among editor items, or only within the selected block's controls, and wrap. |
 | File menu | Enter/Space, Arrow Up/Down, Home/End, Escape | Open/navigate/close. |
 | Directory | Tab, Enter/Space | Focus/open a document. |
 | Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
