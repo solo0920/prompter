@@ -59,8 +59,8 @@ Current result (2026-10-28): **92 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **63 passing, 0 failing** (required gate). Edge and Firefox
-also report 63 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **64 passing, 0 failing** (required gate). Edge and Firefox
+also report 64 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 63/63 | PASS 63/63 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 63/63 | PASS 63/63 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 63/63 | PASS 63/63 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 64/64 | PASS 64/64 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 64/64 | PASS 64/64 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 64/64 | PASS 64/64 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -262,7 +262,9 @@ session-only.
 3. Use the settings reset to follow the system again.
 4. With a fresh profile, confirm 簡約留白 (`apple`) is the default. Switch among all ten
    styles; confirm each works in both light and dark and persists.
-5. Change the default Marker; create a new composer and confirm it uses the new default.
+5. With a blank document, change the default Marker and confirm the initial composer uses it.
+   Commit a block with `##` and confirm the next composer inherits `##`; use `+` on a
+   differently marked block and confirm it inherits that block's Marker.
 6. Toggle the alignment grid; confirm it appears/disappears and persists.
 7. Open the settings dialog, confirm version information is present.
 8. Clear the local library after confirming; confirm the workspace is empty, local records are

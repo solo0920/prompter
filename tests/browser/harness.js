@@ -132,10 +132,13 @@
     return lastBlock(win);
   }
 
-  function addBelow(win, anchorElement, text) {
+  function addBelow(win, anchorElement, text, marker) {
     var plus = anchorElement.querySelector('.block-plus');
     assert(plus, 'The block "+" control is missing.');
     plus.click();
+    if (marker !== undefined) {
+      win.Prompter.editor.setDefaultMarker(marker);
+    }
     return commitComposer(win, text);
   }
 
@@ -712,6 +715,45 @@
       press(win, input, 'Enter');
       equal(state.document.blocks[0].marker, '1.');
       equal(state.document.blocks[0].text, '第一項');
+    });
+  });
+
+  test('US1 composers inherit the preceding text block Marker', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win, '##');
+      var composerMarker = function () {
+        return win.document.querySelector('#canvas .composer-marker');
+      };
+
+      equal(composerMarker().textContent, '##',
+        'The initial composer should use the default Marker.');
+      var input = composerInput(win);
+      setValue(win, input, '第一項');
+      press(win, input, 'Enter');
+      equal(state.document.blocks[0].marker, '##');
+      equal(composerMarker().textContent, '##',
+        'The follow-up composer should inherit the committed Marker.');
+
+      composerMarker().click();
+      var menu = win.document.querySelector('.marker-menu');
+      var dash = menu.querySelector('[data-marker="-"]');
+      assert(dash, 'The bullet Marker option is missing.');
+      dash.click();
+      input = composerInput(win);
+      setValue(win, input, '第二項');
+      press(win, input, 'Enter');
+      equal(state.document.blocks[1].marker, '-');
+      equal(state.preferences.defaultMarker, '##',
+        'The settings default should remain unchanged.');
+      equal(composerMarker().textContent, '-',
+        'The next composer should inherit the list Marker, not the settings default.');
+
+      var first = state.document.blocks.filter(function (block) {
+        return block.text === '第一項';
+      })[0];
+      blockById(win, first.id).querySelector('.block-plus').click();
+      equal(composerMarker().textContent, '##',
+        'A composer opened from "+" should inherit the source block Marker.');
     });
   });
 
@@ -1680,7 +1722,7 @@
       freshDocument(win);
       var heading = commitComposer(win, '# 預覽標題');
       var quote = addBelow(win, heading, '> 引言 <script>alert(1)</script>');
-      addBelow(win, quote, '![遠端](https://example.com/remote.png)');
+      addBelow(win, quote, '![遠端](https://example.com/remote.png)', 'none');
       return addPickerImage(win, 'preview.png').then(function () {
         var button = byId(win, 'preview-button');
         button.focus();
@@ -1830,7 +1872,7 @@
     return appReady().then(function (win) {
       var state = freshDocument(win);
       var heading = commitComposer(win, '# 複製標題');
-      addBelow(win, heading, '第二行 & <b>');
+      addBelow(win, heading, '第二行 & <b>', 'none');
       return addPickerImage(win, 'copied.png').then(function () {
         var written = null;
         return withClipboardStub(win, {

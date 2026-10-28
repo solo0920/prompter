@@ -351,8 +351,9 @@ settings panel and clear the local library after confirming the warning.
   inserted with "+" MUST be placed below their source block; inserted or pasted images MUST be
   placed at the insertion point, below the selected block when one exists and otherwise below
   the last block; lower overlapping blocks MUST shift down by the minimum amount needed to
-  preserve the resulting reading order; and new text blocks MUST use the default Marker selected
-  in settings.
+  preserve the resulting reading order; and a new composer MUST inherit the Marker of its source
+  text block, or the nearest preceding text block for an image source, falling back to the
+  default Marker selected in settings when no text block precedes it.
 - **FR-028**: Preview MUST render the current document's Markdown, including headings, lists,
   quotes, fenced code, basic pipe tables, images, and plain text, with raw HTML-looking text
   escaped, without modifying the document; it MUST close with a close control or Escape and

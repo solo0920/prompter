@@ -226,7 +226,7 @@ The transient input box shown for a blank document or after activating "+".
 | `mode` | `"initial"` \| `"inserted"` | Initial is the blank-document composer; inserted is opened by "+". |
 | `anchorBlockId` | string \| null | Source block for inserted mode; `null` for initial. |
 | `x`, `y` | number | Insertion position, below the source block or at the canvas start. |
-| `marker` | Marker | Default Marker from settings, or live detected marker. |
+| `marker` | Marker | Inherited from the source text block, or the nearest preceding text block for an image source; falls back to the settings default. Live detection may override it until commit. |
 | `text` | string | Current input text; not persisted until committed. |
 
 Transitions:

@@ -1107,6 +1107,36 @@
     render();
   }
 
+  function inheritedComposerMarker(anchor) {
+    var state = getState();
+    var fallback = state && state.preferences
+      ? state.preferences.defaultMarker
+      : 'none';
+    var document = currentDocument();
+    if (!document) {
+      return fallback;
+    }
+    if (anchor && anchor.type === 'text') {
+      return anchor.marker;
+    }
+    var ordered = Model.normalizeSequence(document);
+    var index = ordered.length - 1;
+    if (anchor) {
+      for (var i = 0; i < ordered.length; i += 1) {
+        if (ordered[i].id === anchor.id) {
+          index = i;
+          break;
+        }
+      }
+    }
+    for (var k = index; k >= 0; k -= 1) {
+      if (ordered[k].type === 'text') {
+        return ordered[k].marker;
+      }
+    }
+    return fallback;
+  }
+
   function openComposer(anchorId) {
     var state = getState();
     if (!state || !state.document) {
@@ -1126,7 +1156,7 @@
       anchorBlockId: anchor ? anchor.id : null,
       x: point.x,
       y: point.y,
-      marker: state.preferences.defaultMarker,
+      marker: inheritedComposerMarker(anchor),
       text: ''
     });
     render();

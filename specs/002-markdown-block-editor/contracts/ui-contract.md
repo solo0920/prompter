@@ -136,6 +136,7 @@ Each image block shows:
 - Edit mode shows a text input containing the block text and the Marker button.
 - Enter commits and exits edit mode; Escape cancels and restores the original text and marker;
   clicking outside commits.
+- After committing a text block, the next composer inherits that block's Marker.
 - Marker detection applies on commit: a recognized prefix typed at the start is extracted once.
   If the block already has a marker, a second typed marker is treated as literal text.
 - Committing empty/whitespace-only text removes the block. Its blank-line separation transfers
@@ -151,7 +152,9 @@ Each image block shows:
 - Every block has a "+" control at its lower-left, revealed on block hover or keyboard focus and
   kept visible on touch devices.
 - Activating it creates one composer directly below the source block, aligned to the source x.
-- The composer uses the default Marker from settings.
+- The composer inherits the Marker of the source text block. For an image source, it inherits the
+  nearest preceding text block's Marker; with no preceding text block it falls back to the
+  default Marker from settings.
 - Escape dismisses the inserted composer without creating a block.
 - Enter commits it and removes the composer; the new block is selected.
 - If the document has unsaved changes, adding a block marks it dirty; no save prompt is needed.
