@@ -14,6 +14,7 @@
   var objectUrls = {};
   var currentDocumentId = null;
   var markerMenu = null;
+  var markerCloseTimer = null;
   var dragState = null;
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
@@ -294,30 +295,57 @@
     return button;
   }
 
+  function wireMarkerMenu(anchor, getMarker, onSelect, onToggle) {
+    anchor.setAttribute('aria-haspopup', 'menu');
+    anchor.setAttribute('aria-expanded', 'false');
+    function show(focusMenu, hoverOpened) {
+      openMarkerMenu(anchor, getMarker(), onSelect, onToggle, {
+        focusMenu: focusMenu,
+        hoverOpened: hoverOpened
+      });
+    }
+    anchor.addEventListener('click', function (event) {
+      event.stopPropagation();
+      show(true, false);
+    });
+    anchor.addEventListener('pointerenter', function (event) {
+      if (event.pointerType === 'touch') {
+        return;
+      }
+      cancelMarkerMenuClose();
+      show(false, true);
+    });
+    anchor.addEventListener('pointerleave', function (event) {
+      if (event.pointerType === 'touch') {
+        return;
+      }
+      if (markerMenu && markerMenu.anchor === anchor && markerMenu.hoverOpened) {
+        scheduleMarkerMenuClose();
+      }
+    });
+  }
+
   function createMarkerButton(block, editing) {
     var button = createButton(
       'block-marker' + (block.marker === 'none' ? ' none' : ''),
       '變更標記，目前為' + markerLabel(block.marker),
       markerToken(block.marker)
     );
-    button.setAttribute('aria-haspopup', 'menu');
-    button.setAttribute('aria-expanded', 'false');
-    button.addEventListener('click', function (event) {
-      event.stopPropagation();
-      openMarkerMenu(button, block.marker, function (marker) {
-        if (editing) {
-          applyEditingMarker(marker);
-        } else {
-          if (block.marker !== marker) {
-            block.marker = marker;
-            markDirty();
-          }
-          render();
-          selectBlock(block.id, { focus: true });
+    wireMarkerMenu(button, function () {
+      return block.marker;
+    }, function (marker) {
+      if (editing) {
+        applyEditingMarker(marker);
+      } else {
+        if (block.marker !== marker) {
+          block.marker = marker;
+          markDirty();
         }
-      }, function (open) {
-        button.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
+        render();
+        selectBlock(block.id, { focus: true });
+      }
+    }, function (open) {
+      button.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     return button;
   }
@@ -474,24 +502,21 @@
       '選擇標記，目前為' + markerLabel(composer.marker),
       markerToken(composer.marker)
     );
-    markerButton.setAttribute('aria-haspopup', 'menu');
-    markerButton.setAttribute('aria-expanded', 'false');
-    markerButton.addEventListener('click', function (event) {
-      event.stopPropagation();
+    wireMarkerMenu(markerButton, function () {
+      return composer.marker;
+    }, function (marker) {
       var composerInput = element.querySelector('.composer-input');
       var caretStart = composerInput ? composerInput.selectionStart : null;
       var caretEnd = composerInput ? composerInput.selectionEnd : null;
-      openMarkerMenu(markerButton, composer.marker, function (marker) {
-        composer.markerOverride = marker;
-        composer.marker = marker;
-        markerButton.textContent = markerToken(marker);
-        markerButton.classList.toggle('none', marker === 'none');
-        markerButton.setAttribute('aria-label', '選擇標記，目前為' + markerLabel(marker));
-        updateComposerDetection(element, composer);
-        focusComposer(caretStart, caretEnd);
-      }, function (open) {
-        markerButton.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
+      composer.markerOverride = marker;
+      composer.marker = marker;
+      markerButton.textContent = markerToken(marker);
+      markerButton.classList.toggle('none', marker === 'none');
+      markerButton.setAttribute('aria-label', '選擇標記，目前為' + markerLabel(marker));
+      updateComposerDetection(element, composer);
+      focusComposer(caretStart, caretEnd);
+    }, function (open) {
+      markerButton.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     element.appendChild(markerButton);
 
@@ -1496,14 +1521,28 @@
     });
   }
 
-  function openMarkerMenu(anchor, currentMarker, onSelect, onToggle) {
+  function openMarkerMenu(anchor, currentMarker, onSelect, onToggle, options) {
+    var opts = options || {};
+    var focusMenu = opts.focusMenu !== false;
+    var hoverOpened = opts.hoverOpened === true;
+    if (markerMenu && markerMenu.anchor === anchor) {
+      if (focusMenu) {
+        markerMenu.hoverOpened = false;
+        var existingChecked = markerMenu.element.querySelector('[aria-checked="true"]') ||
+          markerMenu.element.querySelector('.marker-menu-item');
+        if (existingChecked) {
+          existingChecked.focus();
+        }
+      }
+      return;
+    }
     closeMarkerMenu();
     var menu = global.document.createElement('div');
     menu.className = 'marker-menu menu';
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', '選擇標記');
     var labels = {
-      none: '無',
+      none: '無標記',
       '#': '# 標題 1',
       '##': '## 標題 2',
       '###': '### 標題 3',
@@ -1518,8 +1557,9 @@
       item.className = 'menu-item marker-menu-item';
       item.setAttribute('role', 'menuitemradio');
       item.setAttribute('aria-checked', marker === currentMarker ? 'true' : 'false');
+      item.setAttribute('aria-label', labels[marker] || marker);
       item.dataset.marker = marker;
-      item.textContent = labels[marker] || marker;
+      item.textContent = markerToken(marker);
       item.addEventListener('click', function () {
         closeMarkerMenu();
         onSelect(marker);
@@ -1534,20 +1574,35 @@
     var rect = anchor.getBoundingClientRect();
     var menuWidth = menu.offsetWidth;
     var menuHeight = menu.offsetHeight;
-    var left = Math.min(rect.left, global.innerWidth - menuWidth - 8);
-    var top = rect.bottom + 4;
+    var left = rect.left - menuWidth - 6;
+    left = Math.max(8, Math.min(left, global.innerWidth - menuWidth - 8));
+    var top = rect.top;
     if (top + menuHeight > global.innerHeight - 8) {
-      top = Math.max(8, rect.top - menuHeight - 4);
+      top = global.innerHeight - menuHeight - 8;
     }
-    menu.style.left = Math.max(8, left) + 'px';
-    menu.style.top = top + 'px';
-    markerMenu = { element: menu, anchor: anchor, onToggle: onToggle };
+    top = Math.max(8, top);
+    menu.style.left = Math.round(left) + 'px';
+    menu.style.top = Math.round(top) + 'px';
+    markerMenu = {
+      element: menu,
+      anchor: anchor,
+      onToggle: onToggle,
+      hoverOpened: hoverOpened
+    };
     if (onToggle) {
       onToggle(true);
     }
+    menu.addEventListener('pointerenter', function () {
+      cancelMarkerMenuClose();
+    });
+    menu.addEventListener('pointerleave', function () {
+      if (markerMenu && markerMenu.hoverOpened) {
+        scheduleMarkerMenuClose();
+      }
+    });
     var items = Array.prototype.slice.call(menu.querySelectorAll('.marker-menu-item'));
     var checked = menu.querySelector('[aria-checked="true"]') || items[0];
-    if (checked) {
+    if (focusMenu && checked) {
       checked.focus();
     }
     menu.addEventListener('keydown', function (event) {
@@ -1570,9 +1625,38 @@
         anchor.focus();
       }
     });
-    setTimeout(function () {
-      global.document.addEventListener('pointerdown', onMarkerOutside, true);
-    }, 0);
+    global.document.addEventListener('keydown', onMarkerEscape, true);
+    global.document.addEventListener('pointerdown', onMarkerOutside, true);
+  }
+
+  function onMarkerEscape(event) {
+    if (!markerMenu || event.key !== 'Escape') {
+      return;
+    }
+    if (markerMenu.element.contains(event.target)) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    closeMarkerMenu();
+  }
+
+  function cancelMarkerMenuClose() {
+    if (markerCloseTimer !== null) {
+      global.clearTimeout(markerCloseTimer);
+      markerCloseTimer = null;
+    }
+  }
+
+  function scheduleMarkerMenuClose() {
+    cancelMarkerMenuClose();
+    if (!markerMenu || !markerMenu.hoverOpened) {
+      return;
+    }
+    markerCloseTimer = global.setTimeout(function () {
+      markerCloseTimer = null;
+      closeMarkerMenu();
+    }, 200);
   }
 
   function onMarkerOutside(event) {
@@ -1589,8 +1673,10 @@
     if (!markerMenu) {
       return;
     }
+    cancelMarkerMenuClose();
     var menu = markerMenu;
     markerMenu = null;
+    global.document.removeEventListener('keydown', onMarkerEscape, true);
     global.document.removeEventListener('pointerdown', onMarkerOutside, true);
     if (menu.element.parentNode) {
       menu.element.parentNode.removeChild(menu.element);

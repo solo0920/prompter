@@ -59,8 +59,8 @@ Current result (2026-10-28): **92 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **65 passing, 0 failing** (required gate). Edge and Firefox
-also report 65 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **66 passing, 0 failing** (required gate). Edge and Firefox
+also report 66 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 65/65 | PASS 65/65 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 65/65 | PASS 65/65 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 65/65 | PASS 65/65 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 66/66 | PASS 66/66 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 66/66 | PASS 66/66 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 66/66 | PASS 66/66 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -124,7 +124,8 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
    appears directly below.
 4. Type `- 限制一` and press Enter.
 5. Add another block and type `> 只輸出結果` and press Enter.
-6. Add another block, open the Marker control, choose `.`, type `literal`, and press Enter.
+6. Add another block, hover the Marker control, choose `.` from the symbol-only flyout, type
+   `literal`, and press Enter.
 7. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
    shows `##`; press Enter.
 8. Press Enter in an empty composer; confirm nothing is created.

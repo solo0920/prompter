@@ -726,6 +726,67 @@
     });
   });
 
+  test('US1 hovering a Marker control opens a symbol-only flyout on its left', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win, '##');
+      commitComposer(win, 'Hover marker');
+      var block = state.document.blocks[0];
+      var element = blockById(win, block.id);
+      var marker = element.querySelector('.block-marker');
+      var composerMarker = win.document.querySelector('#canvas .composer-marker');
+
+      function enter(node) {
+        node.dispatchEvent(new win.PointerEvent('pointerenter', {
+          pointerId: 11,
+          pointerType: 'mouse',
+          bubbles: false
+        }));
+      }
+
+      function leave(node) {
+        node.dispatchEvent(new win.PointerEvent('pointerleave', {
+          pointerId: 11,
+          pointerType: 'mouse',
+          bubbles: false
+        }));
+      }
+
+      enter(marker);
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Hovering the block Marker must open the flyout.');
+      var symbols = Array.prototype.map.call(
+        menu.querySelectorAll('.marker-menu-item'),
+        function (item) { return item.textContent.trim(); }
+      );
+      equal(symbols.join(','), '無,#,##,###,-,1.,>,.',
+        'The flyout must show Marker symbols only.');
+      assert(menu.textContent.indexOf('標題') === -1,
+        'The flyout must not show descriptive Marker labels.');
+      var markerRect = marker.getBoundingClientRect();
+      var menuRect = menu.getBoundingClientRect();
+      assert(menuRect.right <= markerRect.left + 0.5,
+        'The flyout must open to the left of the Marker.');
+      equal(win.document.activeElement, composerInput(win),
+        'Hovering the Marker must not move focus out of the composer.');
+
+      menu.querySelector('[data-marker="-"]').click();
+      equal(state.document.blocks[0].marker, '-');
+
+      composerMarker = win.document.querySelector('#canvas .composer-marker');
+      enter(composerMarker);
+      var composerMenu = win.document.querySelector('.marker-menu');
+      assert(composerMenu, 'Hovering the composer Marker must open the flyout.');
+      var composerMarkerRect = composerMarker.getBoundingClientRect();
+      var composerMenuRect = composerMenu.getBoundingClientRect();
+      assert(composerMenuRect.right <= composerMarkerRect.left + 0.5,
+        'The composer flyout must open to the left of its Marker.');
+      leave(composerMarker);
+      return waitFor(function () {
+        return win.document.querySelector('.marker-menu') ? null : true;
+      }, 2000);
+    });
+  });
+
   test('US1 composers inherit the preceding text block Marker', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win, '##');

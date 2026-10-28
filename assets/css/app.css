@@ -395,7 +395,13 @@ body {
   z-index: 90;
   max-height: min(360px, calc(100vh - 16px));
   overflow-y: auto;
-  min-width: 180px;
+  min-width: 0;
+  padding: 4px;
+}
+.marker-menu .marker-menu-item {
+  text-align: center;
+  padding: 8px 10px;
+  min-width: 42px;
 }
 .marker-menu .marker-menu-item[aria-checked="true"] {
   background: var(--surface-2);
