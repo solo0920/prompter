@@ -659,12 +659,8 @@
       equal(tabElements[1].getAttribute('data-document-id'), 'tab-second');
       equal(tabElements[1].classList.contains('active'), true);
       equal(byId(win, 'document-title').value, '乙文件');
-      equal(byId(win, 'preview-file-name').textContent, '乙文件');
-      assert(byId(win, 'preview-label').querySelector('.preview-file-icon'),
-        'The preview label must include a file icon.');
-      assert(byId(win, 'preview-label').getBoundingClientRect().right <=
-        byId(win, 'preview-button').getBoundingClientRect().left + 1,
-      'The preview filename must sit to the left of the preview icon.');
+      equal(byId(win, 'preview-label').hidden, true,
+        'The preview filename must stay hidden until preview opens.');
       tabElements.forEach(function (tab) {
         var close = tab.querySelector('.document-tab-close');
         assert(close, 'Each tab must include a close control.');
@@ -672,10 +668,21 @@
         assert(close.getAttribute('aria-label').indexOf('關閉文件') !== -1);
       });
 
-      tabElements[0].querySelector('.document-tab-label').click();
+      byId(win, 'preview-button').click();
       return waitFor(function () {
-        return state.document && state.document.id === 'tab-first' ? true : null;
+        return !byId(win, 'preview-label').hidden &&
+          byId(win, 'preview-file-name').textContent === '乙文件' ? true : null;
       }, 5000).then(function () {
+        assert(byId(win, 'preview-label').querySelector('.preview-file-icon'),
+          'The preview label must include a file icon.');
+        assert(byId(win, 'preview-label').getBoundingClientRect().right <=
+          byId(win, 'preview-button').getBoundingClientRect().left + 1,
+        'The preview filename must sit to the left of the preview icon.');
+        tabElements[0].querySelector('.document-tab-label').click();
+        return waitFor(function () {
+          return state.document && state.document.id === 'tab-first' ? true : null;
+        }, 5000);
+      }).then(function () {
         equal(byId(win, 'document-title').value, '甲文件');
         equal(byId(win, 'preview-file-name').textContent, '甲文件');
         equal(win.document.querySelector(
@@ -698,6 +705,7 @@
       }).then(function () {
         equal(byId(win, 'document-tabs').hidden, true);
         equal(app.elements['document-title'].hidden, true);
+        equal(app.elements['preview-label'].hidden, true);
         equal(byId(win, 'canvas-empty').hidden, false);
       });
     });
@@ -3052,6 +3060,9 @@
           'The preview pane must sit to the right of the editor.');
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'true');
         equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
+        equal(byId(win, 'preview-label').hidden, false,
+          'Opening preview must reveal the active filename in the tab bar.');
+        equal(byId(win, 'preview-file-name').textContent, 'Untitled');
         assert(!byId(win, 'preview-button').querySelector('.edit-icon'),
           'The preview toggle must not switch to an edit icon.');
         var previewIcon = byId(win, 'preview-button').querySelector('.preview-icon');
@@ -3104,6 +3115,8 @@
           'Closing the preview must keep focus on the preview toggle.');
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
         equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
+        equal(byId(win, 'preview-label').hidden, true,
+          'Closing preview must hide the filename and leave only the preview icon.');
         equal(byId(win, 'preview-content').textContent, '');
       });
     });

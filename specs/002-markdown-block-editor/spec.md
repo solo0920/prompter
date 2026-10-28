@@ -307,8 +307,9 @@ settings panel and clear the local library after confirming the warning.
 - **FR-002**: The header MUST place the File menu at the far left, the document status in the
   center, and Copy, style selector, light/dark toggle, and settings on the right in that order.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
-  the header. The icon-only preview toggle MUST sit at the right edge of that tab bar, with the
-  active document name and a file icon immediately to its left.
+  the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
+  preview pane is open, the active document name and a file icon MUST appear immediately to its
+  left; when preview is closed, only the preview icon remains.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with

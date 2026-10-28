@@ -421,6 +421,9 @@
       button.setAttribute('aria-label', on ? '關閉即時預覽' : '即時預覽');
       button.title = on ? '關閉即時預覽' : '即時預覽';
     }
+    if (app && typeof app.updatePreviewLabel === 'function') {
+      app.updatePreviewLabel();
+    }
     reflowEditor();
   }
 

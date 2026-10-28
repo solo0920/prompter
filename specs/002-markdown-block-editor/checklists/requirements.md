@@ -69,8 +69,9 @@
   or an outside click.
 - Workspace checks: the right-side live preview refreshes after edits and tab switches without
   hiding the canvas; document tabs open, switch, keep their active title editable, close with an
-  `×`, prompt on dirty close, and restore the empty workspace after the last tab. The active
-  filename and file icon sit immediately left of the preview toggle in the tab bar.
+  `×`, prompt on dirty close, and restore the empty workspace after the last tab. While preview
+  is open, the active filename and file icon sit immediately left of the preview toggle; when
+  preview closes, only the preview icon remains.
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.

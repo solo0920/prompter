@@ -246,7 +246,10 @@
     if (!label || !name) {
       return;
     }
-    if (!state.document) {
+    var previewOpen = !!(global.Prompter.preview &&
+      typeof global.Prompter.preview.isOpen === 'function' &&
+      global.Prompter.preview.isOpen());
+    if (!state.document || !previewOpen) {
       label.hidden = true;
       name.textContent = '';
       return;
@@ -1418,6 +1421,7 @@
     setFileBusy: setFileBusy,
     updateStatus: updateStatus,
     updateTitleInput: updateTitleInput,
+    updatePreviewLabel: updatePreviewLabel,
     applyAppearance: applyAppearance,
     savePreferences: savePreferences,
     effectiveTheme: effectiveTheme,

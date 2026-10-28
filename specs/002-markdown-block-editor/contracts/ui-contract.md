@@ -270,8 +270,9 @@ Each image block shows:
 - Preview opens as a live pane on the right side of the workspace; the editor canvas remains
   visible on the left. It is not a dialog or a new window.
 - The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open.
-- The active document name with a file icon appears immediately to the left of the preview icon; the
-  pane itself has no separate `即時預覽` heading.
+- Only while the preview pane is open, the active document name with a file icon appears
+  immediately to the left of the preview icon. When preview is closed, the tab bar shows only the
+  preview icon. The pane itself has no separate `即時預覽` heading.
 - Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
   after edits and tab switches.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,
