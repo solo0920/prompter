@@ -181,10 +181,11 @@ opens the Marker flyout without showing a grab cursor.
 7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next sequence
    item is selected, including the composer at its own slot, and that Up on the first item wraps
    to the last while Down on the last wraps to the first.
-8. Select a block and press Tab repeatedly. Confirm focus cycles only through that block's own
+8. Focus a block and press Tab repeatedly. Confirm focus cycles only through that block's own
    root, title, action controls, and drag handle, wrapping inside the block without moving to
-   another block, the composer, header, or left rail. Shift+Tab must wrap in the opposite
-   direction. With no block selected, confirm Tab still cycles only among editor items.
+   another block, the composer, header, or left rail. Focus the composer input and confirm Tab
+   cycles only its marker, input, and handle. Shift+Tab must wrap in the opposite direction.
+   With focus on the canvas, confirm Tab uses the selected block if one exists.
 9. Tab to a block's title area and press Space. Confirm the Marker menu opens, Up/Down moves
    through the heading options, and Enter/Space applies the focused option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position

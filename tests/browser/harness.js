@@ -1101,28 +1101,43 @@
     });
   });
 
-  test('US1 Tab cycles focus only within the editor items', function () {
+  test('US1 Tab cycles only within the current item', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       createSequence(win, ['A', 'B']);
       var ids = state.document.blocks.map(function (block) { return block.id; });
       var aElement = blockById(win, ids[0]);
+      var marker = aElement.querySelector('.block-marker');
+      var plus = aElement.querySelector('.block-plus');
+      var handle = aElement.querySelector('.drag-handle');
 
       aElement.focus();
       press(win, aElement, 'Tab');
-      equal(win.document.activeElement, aElement.querySelector('.block-marker'),
+      equal(win.document.activeElement, marker,
         'Tab from a block must land on its title area.');
-
-      var composerHandle = win.document.querySelector('#canvas .composer-handle');
-      assert(composerHandle, 'The composer drag handle is missing.');
-      composerHandle.focus();
-      press(win, composerHandle, 'Tab');
+      press(win, marker, 'Tab');
+      equal(win.document.activeElement, plus,
+        'Tab must stay within the current block.');
+      press(win, plus, 'Tab');
+      equal(win.document.activeElement, handle,
+        'Tab must continue through the current block controls.');
+      press(win, handle, 'Tab');
       equal(win.document.activeElement, aElement,
-        'Tab from the last editor control must wrap to the first item.');
+        'Tab must wrap back to the block root.');
 
-      press(win, aElement, 'Tab', { shiftKey: true });
+      var composer = composerInput(win);
+      var composerMarker = win.document.querySelector('#canvas .composer-marker');
+      var composerHandle = win.document.querySelector('#canvas .composer-handle');
+      composer.focus();
+      press(win, composer, 'Tab');
       equal(win.document.activeElement, composerHandle,
-        'Shift+Tab from the first item must wrap to the last editor control.');
+        'Tab from the composer input must stay within the composer.');
+      press(win, composerHandle, 'Tab');
+      equal(win.document.activeElement, composerMarker,
+        'Tab must wrap to the first composer control.');
+      press(win, composerMarker, 'Tab', { shiftKey: true });
+      equal(win.document.activeElement, composerHandle,
+        'Shift+Tab must wrap within the composer.');
       assert(byId(win, 'canvas').contains(win.document.activeElement),
         'Tab focus must stay inside the editor canvas.');
     });

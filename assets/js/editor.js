@@ -2459,28 +2459,28 @@
     return canvasFocusables(item);
   }
 
-  function selectedBlockForTab(active) {
-    var state = getState();
-    if (!state) {
+  function currentItemForTab(active) {
+    if (!active || !active.closest) {
       return null;
     }
-    var focusedBlock = active && active.closest ? active.closest('.block') : null;
-    if (focusedBlock) {
-      return isBlockSelected(state, focusedBlock.dataset.blockId) ? focusedBlock : null;
+    var block = active.closest('.block');
+    if (block) {
+      return block;
     }
-    if (state.selectedBlockId) {
-      var selected = blockElement(state.selectedBlockId);
-      if (selected) {
-        return selected;
-      }
-    }
-    return null;
+    return active.closest('.composer');
   }
 
   function tabFocusables(canvas, active) {
-    var selectedBlock = selectedBlockForTab(active);
-    if (selectedBlock) {
-      return focusablesForItem(selectedBlock);
+    var item = currentItemForTab(active);
+    if (item) {
+      return focusablesForItem(item);
+    }
+    var state = getState();
+    if (state && state.selectedBlockId) {
+      var selected = blockElement(state.selectedBlockId);
+      if (selected) {
+        return focusablesForItem(selected);
+      }
     }
     return canvasFocusables(canvas);
   }
