@@ -2985,7 +2985,11 @@
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'true');
         equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
         assert(!byId(win, 'preview-button').querySelector('.edit-icon'),
-          'The preview toggle must stay an eye icon.');
+          'The preview toggle must not switch to an edit icon.');
+        var previewIcon = byId(win, 'preview-button').querySelector('.preview-icon');
+        assert(previewIcon && previewIcon.querySelector('rect') &&
+          previewIcon.querySelector('circle'),
+        'The preview toggle must use the preview-window icon.');
         assert(!byId(win, 'preview-dialog'), 'Preview must not use a dialog.');
         var quoteElement = content.querySelector('blockquote');
         assert(quoteElement, 'Quote lines must render as a blockquote.');
@@ -3027,7 +3031,7 @@
         }, 5000);
       }).then(function () {
         equal(win.document.activeElement, byId(win, 'preview-button'),
-          'Closing the preview must keep focus on the eye toggle.');
+          'Closing the preview must keep focus on the preview toggle.');
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
         equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
         equal(byId(win, 'preview-content').textContent, '');

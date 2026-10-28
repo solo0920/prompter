@@ -164,11 +164,11 @@ expected content.
 
 **Acceptance Scenarios**:
 
-1. **Given** an open document, **When** the user activates the eye icon, **Then** a live
+1. **Given** an open document, **When** the user activates the preview icon, **Then** a live
    rendered preview opens on the right side while the editor canvas remains visible.
 2. **Given** the preview pane is open, **When** the user edits the document or switches tabs,
    **Then** the preview updates to the active document without hiding the editor.
-3. **Given** the preview pane is open, **When** the user activates the eye icon again, **Then**
+3. **Given** the preview pane is open, **When** the user activates the preview icon again, **Then**
    the pane closes, the editor is unchanged, and focus remains on the toggle.
 4. **Given** an open document with content, **When** the user activates Copy, **Then** the
    Markdown source is placed on the clipboard exactly as it would be saved, preserving line
@@ -398,7 +398,7 @@ settings panel and clear the local library after confirming the warning.
 - **FR-028**: Preview MUST render the current document's Markdown in a live pane on the right
   side of the workspace while the editor canvas remains visible, including headings, lists,
   quotes, fenced code, basic pipe tables, images, and plain text, with raw HTML-looking text
-  escaped, without modifying the document. The header eye icon MUST toggle the pane; edits and
+  escaped, without modifying the document. The header preview icon MUST toggle the pane; edits and
   tab switches MUST refresh it without closing it. Preview MUST NOT open a dialog or a new
   window.
 - **FR-029**: Copy MUST place the Markdown source on the clipboard exactly as it would be

@@ -207,7 +207,7 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
    pipe table, and a long wrapped line.
-2. Activate the eye icon in the header. Confirm a live preview pane opens on the right while
+2. Activate the preview icon in the header. Confirm a live preview pane opens on the right while
    the editor canvas remains visible on the left, includes images, renders the code block and
    table, and does not execute raw HTML-looking text.
 3. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
@@ -219,8 +219,8 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 6. Close a clean tab with `×`; confirm the neighboring tab becomes active. Make a tab dirty and
    close it; confirm Save, Discard, or Cancel appears.
 7. Close the last tab. Confirm the empty workspace returns and the preview pane closes.
-8. Activate the eye icon again with a document open; confirm the editor is unchanged, focus stays
-   on the eye toggle, and the preview closes.
+8. Activate the preview icon again with a document open; confirm the editor is unchanged, focus stays
+   on the preview toggle, and the preview closes.
 9. Confirm a document with 500 blocks renders in under 1 second on a mid-range laptop.
 
 ### 6. Copy exact Markdown and rich content (US3, FR-029..FR-031, SC-007)
