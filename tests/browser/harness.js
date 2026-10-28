@@ -1055,6 +1055,129 @@
     });
   });
 
+  test('US1 arrow keys select adjacent blocks and wrap around', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      var canvas = byId(win, 'canvas');
+      state.dirty = false;
+
+      canvas.focus();
+      press(win, canvas, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), aId,
+        'Down from an unselected canvas must select the first block.');
+      equal(win.document.activeElement, blockById(win, aId),
+        'Focus must move to the selected block.');
+
+      press(win, blockById(win, aId), 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), cId,
+        'Up from the first block must wrap to the last block.');
+      equal(win.document.activeElement, blockById(win, cId));
+
+      press(win, blockById(win, cId), 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), aId,
+        'Down from the last block must wrap to the first block.');
+      equal(win.document.activeElement, blockById(win, aId));
+
+      press(win, blockById(win, aId), 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), bId,
+        'Down must select the next block.');
+      equal(state.dirty, false, 'Arrow selection must not mark the document dirty.');
+    });
+  });
+
+  test('US1 Tab cycles focus only within the editor items', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aElement = blockById(win, ids[0]);
+
+      aElement.focus();
+      press(win, aElement, 'Tab');
+      equal(win.document.activeElement, aElement.querySelector('.block-marker'),
+        'Tab from a block must land on its title area.');
+
+      var composerHandle = win.document.querySelector('#canvas .composer-handle');
+      assert(composerHandle, 'The composer drag handle is missing.');
+      composerHandle.focus();
+      press(win, composerHandle, 'Tab');
+      equal(win.document.activeElement, aElement,
+        'Tab from the last editor control must wrap to the first item.');
+
+      press(win, aElement, 'Tab', { shiftKey: true });
+      equal(win.document.activeElement, composerHandle,
+        'Shift+Tab from the first item must wrap to the last editor control.');
+      assert(byId(win, 'canvas').contains(win.document.activeElement),
+        'Tab focus must stay inside the editor canvas.');
+    });
+  });
+
+  test('US1 Marker menu and drag-handle keyboard navigation', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+
+      var marker = blockById(win, aId).querySelector('.block-marker');
+      marker.focus();
+      press(win, marker, ' ');
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Space on the title area must open the Marker menu.');
+      var checked = menu.querySelector('[aria-checked="true"]');
+      equal(win.document.activeElement, checked,
+        'The Marker menu must focus the current option.');
+
+      press(win, win.document.activeElement, 'ArrowDown');
+      equal(win.document.activeElement.dataset.marker, '#',
+        'Down must move to the next Marker option.');
+      press(win, win.document.activeElement, 'ArrowDown');
+      equal(win.document.activeElement.dataset.marker, '##',
+        'Down must continue through the Marker options.');
+      press(win, win.document.activeElement, 'Enter');
+      equal(state.document.blocks[0].marker, '##',
+        'Enter on the focused option must apply the Marker.');
+
+      var markerButton = blockById(win, aId).querySelector('.block-marker');
+      markerButton.focus();
+      press(win, markerButton, ' ');
+      assert(win.document.querySelector('.marker-menu'),
+        'The Marker menu must reopen for the Tab check.');
+      press(win, win.document.activeElement, 'Tab');
+      equal(win.document.querySelector('.marker-menu'), null,
+        'Tab from the Marker menu must close the menu.');
+      equal(win.document.activeElement,
+        blockById(win, aId).querySelector('.block-plus'),
+        'Tab from the Marker menu must move to the next editor control.');
+
+      var handle = blockById(win, bId).querySelector('.drag-handle');
+      handle.focus();
+      press(win, handle, 'ArrowDown');
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [aId, cId, bId].join(','),
+        'Down on the drag handle must move the item one position later.');
+      equal(win.document.activeElement,
+        blockById(win, bId).querySelector('.drag-handle'),
+        'Focus must stay on the drag handle after moving.');
+
+      press(win, win.document.activeElement, 'ArrowUp');
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [aId, bId, cId].join(','),
+        'Up on the drag handle must move the item one position earlier.');
+      equal(win.document.activeElement,
+        blockById(win, bId).querySelector('.drag-handle'));
+      equal(byId(win, 'move-announcer').textContent,
+        '區塊已移到第 2 個位置，共 3 個區塊。');
+    });
+  });
+
   test('US1 pointer dragging shifts intervening blocks in sequence', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

@@ -212,6 +212,18 @@ Each image block shows:
   blocks; blocks are selected as soon as the rectangle intersects them.
 - The grab cursor and drag affordance apply to the right side of a block. The left Marker area
   uses the default cursor so it is clear that it opens the Marker flyout instead of dragging.
+
+## Keyboard Navigation
+
+- With focus on a block or the canvas, Up/Down selects the previous/next block and wraps at the
+  ends. The focused block is selected and revealed in the reading order.
+- Tab/Shift+Tab while focus is inside the editor cycles the block, title, action, drag-handle,
+  and composer controls without leaving the canvas; the ends wrap.
+- Space/Enter on the title/Marker control opens the symbol-only flyout; Up/Down moves through
+  the Marker options and Enter/Space applies the focused option.
+- Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
+  the handle, with the move announced.
+- These keys edit text normally while the composer or block editor input is focused.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.
@@ -327,14 +339,17 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 
 | Context | Keys | Action |
 |---------|------|--------|
-| Global | Tab / Shift+Tab | Move focus through controls in visual order. |
+| Global | Tab / Shift+Tab | Move focus through controls in visual order; while focus is in the editor, cycle only among editor items and wrap. |
 | File menu | Enter/Space, Arrow Up/Down, Home/End, Escape | Open/navigate/close. |
 | Directory | Tab, Enter/Space | Focus/open a document. |
 | Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
+| Block/canvas | Up/Down | Select the previous/next block; wraps from first to last and last to first. |
 | Block/canvas | Delete / Backspace | Remove every selected block; ignored while typing in the composer or block editor. |
 | Block | Enter/F2 | Enter edit mode. |
+| Title/Marker | Space/Enter | Open the Marker menu; Up/Down choose an option; Enter/Space apply it. |
+| Drag handle | Up/Down | Move the focused block one sequence position earlier or later; focus stays on the handle. |
 | Block | Alt+Arrow | Move one sequence position earlier or later. |
 | Block | `+` button | Insert composer below. |
 | Editing | Enter | Commit and exit. |

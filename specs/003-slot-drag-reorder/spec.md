@@ -311,7 +311,8 @@ is introduced.
 - **FR-016**: A blank document MUST place its first composer and first block in the first
   position.
 - **FR-017**: Keyboard users MUST be able to move a focused block one position forward or
-  backward. The same sequential shift MUST apply, and the result MUST be announced.
+  backward. The same sequential shift MUST apply, and the result MUST be announced. Up/Down on
+  a focused drag handle MUST also perform this movement and keep focus on the handle.
 - **FR-018**: Touch dragging MUST work from the drag handle without scrolling the page or
   entering edit mode. Touch and mouse input MUST produce the same sequential shift.
 - **FR-019**: During a drag, the target position MUST be visibly highlighted and the shifted

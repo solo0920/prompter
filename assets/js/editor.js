@@ -362,6 +362,13 @@
       event.stopPropagation();
       show(true, false);
     });
+    anchor.addEventListener('keydown', function (event) {
+      if (event.key === ' ' || event.key === 'Spacebar' || event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        show(true, false);
+      }
+    });
     anchor.addEventListener('pointerenter', function (event) {
       if (event.pointerType === 'touch') {
         return;
@@ -1445,7 +1452,8 @@
       ' 個位置，共 ' + ordered.length + ' 個區塊。');
   }
 
-  function moveBlockByKeyboard(block, delta) {
+  function moveBlockByKeyboard(block, delta, options) {
+    var opts = options || {};
     var document = currentDocument();
     if (!document) {
       return false;
@@ -1462,8 +1470,40 @@
     markDirty();
     render();
     selectBlock(block.id, { focus: true });
+    if (opts.focusHandle) {
+      var element = blockElement(block.id);
+      var handle = element ? element.querySelector('.drag-handle') : null;
+      if (handle) {
+        handle.focus();
+      }
+    }
     announceSequencePosition(block.id);
     return true;
+  }
+
+  function selectAdjacentBlock(currentId, delta) {
+    var state = getState();
+    if (!state || !state.document) {
+      return;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    if (!ordered.length) {
+      return;
+    }
+    var index = -1;
+    if (currentId) {
+      for (var i = 0; i < ordered.length; i += 1) {
+        if (ordered[i].id === currentId) {
+          index = i;
+          break;
+        }
+      }
+    }
+    if (index === -1) {
+      index = delta > 0 ? -1 : 0;
+    }
+    var next = (index + delta + ordered.length) % ordered.length;
+    selectBlock(ordered[next].id, { focus: true });
   }
 
   function beginEditing(blockId, options) {
@@ -2147,6 +2187,13 @@
           anchor.focus();
         }
       });
+      item.addEventListener('keydown', function (event) {
+        if (event.key === ' ' || event.key === 'Spacebar' || event.key === 'Enter') {
+          event.preventDefault();
+          event.stopPropagation();
+          item.click();
+        }
+      });
       menu.appendChild(item);
     });
     global.document.body.appendChild(menu);
@@ -2195,6 +2242,20 @@
       } else if (event.key === 'End') {
         event.preventDefault();
         items[items.length - 1].focus();
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMarkerMenu();
+        var focusables = canvasFocusables(getCanvas());
+        var index = focusables.indexOf(anchor);
+        if (index === -1) {
+          anchor.focus();
+          return;
+        }
+        var next = event.shiftKey
+          ? (index === 0 ? focusables.length - 1 : index - 1)
+          : (index === focusables.length - 1 ? 0 : index + 1);
+        focusables[next].focus();
       } else if (event.key === 'Escape') {
         event.preventDefault();
         closeMarkerMenu();
@@ -2263,27 +2324,50 @@
   }
 
   function handleBlockKeydown(event) {
-    var target = event.target.closest ? event.target.closest('.block') : null;
-    if (!target) {
+    if (dragState || marqueeState || event.defaultPrevented) {
       return;
     }
-    var blockId = target.dataset.blockId;
-    var block = findBlock(blockId);
+    var target = event.target;
+    if (!target || !target.closest) {
+      return;
+    }
+    if (target.closest('input, textarea, select, [contenteditable="true"]') ||
+        target.isContentEditable) {
+      return;
+    }
+    if (target.closest('.composer')) {
+      return;
+    }
+    var state = getState();
+    var blockElementNode = target.closest('.block');
+    var block = blockElementNode ? findBlock(blockElementNode.dataset.blockId) : null;
+    var plainArrow = !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey &&
+      (event.key === 'ArrowUp' || event.key === 'ArrowDown');
+    if (plainArrow) {
+      var delta = event.key === 'ArrowDown' ? 1 : -1;
+      if (block && target.closest('.drag-handle')) {
+        event.preventDefault();
+        event.stopPropagation();
+        moveBlockByKeyboard(block, delta, { focusHandle: true });
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      selectAdjacentBlock(block ? block.id : (state ? state.selectedBlockId : null), delta);
+      return;
+    }
     if (!block) {
-      return;
-    }
-    if (event.target.classList.contains('block-edit-input')) {
       return;
     }
     if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight' ||
         event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
-      var delta = (event.key === 'ArrowLeft' || event.key === 'ArrowUp') ? -1 : 1;
-      moveBlockByKeyboard(block, delta);
+      var moveDelta = (event.key === 'ArrowLeft' || event.key === 'ArrowUp') ? -1 : 1;
+      moveBlockByKeyboard(block, moveDelta);
       return;
     }
     if (event.key === 'Enter' || event.key === 'F2') {
-      if (block.type === 'text') {
+      if (block.type === 'text' && !target.closest('button')) {
         event.preventDefault();
         event.stopPropagation();
         beginEditing(block.id);
@@ -2293,7 +2377,7 @@
   }
 
   function handleCanvasDeleteKeydown(event) {
-    if (event.defaultPrevented) {
+    if (dragState || marqueeState || event.defaultPrevented) {
       return;
     }
     if (event.key !== 'Delete' && event.key !== 'Backspace') {
@@ -2321,6 +2405,57 @@
     event.preventDefault();
     event.stopPropagation();
     removeSelectedBlocks();
+  }
+
+  function canvasFocusables(canvas) {
+    if (!canvas) {
+      return [];
+    }
+    var selector = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+      'textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+    return Array.prototype.filter.call(canvas.querySelectorAll(selector), function (node) {
+      if (node === canvas || node.hidden || node.disabled) {
+        return false;
+      }
+      if (node.getAttribute('aria-hidden') === 'true' || node.closest('[hidden]')) {
+        return false;
+      }
+      if (node.tabIndex < 0 || node.getClientRects().length === 0) {
+        return false;
+      }
+      var style = global.getComputedStyle(node);
+      return style.display !== 'none' && style.visibility !== 'hidden';
+    });
+  }
+
+  function handleCanvasTabKeydown(event) {
+    if (dragState || marqueeState || event.key !== 'Tab' || event.defaultPrevented) {
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    var canvas = getCanvas();
+    var active = global.document.activeElement;
+    if (!canvas || !active || !canvas.contains(active)) {
+      return;
+    }
+    var focusables = canvasFocusables(canvas);
+    if (!focusables.length) {
+      return;
+    }
+    var index = focusables.indexOf(active);
+    var next;
+    if (index === -1) {
+      next = event.shiftKey ? focusables.length - 1 : 0;
+    } else if (event.shiftKey) {
+      next = index === 0 ? focusables.length - 1 : index - 1;
+    } else {
+      next = index === focusables.length - 1 ? 0 : index + 1;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    focusables[next].focus();
   }
 
   function selectionInReadingOrder(ids) {
@@ -2620,6 +2755,7 @@
     canvas.addEventListener('pointerdown', handleCanvasPointerDown);
     canvas.addEventListener('keydown', handleBlockKeydown);
     canvas.addEventListener('keydown', handleCanvasDeleteKeydown);
+    canvas.addEventListener('keydown', handleCanvasTabKeydown);
     global.document.addEventListener('pointermove', handleBlockHover);
     global.document.addEventListener('pointerleave', clearBlockHover);
     global.addEventListener('pointerleave', clearBlockHover);

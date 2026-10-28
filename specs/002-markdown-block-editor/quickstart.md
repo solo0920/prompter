@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **79 passing, 0 failing** (required gate). Edge and Firefox
-also report 79 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **82 passing, 0 failing** (required gate). Edge and Firefox
+also report 82 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 79/79 | PASS 79/79 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 79/79 | PASS 79/79 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 79/79 | PASS 79/79 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 82/82 | PASS 82/82 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 82/82 | PASS 82/82 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 82/82 | PASS 82/82 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -163,7 +163,7 @@ opens the Marker flyout without showing a grab cursor.
 7. Double-click a block and press Delete inside the editor; confirm it edits text instead of
    removing the block. Repeat in the composer.
 
-### 4. Drag and keyboard movement (US1, FR-023..FR-026, SC-011)
+### 4. Drag and keyboard movement (US1, FR-023..FR-026, FR-049, SC-011)
 
 1. Drag a block past the center of a later or earlier block; confirm the intervening blocks
    shift one position and the dragged block takes the target position with no overlap.
@@ -178,11 +178,21 @@ opens the Marker flyout without showing a grab cursor.
 6. Drag the composer by its handle to another slot; confirm blocks shift to make room and the
    Markdown order remains unchanged. Then drag a block across the composer and confirm the
    composer shifts one position.
-7. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
-   unsaved draft is not restored.
+7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next block is
+   selected, and that Up on the first block wraps to the last while Down on the last wraps to
+   the first.
+8. Press Tab repeatedly from a block and confirm focus cycles only through editor items (block,
+   title, action controls, drag handle, composer) without entering the header or left rail.
+   Shift+Tab must wrap in the opposite direction.
+9. Tab to a block's title area and press Space. Confirm the Marker menu opens, Up/Down moves
+   through the heading options, and Enter/Space applies the focused option.
+10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
+    earlier/later, focus stays on the handle, and the move is announced.
+11. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
+    unsaved draft is not restored.
 
 Expected: positions are layout-only; Markdown never contains coordinates; unsaved drafts are
-session-only.
+session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the editor.
 
 ### 5. Preview (US3, FR-028, SC-008)
 

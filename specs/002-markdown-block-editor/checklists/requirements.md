@@ -43,7 +43,7 @@
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **79 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **82 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Edge 156.0.4314.42 and Firefox 159.0 also pass as supplementary checks. Chrome and
   Edge pass with networking blocked; Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
@@ -68,6 +68,9 @@
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.
+- Keyboard navigation checks: Up/Down block selection with first/last wrap, Tab/Shift+Tab
+  cycling confined to editor items, Space-opened Marker menu with arrow selection, and
+  drag-handle Up/Down reordering with retained handle focus.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
   spot checks, and real OS pickers remain manual. Safari is outside the automated and manual
   acceptance scope; Chrome is the required release gate.

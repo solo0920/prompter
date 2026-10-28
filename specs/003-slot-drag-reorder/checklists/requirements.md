@@ -98,8 +98,9 @@
   their first render without being marked dirty. A multi-selected group drags as one contiguous
   group and stays selected after the drop. A marquee dragged on empty canvas selects the blocks
   it intersects, including additive Cmd/Ctrl selection. Delete/Backspace removes every selected
-  block and closes the resulting gaps.
-- Verification: **93 unit tests** and **79 browser tests** pass in Chrome, Edge, and Firefox,
+  block and closes the resulting gaps. Up/Down selects blocks with first/last wrap; Tab stays
+  within editor items; and Up/Down on a drag handle reorders the block while retaining focus.
+- Verification: **93 unit tests** and **82 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 
 ## Notes
