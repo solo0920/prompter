@@ -7,10 +7,9 @@ package installation, or network. It is also the manual acceptance script for th
 
 ## Prerequisites
 
-- Chrome is the required acceptance browser (latest two major versions). Edge and Firefox are
-  optional secondary compatibility checks.
-- For direct multi-file saving: a Chromium browser (Chrome or Edge). Firefox uses the download
-  fallback.
+- Chrome is the required acceptance browser (latest two major versions). Firefox is the optional
+  secondary compatibility check.
+- For direct multi-file saving: Chrome. Firefox uses the download fallback.
 - Safari is outside the automated and manual acceptance scope.
 - The repository checked out locally; no dependencies to install.
 - A plain-text destination and at least two rich-text destinations for Copy verification. For
@@ -59,10 +58,10 @@ Current result (2026-10-29): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **89 passing, 0 failing** (required gate). Edge and Firefox
-also report 89 passing, 0 failing as supplementary checks.
+Current result (2026-10-29): Chrome **89 passing, 0 failing** (required gate). Firefox also
+reports 89 passing, 0 failing as the supplementary check.
 
-## Verified Results (2026-10-28)
+## Verified Results (2026-10-29)
 
 All automated checks were run against the committed `file://` entry page; no server or build
 step was used. Offline runs used an unreachable proxy/network resolver so any runtime network
@@ -71,11 +70,10 @@ request would fail.
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
 | Chrome (macOS) | 156.0.8078.49 | PASS 89/89 | PASS 89/89 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 89/89 | PASS 89/89 | Supplementary check; same Chromium path as Chrome |
 | Firefox (macOS) | 159.0 | PASS 89/89 | PASS 89/89 | Supplementary check; WebDriver BiDi run; download save fallback |
 
-Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
-Safari is not part of the test matrix.
+Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
+is not part of the test matrix.
 
 Additional automated evidence:
 
@@ -102,8 +100,7 @@ construction, iframe viewport layout, ARIA structure, and picker mocks) pass.
 ## Manual Acceptance Scenarios
 
 Run these in Chrome first as the required acceptance browser. Optionally repeat the core
-authoring, preview, copy, and download paths in Edge and Firefox. Safari is outside the test
-scope.
+authoring, preview, copy, and download paths in Firefox. Safari is outside the test scope.
 
 ### 1. First run and blank document (US1, FR-017)
 
@@ -378,25 +375,25 @@ release-blocking. **Expected** means the flow should work when the browser expos
 but the documented fallback is acceptable. **Fallback** means the documented alternative path
 is the required behavior.
 
-| Flow | Chrome (required) | Edge (supplementary) | Firefox (supplementary) |
-|------|-------------------|----------------------|-------------------------|
-| Open from `file://` | Required | Verified | Verified |
-| Create/edit/drag/keyboard | Required | Verified | Verified |
-| Preview and search | Required | Verified | Verified |
-| Save As direct multi-file | Required (File System Access) | Verified (File System Access) | Download fallback |
-| Save downloads | Fallback | Fallback | Verified |
-| Async rich copy | Expected | Verified | Fallback |
-| `execCommand` copy fallback | Required | Verified | Verified |
-| Image paste via `paste` event | Required | Verified | Verified |
-| IndexedDB persistence | Expected/fallback | Verified/fallback | Verified/fallback |
-| localStorage fallback | Required | Verified | Verified |
-| 360 px layout | Required | Verified | Verified |
+| Flow | Chrome (required) | Firefox (supplementary) |
+|------|-------------------|-------------------------|
+| Open from `file://` | Required | Verified |
+| Create/edit/drag/keyboard | Required | Verified |
+| Preview and search | Required | Verified |
+| Save As direct multi-file | Required (File System Access) | Download fallback |
+| Save downloads | Fallback | Verified |
+| Async rich copy | Expected | Fallback |
+| `execCommand` copy fallback | Required | Verified |
+| Image paste via `paste` event | Required | Verified |
+| IndexedDB persistence | Expected/fallback | Verified/fallback |
+| localStorage fallback | Required | Verified |
+| 360 px layout | Required | Verified |
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-10-28**: Chrome 156 passes the full automated harness from `file://`,
-including offline runs and is the required release gate. Edge 156 and Firefox 159 also pass
-as supplementary checks. Safari is not part of the test matrix.
+**Verified 2026-10-29**: Chrome 156 passes the full automated harness from `file://`,
+including offline runs and is the required release gate. Firefox 159 also passes as the
+supplementary check. Safari is not part of the test matrix.
 
 ## Acceptance Checklist
 
@@ -442,7 +439,7 @@ automated checks. The app remains ready for those manual spot checks.
 |---------|-------|
 | Clipboard fails silently | Use a user gesture; check browser permission; confirm the manual-copy dialog appears. |
 | Images missing after reopen | Keep the Markdown and image files together; do not rename downloads; re-open with all images selected. |
-| Save always downloads | The browser lacks File System Access; use Chrome/Edge for direct writes or accept the download fallback. |
+| Save always downloads | The browser lacks File System Access; use Chrome for direct writes or accept the download fallback. |
 | Storage warning | IndexedDB/localStorage may be blocked or full; save to disk and clear browser data as needed. |
 | Search finds nothing | Check leading/trailing spaces; matching is literal, not fuzzy. |
 | Theme flashes | Confirm the inline preflight script is present and localStorage is readable. |

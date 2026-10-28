@@ -37,15 +37,15 @@
 - 45 functional requirements and 16 measurable outcomes are defined.
 - The specification is ready for `/speckit.plan`.
 
-## Post-Implementation Verification (2026-10-28)
+## Post-Implementation Verification (2026-10-29)
 
 - Unit and contract tests: **93 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
 - Browser harness: **89 passing, 0 failing** in Chrome 156.0.8078.49, the required release
-  gate. Edge 156.0.4314.42 and Firefox 159.0 also pass as supplementary checks. Chrome and
-  Edge pass with networking blocked; Firefox passes with an unreachable proxy configured.
+  gate. Firefox 159.0 also passes as the supplementary check. Chrome passes with networking
+  blocked; Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
   unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate
   image basenames all round-trip.

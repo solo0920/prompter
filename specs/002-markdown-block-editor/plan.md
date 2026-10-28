@@ -36,12 +36,12 @@ document fallback; in-memory fallback when both are unavailable. No remote persi
 **Testing**: `node --test tests/unit/*.test.js` for pure model, serializer, ordering, search,
 renderer, clipboard payload, file-helper, and preference logic; `tests/browser/harness.html`
 opened from `file://` for DOM, storage, and renderer checks; manual core-flow matrix in
-Chrome as the required release gate, with Edge and Firefox as optional compatibility checks.
+Chrome as the required release gate, with Firefox as the optional compatibility check.
 Safari is outside the test scope.
 
 **Target Platform**: Static web app opened directly from `file://` on desktop, responsive down
-to 360 px. Chrome is the primary supported browser; Edge and Firefox are secondary
-compatibility targets.
+to 360 px. Chrome is the primary supported browser; Firefox is the secondary compatibility
+target.
 
 **Project Type**: Single-project static web application.
 
@@ -82,7 +82,7 @@ service worker, local `fetch()`, telemetry, remote asset, or runtime dependency.
 browser-local and degrades through IndexedDB, localStorage, and session memory; preferences
 survive clear-library while disk files are untouched. Copy `text/plain` is byte-identical to
 Save via the shared canonical serializer; output is deterministic. Automated static checks
-reject network and dynamic-code primitives, and offline harness runs pass in Chrome, Edge, and
+reject network and dynamic-code primitives, and offline harness runs pass in Chrome and
 Firefox. The documented manual-only exceptions (external rich-text destinations, physical
 touch, screen reader, and OS pickers) do not violate a principle; the required fallbacks
 exist. Safari is outside the automated and manual acceptance scope.
