@@ -415,6 +415,11 @@ settings panel and clear the local library after confirming the warning.
   without changing other blocks.
 - **FR-045**: Unsupported image formats and images that cannot be stored because local storage
   is full MUST be rejected with a clear message, and the document MUST remain unchanged.
+- **FR-046**: Cmd-click (Ctrl-click on Windows) MUST toggle a block in a multi-selection without
+  clearing the other selected blocks, and selected blocks MUST use a bright orange highlight.
+  Hovering the Marker control of a selected text block MUST open the symbol flyout; choosing a
+  Marker MUST apply it to every selected text block, leave unselected blocks and image blocks
+  unchanged, and keep the selection highlighted.
 
 ### Key Entities *(include if feature involves data)*
 

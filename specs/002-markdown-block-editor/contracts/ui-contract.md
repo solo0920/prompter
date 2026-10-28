@@ -134,7 +134,9 @@ Each text block is a floating box showing:
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
   right half of the block is hovered or keyboard-focused, and always visible on touch devices.
-- A selected/focus style with a visible outline.
+- A selected/focus style with a visible outline. Multi-selected blocks use a bright orange
+  highlight; the composer uses its own accent border only while its input or controls hold
+  focus.
 
 Each image block shows:
 
@@ -143,6 +145,14 @@ Each image block shows:
 - A remove button labeled `移除圖片`.
 - The same `+`, drag, select, and focus behavior as text blocks.
 - A missing-image placeholder with the alt text when the asset cannot be loaded.
+
+## Selection
+
+- Cmd-click (Ctrl-click on Windows) toggles a block in the current selection without clearing
+  the others; a plain click selects only that block.
+- Hovering the Marker control of a selected text block opens the symbol flyout. Choosing a
+  Marker applies it to every selected text block; unselected blocks and image blocks are
+  unchanged, and the selection remains highlighted.
 
 ## Editing a Block
 
@@ -302,6 +312,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Directory | Tab, Enter/Space | Focus/open a document. |
 | Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
 | Block | Tab | Focus block in reading order. |
+| Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
 | Block | Enter/F2 | Enter edit mode. |
 | Block | Alt+Arrow | Move one sequence position earlier or later. |
 | Block | `+` button | Insert composer below. |

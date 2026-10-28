@@ -117,9 +117,22 @@
     return marker === 'none' ? '無' : marker;
   }
 
+  function selectedBlockIds(state) {
+    if (!state) {
+      return [];
+    }
+    return Object.prototype.toString.call(state.selectedBlockIds) === '[object Array]'
+      ? state.selectedBlockIds
+      : [];
+  }
+
+  function isBlockSelected(state, blockId) {
+    return selectedBlockIds(state).indexOf(blockId) !== -1;
+  }
+
   function blockLabel(block) {
     var state = getState();
-    var selected = state && state.selectedBlockId === block.id;
+    var selected = state && isBlockSelected(state, block.id);
     var editing = state && state.editingBlockId === block.id;
     var label;
     if (block.type === 'image') {
@@ -328,6 +341,35 @@
     });
   }
 
+  function applyMarkerToSelection(anchorBlock, marker) {
+    var state = getState();
+    if (!state) {
+      return;
+    }
+    var ids = selectedBlockIds(state).slice();
+    if (ids.indexOf(anchorBlock.id) === -1) {
+      ids = [anchorBlock.id];
+    }
+    var changed = false;
+    ids.forEach(function (id) {
+      var target = findBlock(id);
+      if (target && target.type === 'text' && target.marker !== marker) {
+        target.marker = marker;
+        changed = true;
+      }
+    });
+    state.selectedBlockIds = ids;
+    state.selectedBlockId = anchorBlock.id;
+    if (changed) {
+      markDirty();
+    }
+    render();
+    var element = blockElement(anchorBlock.id);
+    if (element) {
+      element.focus();
+    }
+  }
+
   function createMarkerButton(block, editing) {
     var button = createButton(
       'block-marker' + (block.marker === 'none' ? ' none' : ''),
@@ -340,12 +382,7 @@
       if (editing) {
         applyEditingMarker(marker);
       } else {
-        if (block.marker !== marker) {
-          block.marker = marker;
-          markDirty();
-        }
-        render();
-        selectBlock(block.id, { focus: true });
+        applyMarkerToSelection(block, marker);
       }
     }, function (open) {
       button.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -442,7 +479,7 @@
     element.style.left = block.x + 'px';
     element.style.top = block.y + 'px';
     element.style.zIndex = String(block.z || 1);
-    var selected = state && state.selectedBlockId === block.id;
+    var selected = state && isBlockSelected(state, block.id);
     element.setAttribute('aria-current', selected ? 'true' : 'false');
     if (selected) {
       element.classList.add('selected');
@@ -673,8 +710,52 @@
     }
   }
 
-  function selectBlock(blockId, options) {
+  function refreshSelectionDom() {
+    var state = getState();
+    var canvas = getCanvas();
+    if (!state || !canvas) {
+      return;
+    }
+    var ids = selectedBlockIds(state);
+    Array.prototype.forEach.call(canvas.querySelectorAll('.block'), function (element) {
+      var id = element.dataset.blockId;
+      var selected = ids.indexOf(id) !== -1;
+      element.classList.toggle('selected', selected);
+      element.setAttribute('aria-current', selected ? 'true' : 'false');
+      var block = findBlock(id);
+      if (block) {
+        element.style.zIndex = String(block.z || 1);
+        element.setAttribute('aria-label', blockLabel(block));
+      }
+    });
+  }
+
+  function setBlockSelection(ids, activeId, options) {
     var opts = options || {};
+    var state = getState();
+    if (!state || !state.document) {
+      return;
+    }
+    var unique = [];
+    (ids || []).forEach(function (id) {
+      if (findBlock(id) && unique.indexOf(id) === -1) {
+        unique.push(id);
+      }
+    });
+    state.selectedBlockIds = unique;
+    state.selectedBlockId = activeId && unique.indexOf(activeId) !== -1
+      ? activeId
+      : (unique.length ? unique[unique.length - 1] : null);
+    refreshSelectionDom();
+    if (opts.focus && state.selectedBlockId) {
+      var element = blockElement(state.selectedBlockId);
+      if (element) {
+        element.focus();
+      }
+    }
+  }
+
+  function selectBlock(blockId, options) {
     var state = getState();
     if (!state || !state.document) {
       return;
@@ -684,39 +765,59 @@
       if (!block) {
         return;
       }
-      if (state.selectedBlockId !== blockId) {
+      if (!isBlockSelected(state, blockId)) {
         block.z = Model.nextZ(state.document);
       }
     }
-    state.selectedBlockId = blockId;
-    var canvas = getCanvas();
-    if (canvas) {
-      Array.prototype.forEach.call(canvas.querySelectorAll('.block'), function (element) {
-        var id = element.dataset.blockId;
-        var selected = id === blockId;
-        element.classList.toggle('selected', selected);
-        element.setAttribute('aria-current', selected ? 'true' : 'false');
-        var block = findBlock(id);
-        if (block) {
-          element.style.zIndex = String(block.z || 1);
-          element.setAttribute('aria-label', blockLabel(block));
-        }
-      });
+    setBlockSelection(blockId ? [blockId] : [], blockId, options);
+  }
+
+  function toggleBlockSelection(blockId, options) {
+    var state = getState();
+    if (!state || !state.document) {
+      return;
     }
-    if (opts.focus) {
-      var element = blockElement(blockId);
-      if (element) {
-        element.focus();
+    var block = findBlock(blockId);
+    if (!block) {
+      return;
+    }
+    var ids = selectedBlockIds(state).slice();
+    var index = ids.indexOf(blockId);
+    var active = state.selectedBlockId;
+    if (index === -1) {
+      ids.push(blockId);
+      active = blockId;
+      block.z = Model.nextZ(state.document);
+    } else {
+      ids.splice(index, 1);
+      if (active === blockId) {
+        active = ids.length ? ids[ids.length - 1] : null;
       }
+    }
+    setBlockSelection(ids, active, { focus: false });
+    var element = blockElement(blockId);
+    if (element) {
+      element.focus();
     }
   }
 
   function clearSelection() {
-    selectBlock(null);
+    setBlockSelection([], null, { focus: false });
+  }
+
+  function removeFromSelection(blockId) {
     var state = getState();
-    if (state) {
-      state.selectedBlockId = null;
+    if (!state) {
+      return;
     }
+    var ids = selectedBlockIds(state).filter(function (id) {
+      return id !== blockId;
+    });
+    var active = state.selectedBlockId === blockId
+      ? (ids.length ? ids[ids.length - 1] : null)
+      : state.selectedBlockId;
+    state.selectedBlockIds = ids;
+    state.selectedBlockId = active;
   }
 
   function isComposerItem(item) {
@@ -913,6 +1014,9 @@
 
   function beginDrag(event, blockId, element, fromHandle) {
     if (event.button !== undefined && event.button !== 0) {
+      return;
+    }
+    if (event.metaKey || event.ctrlKey) {
       return;
     }
     var state = getState();
@@ -1157,6 +1261,7 @@
       caret: caret
     };
     state.editingBlockId = block.id;
+    state.selectedBlockIds = [block.id];
     state.selectedBlockId = block.id;
     block.z = Model.nextZ(state.document);
     render();
@@ -1234,6 +1339,7 @@
 
     if (text.trim() === '') {
       removeBlockFromDocument(state.document, block.id);
+      removeFromSelection(block.id);
       markDirty();
       render();
       if (state.document.blocks.length === 0) {
@@ -1241,7 +1347,6 @@
         render();
         focusComposer();
       } else {
-        selectBlock(state.selectedBlockId === block.id ? null : state.selectedBlockId);
         var canvas = getCanvas();
         if (canvas) {
           canvas.focus();
@@ -1511,9 +1616,7 @@
       }
     }
     markDirty();
-    if (state.selectedBlockId === blockId) {
-      state.selectedBlockId = null;
-    }
+    removeFromSelection(blockId);
     render();
     if (state.document.blocks.length === 0) {
       ensureInitialComposer(state);
@@ -1902,6 +2005,11 @@
     if (control && !control.classList.contains('drag-handle')) {
       return;
     }
+    if (event.metaKey || event.ctrlKey) {
+      event.preventDefault();
+      toggleBlockSelection(block.dataset.blockId);
+      return;
+    }
     selectBlock(block.dataset.blockId);
   }
 
@@ -1934,6 +2042,9 @@
     }
     var state = getState();
     if (state && state.editingBlockId === blockElementNode.dataset.blockId) {
+      return;
+    }
+    if (event.metaKey || event.ctrlKey) {
       return;
     }
     beginDrag(event, blockElementNode.dataset.blockId, blockElementNode, false);
@@ -2028,6 +2139,10 @@
     getSelectedBlockId: function () {
       var state = getState();
       return state ? state.selectedBlockId : null;
+    },
+    getSelectedBlockIds: function () {
+      var state = getState();
+      return selectedBlockIds(state).slice();
     },
     closeMarkerMenu: closeMarkerMenu,
     updateCanvasSize: updateCanvasSize

@@ -59,8 +59,8 @@ Current result (2026-10-28): **92 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **69 passing, 0 failing** (required gate). Edge and Firefox
-also report 69 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **70 passing, 0 failing** (required gate). Edge and Firefox
+also report 70 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 69/69 | PASS 69/69 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 69/69 | PASS 69/69 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 69/69 | PASS 69/69 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 70/70 | PASS 70/70 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 70/70 | PASS 70/70 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 70/70 | PASS 70/70 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -116,7 +116,7 @@ scope.
 
 Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 
-### 2. Create blocks with markers (US1, FR-018, FR-019, SC-001, SC-002)
+### 2. Create blocks with markers (US1, FR-018, FR-019, FR-046, SC-001, SC-002)
 
 1. With the composer focused, type `# 角色` and press Enter.
 2. Confirm one heading block appears with a single `#` prefix and the composer closes.
@@ -134,6 +134,9 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 10. Try `#Heading` (no space) and `#### Heading`; confirm they remain ordinary text, not
    markers.
 11. Create at least five blocks with three different markers in under two minutes.
+12. Cmd-click several blocks; confirm they keep bright orange outlines. Hover the left Marker
+    area of one selected block, choose `##`, and confirm every selected text block changes while
+    the selection remains orange.
 
 Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes enabled.
 

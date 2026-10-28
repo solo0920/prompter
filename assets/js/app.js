@@ -23,6 +23,7 @@
     fileTarget: null,
     documentPersisted: false,
     selectedBlockId: null,
+    selectedBlockIds: [],
     editingBlockId: null,
     composer: null,
     dirty: false,
@@ -285,6 +286,7 @@
     state.assets = assets ? assets.slice() : [];
     state.documentPersisted = opts.persisted === true;
     state.selectedBlockId = null;
+    state.selectedBlockIds = [];
     state.editingBlockId = null;
     state.composer = null;
     state.dirty = opts.dirty === true;

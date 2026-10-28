@@ -794,6 +794,63 @@
     });
   });
 
+  test('US1 Cmd-click selects multiple blocks and a Marker applies to all selected', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+
+      function cmdClick(blockId) {
+        blockById(win, blockId).querySelector('.block-content')
+          .dispatchEvent(new win.MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            metaKey: true
+          }));
+      }
+
+      cmdClick(ids[0]);
+      cmdClick(ids[1]);
+      cmdClick(ids[2]);
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','), ids.join(','),
+        'Cmd-click must accumulate the selected blocks.');
+      ids.forEach(function (id) {
+        var element = blockById(win, id);
+        assert(element.classList.contains('selected'), 'Each Cmd-clicked block must be selected.');
+        equal(win.getComputedStyle(element).outlineColor, 'rgb(255, 90, 0)',
+          'Selected blocks must use the bright orange outline.');
+      });
+
+      cmdClick(ids[1]);
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [ids[0], ids[2]].join(','), 'Cmd-clicking a selected block must deselect it.');
+
+      var marker = blockById(win, ids[0]).querySelector('.block-marker');
+      marker.dispatchEvent(new win.PointerEvent('pointerenter', {
+        pointerId: 14,
+        pointerType: 'mouse',
+        bubbles: false
+      }));
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Hovering a selected block Marker must open the flyout.');
+      menu.querySelector('[data-marker="##"]').click();
+
+      equal(state.document.blocks[0].marker, '##',
+        'The first selected block must receive the chosen Marker.');
+      equal(state.document.blocks[1].marker, 'none',
+        'An unselected block must keep its Marker.');
+      equal(state.document.blocks[2].marker, '##',
+        'The other selected block must receive the chosen Marker.');
+      equal(state.dirty, true);
+      var selected = win.Prompter.editor.getSelectedBlockIds();
+      equal(selected.join(','), [ids[0], ids[2]].join(','),
+        'Applying a Marker must keep the multi-selection.');
+      assert(blockById(win, ids[0]).classList.contains('selected') &&
+        blockById(win, ids[2]).classList.contains('selected'),
+        'Selected blocks must stay highlighted after applying a Marker.');
+    });
+  });
+
   test('US1 composers inherit the preceding text block Marker', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win, '##');
@@ -936,6 +993,8 @@
       equal(style.outlineStyle, 'solid');
       equal(style.outlineWidth, '2px');
       equal(style.outlineOffset, '-2px');
+      equal(style.outlineColor, 'rgb(255, 90, 0)',
+        'Selected blocks must use the bright orange highlight.');
       equal(style.paddingTop, '4.5px');
       equal(style.paddingBottom, '5px');
       equal(style.paddingLeft, '5px');

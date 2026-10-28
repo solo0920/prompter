@@ -1,6 +1,10 @@
 /* Prompter base reset and layout */
 *, *::before, *::after { box-sizing: border-box; }
 
+:root {
+  --selection: #ff5a00;
+}
+
 html, body { height: 100%; }
 
 body {
