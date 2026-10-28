@@ -309,8 +309,9 @@ settings panel and clear the local library after confirming the warning.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
   the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
   preview pane is open, the active document name and a file icon MUST appear immediately to its
-  left as a tab-styled label matching the active document tab, with an `×` that closes preview;
-  when preview is closed, only the preview icon remains.
+  left as a tab-styled label matching the active document tab, with its left edge aligned to the
+  preview pane boundary and an `×` that closes preview; when preview is closed, only the preview
+  icon remains.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with

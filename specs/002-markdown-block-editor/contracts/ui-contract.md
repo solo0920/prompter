@@ -272,8 +272,10 @@ Each image block shows:
 - The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open.
 - Only while the preview pane is open, the active document name with a file icon appears
   immediately to the left of the preview icon as a tab-styled label matching the active document
-  tab's colors and shape. It includes a small `×` that closes preview. When preview is closed, the
-  tab bar shows only the preview icon. The pane itself has no separate `即時預覽` heading.
+  tab's colors and shape. Its left edge aligns with the preview pane's left boundary, so the tab
+  bar visibly splits into editor and preview sections. It includes a small `×` that closes
+  preview. When preview is closed, the tab bar shows only the preview icon. The pane itself has no
+  separate `即時預覽` heading.
 - Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
   after edits and tab switches.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,

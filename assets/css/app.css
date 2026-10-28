@@ -225,7 +225,8 @@ body {
 .document-tabs {
   grid-row: 1;
   grid-column: 1 / -1;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: stretch;
   min-width: 0;
   min-height: 36px;
@@ -233,14 +234,24 @@ body {
   border-bottom: 1px solid var(--border);
   overflow: hidden;
 }
+.workspace.preview-open .document-tabs {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 42%);
+}
 .document-tab-items {
+  grid-column: 1;
   display: flex;
-  flex: 1 1 auto;
   align-items: stretch;
   min-width: 0;
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+}
+.preview-tab-area {
+  grid-column: 2;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  min-width: 0;
 }
 .preview-label {
   display: flex;
@@ -249,6 +260,7 @@ body {
   gap: 6px;
   min-width: 140px;
   max-width: 260px;
+  margin-right: auto;
   padding: 4px 4px 4px 8px;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
@@ -722,6 +734,9 @@ body {
 @media (max-width: 900px) {
   .app-main.directory-open { grid-template-columns: 44px 250px minmax(0, 1fr); }
   .workspace.preview-open { grid-template-columns: minmax(0, 1fr) minmax(260px, 40%); }
+  .workspace.preview-open .document-tabs {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 40%);
+  }
   .block-image-wrap { max-width: min(420px, calc(100vw - 310px)); }
 }
 
@@ -750,6 +765,9 @@ body {
     background: var(--overlay);
   }
   .workspace.preview-open { grid-template-columns: minmax(0, 1fr); }
+  .workspace.preview-open .document-tabs {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
   .workspace.preview-open .preview-view:not([hidden]) {
     position: absolute;
     inset: 0 0 0 auto;

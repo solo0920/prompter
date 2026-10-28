@@ -211,9 +211,10 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
    pipe table, and a long wrapped line.
 2. Confirm the tab bar shows only the preview icon while preview is closed. Activate it and
    confirm a live preview pane opens on the right while the editor canvas remains visible on the
-   left; the active document name and file icon appear as a tab-styled label immediately left of
-   the preview icon, with an `×` that closes preview. Confirm images render, the code block and
-   table render, and raw HTML-looking text is not executed.
+   left; the active document name and file icon appear as a tab-styled label aligned with the
+   preview pane's left boundary and immediately left of the preview icon, with an `×` that closes
+   preview. Confirm images render, the code block and table render, and raw HTML-looking text is
+   not executed.
 3. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
    editor.
 4. Choose File > New twice. Confirm each document opens in a new tab above the editor, each tab
