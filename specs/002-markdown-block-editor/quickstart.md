@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **72 passing, 0 failing** (required gate). Edge and Firefox
-also report 72 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **74 passing, 0 failing** (required gate). Edge and Firefox
+also report 74 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 72/72 | PASS 72/72 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 72/72 | PASS 72/72 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 72/72 | PASS 72/72 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 74/74 | PASS 74/74 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 74/74 | PASS 74/74 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 74/74 | PASS 74/74 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -137,8 +137,12 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 12. Cmd-click several blocks; confirm they keep bright orange outlines. Hover the left Marker
     area of one selected block, choose `##`, and confirm every selected text block changes while
     the selection remains orange.
+13. With two or more blocks selected, drag one of them to a new position. Confirm the whole
+    selected group moves together as one contiguous group, keeps its relative order and orange
+    selection, and that Escape restores the pre-drag order and selection.
 
-Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes enabled.
+Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes enabled; the
+selected group moves as one unit.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022)
 

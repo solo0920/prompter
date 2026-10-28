@@ -150,6 +150,11 @@ Each image block shows:
 
 - Cmd-click (Ctrl-click on Windows) toggles a block in the current selection without clearing
   the others; a plain click selects only that block.
+- Dragging any selected block moves the entire selection as one contiguous group, preserving the
+  selected blocks' relative order and leaving unselected blocks outside the group. The whole
+  group stays highlighted during and after the drag. Dragging a non-selected block clears the
+  selection and moves only that block. Escape or an out-of-bounds drop restores the pre-drag
+  order and selection.
 - Hovering the Marker control of a selected text block opens the symbol flyout. Choosing a
   Marker applies it to every selected text block; unselected blocks and image blocks are
   unchanged, and the selection remains highlighted.
@@ -192,6 +197,9 @@ Each image block shows:
 - During drag, the dragged block follows the pointer while the intervening blocks shift live
   into their previewed sequence positions. Releasing commits the sequential shift; canceling
   restores the pre-drag sequence.
+- When multiple blocks are selected, dragging any one of them moves the whole selection as a
+  contiguous group. The group follows the pointer as one unit, intervening blocks shift live,
+  and releasing inserts the group at the previewed position.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.

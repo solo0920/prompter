@@ -1191,6 +1191,223 @@
     });
   });
 
+  test('US1 dragging a multi-selection moves the whole group together', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C', 'D']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      var dId = ids[3];
+      state.dirty = false;
+
+      function pointer(target, type, x, y) {
+        target.dispatchEvent(new win.PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 21,
+          pointerType: 'mouse',
+          button: 0,
+          clientX: x,
+          clientY: y
+        }));
+      }
+
+      function pointerUp(x, y) {
+        win.dispatchEvent(new win.PointerEvent('pointerup', {
+          bubbles: true, cancelable: true, pointerId: 21, pointerType: 'mouse', button: 0,
+          clientX: x, clientY: y
+        }));
+      }
+
+      function cmdClick(blockId) {
+        blockById(win, blockId).querySelector('.block-content')
+          .dispatchEvent(new win.MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            metaKey: true
+          }));
+      }
+
+      var canvasRect = byId(win, 'canvas').getBoundingClientRect();
+
+      function modelBlock(blockId) {
+        return state.document.blocks.filter(function (block) {
+          return block.id === blockId;
+        })[0];
+      }
+
+      function clientLeftOf(blockId) {
+        return canvasRect.left + modelBlock(blockId).x;
+      }
+
+      function clientTopOf(blockId) {
+        return canvasRect.top + modelBlock(blockId).y;
+      }
+
+      function blockHeight(blockId) {
+        return blockById(win, blockId).offsetHeight;
+      }
+
+      function pointerDownOn(blockId) {
+        var element = blockById(win, blockId);
+        pointer(element.querySelector('.block-content'), 'pointerdown',
+          clientLeftOf(blockId) + 10, clientTopOf(blockId) + 10);
+      }
+
+      cmdClick(aId);
+      cmdClick(bId);
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [aId, bId].join(','), 'A and B must be multi-selected.');
+
+      var cTopBefore = parseFloat(blockById(win, cId).style.top);
+      var moveY = clientTopOf(cId) + blockHeight(cId) / 2 + 10 - blockHeight(aId) / 2;
+      pointerDownOn(aId);
+      pointer(win, 'pointermove', clientLeftOf(cId) + 10, moveY);
+
+      assert(blockById(win, aId).classList.contains('group-dragging'),
+        'The grabbed block must join the group drag.');
+      assert(blockById(win, bId).classList.contains('group-dragging'),
+        'Other selected blocks must move with the group.');
+      assert(blockById(win, cId).classList.contains('group-dragging') === false,
+        'Unselected blocks must not join the group drag.');
+      assert(blockById(win, aId).style.transform !== '' &&
+        blockById(win, bId).style.transform !== '',
+      'Both selected blocks must be translated during the drag.');
+      assert(parseFloat(blockById(win, cId).style.top) < cTopBefore,
+        'The remaining blocks must reflow around the dragged group.');
+
+      pointerUp(clientLeftOf(cId) + 10, moveY);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [cId, dId, aId, bId].join(','),
+        'Dropping the two-block A+B group over C and D must produce C, D, A, B.');
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [aId, bId].join(','), 'The group must stay selected after the drop.');
+      assert(blockById(win, aId).classList.contains('selected') &&
+        blockById(win, bId).classList.contains('selected'),
+      'Every block in the moved group must stay highlighted.');
+      equal(state.dirty, true, 'Moving the group must mark the document dirty.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        'C\nD\nA\nB\n', 'Markdown output must follow the group order.');
+      equal(byId(win, 'move-announcer').textContent,
+        '已移動 2 個區塊到第 3 個位置，共 4 個區塊。');
+
+      var ordered = readingOrder(win);
+      ordered.forEach(function (block, index) {
+        if (index === ordered.length - 1) {
+          return;
+        }
+        var current = blockById(win, block.id);
+        assert(block.y + current.offsetHeight + 1 < ordered[index + 1].y,
+          'The moved group must not overlap the following blocks.');
+      });
+
+      state.dirty = false;
+      var cancelY = clientTopOf(cId) + blockHeight(cId) / 2 + 10 - blockHeight(aId) / 2;
+      pointerDownOn(aId);
+      pointer(win, 'pointermove', clientLeftOf(cId) + 10, cancelY);
+      win.dispatchEvent(new win.KeyboardEvent('keydown', {
+        key: 'Escape', bubbles: true, cancelable: true
+      }));
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [cId, dId, aId, bId].join(','), 'Escape must restore the pre-drag group order.');
+      equal(state.dirty, false, 'A canceled group drag must not mark the document dirty.');
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [aId, bId].join(','), 'A canceled group drag must keep the group selected.');
+      assert(blockById(win, aId).classList.contains('group-dragging') === false &&
+        blockById(win, bId).classList.contains('group-dragging') === false,
+      'Canceled group drags must clear the drag styling.');
+      equal(blockById(win, aId).style.transform, '');
+      equal(blockById(win, bId).style.transform, '');
+    });
+  });
+
+  test('US1 dragging a non-contiguous multi-selection groups the selected blocks', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C', 'D']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      var dId = ids[3];
+      state.dirty = false;
+
+      function pointer(target, type, x, y) {
+        target.dispatchEvent(new win.PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 22,
+          pointerType: 'mouse',
+          button: 0,
+          clientX: x,
+          clientY: y
+        }));
+      }
+
+      function pointerUp(x, y) {
+        win.dispatchEvent(new win.PointerEvent('pointerup', {
+          bubbles: true, cancelable: true, pointerId: 22, pointerType: 'mouse', button: 0,
+          clientX: x, clientY: y
+        }));
+      }
+
+      function cmdClick(blockId) {
+        blockById(win, blockId).querySelector('.block-content')
+          .dispatchEvent(new win.MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            metaKey: true
+          }));
+      }
+
+      var canvasRect = byId(win, 'canvas').getBoundingClientRect();
+
+      function modelBlock(blockId) {
+        return state.document.blocks.filter(function (block) {
+          return block.id === blockId;
+        })[0];
+      }
+
+      function clientLeftOf(blockId) {
+        return canvasRect.left + modelBlock(blockId).x;
+      }
+
+      function clientTopOf(blockId) {
+        return canvasRect.top + modelBlock(blockId).y;
+      }
+
+      function blockHeight(blockId) {
+        return blockById(win, blockId).offsetHeight;
+      }
+
+      cmdClick(aId);
+      cmdClick(cId);
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [aId, cId].join(','), 'A and C must be multi-selected.');
+
+      var moveY = clientTopOf(dId) + blockHeight(dId) / 2 + 10 - blockHeight(cId) / 2;
+      pointer(blockById(win, cId).querySelector('.block-content'), 'pointerdown',
+        clientLeftOf(cId) + 10, clientTopOf(cId) + 10);
+      pointer(win, 'pointermove', clientLeftOf(dId) + 10, moveY);
+      pointerUp(clientLeftOf(dId) + 10, moveY);
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        [bId, dId, aId, cId].join(','),
+        'The non-contiguous A+C selection must become the contiguous group B, D, A, C.');
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [aId, cId].join(','), 'The non-contiguous group must stay selected.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        'B\nD\nA\nC\n', 'Markdown output must preserve the selected relative order.');
+      equal(byId(win, 'move-announcer').textContent,
+        '已移動 2 個區塊到第 3 個位置，共 4 個區塊。');
+      equal(state.dirty, true);
+    });
+  });
+
   test('US1 block markers stay visible and right hover reveals the add control', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win, '##');

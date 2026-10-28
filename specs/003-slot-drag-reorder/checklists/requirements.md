@@ -95,8 +95,9 @@
   fall back to Apple without changing the other preferences.
 - As implemented, committed blocks occupy a contiguous vertical sequence. Dragging previews the
   sequential shift, Escape/blur/out-of-bounds drops cancel it, and legacy documents migrate on
-  their first render without being marked dirty.
-- Verification: **93 unit tests** and **72 browser tests** pass in Chrome, Edge, and Firefox,
+  their first render without being marked dirty. A multi-selected group drags as one contiguous
+  group and stays selected after the drop.
+- Verification: **93 unit tests** and **74 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 
 ## Notes

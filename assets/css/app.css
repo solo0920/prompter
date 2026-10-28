@@ -248,6 +248,8 @@ body {
   outline-offset: -2px;
 }
 .block.dragging { cursor: grabbing; box-shadow: var(--shadow); transition: none; }
+.block.group-dragging { cursor: grabbing; box-shadow: var(--shadow); }
+.canvas.reordering .block.group-dragging { transition: none; }
 .block.editing { cursor: default; }
 .block-text { display: flex; align-items: flex-start; gap: 7px; min-height: 24px; }
 .block-marker {

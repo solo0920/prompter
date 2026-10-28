@@ -84,6 +84,9 @@ and confirm the unsaved draft is not restored.
     text becomes block content immediately before the image in reading order.
 11. **Given** an image block, **When** the user activates its remove control, **Then** the
     image is removed from the canvas and from the Markdown output.
+12. **Given** two or more selected blocks, **When** the user drags any selected block, **Then**
+    the whole selection moves together as one contiguous group, its relative order is
+    preserved, and the group stays selected after the drop.
 
 ---
 
@@ -420,7 +423,11 @@ settings panel and clear the local library after confirming the warning.
   clearing the other selected blocks, and selected blocks MUST use a bright orange highlight.
   Hovering the Marker control of a selected text block MUST open the symbol flyout; choosing a
   Marker MUST apply it to every selected text block, leave unselected blocks and image blocks
-  unchanged, and keep the selection highlighted.
+  unchanged, and keep the selection highlighted. Dragging any selected block MUST move the whole
+  selection as one contiguous group, preserve the selected blocks' relative reading order, and
+  keep the group selected after the drop. Dragging a non-selected block MUST move only that
+  block. Canceling or dropping outside the canvas MUST restore the pre-drag sequence and
+  selection.
 
 ### Key Entities *(include if feature involves data)*
 

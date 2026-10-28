@@ -86,6 +86,9 @@ direction and cancel once before release.
    remain on the moved block rather than moving to another block or to a position.
 10. **Given** a drag is in progress, **When** the viewport is resized, **Then** the drag is
     canceled or recomputed safely and no block is lost, duplicated, or left between positions.
+11. **Given** two or more blocks are selected, **When** the user drags any selected block,
+    **Then** the whole selection moves as one contiguous group, its relative order is
+    preserved, and the group remains selected.
 
 ---
 
@@ -275,12 +278,14 @@ is introduced.
 - **FR-007**: Releasing a dragged block on a different position MUST commit the previewed
   sequential shift. The source position MUST be filled by the intervening block nearest the
   source, every other intervening block MUST shift one position toward the source, and the
-  target position MUST be occupied by the dragged block.
+  target position MUST be occupied by the dragged block. When the dragged block is part of a
+  multi-selection, the entire selected group MUST move as one contiguous group, preserving the
+  selected blocks' relative order and keeping unselected blocks outside the group.
 - **FR-008**: Releasing a dragged block beyond the last block MUST append it to the end of the
   sequence, with every block between its former position and the end shifting one position
   toward its former position. Releasing over the original position, outside every valid drop
-  target, or canceling the drag MUST restore the pre-drag sequence and MUST NOT mark the
-  document as changed.
+  target, or canceling the drag MUST restore the pre-drag sequence and selection and MUST NOT
+  mark the document as changed.
 - **FR-009**: A successful reorder MUST mark the document as changed and MUST persist in the
   document's local record when it is saved. The exported Markdown MUST contain only block
   content in sequence order, because Markdown has no layout positions.
@@ -313,7 +318,8 @@ is introduced.
 - **FR-021**: The ordered layout and drag controls MUST remain usable at 1280×720, 768 px, and
   360×800 without horizontal page scrolling.
 - **FR-022**: After a reorder, selection and focus MUST remain on the moved block, not on
-  another block or on a position.
+  another block or on a position. When a multi-selected group is moved, every block in the
+  group MUST remain selected and focus MUST stay on the block used to start the drag.
 
 ### Functional Requirements: Tech-Site Visual Styles
 
@@ -468,7 +474,8 @@ font, or remote asset is bundled.
 - The feature applies to text and image blocks. The composer is transient and does not appear
   in saved Markdown.
 - Users may drag with a mouse or touch and may move blocks with the keyboard. Multi-block
-  selection and multi-block dragging are out of scope.
+  selection is defined by the block-selection requirements; dragging any selected block moves
+  the selection as a group.
 - Automatic sorting by Marker, content, creation time, or image type is out of scope.
 
 ## Out of Scope
@@ -477,7 +484,7 @@ font, or remote asset is bundled.
 - Changing file open, save, download, or directory-location behavior.
 - Changing Preview, Copy, or clipboard payload formats.
 - Free pixel-level positioning, intentionally empty layout gaps, or arbitrary canvas placement.
-- Multi-select drag, lasso selection, or group moves.
+- Lasso selection or automatic group creation beyond the explicit multi-selection.
 - Automatic layout compaction by block type or automatic sorting.
 - Importing or fetching DESIGN.md files at runtime from getdesign.md or any other site.
 - A custom theme editor, color picker, or user-uploaded style files.

@@ -879,23 +879,54 @@
     return centers;
   }
 
+  function groupVisualBounds(drag) {
+    var top = Infinity;
+    var bottom = -Infinity;
+    var base = drag.layout && drag.layout.positions[drag.itemId];
+    var offsetY = base ? drag.currentY - base.y : drag.currentY - drag.startY;
+    drag.groupItems.forEach(function (block) {
+      var point = drag.layout && drag.layout.positions[block.id];
+      var blockTop = point ? point.y : block.y;
+      var height = drag.heights[block.id] !== undefined
+        ? drag.heights[block.id]
+        : elementHeightFor(block);
+      top = Math.min(top, blockTop + offsetY);
+      bottom = Math.max(bottom, blockTop + offsetY + height);
+    });
+    return top === Infinity ? null : { top: top, bottom: bottom };
+  }
+
   function targetIndexForDrag(drag, clientY) {
     var pointerCenter = clientY - drag.grabOffsetY + drag.element.offsetHeight / 2;
-    var target = 0;
     var movingUp = pointerCenter < drag.startCenter;
+    var comparison = pointerCenter;
+    if (drag.groupContiguous) {
+      var bounds = groupVisualBounds(drag);
+      if (bounds) {
+        comparison = drag.canvasTop + (movingUp ? bounds.top : bounds.bottom);
+      }
+    }
+    var target = 0;
     drag.items.forEach(function (item) {
-      if (item.id === drag.itemId) {
+      if (item.id === drag.itemId || drag.groupIdSet[item.id]) {
         return;
       }
       var center = drag.centers[item.id];
       if (center === undefined) {
         return;
       }
-      if (movingUp ? center < pointerCenter : center <= pointerCenter) {
+      if (movingUp ? center < comparison : center <= comparison) {
         target += 1;
       }
     });
-    return Utils.clamp(target, 0, drag.items.length - 1);
+    return Utils.clamp(target, 0, drag.remainingItems.length);
+  }
+
+  function previewItemsForTarget(drag, targetIndex) {
+    var remaining = drag.remainingItems.slice();
+    var moving = drag.groupItems.length ? drag.groupItems : [drag.item];
+    Array.prototype.splice.apply(remaining, [targetIndex, 0].concat(moving));
+    return remaining;
   }
 
   function previewDragLayout(drag) {
@@ -929,21 +960,77 @@
   }
 
   function applyDragTransform(drag) {
-    var point;
     if (drag.kind === 'composer') {
-      point = drag.layout && drag.layout.composerTop !== null
+      var composerPoint = drag.layout && drag.layout.composerTop !== null
         ? { x: Files.COLUMN_X, y: drag.layout.composerTop }
         : null;
-    } else {
-      point = drag.layout && drag.layout.positions[drag.itemId];
-    }
-    if (!point) {
-      drag.element.style.transform = '';
+      if (!composerPoint) {
+        drag.element.style.transform = '';
+        return;
+      }
+      drag.element.style.transform = 'translate(' +
+        (drag.currentX - composerPoint.x) + 'px, ' +
+        (drag.currentY - composerPoint.y) + 'px)';
       return;
     }
-    drag.element.style.transform = 'translate(' +
-      (drag.currentX - point.x) + 'px, ' +
-      (drag.currentY - point.y) + 'px)';
+    var point = drag.layout && drag.layout.positions[drag.itemId];
+    if (!point) {
+      drag.groupIds.forEach(function (id) {
+        var element = blockElement(id);
+        if (element) {
+          element.style.transform = '';
+        }
+      });
+      return;
+    }
+    var dx = drag.currentX - point.x;
+    var dy = drag.currentY - point.y;
+    drag.groupIds.forEach(function (id) {
+      var element = blockElement(id);
+      if (!element) {
+        return;
+      }
+      var groupPoint = drag.layout.positions[id];
+      if (!groupPoint) {
+        element.style.transform = '';
+        return;
+      }
+      element.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+    });
+  }
+
+  function addGroupDragStyles(drag) {
+    if (drag.kind !== 'block') {
+      return;
+    }
+    drag.groupIds.forEach(function (id) {
+      var element = blockElement(id);
+      if (!element) {
+        return;
+      }
+      element.classList.add('group-dragging');
+      drag.originalZIndexes[id] = element.style.zIndex;
+      element.style.zIndex = '40';
+    });
+  }
+
+  function clearGroupDragStyles(drag) {
+    if (!drag) {
+      return;
+    }
+    drag.groupIds.forEach(function (id) {
+      var element = blockElement(id);
+      if (!element) {
+        return;
+      }
+      element.classList.remove('group-dragging');
+      element.style.transform = '';
+      if (drag.originalZIndexes[id] !== undefined) {
+        element.style.zIndex = drag.originalZIndexes[id];
+      }
+    });
+    drag.element.classList.remove('dragging');
+    drag.element.style.transform = '';
   }
 
   function startDrag(event, config) {
@@ -962,6 +1049,47 @@
     }
     if (startIndex === -1) {
       return;
+    }
+    var groupIds = [];
+    var groupIdSet = {};
+    if (config.kind === 'block') {
+      var requested = config.groupIds && config.groupIds.length
+        ? config.groupIds
+        : [config.itemId];
+      items.forEach(function (item) {
+        if (!isComposerItem(item) && requested.indexOf(item.id) !== -1) {
+          groupIds.push(item.id);
+        }
+      });
+      if (groupIds.indexOf(config.itemId) === -1) {
+        groupIds = [config.itemId];
+      }
+      groupIds.forEach(function (id) {
+        groupIdSet[id] = true;
+      });
+    }
+    var groupIndices = [];
+    items.forEach(function (item, index) {
+      if (groupIdSet[item.id]) {
+        groupIndices.push(index);
+      }
+    });
+    var groupContiguous = groupIndices.length > 1 &&
+      groupIndices[groupIndices.length - 1] - groupIndices[0] === groupIndices.length - 1;
+    var groupItems = groupIds.length ? items.filter(function (item) {
+      return !!groupIdSet[item.id];
+    }) : [];
+    var remainingItems = items.filter(function (item) {
+      return !groupIdSet[item.id] && item.id !== config.itemId;
+    });
+    var startTargetIndex = 0;
+    for (var j = 0; j < items.length; j += 1) {
+      if (items[j].id === config.itemId) {
+        break;
+      }
+      if (!groupIdSet[items[j].id]) {
+        startTargetIndex += 1;
+      }
     }
     canvas.classList.add('reordering');
     var rect = config.element.getBoundingClientRect();
@@ -985,13 +1113,20 @@
       startY: config.startY,
       currentX: config.startX,
       currentY: config.startY,
+      canvasTop: canvasTop,
       startIndex: startIndex,
       startCenter: canvasTop + config.startY + rect.height / 2,
       items: items,
+      groupIds: groupIds,
+      groupIdSet: groupIdSet,
+      groupItems: groupItems,
+      groupContiguous: groupContiguous,
+      remainingItems: remainingItems,
       centers: dragCenters(items),
       heights: heights,
       previewItems: items.slice(),
-      targetIndex: startIndex,
+      targetIndex: startTargetIndex,
+      startTargetIndex: startTargetIndex,
       startBlockOrder: blocksFromItems(items),
       composerHeight: composerElement ? composerElement.offsetHeight : 0,
       previewBlockOrder: null,
@@ -1000,6 +1135,7 @@
       validDrop: true,
       moved: false,
       frame: null,
+      originalZIndexes: {},
       pointerType: event.pointerType || 'mouse'
     };
     try {
@@ -1032,11 +1168,21 @@
       return;
     }
     clearBlockHover();
-    selectBlock(blockId);
+    var selected = selectedBlockIds(state);
+    var groupIds;
+    if (selected.indexOf(blockId) === -1) {
+      selectBlock(blockId);
+      groupIds = [blockId];
+    } else {
+      groupIds = selected.slice();
+      setBlockSelection(groupIds, blockId, { focus: false });
+      groupIds = selectedBlockIds(state).slice();
+    }
     startDrag(event, {
       kind: 'block',
       item: block,
       itemId: blockId,
+      groupIds: groupIds,
       element: element,
       startX: block.x,
       startY: block.y
@@ -1075,6 +1221,10 @@
     }
     drag.moved = true;
     drag.element.classList.add('dragging');
+    if (!drag.groupStyled) {
+      addGroupDragStyles(drag);
+      drag.groupStyled = true;
+    }
     var canvas = getCanvas();
     if (!canvas) {
       return;
@@ -1087,16 +1237,11 @@
     drag.validDrop = event.clientX >= canvasRect.left && event.clientX <= canvasRect.right &&
       event.clientY >= canvasRect.top && event.clientY <= canvasRect.bottom;
     var targetIndex = targetIndexForDrag(drag, event.clientY);
-    if (targetIndex !== drag.targetIndex) {
+    if (targetIndex !== drag.targetIndex || !drag.layout) {
       drag.targetIndex = targetIndex;
-      var remaining = drag.items.filter(function (item) {
-        return item.id !== drag.itemId;
-      });
-      remaining.splice(targetIndex, 0, drag.item);
-      drag.previewItems = remaining;
-      previewDragLayout(drag);
-      applyDragTransform(drag);
-    } else if (!drag.layout) {
+      drag.previewItems = targetIndex === drag.startTargetIndex
+        ? drag.items.slice()
+        : previewItemsForTarget(drag, targetIndex);
       previewDragLayout(drag);
       applyDragTransform(drag);
     }
@@ -1143,8 +1288,7 @@
     } catch (error) {
       // Ignore environments where capture was not established.
     }
-    drag.element.classList.remove('dragging');
-    drag.element.style.transform = '';
+    clearGroupDragStyles(drag);
     if (!drag.moved) {
       if (drag.kind === 'block') {
         selectBlock(drag.blockId, { focus: false });
@@ -1153,21 +1297,27 @@
       }
       return;
     }
-    var changed = commit && drag.validDrop && drag.targetIndex !== drag.startIndex;
-    if (changed) {
-      var state = getState();
-      if (drag.kind === 'composer') {
-        if (state && state.composer) {
-          if (drag.previewComposerIndex >= 0) {
-            state.composer.insertIndex = drag.previewComposerIndex;
-          }
-          render();
-          focusComposer();
-        }
-        return;
+    var state = getState();
+    if (drag.kind === 'composer') {
+      var composerChanged = !!(commit && drag.validDrop && state && state.composer &&
+        drag.previewComposerIndex >= 0 &&
+        Number(state.composer.insertIndex) !== drag.previewComposerIndex);
+      if (composerChanged) {
+        state.composer.insertIndex = drag.previewComposerIndex;
+        render();
+        focusComposer();
+      } else if (drag.targetIndex !== drag.startTargetIndex) {
+        render();
+        focusComposer();
       }
-      var blockOrder = drag.previewBlockOrder || blocksFromItems(drag.previewItems);
-      var orderChanged = !sameBlockOrder(blockOrder, drag.startBlockOrder);
+      return;
+    }
+    var blockOrder = drag.previewBlockOrder || blocksFromItems(drag.previewItems);
+    var orderChanged = !sameBlockOrder(blockOrder, drag.startBlockOrder);
+    var composerChanged = !!(state && state.composer && drag.previewComposerIndex >= 0 &&
+      Number(state.composer.insertIndex) !== drag.previewComposerIndex);
+    var changed = commit && drag.validDrop && (orderChanged || composerChanged);
+    if (changed) {
       if (state && state.composer && drag.previewComposerIndex >= 0) {
         state.composer.insertIndex = drag.previewComposerIndex;
       }
@@ -1180,19 +1330,16 @@
         markDirty();
       }
       render();
-      selectBlock(drag.blockId, { focus: true });
+      selectAfterBlockDrag(drag, true);
       if (orderChanged) {
-        announceSequencePosition(drag.blockId);
+        announceSequenceMove(drag.groupIds, drag.blockId);
       }
       return;
     }
-    if (drag.targetIndex !== drag.startIndex) {
+    if (drag.moved && (orderChanged || composerChanged ||
+        drag.targetIndex !== drag.startTargetIndex)) {
       render();
-      if (drag.kind === 'block') {
-        selectBlock(drag.blockId, { focus: true });
-      } else {
-        focusComposer();
-      }
+      selectAfterBlockDrag(drag, true);
     }
   }
 
@@ -1208,6 +1355,14 @@
       return;
     }
     finishDrag(false);
+  }
+
+  function selectAfterBlockDrag(drag, focus) {
+    if (drag.groupIds && drag.groupIds.length > 1) {
+      setBlockSelection(drag.groupIds, drag.blockId, { focus: !!focus });
+    } else {
+      selectBlock(drag.blockId, { focus: !!focus });
+    }
   }
 
   function announceSequencePosition(blockId) {
@@ -1227,6 +1382,32 @@
       return;
     }
     announce('區塊已移到第 ' + (index + 1) + ' 個位置，共 ' + ordered.length + ' 個區塊。');
+  }
+
+  function announceSequenceMove(ids, blockId) {
+    if (!ids || ids.length <= 1) {
+      announceSequencePosition(blockId);
+      return;
+    }
+    var document = currentDocument();
+    if (!document) {
+      return;
+    }
+    var ordered = Model.normalizeSequence(document);
+    var firstIndex = -1;
+    ids.forEach(function (id) {
+      for (var i = 0; i < ordered.length; i += 1) {
+        if (ordered[i].id === id && (firstIndex === -1 || i < firstIndex)) {
+          firstIndex = i;
+          break;
+        }
+      }
+    });
+    if (firstIndex === -1) {
+      return;
+    }
+    announce('已移動 ' + ids.length + ' 個區塊到第 ' + (firstIndex + 1) +
+      ' 個位置，共 ' + ordered.length + ' 個區塊。');
   }
 
   function moveBlockByKeyboard(block, delta) {
