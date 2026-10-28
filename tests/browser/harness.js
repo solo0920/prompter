@@ -1122,7 +1122,7 @@
     });
   });
 
-  test('US1 left and right block hover reveal the Marker and add controls', function () {
+  test('US1 block markers stay visible and right hover reveals the add control', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win, '##');
       commitComposer(win, 'Hover me');
@@ -1145,33 +1145,28 @@
         }));
       }
 
+      function opacity(node) {
+        return win.getComputedStyle(node).opacity;
+      }
+
       move(byId(win, 'document-title'), 10, 10);
+      equal(opacity(marker), '1', 'The Marker must be visible without hover.');
+
       move(content, rect.left + rect.width * 0.2, rect.top + 10);
       equal(element.classList.contains('hover-left'), true);
       equal(element.classList.contains('hover-right'), false);
+      equal(opacity(marker), '1', 'The Marker must stay visible on left hover.');
+      if (hoverCapable) {
+        equal(opacity(plus), '0', 'The add control must stay hidden on left hover.');
+      }
 
-      var leftReady = function () {
-        var markerOpacity = win.getComputedStyle(marker).opacity;
-        var plusOpacity = win.getComputedStyle(plus).opacity;
-        if (hoverCapable) {
-          return markerOpacity === '1' && plusOpacity === '0';
-        }
-        return markerOpacity === '1' && plusOpacity === '1';
-      };
+      move(content, rect.left + rect.width * 0.8, rect.top + 10);
+      equal(element.classList.contains('hover-left'), false);
+      equal(element.classList.contains('hover-right'), true);
+      equal(opacity(marker), '1', 'The Marker must stay visible on right hover.');
       return waitFor(function () {
-        return leftReady() ? true : null;
+        return opacity(plus) === '1' ? true : null;
       }, 1000).then(function () {
-        move(content, rect.left + rect.width * 0.8, rect.top + 10);
-        equal(element.classList.contains('hover-left'), false);
-        equal(element.classList.contains('hover-right'), true);
-        if (!hoverCapable) {
-          return;
-        }
-        return waitFor(function () {
-          return win.getComputedStyle(marker).opacity === '0' &&
-            win.getComputedStyle(plus).opacity === '1' ? true : null;
-        }, 1000);
-      }).then(function () {
         var plusRect = plus.getBoundingClientRect();
         var blockRect = element.getBoundingClientRect();
         assert(Math.abs(plusRect.right - (blockRect.right + 12)) <= 2,
@@ -1181,7 +1176,69 @@
         move(byId(win, 'document-title'), 10, 10);
         equal(element.classList.contains('hover-left'), false);
         equal(element.classList.contains('hover-right'), false);
+        equal(opacity(marker), '1', 'The Marker must remain visible after hover.');
+        if (hoverCapable) {
+          return waitFor(function () {
+            return opacity(plus) === '0' ? true : null;
+          }, 1000);
+        }
       });
+    });
+  });
+
+  test('US1 markers without a type render as blank space', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var composerMarker = win.document.querySelector('#canvas .composer-marker');
+      assert(composerMarker, 'The composer Marker control is missing.');
+      equal(composerMarker.textContent.trim(), '',
+        'A no-type composer must render a blank Marker area.');
+      equal(composerMarker.classList.contains('none'), true);
+
+      commitComposer(win, 'Plain');
+      var block = state.document.blocks[0];
+      var marker = blockById(win, block.id).querySelector('.block-marker');
+      equal(marker.textContent.trim(), '',
+        'A no-type block must render a blank Marker area.');
+      equal(marker.classList.contains('none'), true);
+      equal(win.getComputedStyle(marker).opacity, '1',
+        'The blank Marker area must stay visible without hover.');
+
+      marker.dispatchEvent(new win.PointerEvent('pointerenter', {
+        pointerId: 12,
+        pointerType: 'mouse',
+        bubbles: false
+      }));
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Hovering the blank Marker area must open the flyout.');
+      var noneOption = menu.querySelector('[data-marker="none"]');
+      assert(noneOption, 'The no-type option is missing.');
+      equal(noneOption.textContent.trim(), '×',
+        'The flyout may use an X symbol for the no-type option.');
+      win.Prompter.editor.closeMarkerMenu();
+    });
+  });
+
+  test('US1 the composer stays in its slot when the last edited block moves', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      equal(state.composer.insertIndex, 3,
+        'The composer should start after the committed sequence.');
+      var cId = state.document.blocks[2].id;
+
+      press(win, blockById(win, cId), 'ArrowUp', { altKey: true });
+      press(win, blockById(win, cId), 'ArrowUp', { altKey: true });
+
+      var ordered = readingOrder(win);
+      equal(ordered[0].id, cId, 'C should move to the first position.');
+      equal(state.composer.insertIndex, 3,
+        'The composer must keep its own sequence slot.');
+      var composer = win.document.querySelector('#canvas .composer');
+      var last = ordered[ordered.length - 1];
+      var lastElement = blockById(win, last.id);
+      assert(parseFloat(composer.style.top) >= last.y + lastElement.offsetHeight + 4,
+        'The composer must remain at the end instead of following C.');
     });
   });
 

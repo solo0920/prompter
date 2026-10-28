@@ -58,6 +58,8 @@ test('library, preferences, composer and asset factories provide defaults', func
   const composer = Model.createComposer({ marker: '#', text: 'Draft' });
   assert.equal(composer.mode, 'initial');
   assert.equal(composer.anchorBlockId, null);
+  assert.equal(composer.insertIndex, 0);
+  assert.equal(Model.createComposer({ insertIndex: 2 }).insertIndex, 2);
   assert.equal(composer.marker, '#');
   assert.equal(composer.text, 'Draft');
 
@@ -299,6 +301,22 @@ test('sequence helpers migrate, insert, and move blocks in reading order', funct
   assert.deepEqual(
     sequence.blocks.map(function (block) { return block.seq; }),
     [1, 2, 3, 4]
+  );
+
+  const indexed = Model.createPromptDocument({
+    blocks: [
+      Model.createTextBlock({ id: 'a', text: 'A', seq: 1 }),
+      Model.createTextBlock({ id: 'b', text: 'B', seq: 2 }),
+      Model.createTextBlock({ id: 'c', text: 'C', seq: 3 })
+    ]
+  });
+  indexed.layoutVersion = 2;
+  Model.insertBlocksAtIndex(indexed, [
+    Model.createTextBlock({ id: 'y', text: 'Y' })
+  ], 1);
+  assert.deepEqual(
+    indexed.blocks.map(function (block) { return block.id; }),
+    ['a', 'y', 'b', 'c']
   );
 });
 

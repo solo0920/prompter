@@ -157,6 +157,9 @@
     return {
       mode: input.mode === 'inserted' ? 'inserted' : 'initial',
       anchorBlockId: input.anchorBlockId || null,
+      insertIndex: Utils.isInteger(input.insertIndex) && input.insertIndex >= 0
+        ? input.insertIndex
+        : 0,
       x: valueOr(input.x, 0),
       y: valueOr(input.y, 0),
       marker: normalizeMarker(valueOr(input.marker, 'none')),
@@ -472,13 +475,33 @@
     return ordered;
   }
 
-  function insertBlocksAfter(document, blocks, anchorId) {
+  function insertBlocksAtIndex(document, blocks, index) {
     if (!document) {
       return [];
     }
     var incoming = Object.prototype.toString.call(blocks) === '[object Array]'
       ? blocks.slice()
       : [];
+    var ordered = normalizeSequence(document);
+    var target = Math.floor(Number(index));
+    if (!isFinite(target)) {
+      target = ordered.length;
+    }
+    target = Math.max(0, Math.min(ordered.length, target));
+    var result = ordered.slice();
+    Array.prototype.splice.apply(result, [target, 0].concat(incoming));
+    document.blocks = result;
+    result.forEach(function (block, position) {
+      block.seq = position + 1;
+    });
+    document.layoutVersion = 2;
+    return result;
+  }
+
+  function insertBlocksAfter(document, blocks, anchorId) {
+    if (!document) {
+      return [];
+    }
     var ordered = normalizeSequence(document);
     var index = ordered.length;
     if (anchorId) {
@@ -489,14 +512,7 @@
         }
       }
     }
-    var result = ordered.slice();
-    Array.prototype.splice.apply(result, [index, 0].concat(incoming));
-    document.blocks = result;
-    result.forEach(function (block, position) {
-      block.seq = position + 1;
-    });
-    document.layoutVersion = 2;
-    return result;
+    return insertBlocksAtIndex(document, blocks, index);
   }
 
   function moveBlockToIndex(document, blockId, targetIndex) {
@@ -582,6 +598,7 @@
     removeBlock: removeBlock,
     sequenceBlocks: sequenceBlocks,
     normalizeSequence: normalizeSequence,
+    insertBlocksAtIndex: insertBlocksAtIndex,
     insertBlocksAfter: insertBlocksAfter,
     moveBlockToIndex: moveBlockToIndex,
     cloneDocumentForSaveAs: cloneDocumentForSaveAs

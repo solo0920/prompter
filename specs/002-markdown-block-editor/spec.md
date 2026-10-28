@@ -327,11 +327,12 @@ settings panel and clear the local library after confirming the warning.
   text and pressing Enter MUST create a block, while pressing Enter with empty text MUST do
   nothing.
 - **FR-018**: The Marker control MUST offer None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`
-  options (None is displayed as `×`), and the selected Marker MUST be displayed in front of the
-  block and included once in Markdown output. Hovering the control MUST open a symbol-only
-  flyout to its left; clicking or pressing Enter/Space MUST also open it for keyboard and touch
-  input. Choosing an option MUST return focus to the composer text input and preserve its caret
-  or selection.
+  options (None is represented by `×` in the flyout), and the selected Marker MUST be displayed
+  in front of the block and included once in Markdown output. Block Markers MUST be visible
+  without hover; when no Marker is set, the prefix MUST be blank with no `×` or text. Hovering
+  the control MUST open a symbol-only flyout to its left; clicking or pressing Enter/Space MUST
+  also open it for keyboard and touch input. Choosing an option MUST return focus to the
+  composer text input and preserve its caret or selection.
 - **FR-019**: When the user types a recognized Marker followed by a space in an input box, the
   Marker MUST be detected live and shown as a prefix; on commit it MUST become the block
   Marker without being duplicated in the block text.
@@ -357,9 +358,10 @@ settings panel and clear the local library after confirming the warning.
   inserted with "+" MUST be placed below their source block; inserted or pasted images MUST be
   placed at the insertion point, below the selected block when one exists and otherwise below
   the last block; lower overlapping blocks MUST shift down by the minimum amount needed to
-  preserve the resulting reading order; and a new composer MUST inherit the Marker of its source
+  preserve the resulting reading order; a new composer MUST inherit the Marker of its source
   text block, or the nearest preceding text block for an image source, falling back to the
-  default Marker selected in settings when no text block precedes it.
+  default Marker selected in settings when no text block precedes it; and an open composer MUST
+  occupy a fixed sequence slot that does not move with its source block when blocks are moved.
 - **FR-028**: Preview MUST render the current document's Markdown in place of the editor canvas
   within the same workspace, including headings, lists, quotes, fenced code, basic pipe tables,
   images, and plain text, with raw HTML-looking text escaped, without modifying the document.

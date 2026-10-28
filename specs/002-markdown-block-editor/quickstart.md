@@ -59,8 +59,8 @@ Current result (2026-10-28): **92 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **66 passing, 0 failing** (required gate). Edge and Firefox
-also report 66 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **68 passing, 0 failing** (required gate). Edge and Firefox
+also report 68 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 66/66 | PASS 66/66 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 66/66 | PASS 66/66 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 66/66 | PASS 66/66 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 68/68 | PASS 68/68 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 68/68 | PASS 68/68 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 68/68 | PASS 68/68 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -120,18 +120,20 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 
 1. With the composer focused, type `# 角色` and press Enter.
 2. Confirm one heading block appears with a single `#` prefix and the composer closes.
-3. Hover the right half of the block and press its lower-right `+`; confirm a new composer
+3. Confirm the `#` prefix is visible without hovering the block, and a block with no Marker shows
+   a blank prefix without `×` or text.
+4. Hover the right half of the block and press its lower-right `+`; confirm a new composer
    appears directly below.
-4. Type `- 限制一` and press Enter.
-5. Add another block and type `> 只輸出結果` and press Enter.
-6. Add another block, hover the Marker control, choose `.` from the symbol-only flyout, type
+5. Type `- 限制一` and press Enter.
+6. Add another block and type `> 只輸出結果` and press Enter.
+7. Add another block, hover the Marker control, choose `.` from the symbol-only flyout, type
    `literal`, and press Enter.
-7. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
+8. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
    shows `##`; press Enter.
-8. Press Enter in an empty composer; confirm nothing is created.
-9. Try `#Heading` (no space) and `#### Heading`; confirm they remain ordinary text, not
+9. Press Enter in an empty composer; confirm nothing is created.
+10. Try `#Heading` (no space) and `#### Heading`; confirm they remain ordinary text, not
    markers.
-10. Create at least five blocks with three different markers in under two minutes.
+11. Create at least five blocks with three different markers in under two minutes.
 
 Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes enabled.
 
@@ -153,7 +155,9 @@ Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes 
    sequence with no gaps.
 4. Drag a block beyond the last block and confirm it appends while the intervening blocks shift
    toward its former position.
-5. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
+5. With a composer open after the last block, move that block and confirm the composer stays in
+   its own sequence slot instead of following it.
+6. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
    unsaved draft is not restored.
 
 Expected: positions are layout-only; Markdown never contains coordinates; unsaved drafts are

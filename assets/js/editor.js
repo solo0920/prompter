@@ -109,7 +109,7 @@
   }
 
   function markerToken(marker) {
-    return marker === 'none' ? '×' : marker;
+    return marker === 'none' ? '' : marker;
   }
 
   function markerLabel(marker) {
@@ -158,17 +158,19 @@
     var positions = {};
     var y = Files.COLUMN_START_Y;
     var composerTop = null;
-    var anchorId = composer ? composer.anchorBlockId : null;
-    ordered.forEach(function (block) {
+    var composerIndex = composer && composer.insertIndex !== undefined
+      ? Math.max(0, Math.min(ordered.length, Number(composer.insertIndex)))
+      : null;
+    ordered.forEach(function (block, index) {
+      if (composer && composerIndex === index) {
+        composerTop = y;
+        y += (composer.height || 0) + GAP;
+      }
       var height = heights && heights[block.id] !== undefined
         ? heights[block.id]
         : elementHeightFor(block);
       positions[block.id] = { x: Files.COLUMN_X, y: y };
       y += height + GAP;
-      if (anchorId && anchorId === block.id) {
-        composerTop = y;
-        y += (composer.height || 0) + GAP;
-      }
     });
     if (composer && composerTop === null) {
       composerTop = y;
@@ -186,7 +188,7 @@
     var ordered = Model.normalizeSequence(state.document);
     var composerElement = canvas.querySelector('.composer');
     var composer = state.composer ? {
-      anchorBlockId: state.composer.anchorBlockId,
+      insertIndex: state.composer.insertIndex,
       height: composerElement ? composerElement.offsetHeight : 0
     } : null;
     var layout = computeSequenceLayout(ordered, composer);
@@ -595,6 +597,7 @@
     state.composer = Model.createComposer({
       mode: 'initial',
       anchorBlockId: null,
+      insertIndex: 0,
       x: Files.COLUMN_X,
       y: Files.COLUMN_START_Y,
       marker: preferences.defaultMarker,
@@ -744,7 +747,7 @@
     }
     var composerElement = canvas.querySelector('.composer');
     var composer = drag.composer ? {
-      anchorBlockId: drag.composer.anchorBlockId,
+      insertIndex: drag.composer.insertIndex,
       height: drag.composer.height
     } : null;
     var layout = computeSequenceLayout(drag.previewOrder, composer, drag.heights);
@@ -820,7 +823,7 @@
       previewOrder: ordered.slice(),
       targetIndex: startIndex,
       composer: state.composer && composerElement ? {
-        anchorBlockId: state.composer.anchorBlockId,
+        insertIndex: state.composer.insertIndex,
         height: composerElement.offsetHeight
       } : null,
       layout: null,
@@ -1085,7 +1088,7 @@
     editDraft = null;
 
     if (text.trim() === '') {
-      Model.removeBlock(state.document, block.id);
+      removeBlockFromDocument(state.document, block.id);
       markDirty();
       render();
       if (state.document.blocks.length === 0) {
@@ -1216,10 +1219,19 @@
       }
     }
     var anchor = anchorId ? findBlock(anchorId) : null;
+    var ordered = Model.normalizeSequence(state.document);
+    var insertIndex = ordered.length;
+    if (anchor) {
+      var anchorIndex = ordered.indexOf(anchor);
+      if (anchorIndex !== -1) {
+        insertIndex = anchorIndex + 1;
+      }
+    }
     var point = insertionPoint(anchor);
     state.composer = Model.createComposer({
       mode: anchor ? 'inserted' : 'initial',
       anchorBlockId: anchor ? anchor.id : null,
+      insertIndex: insertIndex,
       x: point.x,
       y: point.y,
       marker: inheritedComposerMarker(anchor),
@@ -1284,8 +1296,7 @@
       seq: 0,
       blankLinesAfter: 0
     });
-    var anchorId = composer.anchorBlockId || null;
-    Model.insertBlocksAfter(document, [block], anchorId);
+    Model.insertBlocksAtIndex(document, [block], composer.insertIndex);
     state.composer = null;
     markDirty();
     render();
@@ -1317,6 +1328,25 @@
     }
   }
 
+  function removeBlockFromDocument(document, blockId) {
+    var state = getState();
+    var composer = state && state.composer;
+    var ordered = document ? Model.normalizeSequence(document) : [];
+    var removedBlock = findBlock(blockId);
+    var removedIndex = removedBlock ? ordered.indexOf(removedBlock) : -1;
+    var previous = removedIndex > 0 ? ordered[removedIndex - 1] : null;
+    var removed = Model.removeBlock(document, blockId);
+    if (removed && composer) {
+      if (removedIndex !== -1 && removedIndex < composer.insertIndex) {
+        composer.insertIndex = Math.max(0, composer.insertIndex - 1);
+      }
+      if (composer.anchorBlockId === blockId) {
+        composer.anchorBlockId = previous ? previous.id : null;
+      }
+    }
+    return removed;
+  }
+
   function removeImageBlock(blockId) {
     var state = getState();
     var block = findBlock(blockId);
@@ -1324,7 +1354,7 @@
       return;
     }
     var assetId = block.assetId;
-    Model.removeBlock(state.document, blockId);
+    removeBlockFromDocument(state.document, blockId);
     var stillUsed = state.document.blocks.some(function (entry) {
       return entry.type === 'image' && entry.assetId === assetId;
     });
@@ -1559,7 +1589,7 @@
       item.setAttribute('aria-checked', marker === currentMarker ? 'true' : 'false');
       item.setAttribute('aria-label', labels[marker] || marker);
       item.dataset.marker = marker;
-      item.textContent = markerToken(marker);
+      item.textContent = marker === 'none' ? '×' : markerToken(marker);
       item.addEventListener('click', function () {
         closeMarkerMenu();
         onSelect(marker);

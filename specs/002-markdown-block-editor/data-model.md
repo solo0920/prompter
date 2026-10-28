@@ -224,9 +224,10 @@ The transient input box shown for a blank document or after activating "+".
 | Field | Type | Rules |
 |-------|------|-------|
 | `mode` | `"initial"` \| `"inserted"` | Initial is the blank-document composer; inserted is opened by "+". |
-| `anchorBlockId` | string \| null | Source block for inserted mode; `null` for initial. |
-| `x`, `y` | number | Insertion position, below the source block or at the canvas start. |
-| `marker` | Marker | Inherited from the source text block, or the nearest preceding text block for an image source; falls back to the settings default. Live detection may override it until commit. |
+| `anchorBlockId` | string \| null | Source block for Marker inheritance and focus return; `null` for initial. It does not control layout after opening. |
+| `insertIndex` | integer | Fixed sequence slot where the composer stays while blocks move; a committed block is inserted at this index. |
+| `x`, `y` | number | Derived preview position, below the source block or at the canvas start. |
+| `marker` | Marker | Inherited from the source text block, or the nearest preceding text block for an image source; falls back to the settings default. `none` renders as a blank prefix. Live detection may override it until commit. |
 | `text` | string | Current input text; not persisted until committed. |
 
 Transitions:
@@ -234,7 +235,7 @@ Transitions:
 - `absent -> initial` when a blank document opens.
 - `absent -> inserted` when "+" is activated.
 - `initial`/`inserted -> absent` when Enter commits non-empty text, creating a text block at the
-  composer position with the next sequence number.
+  composer's fixed insertion index.
 - Enter with empty text does nothing.
 - Escape dismisses an inserted composer; the initial composer remains.
 - If the composer text changes, the document is dirty.

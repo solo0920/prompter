@@ -96,6 +96,8 @@ The composer is the only input box that creates a new block.
 
 - A blank document opens with one composer at the top-left and the Marker control on its left.
 - The composer shows the selected or detected Marker as a prefix pill.
+- The composer occupies a fixed sequence slot. Moving its source block or reordering other
+  blocks does not drag the composer along.
 - Enter:
   - With non-empty text: create a text block at the composer position, remove the composer,
     mark dirty, and select the new block.
@@ -123,8 +125,9 @@ The composer is the only input box that creates a new block.
 Each text block is a floating box showing:
 
 - The Marker prefix (if any) as a non-editable visual prefix that is also a button for changing
-  the Marker. Hovering the left half of the block reveals it; keyboard focus or an open Marker
-  menu also keeps it visible, and it is always visible on touch devices.
+  the Marker. Markers are always visible without hover; when no Marker is set, the prefix is a
+  blank clickable area with no `×` or text. The flyout opens from this area on hover, click, or
+  keyboard activation.
 - The text, wrapped visually but representing one Markdown line.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
