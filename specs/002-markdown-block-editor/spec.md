@@ -374,7 +374,8 @@ settings panel and clear the local library after confirming the warning.
   feedback.
 - **FR-030**: When the document has opened, inserted, or pasted images, Copy MUST also include
   a rich representation containing the text and images so that one paste into a rich-text
-  destination includes both.
+  destination includes both. For a text-only document, Copy MUST provide the Markdown text
+  without a rich HTML flavor so Markers are not converted to formatted headings and lists.
 - **FR-031**: When images cannot be included, Copy MUST still place the Markdown text on the
   clipboard and MUST explain that images were omitted; Copy MUST be disabled when the
   document is empty.

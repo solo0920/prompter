@@ -296,7 +296,7 @@ The same ordered array is used for:
 - DOM order within the canvas list
 - Preview input
 - Save output
-- Copy `text/plain` and `text/html`
+- Copy `text/plain`; `text/html` only when the document contains images
 - Image-before/after decisions in mixed paste
 - Search content generation (order does not affect matching, only generation)
 

@@ -130,8 +130,8 @@ Layers:
 - `search.js`: normalized search index and literal partial matching.
 - `files.js`: Open, Insert Image, Save, Save As, directory handles, download fallback, image
   naming, conflict handling.
-- `clipboard.js`: Paste handler, `text/plain` + `text/html` rich copy, async and fallback
-  copy paths, manual-copy dialog.
+- `clipboard.js`: Paste handler, `text/plain` Markdown plus `text/html` rich copy when images
+  are present, async and fallback copy paths, manual-copy dialog.
 - `preview.js`: `<dialog>` preview, rendered Markdown, image resolution and placeholder
   handling.
 - `editor.js`: composer, marker detection, block editing, dragging, keyboard movement,

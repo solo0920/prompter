@@ -47,7 +47,28 @@ test('builds exact Markdown and self-contained HTML with embedded images', async
   assert.match(payload.html,
     /<img src="data:image\/png;base64,AAAA" alt="像素"[^>]*>/);
   assert.equal(payload.html.includes('<script>'), false);
+  assert.equal(payload.hasImages, true);
   assert.deepEqual(payload.omittedImages, []);
+});
+
+test('marks text-only documents so Copy can avoid a rich HTML flavor', async function () {
+  const textOnly = documentWith([
+    Model.createTextBlock({ id: 'h', marker: '##', text: '標題', y: 0, seq: 1 })
+  ]);
+  const plainPayload = await Clipboard.buildClipboardPayload(textOnly, []);
+  assert.equal(plainPayload.hasImages, false);
+  assert.equal(plainPayload.markdown, '## 標題\n');
+
+  const remoteImage = documentWith([
+    Model.createTextBlock({
+      id: 'remote',
+      text: '![遠端](https://example.com/remote.png)',
+      y: 0,
+      seq: 1
+    })
+  ]);
+  const remotePayload = await Clipboard.buildClipboardPayload(remoteImage, []);
+  assert.equal(remotePayload.hasImages, true);
 });
 
 test('uses placeholders and reports remote or missing images', async function () {

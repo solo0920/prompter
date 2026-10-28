@@ -105,7 +105,7 @@
   <header>
     <h1>Prompter 剪貼簿驗證</h1>
     <p>在 Prompter 按下「複製」，再分別貼到下面的純文字與富文字目標。</p>
-    <p class="muted">純文字目標應與儲存的 Markdown 完全相同；富文字目標應保留標題、清單、引用、表格與可顯示的本機圖片。</p>
+    <p class="muted">純文字目標應與儲存的 Markdown 完全相同；純文字文件的複製會貼成 Markdown，富文字目標只會在文件含圖片時收到格式化內容與本機圖片。</p>
     <div class="toolbar">
       <a href="../../index.html">回到 Prompter</a>
       <button id="clear-all" type="button">清空兩個目標</button>
@@ -125,7 +125,7 @@
 
     <section aria-labelledby="rich-title">
       <h2 id="rich-title">富文字目標</h2>
-      <p class="hint">貼到這個 contenteditable 區域，檢查標題、清單、引用、表格與圖片是否一併出現。</p>
+      <p class="hint">貼到這個 contenteditable 區域，檢查純文字文件是否保留 Markdown 標記；含圖片的文件應一併出現格式化文字與圖片。</p>
       <div id="rich-target" class="rich-target" contenteditable="true" role="textbox"
            aria-multiline="true" aria-labelledby="rich-title"
            data-placeholder="在這裡貼上富文字…"></div>

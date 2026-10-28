@@ -43,7 +43,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-28): **92 passing, 0 failing**.
+Current result (2026-10-28): **93 passing, 0 failing**.
 
 ### Browser harness
 
@@ -59,8 +59,8 @@ Current result (2026-10-28): **92 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **70 passing, 0 failing** (required gate). Edge and Firefox
-also report 70 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **72 passing, 0 failing** (required gate). Edge and Firefox
+also report 72 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 70/70 | PASS 70/70 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 70/70 | PASS 70/70 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 70/70 | PASS 70/70 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 72/72 | PASS 72/72 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 72/72 | PASS 72/72 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 72/72 | PASS 72/72 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -183,16 +183,21 @@ session-only.
 
 ### 6. Copy exact Markdown and rich content (US3, FR-029..FR-031, SC-007)
 
-1. Activate Copy. Paste into a plain-text destination. Confirm the text is byte-identical to the
-   saved Markdown, including markers, blank lines, image references, and the final newline.
-2. Paste into rich destination 1 and rich destination 2. Confirm text and local images appear in
-   a single paste in destinations that support data-URL images.
-3. If a destination strips images, confirm the Markdown text is still present and the app
+1. Create a text-only document with headings and lists. Activate Copy and paste into a
+   plain-text destination. Confirm the text is byte-identical to the saved Markdown, including
+   markers, blank lines, image references, and the final newline.
+2. Paste the same text-only copy into rich destination 1 and rich destination 2. Confirm the
+   Markdown Markers (`#`, `##`, `-`) remain visible instead of being converted to formatted
+   headings and lists.
+3. Add a local image, activate Copy, and paste into rich destination 1 and rich destination 2.
+   Confirm text and local images appear in a single paste in destinations that support data-URL
+   images.
+4. If a destination strips images, confirm the Markdown text is still present and the app
    reported that images were omitted.
-4. Empty the document; confirm Copy is disabled.
-5. Deny clipboard permission if the browser offers it; confirm the fallback still copies text or
+5. Empty the document; confirm Copy is disabled.
+6. Deny clipboard permission if the browser offers it; confirm the fallback still copies text or
    opens the manual-copy dialog.
-6. Confirm a missing image produces a warning and still copies the Markdown line.
+7. Confirm a missing image produces a warning and still copies the Markdown line.
 
 ### 7. Insert and paste images (US1, FR-041..FR-045, SC-014..SC-016)
 
@@ -363,8 +368,8 @@ as supplementary checks. Safari is not part of the test matrix.
 
 **Exception recorded**: SC-007 requires human verification because this environment cannot
 drive external rich-text destinations. The generated rich payload, exact `text/plain`
-Markdown, image placeholders, and all fallback paths pass automated checks. The app remains
-ready for those manual spot checks.
+Markdown, text-only `text/plain`-only flavor, image placeholders, and all fallback paths pass
+automated checks. The app remains ready for those manual spot checks.
 
 ## Known Limitations
 

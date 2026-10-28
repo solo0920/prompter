@@ -116,16 +116,19 @@ mandatory.
 
 ## D6. Clipboard: text/plain plus rich text/html, async first, execCommand fallback
 
-**Decision**: Copy writes exact Markdown as `text/plain` and rendered Markdown as `text/html`,
-with local images embedded as data URLs. Use `navigator.clipboard.write()` with a
-`ClipboardItem` when available; fall back to a hidden contenteditable and
-`document.execCommand('copy')`; finally show a manual-copy dialog. Always report omitted
-images.
+**Decision**: Copy always writes exact Markdown as `text/plain`. When the document contains
+images, Copy also writes rendered Markdown as `text/html`, with local images embedded as data
+URLs. Use `navigator.clipboard.write()` with a `ClipboardItem` when available; fall back to a
+hidden contenteditable and `document.execCommand('copy')`; finally show a manual-copy dialog.
+Always report omitted images.
 
 **Rationale**: `text/plain` guarantees that AI tools and plain-text destinations receive the
-exact Markdown. `text/html` supports one-paste rich destinations with formatted text and
-images. Async Clipboard is not reliably available or permitted under `file://`, so the
-fallback path is required by the constitution's clipboard constraint.
+exact Markdown, including Markers. `text/html` supports one-paste rich destinations with
+formatted text and images when images make that necessary. Text-only documents omit
+`text/html` so rich destinations cannot silently convert Markdown headings and lists into
+formatted content that loses the Markers. Async Clipboard is not reliably available or
+permitted under `file://`, so the fallback path is required by the constitution's clipboard
+constraint.
 
 **Alternatives considered**:
 

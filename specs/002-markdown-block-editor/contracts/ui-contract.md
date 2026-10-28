@@ -42,7 +42,7 @@ behavior so tests can be written against it.
 | File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
 | Preview / Edit | `預覽` / `編輯` | Shows the rendered preview in the workspace and changes the toggle to `編輯`; activating `編輯` returns to the same editor state. Disabled when no document. |
-| Copy | `複製` | Disabled when the document is empty. Copies Markdown plus rich content. |
+| Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images. |
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
 | Settings | `設定` | Opens the settings dialog. |

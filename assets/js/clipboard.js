@@ -158,6 +158,21 @@
     return result;
   }
 
+  function blockHasImage(block) {
+    if (!block) {
+      return false;
+    }
+    if (block.type === 'image') {
+      return true;
+    }
+    return block.type === 'text' &&
+      !!Markdown.matchImageLine(String(block.text == null ? '' : block.text));
+  }
+
+  function documentHasImages(document) {
+    return !!document && !!document.blocks && document.blocks.some(blockHasImage);
+  }
+
   function buildClipboardPayload(document, assets, options) {
     var input = options || {};
     if (!document || !document.blocks || document.blocks.length === 0) {
@@ -165,6 +180,7 @@
     }
     var assetList = assets || [];
     var markdown = Markdown.serializeDocument(document, { assets: assetList });
+    var hasImages = documentHasImages(document);
     var limit = input.maxDataUrlLength === undefined
       ? DEFAULT_MAX_DATA_URL_LENGTH
       : Number(input.maxDataUrlLength);
@@ -177,6 +193,7 @@
         return {
           markdown: markdown,
           html: rendered.html,
+          hasImages: hasImages,
           omittedImages: uniqueStrings(rendered.missingImages)
         };
       });
@@ -193,9 +210,11 @@
     items['text/plain'] = new global.Blob([payload.markdown], {
       type: 'text/plain;charset=utf-8'
     });
-    items['text/html'] = new global.Blob([payload.html], {
-      type: 'text/html;charset=utf-8'
-    });
+    if (payload.hasImages) {
+      items['text/html'] = new global.Blob([payload.html], {
+        type: 'text/html;charset=utf-8'
+      });
+    }
     try {
       if (global.ClipboardItem.supports &&
           global.ClipboardItem.supports('text/markdown')) {
@@ -238,7 +257,11 @@
     container.style.left = '-99999px';
     container.style.top = '0';
     container.style.opacity = '0';
-    container.innerHTML = payload.html;
+    if (payload.hasImages) {
+      container.innerHTML = payload.html;
+    } else {
+      container.textContent = payload.markdown;
+    }
     global.document.body.appendChild(container);
 
     var selection = typeof global.getSelection === 'function' ? global.getSelection() : null;
@@ -256,7 +279,9 @@
       }
       event.preventDefault();
       event.clipboardData.setData('text/plain', payload.markdown);
-      event.clipboardData.setData('text/html', payload.html);
+      if (payload.hasImages) {
+        event.clipboardData.setData('text/html', payload.html);
+      }
       handled = true;
     }
 

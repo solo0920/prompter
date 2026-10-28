@@ -2292,6 +2292,43 @@
     });
   });
 
+  test('US3 Copy includes markers chosen through the block flyout', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      commitComposer(win, 'Flyout copy');
+      var block = state.document.blocks[0];
+      var marker = blockById(win, block.id).querySelector('.block-marker');
+      marker.dispatchEvent(new win.PointerEvent('pointerenter', {
+        pointerId: 16,
+        pointerType: 'mouse',
+        bubbles: false
+      }));
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'The block Marker flyout did not open.');
+      menu.querySelector('[data-marker="##"]').click();
+
+      var written = null;
+      return withClipboardStub(win, {
+        asyncWrite: function (items) {
+          written = items;
+          return Promise.resolve();
+        }
+      }, function () {
+        byId(win, 'copy-button').click();
+        return waitFor(function () {
+          return written ? true : null;
+        }, 5000).then(function () {
+          equal(written[0].items['text/html'], undefined,
+            'Text-only documents must not offer HTML that would discard Markdown Markers.');
+          return written[0].items['text/plain'].text();
+        });
+      }).then(function (markdown) {
+        equal(markdown, '## Flyout copy\n',
+          'Copy must serialize the Marker applied through the flyout.');
+      });
+    });
+  });
+
   test('US3 Copy keeps exact Markdown but reports images missing from rich HTML', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
@@ -2364,8 +2401,52 @@
         assert(result && result.ok, 'The execCommand fallback must succeed.');
         equal(result.method, 'execCommand');
         equal(captured['text/plain'], '備援複製\n');
-        assert(captured['text/html'].indexOf('<p>備援複製</p>') !== -1,
-          'The fallback must include rich HTML.');
+        equal(captured['text/html'], undefined,
+          'Text-only fallback copies must not add an HTML flavor.');
+      });
+    });
+  });
+
+  test('US3 Copy fallback keeps rich HTML when images are present', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      commitComposer(win, '# 備援圖片');
+      return addPickerImage(win, 'fallback.png').then(function () {
+        var captured = {};
+        var result = null;
+        return withClipboardStub(win, {
+          asyncWrite: function () {
+            return Promise.reject(new Error('Async clipboard blocked.'));
+          },
+          execCommand: function (command) {
+            if (command !== 'copy') {
+              return false;
+            }
+            var event = new win.Event('copy', { bubbles: true, cancelable: true });
+            win.Object.defineProperty(event, 'clipboardData', {
+              value: {
+                setData: function (type, data) {
+                  captured[type] = data;
+                }
+              }
+            });
+            win.document.dispatchEvent(event);
+            return true;
+          }
+        }, function () {
+          return win.Prompter.clipboard.copy().then(function (value) {
+            result = value;
+          });
+        }).then(function () {
+          assert(result && result.ok, 'The execCommand fallback must succeed.');
+          equal(result.method, 'execCommand');
+          equal(captured['text/plain'], '# 備援圖片\n![fallback.png](fallback.png)\n');
+          assert(captured['text/html'].indexOf('<h1>備援圖片</h1>') !== -1,
+            'Rich fallback HTML must render headings.');
+          assert(/<img src="data:image\/png;base64,[^"]+" alt="fallback\.png"/
+            .test(captured['text/html']),
+          'Rich fallback HTML must embed local images.');
+        });
       });
     });
   });
