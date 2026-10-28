@@ -73,10 +73,10 @@ test('themes define every supported style in light and dark mode', function () {
   ];
   assert.deepEqual(Model.SUPPORTED_STYLES, [
     'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
-    'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+    'notion', 'figma', 'spacex', 'spotify'
   ]);
   assert.equal(Model.DEFAULT_STYLE, 'apple');
-  assert.equal(Object.keys(blocks).length, 24);
+  assert.equal(Object.keys(blocks).length, 20);
   Model.SUPPORTED_STYLES.forEach(function (style) {
     ['light', 'dark'].forEach(function (theme) {
       const name = style + '/' + theme;
@@ -138,7 +138,7 @@ test('every style and theme meets WCAG 2.1 AA contrast for text and controls', f
   });
 });
 
-test('the style selector lists all twelve styles with Apple first', function () {
+test('the style selector lists all ten styles with Apple first', function () {
   const select = html.match(/<select id="style-select"[\s\S]*?<\/select>/);
   assert.ok(select, 'The style selector must exist.');
   const values = [];
@@ -148,6 +148,7 @@ test('the style selector lists all twelve styles with Apple first', function () 
     values.push(match[1]);
   }
   assert.deepEqual(values, Model.SUPPORTED_STYLES);
+  assert.doesNotMatch(select[0], /<optgroup\b/i, 'The selector must be a flat list.');
   assert.match(html, /<html[^>]*data-style="apple"/);
 });
 

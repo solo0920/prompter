@@ -41,10 +41,10 @@ test('preferences provide documented defaults and schema version', function () {
   assert.equal(Settings.SCHEMA_VERSION, Model.SCHEMA_VERSION);
 });
 
-test('all twelve styles are supported and Apple is the default', function () {
+test('all ten styles are supported and Apple is the default', function () {
   const styles = [
     'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
-    'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+    'notion', 'figma', 'spacex', 'spotify'
   ];
   assert.deepEqual(Model.SUPPORTED_STYLES, styles);
   assert.deepEqual(Settings.SUPPORTED_STYLES, styles);
@@ -58,13 +58,17 @@ test('all twelve styles are supported and Apple is the default', function () {
     assert.equal(Model.validatePreferences(preferences).valid, true);
   });
   assert.equal(Model.isSupportedStyle('neon'), false);
+  assert.equal(Model.isSupportedStyle('paper'), false);
+  assert.equal(Model.isSupportedStyle('graphite'), false);
   assert.equal(Model.normalizeStyle('neon'), 'apple');
+  assert.equal(Model.normalizeStyle('paper'), 'apple');
+  assert.equal(Model.normalizeStyle('graphite'), 'apple');
 });
 
 test('preferences preserve valid values and normalize invalid ones', function () {
   const valid = Model.normalizePreferences({
     schemaVersion: 99,
-    style: 'graphite',
+    style: 'spotify',
     theme: 'dark',
     defaultMarker: '##',
     showGrid: true,
@@ -72,7 +76,7 @@ test('preferences preserve valid values and normalize invalid ones', function ()
   });
   assert.deepEqual(valid, {
     schemaVersion: Model.SCHEMA_VERSION,
-    style: 'graphite',
+    style: 'spotify',
     theme: 'dark',
     defaultMarker: '##',
     showGrid: true,
@@ -103,16 +107,21 @@ test('system theme follows the media preference while explicit choices win', fun
 
 test('style and theme remain independent in preflight output', function () {
   assert.deepEqual(Settings.preflightAppearance({
-    style: 'graphite',
+    style: 'spotify',
     theme: 'system'
-  }, { dark: true }), { theme: 'dark', style: 'graphite' });
+  }, { dark: true }), { theme: 'dark', style: 'spotify' });
+  assert.deepEqual(Settings.preflightAppearance({
+    style: 'paper',
+    theme: 'light'
+  }, { dark: true }), { theme: 'light', style: 'apple' });
   assert.deepEqual(Settings.preflightAppearance({
     style: 'neon',
     theme: 'light'
   }, { dark: true }), { theme: 'light', style: 'apple' });
   assert.equal(Settings.isSupportedTheme('system'), true);
   assert.equal(Settings.isSupportedTheme('dim'), false);
-  assert.equal(Settings.isSupportedStyle('graphite'), true);
+  assert.equal(Settings.isSupportedStyle('spotify'), true);
+  assert.equal(Settings.isSupportedStyle('graphite'), false);
   assert.equal(Settings.isSupportedStyle('neon'), false);
 });
 
@@ -127,7 +136,7 @@ test('preference serialization survives a reload and clear-library keeps prefere
     assert.equal(storage.mode, 'local');
 
     storage.savePreferences({
-      style: 'graphite',
+      style: 'spotify',
       theme: 'light',
       defaultMarker: '-',
       showGrid: true,
@@ -135,13 +144,13 @@ test('preference serialization survives a reload and clear-library keeps prefere
     });
     const raw = global.localStorage.getItem('prompter.prefs.v1');
     assert.ok(raw, 'Preferences must be serialized into localStorage.');
-    assert.equal(JSON.parse(raw).style, 'graphite');
+    assert.equal(JSON.parse(raw).style, 'spotify');
 
     const reloaded = Storage.createStorage();
     await reloaded.init();
     assert.deepEqual(reloaded.getPreferences(), {
       schemaVersion: Model.SCHEMA_VERSION,
-      style: 'graphite',
+      style: 'spotify',
       theme: 'light',
       defaultMarker: '-',
       showGrid: true,
@@ -154,7 +163,7 @@ test('preference serialization survives a reload and clear-library keeps prefere
     }), []);
     await reloaded.clearLibrary();
     assert.equal((await reloaded.getDocuments()).length, 0);
-    assert.equal(reloaded.getPreferences().style, 'graphite');
+    assert.equal(reloaded.getPreferences().style, 'spotify');
     assert.equal(reloaded.getPreferences().defaultMarker, '-');
   } finally {
     if (originalLocalStorage === undefined) {

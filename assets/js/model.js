@@ -12,7 +12,7 @@
   var MAX_TITLE_LENGTH = 200;
   var SUPPORTED_STYLES = [
     'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
-    'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+    'notion', 'figma', 'spacex', 'spotify'
   ];
   var DEFAULT_STYLE = 'apple';
 

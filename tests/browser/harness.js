@@ -2530,7 +2530,7 @@
   test('US5 settings apply the default Marker and grid, persist, and show version information', function () {
     return appReady().then(function (win) {
       return withPreferences(win, {
-        style: 'paper',
+        style: 'apple',
         theme: 'light',
         defaultMarker: 'none',
         showGrid: false,
@@ -2599,7 +2599,7 @@
   test('US5 theme and style apply immediately, persist, follow the system and preflight', function () {
     return appReady().then(function (win) {
       return withPreferences(win, {
-        style: 'paper',
+        style: 'apple',
         theme: 'light',
         showGrid: false,
         lastDocumentId: null
@@ -2609,7 +2609,7 @@
         var root = win.document.documentElement;
         app.clearDocument();
         equal(root.getAttribute('data-theme'), 'light');
-        equal(root.getAttribute('data-style'), 'paper');
+        equal(root.getAttribute('data-style'), 'apple');
         var toggle = byId(win, 'theme-toggle');
         equal(toggle.getAttribute('aria-pressed'), 'false');
         toggle.click();
@@ -2619,16 +2619,16 @@
         equal(state.preferences.theme, 'dark');
         equal(state.storage.getPreferences().theme, 'dark');
 
-        changeSelect(win, byId(win, 'style-select'), 'graphite');
-        equal(root.getAttribute('data-style'), 'graphite');
-        equal(state.preferences.style, 'graphite');
-        equal(state.storage.getPreferences().style, 'graphite');
+        changeSelect(win, byId(win, 'style-select'), 'spotify');
+        equal(root.getAttribute('data-style'), 'spotify');
+        equal(state.preferences.style, 'spotify');
+        equal(state.storage.getPreferences().style, 'spotify');
 
         return withProbeFrame(win, function (probe) {
           equal(probe.contentDocument.documentElement.getAttribute('data-theme'), 'dark',
             'The preflight must apply the saved dark theme before storage initializes.');
-          equal(probe.contentDocument.documentElement.getAttribute('data-style'), 'graphite',
-            'The preflight must apply the saved graphite style.');
+          equal(probe.contentDocument.documentElement.getAttribute('data-style'), 'spotify',
+            'The preflight must apply the saved Spotify-inspired style.');
         }).then(function () {
           byId(win, 'settings-button').click();
           return waitFor(function () {
@@ -2643,7 +2643,7 @@
             : 'light';
           equal(root.getAttribute('data-theme'), expected,
             'Following the system must use the current media preference.');
-          equal(root.getAttribute('data-style'), 'graphite',
+          equal(root.getAttribute('data-style'), 'spotify',
             'The style must remain independent of the theme.');
           byId(win, 'settings-close').click();
           return waitFor(function () {
@@ -2654,11 +2654,11 @@
     });
   });
 
-  test('US5 offers twelve styles and applies each without touching content', function () {
+  test('US5 offers ten styles and applies each without touching content', function () {
     return appReady().then(function (win) {
       var styles = [
         'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
-        'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+        'notion', 'figma', 'spacex', 'spotify'
       ];
       return withPreferences(win, {
         style: 'apple',
@@ -2672,9 +2672,9 @@
           select.querySelectorAll('option'),
           function (option) { return option.value; }
         );
-        equal(options.length, 12, 'The style selector must offer twelve styles.');
+        equal(options.length, 10, 'The style selector must offer ten styles.');
         equal(options.join(','), styles.join(','),
-          'The style selector order must start with Apple and keep the legacy styles.');
+          'The style selector order must start with Apple.');
         equal(select.value, 'apple');
         equal(root.getAttribute('data-style'), 'apple',
           'Apple must be the default style.');
@@ -2699,7 +2699,7 @@
   test('US5 clear library confirms, keeps preferences, and removes local records and targets', function () {
     return appReady().then(function (win) {
       return withPreferences(win, {
-        style: 'graphite',
+        style: 'spotify',
         theme: 'dark',
         defaultMarker: '##',
         showGrid: true,
@@ -2812,11 +2812,11 @@
               equal(state.storage.getLastDocumentId(), null,
                 'Clear library must forget the removed last document.');
               var preferences = state.storage.getPreferences();
-              equal(preferences.style, 'graphite');
+              equal(preferences.style, 'spotify');
               equal(preferences.theme, 'dark');
               equal(preferences.defaultMarker, '##');
               equal(preferences.showGrid, true);
-              equal(win.document.documentElement.getAttribute('data-style'), 'graphite');
+              equal(win.document.documentElement.getAttribute('data-style'), 'spotify');
               assert(byId(win, 'toast-region').textContent
                 .indexOf('本機資料庫已清除，磁碟上的檔案不受影響。') !== -1,
               'Clear library must confirm that disk files were untouched.');

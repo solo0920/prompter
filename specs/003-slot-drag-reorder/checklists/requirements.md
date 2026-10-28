@@ -37,14 +37,14 @@
 
 ## Style Requirements Quality
 
-- [x] The twelve-style set and the ten technology references are enumerated.
+- [x] The ten-style set and the ten technology references are enumerated.
 - [x] Light and dark variants, immediate application, and persistence are defined.
 - [x] Offline delivery is explicit: no remote fonts, images, logos, stylesheets, runtime
   network requests, or bundled brand assets.
 - [x] Contrast and focus-visibility requirements are measurable against WCAG 2.1 AA.
 - [x] Brand independence, system-font typography, and Traditional Chinese naming are explicit.
 - [x] Style switching cannot change content, order, Markdown, clipboard output, or saved files.
-- [x] Existing Paper and Graphite compatibility and the Apple default are defined.
+- [x] Removal of the legacy Paper and Graphite options, their fallback to Apple, and the Apple default are defined.
 - [x] Style-selector usability at 360 px is covered.
 
 ## Feature Readiness
@@ -91,8 +91,8 @@
   002, and expands the appearance set. All other feature 002 behavior remains in force.
 - The new styles are independent interpretations: no brand logos, official assets, proprietary
   font files, or implied affiliation.
-- Apple (`apple`, 簡約留白) is the default for new users. Existing Paper and Graphite
-  preferences are preserved unchanged.
+- Apple (`apple`, 簡約留白) is the default for new users. Stored Paper or Graphite preferences
+  fall back to Apple without changing the other preferences.
 
 ## Notes
 

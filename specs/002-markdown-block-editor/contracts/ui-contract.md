@@ -44,7 +44,7 @@ behavior so tests can be written against it.
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
 | Preview | `預覽` | Opens the Preview dialog for the current content. |
 | Copy | `複製` | Disabled when the document is empty. Copies Markdown plus rich content. |
-| Style | `視覺風格` | Selects one of twelve styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the expanded set. |
+| Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
 | Settings | `設定` | Opens the settings dialog. |
 | Directory toggle | `文件目錄` | Shows/hides the directory drawer at narrow widths. `aria-expanded` reflects state. |

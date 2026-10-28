@@ -20,9 +20,9 @@ at arbitrary two-dimensional coordinates or leave gaps between positions. Every 
 one position in a contiguous reading-order sequence, and dragging a block shifts the entire
 range of blocks between the source and target one position at a time.
 
-The feature also expands the appearance system from the existing Paper and Graphite styles to
-a set of twelve styles: the two existing styles plus ten new styles inspired by the technology
-websites analyzed in the [getdesign.md](https://getdesign.md/) catalog.
+The feature also replaces the previous Paper and Graphite appearance options with a curated
+set of ten styles inspired by the technology websites analyzed in the
+[getdesign.md](https://getdesign.md/) catalog. Apple is the default style.
 
 All other behavior from feature 002 remains in force: block content, Markers, image handling,
 file operations, preview, copy, search, settings, storage degradation, and accessibility.
@@ -188,11 +188,11 @@ drag a block by touch and confirm the page does not scroll.
 As a user, I want to choose from a curated set of technology-website-inspired visual styles so
 that the workspace matches a visual mood I like without changing my content or workflow.
 
-**Why this priority**: The existing Paper and Graphite styles cover only two moods. The new
-style pack makes the workspace more personal while preserving the same structure and behavior.
-It is secondary to correct reordering but part of the same release.
+**Why this priority**: The previous two styles cover only two moods. The new style pack
+replaces them and makes the workspace more personal while preserving the same structure and
+behavior. It is secondary to correct reordering but part of the same release.
 
-**Independent Test**: Open the style selector, apply each of the twelve styles in light and dark
+**Independent Test**: Open the style selector, apply each of the ten styles in light and dark
 mode, reload, and confirm the chosen style is restored. Confirm that switching styles never
 changes block text, order, Markdown, or saved files, and that no network request or remote asset
 is introduced.
@@ -200,18 +200,17 @@ is introduced.
 **Acceptance Scenarios**:
 
 1. **Given** the header is visible, **When** the style selector is opened, **Then** it offers
-   twelve styles grouped under clear Traditional Chinese labels: the two existing styles and ten
-   technology-inspired styles.
+   ten technology-inspired styles under clear Traditional Chinese labels.
 2. **Given** a style is selected, **When** the selection is made, **Then** the entire interface
    updates immediately and the choice persists after reload.
-3. **Given** any of the ten new styles, **When** the user switches between light and dark mode,
+3. **Given** any of the ten styles, **When** the user switches between light and dark mode,
    **Then** both variants remain legible, visually distinct, and consistent with that style's
    palette and typography.
 4. **Given** a style is selected, **When** the user edits, reorders, previews, copies, or saves
    a document, **Then** content, ordering, Markdown, and file output are unchanged.
 5. **Given** the user has an existing Paper or Graphite preference, **When** the new version
-   loads, **Then** the existing preference is preserved and Apple becomes the default for new
-   users.
+   loads, **Then** the workspace falls back to Apple without breaking other preferences, and
+   Apple is the default for new users.
 6. **Given** a narrow viewport, **When** the style selector is used at 360 px, **Then** every
    style can be reached and the header does not overflow horizontally.
 7. **Given** any new style, **When** the interface is inspected with networking disabled,
@@ -318,22 +317,22 @@ is introduced.
 
 ### Functional Requirements: Tech-Site Visual Styles
 
-- **FR-023**: The style selector MUST offer twelve styles: the existing Paper and Graphite
-  styles plus ten new technology-site-inspired styles.
-- **FR-024**: The ten new styles MUST be inspired by the following references from the
+- **FR-023**: The style selector MUST offer exactly ten technology-site-inspired styles and
+  MUST NOT offer the legacy Paper or Graphite options.
+- **FR-024**: The ten styles MUST be inspired by the following references from the
   getdesign.md catalog: Apple, NVIDIA, Meta, IBM, Stripe, Vercel, Notion, Figma, SpaceX, and
   Spotify. The set MUST span consumer hardware, AI computing, social, enterprise software,
   payments, developer platforms, productivity, design tools, space technology, and music
   streaming.
-- **FR-025**: Each of the ten new styles MUST provide both a light and a dark variant, and the
-  existing light/dark toggle MUST apply to all twelve styles.
+- **FR-025**: Each of the ten styles MUST provide both a light and a dark variant, and the
+  existing light/dark toggle MUST apply to all ten styles.
 - **FR-026**: Each style MUST define a complete visual treatment for the workspace, including
   background, surfaces, text, muted text, borders, accent, focus, danger, canvas, blocks,
   preview, menus, overlays, shadows, and toast surfaces.
-- **FR-027**: The new styles MUST be visually distinct from Paper, Graphite, and one another
-  through a distinct combination of palette, typography treatment, surface hierarchy, corner
-  shape, and elevation. They MUST be recognizable as the referenced moods without copying brand
-  logos, proprietary artwork, or brand font files.
+- **FR-027**: The ten styles MUST be visually distinct from one another through a distinct
+  combination of palette, typography treatment, surface hierarchy, corner shape, and elevation.
+  They MUST be recognizable as the referenced moods without copying brand logos, proprietary
+  artwork, or brand font files.
 - **FR-028**: The style pack MUST NOT introduce remote fonts, images, logos, stylesheets, or
   runtime network requests. Typography MUST use system font stacks, and all colors and shapes
   MUST be defined locally.
@@ -351,8 +350,9 @@ is introduced.
   referenced companies.
 - **FR-033**: The style selector MUST remain reachable and usable at 360 px without horizontal
   scrolling or clipped options.
-- **FR-034**: The existing Paper and Graphite styles MUST remain visually and behaviorally
-  unchanged, and Apple MUST be the default for users without a preference.
+- **FR-034**: The legacy Paper and Graphite options MUST be removed from the selector. A stored
+  legacy value MUST fall back to Apple without losing the other preferences, and Apple MUST be
+  the default for users without a preference.
 
 ### Style Direction
 
@@ -417,7 +417,7 @@ font, or remote asset is bundled.
   drag provides a visible target state before release.
 - **SC-011**: In a document with at least four blocks, a user can complete a two-position
   reorder in under 5 seconds without opening a menu or dialog.
-- **SC-012**: The style selector offers twelve distinct styles, and 100% of them persist after
+- **SC-012**: The style selector offers ten distinct styles, and 100% of them persist after
   reload in both light and dark mode.
 - **SC-013**: 100% of new style combinations pass the defined WCAG 2.1 AA contrast checks for
   text, controls, and focus indicators.
@@ -425,9 +425,9 @@ font, or remote asset is bundled.
   output, and saved files unchanged.
 - **SC-015**: The application makes zero remote requests or asset loads when any new style is
   active with networking disabled.
-- **SC-016**: All twelve styles remain selectable at 360 px with no horizontal page scrolling.
-- **SC-017**: Existing Paper and Graphite preferences survive the upgrade, and new users see
-  Apple as the default.
+- **SC-016**: All ten styles remain selectable at 360 px with no horizontal page scrolling.
+- **SC-017**: A stored legacy Paper or Graphite preference falls back to Apple while all other
+  preferences survive, and new users see Apple as the default.
 - **SC-018**: 100% of user-visible style names and any descriptions are in Traditional Chinese
   and contain no claim of affiliation with or endorsement by a referenced company.
 - **SC-019**: The delivered application bundles zero brand logos, official brand artwork, or

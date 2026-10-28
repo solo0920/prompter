@@ -9,7 +9,7 @@
     (function () {
       var STYLES = [
         'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
-        'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+        'notion', 'figma', 'spacex', 'spotify'
       ];
       var DEFAULT_STYLE = 'apple';
       function systemTheme() {
@@ -98,22 +98,16 @@
     <div class="header-group header-right">
       <label class="visually-hidden" for="style-select">視覺風格</label>
       <select id="style-select" class="select" aria-label="視覺風格">
-        <optgroup label="科技靈感">
-          <option value="apple">簡約留白</option>
-          <option value="nvidia">勁綠科技</option>
-          <option value="meta">幾何湛藍</option>
-          <option value="ibm">結構企業</option>
-          <option value="stripe">柔光紫韻</option>
-          <option value="vercel">極簡黑白</option>
-          <option value="notion">暖調人文</option>
-          <option value="figma">繽紛幾何</option>
-          <option value="spacex">冷冽星際</option>
-          <option value="spotify">沉浸翠綠</option>
-        </optgroup>
-        <optgroup label="經典">
-          <option value="paper">紙張</option>
-          <option value="graphite">石墨</option>
-        </optgroup>
+        <option value="apple">簡約留白</option>
+        <option value="nvidia">勁綠科技</option>
+        <option value="meta">幾何湛藍</option>
+        <option value="ibm">結構企業</option>
+        <option value="stripe">柔光紫韻</option>
+        <option value="vercel">極簡黑白</option>
+        <option value="notion">暖調人文</option>
+        <option value="figma">繽紛幾何</option>
+        <option value="spacex">冷冽星際</option>
+        <option value="spotify">沉浸翠綠</option>
       </select>
       <button id="theme-toggle" class="button button-quiet button-with-icon" type="button"
               aria-label="切換明暗">

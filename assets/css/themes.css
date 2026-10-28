@@ -1,4 +1,4 @@
-/* Theme tokens: 蘋果 (apple) default, ten tech-site-inspired styles, and legacy 紙張/石墨 */
+/* Theme tokens: ten technology-site-inspired styles, with 蘋果 (apple) as the default */
 :root {
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
     "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -714,120 +714,6 @@ html[data-style="spotify"][data-theme="dark"] {
   --header-accent: #1ed760;
 }
 
-html[data-style="paper"][data-theme="light"] {
-  --bg: #f7f3ea;
-  --surface: #fffdf8;
-  --surface-2: #efe8db;
-  --surface-3: #e6dccb;
-  --text: #2b241c;
-  --muted: #6d6255;
-  --border: #d8ccba;
-  --border-strong: #bcae99;
-  --accent: #9a5b2d;
-  --accent-strong: #79421d;
-  --accent-soft: #f0ddc8;
-  --focus: #2f6fdd;
-  --danger: #a3322c;
-  --danger-soft: #f6d9d6;
-  --canvas-bg: #fbf7ef;
-  --grid-line: rgba(120, 98, 68, .14);
-  --block-bg: #fffdf8;
-  --block-border: #d6c8b4;
-  --image-bg: #eee6d8;
-  --menu-bg: #fffdf8;
-  --overlay: rgba(37, 29, 20, .42);
-  --shadow: 0 10px 30px rgba(55, 40, 24, .14);
-  --shadow-small: 0 2px 8px rgba(55, 40, 24, .12);
-  --toast-bg: #2b241c;
-  --toast-text: #fffdf8;
-}
-
-html[data-style="paper"][data-theme="dark"] {
-  --bg: #201b16;
-  --surface: #2a241d;
-  --surface-2: #342c23;
-  --surface-3: #41372c;
-  --text: #f1e8da;
-  --muted: #b9aa96;
-  --border: #4a3e32;
-  --border-strong: #665645;
-  --accent: #dfa36a;
-  --accent-strong: #f0bd8a;
-  --accent-soft: #4a3627;
-  --focus: #7db1ff;
-  --danger: #ff8f86;
-  --danger-soft: #4a2a27;
-  --canvas-bg: #251f19;
-  --grid-line: rgba(230, 210, 185, .10);
-  --block-bg: #2e2720;
-  --block-border: #514435;
-  --image-bg: #1b1712;
-  --menu-bg: #302820;
-  --overlay: rgba(0, 0, 0, .58);
-  --shadow: 0 12px 34px rgba(0, 0, 0, .40);
-  --shadow-small: 0 2px 10px rgba(0, 0, 0, .34);
-  --toast-bg: #f1e8da;
-  --toast-text: #201b16;
-  --on-accent: #2b1a0b;
-}
-
-html[data-style="graphite"][data-theme="light"] {
-  --bg: #eef0f3;
-  --surface: #fbfbfc;
-  --surface-2: #e4e7eb;
-  --surface-3: #d7dbe1;
-  --text: #1d232b;
-  --muted: #5d6672;
-  --border: #c9cfd7;
-  --border-strong: #aeb6c1;
-  --accent: #3d6f8e;
-  --accent-strong: #2b5570;
-  --accent-soft: #dce9f1;
-  --focus: #2d6bd6;
-  --danger: #a3322c;
-  --danger-soft: #f6d9d6;
-  --canvas-bg: #f3f5f8;
-  --grid-line: rgba(55, 68, 84, .12);
-  --block-bg: #ffffff;
-  --block-border: #c7ced7;
-  --image-bg: #e3e7ec;
-  --menu-bg: #ffffff;
-  --overlay: rgba(20, 28, 38, .40);
-  --shadow: 0 10px 30px rgba(30, 42, 56, .14);
-  --shadow-small: 0 2px 8px rgba(30, 42, 56, .12);
-  --toast-bg: #1d232b;
-  --toast-text: #fbfbfc;
-}
-
-html[data-style="graphite"][data-theme="dark"] {
-  --bg: #15191e;
-  --surface: #1d232a;
-  --surface-2: #252c34;
-  --surface-3: #303943;
-  --text: #e7ecf1;
-  --muted: #a7b2bf;
-  --border: #39424d;
-  --border-strong: #505c69;
-  --accent: #79b7d8;
-  --accent-strong: #a2d1e8;
-  --accent-soft: #253c4a;
-  --focus: #85b8ff;
-  --danger: #ff9188;
-  --danger-soft: #472a2a;
-  --canvas-bg: #191e24;
-  --grid-line: rgba(200, 220, 240, .10);
-  --block-bg: #20272f;
-  --block-border: #3e4955;
-  --image-bg: #111519;
-  --menu-bg: #222a33;
-  --overlay: rgba(0, 0, 0, .60);
-  --shadow: 0 12px 34px rgba(0, 0, 0, .46);
-  --shadow-small: 0 2px 10px rgba(0, 0, 0, .38);
-  --toast-bg: #e7ecf1;
-  --toast-text: #15191e;
-  --on-accent: #0e1a24;
-}
-
 /* A restrained multi-colour rule for the Figma-inspired style; purely decorative. */
 html[data-style="figma"] .app-header::after {
   content: "";
@@ -840,7 +726,7 @@ html[data-style="figma"] .app-header::after {
   pointer-events: none;
 }
 
-/* Dialog radius follows each style's shape language; Paper and Graphite keep 14px. */
+/* Dialog radius follows each style's shape language. */
 html[data-style="apple"] { --radius-dialog: 18px; }
 html[data-style="nvidia"] { --radius-dialog: 8px; }
 html[data-style="meta"] { --radius-dialog: 20px; }
