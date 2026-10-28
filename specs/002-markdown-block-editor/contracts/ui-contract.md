@@ -283,7 +283,9 @@ Each image block shows:
   preview. When preview is closed, the tab bar shows only the preview icon. The pane itself has no
   separate `即時預覽` heading.
 - Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
-  after edits and tab switches.
+  after edits and tab switches. While the composer has text, or a block is being edited, the
+  uncommitted draft appears in Preview and updates as the user types; dismissing the composer or
+  canceling the edit restores the committed content.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,
   plain text, fenced code, basic pipe tables, and KaTeX math using `$...$`, `$$...$$`,
   `\(...\)`, and `\[...\]` delimiters. Math inside fenced code stays literal.

@@ -662,6 +662,10 @@
       return Promise.resolve({ ok: false });
     }
     var document = app.state.document;
+    if (global.Prompter.editor &&
+        typeof global.Prompter.editor.previewDocument === 'function') {
+      document = global.Prompter.editor.previewDocument() || document;
+    }
     if (!document || !document.blocks || document.blocks.length === 0) {
       renderToken += 1;
       emptyState(content);

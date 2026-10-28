@@ -43,7 +43,7 @@
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **91 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **92 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome passes with networking
   blocked; Firefox passes with an unreachable proxy configured.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -53,6 +53,8 @@
 - Multi-line input: the composer and block editor are auto-growing text areas; Shift+Enter
   inserts a line break, Enter commits, width grows up to the maximum before wrapping, and
   height grows so every line remains visible.
+- Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
+  Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
   unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate
   image basenames all round-trip.

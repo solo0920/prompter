@@ -246,6 +246,7 @@ across all stories.
 - [x] T080 Complete the manual browser matrix in `quickstart.md` with Chrome as the required release gate and Firefox as the supplementary compatibility check, recording exact versions and pass/fail notes; Safari is outside the test scope.
 - [x] T081 Add offline KaTeX 0.19.1 math rendering to Preview for `$...$`, `$$...$$`, `\(...\)`, and `\[...\]`, including local fonts, multi-line display math, fenced-code exclusion, and automated coverage.
 - [x] T082 Make composer and block-edit inputs auto-growing multi-line text areas: Shift+Enter inserts a line break, Enter commits, width grows up to the maximum before wrapping, and height grows to keep all lines visible.
+- [x] T083 Include uncommitted composer and block-editor drafts in live Preview, refresh on input and Marker changes, and restore committed content on dismiss or cancel.
 
 ---
 

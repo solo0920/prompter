@@ -3250,6 +3250,68 @@
     });
   });
 
+  test('US3 Preview updates while composer and block drafts change', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var first = commitComposer(win, '# 原始內容');
+      var firstId = first.dataset.blockId;
+      byId(win, 'preview-button').click();
+      return waitFor(function () {
+        return byId(win, 'preview-content').textContent.indexOf('原始內容') !== -1
+          ? true
+          : null;
+      }, 5000).then(function () {
+        setValue(win, composerInput(win), '草稿內容');
+        return waitFor(function () {
+          return byId(win, 'preview-content').textContent.indexOf('草稿內容') !== -1
+            ? true
+            : null;
+        }, 5000);
+      }).then(function () {
+        equal(state.document.blocks.length, 1,
+          'Typing in the composer must not commit a block.');
+        setValue(win, composerInput(win), '');
+        return waitFor(function () {
+          return byId(win, 'preview-content').textContent.indexOf('草稿內容') === -1
+            ? true
+            : null;
+        }, 5000);
+      }).then(function () {
+        setValue(win, composerInput(win), '新增內容');
+        press(win, composerInput(win), 'Enter');
+        return waitFor(function () {
+          return state.document.blocks.length === 2 ? true : null;
+        }, 5000);
+      }).then(function () {
+        blockById(win, firstId).querySelector('.block-content').dispatchEvent(
+          new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
+        var input = blockById(win, firstId).querySelector('.block-edit-input');
+        setValue(win, input, '編輯草稿');
+        return waitFor(function () {
+          var text = byId(win, 'preview-content').textContent;
+          return text.indexOf('編輯草稿') !== -1 && text.indexOf('原始內容') === -1
+            ? true
+            : null;
+        }, 5000);
+      }).then(function () {
+        equal(state.document.blocks[0].text, '原始內容',
+          'The edited draft must not be committed before Enter.');
+        press(win, win.document.querySelector('.block-edit-input'), 'Escape');
+        return waitFor(function () {
+          var text = byId(win, 'preview-content').textContent;
+          return text.indexOf('原始內容') !== -1 && text.indexOf('編輯草稿') === -1
+            ? true
+            : null;
+        }, 5000);
+      }).then(function () {
+        byId(win, 'preview-button').click();
+        return waitFor(function () {
+          return byId(win, 'preview-view').hidden ? true : null;
+        }, 5000);
+      });
+    });
+  });
+
   test('US3 Preview shows an empty state for a blank document', function () {
     return appReady().then(function (win) {
       freshDocument(win);

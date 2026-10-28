@@ -409,9 +409,11 @@ settings panel and clear the local library after confirming the warning.
   side of the workspace while the editor canvas remains visible, including headings, lists,
   quotes, fenced code, basic pipe tables, images, plain text, and KaTeX math using `$...$`,
   `$$...$$`, `\(...\)`, and `\[...\]` delimiters, with raw HTML-looking text
-  escaped, without modifying the document. The preview icon at the right edge of the tab bar MUST toggle the pane; edits and
-  tab switches MUST refresh it without closing it. Preview MUST NOT open a dialog or a new
-  window.
+  escaped, without modifying the document. While the composer or a block editor contains
+  uncommitted text, Preview MUST render that draft in place and refresh as the text changes;
+  dismissing or canceling the draft MUST restore the committed document. The preview icon at
+  the right edge of the tab bar MUST toggle the pane; edits and tab switches MUST refresh it
+  without closing it. Preview MUST NOT open a dialog or a new window.
 - **FR-029**: Copy MUST place the Markdown source on the clipboard exactly as it would be
   saved, preserving line order, Markers, and line breaks, and MUST show success or failure
   feedback.

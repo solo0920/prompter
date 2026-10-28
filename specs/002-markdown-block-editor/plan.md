@@ -260,12 +260,14 @@ targets but never files already saved to disk and never preferences.
 ### Preview and Copy
 
 Preview is a live right-side pane that renders the canonical Markdown, including headings,
-lists, quotes, images, plain text, fenced code, basic pipe tables, and KaTeX math. Math
-supports `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters, including multi-line
-display math and common AMS environments; math inside fenced code stays literal. Raw HTML is
-escaped, other unsupported constructs remain literal text, and remote images are never
-fetched. Missing images show their alternative text or a placeholder plus a warning. Closing
-the pane returns focus to the preview toggle.
+lists, quotes, images, plain text, fenced code, basic pipe tables, and KaTeX math. While the
+composer has text or a block is being edited, the uncommitted draft is substituted at its
+sequence position so Preview updates as the user types; dismissing or canceling restores the
+committed content. Math supports `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters,
+including multi-line display math and common AMS environments; math inside fenced code stays
+literal. Raw HTML is escaped, other unsupported constructs remain literal text, and remote
+images are never fetched. Missing images show their alternative text or a placeholder plus a
+warning. Closing the pane returns focus to the preview toggle.
 
 Copy builds:
 

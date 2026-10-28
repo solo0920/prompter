@@ -58,8 +58,8 @@ Current result (2026-10-29): **101 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **91 passing, 0 failing** (required gate). Firefox also
-reports 91 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **92 passing, 0 failing** (required gate). Firefox also
+reports 92 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -69,8 +69,8 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 91/91 | PASS 91/91 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 91/91 | PASS 91/91 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 92/92 | PASS 92/92 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 92/92 | PASS 92/92 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -92,6 +92,8 @@ Additional automated evidence:
   literals, and untrusted commands or surrounding raw HTML.
 - Input checks cover multi-line composer and block editing, Shift+Enter line breaks, Enter
   commit, and auto-growing width and height.
+- Preview checks cover live composer and block-editor drafts, draft Marker changes, and
+  reverting drafts on dismiss or cancel.
 - Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
   rollback, corrupt-payload isolation, and the dismissible storage-mode banner.
 - Security checks statically reject runtime `fetch`, XHR, WebSocket, `eval`, `new Function`,
@@ -232,19 +234,23 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
    preview pane's left boundary and immediately left of the preview icon, with an `×` that closes
    preview. Confirm images render, the code block and table render, math renders with the
    bundled KaTeX fonts, and raw HTML-looking text is not executed.
-3. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
+3. With the composer focused, type text but do not press Enter. Confirm the preview shows that
+   draft at the composer slot; clear the text and confirm the draft disappears.
+4. Double-click a block and change its text without committing. Confirm the preview follows the
+   draft. Press Escape and confirm the preview returns to the committed text.
+5. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
    editor.
-4. Choose File > New twice. Confirm each document opens in a new tab above the editor, each tab
+6. Choose File > New twice. Confirm each document opens in a new tab above the editor, each tab
    has a small `×`, and the active tab title is editable.
-5. Switch tabs. Confirm blocks, dirty state, composer, and selection are restored per tab, and
+7. Switch tabs. Confirm blocks, dirty state, composer, and selection are restored per tab, and
    the preview updates to the active document.
-6. Close a clean tab with `×`; confirm the neighboring tab becomes active. Make a tab dirty and
+8. Close a clean tab with `×`; confirm the neighboring tab becomes active. Make a tab dirty and
    close it; confirm Save, Discard, or Cancel appears.
-7. Close the last tab. Confirm the empty workspace returns and the preview pane closes.
-8. Close preview once with the filename tab's `×` and once with the preview icon; confirm the
-   editor is unchanged, the preview closes, and the filename label disappears so only the preview
-   icon remains.
-9. Confirm a document with 500 blocks renders in under 1 second on a mid-range laptop.
+9. Close the last tab. Confirm the empty workspace returns and the preview pane closes.
+10. Close preview once with the filename tab's `×` and once with the preview icon; confirm the
+    editor is unchanged, the preview closes, and the filename label disappears so only the preview
+    icon remains.
+11. Confirm a document with 500 blocks renders in under 1 second on a mid-range laptop.
 
 ### 6. Copy exact Markdown and rich content (US3, FR-029..FR-031, SC-007)
 

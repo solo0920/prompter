@@ -101,6 +101,13 @@
     }
   }
 
+  function schedulePreviewRefresh() {
+    var preview = global.Prompter && global.Prompter.preview;
+    if (preview && typeof preview.scheduleRefresh === 'function') {
+      preview.scheduleRefresh();
+    }
+  }
+
   function announce(message) {
     var app = getApp();
     if (app && typeof app.announce === 'function') {
@@ -476,6 +483,7 @@
         if (autoResizeTextarea(input)) {
           reflowSequenceLayout();
         }
+        schedulePreviewRefresh();
       });
       input.addEventListener('keydown', function (event) {
         if (event.isComposing || event.keyCode === 229) {
@@ -633,6 +641,7 @@
       markerButton.classList.toggle('none', marker === 'none');
       markerButton.setAttribute('aria-label', '選擇標記，目前為' + markerLabel(marker));
       updateComposerDetection(element, composer);
+      schedulePreviewRefresh();
       focusComposer(caretStart, caretEnd);
     }, function (open) {
       markerButton.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -658,6 +667,7 @@
       if (autoResizeTextarea(input)) {
         reflowSequenceLayout();
       }
+      schedulePreviewRefresh();
     });
     input.addEventListener('keydown', function (event) {
       if (event.isComposing || event.keyCode === 229) {
@@ -1712,6 +1722,7 @@
     if (editDraft) {
       editDraft.marker = marker;
     }
+    schedulePreviewRefresh();
     var element = blockElement(block.id);
     if (element) {
       var markerButton = element.querySelector('.block-marker');
@@ -1810,6 +1821,7 @@
     state.editingBlockId = null;
     editDraft = null;
     render();
+    schedulePreviewRefresh();
     if (block) {
       selectBlock(block.id, { focus: true });
     }
@@ -1832,6 +1844,55 @@
     }
     var ordered = Model.normalizeSequence(document);
     return ordered.length ? ordered[ordered.length - 1] : null;
+  }
+
+  function previewDocument() {
+    var state = getState();
+    var document = state && state.document;
+    if (!document) {
+      return null;
+    }
+    var editing = editDraft && state.editingBlockId === editDraft.id ? editDraft : null;
+    var composer = state.composer;
+    var hasComposerText = !!(composer && String(composer.text || '').trim() !== '');
+    if (!editing && !hasComposerText) {
+      return document;
+    }
+    var blocks = [];
+    (document.blocks || []).forEach(function (block) {
+      if (editing && block.id === editing.id) {
+        if (String(editing.draftText || '').trim() !== '') {
+          blocks.push(Object.assign({}, block, {
+            text: editing.draftText,
+            marker: editing.marker
+          }));
+        }
+        return;
+      }
+      blocks.push(block);
+    });
+    if (hasComposerText) {
+      var value = String(composer.text || '');
+      var detected = Markdown.detectMarker(value);
+      var marker = composer.markerOverride ||
+        (detected.marker !== 'none' ? detected.marker : composer.marker) || 'none';
+      var text = detected.marker !== 'none' ? detected.text : value;
+      if (text.trim() !== '') {
+        var index = Math.max(0, Math.min(Number(composer.insertIndex) || 0, blocks.length));
+        blocks.splice(index, 0, {
+          id: '__preview_composer__',
+          type: 'text',
+          text: text,
+          marker: marker,
+          x: Files.COLUMN_X,
+          y: Number(composer.y) || Files.COLUMN_START_Y,
+          z: 0,
+          seq: index,
+          blankLinesAfter: 0
+        });
+      }
+    }
+    return Object.assign({}, document, { blocks: blocks });
   }
 
   function elementHeightFor(block) {
@@ -1966,6 +2027,7 @@
       text: ''
     });
     render();
+    schedulePreviewRefresh();
     focusComposer();
   }
 
@@ -1982,6 +2044,7 @@
     var anchorId = composer.anchorBlockId;
     state.composer = null;
     render();
+    schedulePreviewRefresh();
     if (anchorId) {
       selectBlock(anchorId, { focus: true });
     } else {
@@ -3114,6 +3177,7 @@
     insertBlockWithShift: insertBlockWithShift,
     insertImageFiles: insertImageFiles,
     insertPastedContent: insertPastedContent,
+    previewDocument: previewDocument,
     reflowLayout: reflowSequenceLayout,
     getEditingBlockId: function () {
       var state = getState();
