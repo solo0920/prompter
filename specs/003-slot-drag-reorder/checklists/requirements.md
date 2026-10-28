@@ -101,7 +101,7 @@
   block and closes the resulting gaps. Up/Down selects blocks with first/last wrap; Tab cycles
   within the selected block (or within editor items when nothing is selected); and Up/Down on a
   drag handle reorders the block while retaining focus.
-- Verification: **93 unit tests** and **83 browser tests** pass in Chrome, Edge, and Firefox,
+- Verification: **93 unit tests** and **84 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 
 ## Notes

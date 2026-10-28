@@ -1506,6 +1506,36 @@
     selectBlock(ordered[next].id, { focus: true });
   }
 
+  function selectBlockFromComposer(delta) {
+    var state = getState();
+    if (!state || !state.document || !state.composer) {
+      return false;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    if (!ordered.length) {
+      return false;
+    }
+    var insertIndex = Number(state.composer.insertIndex);
+    if (!isFinite(insertIndex)) {
+      insertIndex = ordered.length;
+    }
+    insertIndex = Math.max(0, Math.min(ordered.length, insertIndex));
+    var target;
+    if (delta < 0) {
+      target = insertIndex - 1;
+      if (target < 0) {
+        target = ordered.length - 1;
+      }
+    } else {
+      target = insertIndex;
+      if (target >= ordered.length) {
+        target = 0;
+      }
+    }
+    selectBlock(ordered[target].id, { focus: true });
+    return true;
+  }
+
   function beginEditing(blockId, options) {
     var block = findBlock(blockId);
     var state = getState();
@@ -2329,7 +2359,15 @@
       return;
     }
     var target = event.target;
-    if (!target || !target.closest) {
+    if (!target || !target.closest || event.isComposing) {
+      return;
+    }
+    var plainArrow = !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey &&
+      (event.key === 'ArrowUp' || event.key === 'ArrowDown');
+    if (plainArrow && target.closest('.composer-input')) {
+      event.preventDefault();
+      event.stopPropagation();
+      selectBlockFromComposer(event.key === 'ArrowDown' ? 1 : -1);
       return;
     }
     if (target.closest('input, textarea, select, [contenteditable="true"]') ||
@@ -2342,8 +2380,6 @@
     var state = getState();
     var blockElementNode = target.closest('.block');
     var block = blockElementNode ? findBlock(blockElementNode.dataset.blockId) : null;
-    var plainArrow = !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey &&
-      (event.key === 'ArrowUp' || event.key === 'ArrowDown');
     if (plainArrow) {
       var delta = event.key === 'ArrowDown' ? 1 : -1;
       if (block && target.closest('.drag-handle')) {

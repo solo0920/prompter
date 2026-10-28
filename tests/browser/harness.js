@@ -1117,6 +1117,45 @@
     });
   });
 
+  test('US1 Up/Down from the composer selects adjacent blocks', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+
+      var composer = composerInput(win);
+      assert(composer, 'The composer input is missing.');
+      composer.focus();
+      press(win, composer, 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), cId,
+        'Up from the end composer must select the block before it.');
+      equal(win.document.activeElement, blockById(win, cId));
+      assert(state.composer, 'Moving from the composer must keep it open.');
+
+      composer = composerInput(win);
+      composer.focus();
+      press(win, composer, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), aId,
+        'Down from the end composer must wrap to the first block.');
+
+      blockById(win, aId).querySelector('.block-plus').click();
+      composer = composerInput(win);
+      composer.focus();
+      press(win, composer, 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), aId,
+        'Up from a composer between A and B must select A.');
+
+      composer = composerInput(win);
+      composer.focus();
+      press(win, composer, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), bId,
+        'Down from a composer between A and B must select B.');
+    });
+  });
+
   test('US1 Tab cycles only within the selected block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

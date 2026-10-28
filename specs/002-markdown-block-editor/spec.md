@@ -99,7 +99,8 @@ and confirm the unsaved draft is not restored.
     When a block is selected, Tab and Shift+Tab must cycle only through that block's controls and
     wrap within it; without a selection they must cycle only among editor items. Space on a title
     control opens the Marker menu for arrow-key selection, and Up/Down on a drag handle moves the
-    block one position while keeping focus on that handle.
+    block one position while keeping focus on that handle. Up/Down in the composer input selects
+    the block before/after the composer slot, with the same first/last wrap.
 
 ---
 
@@ -460,7 +461,9 @@ settings panel and clear the local library after confirming the warning.
   of moving to the header or left rail. Space or Enter on a block's title/Marker control MUST
   open the Marker menu, whose Up/Down keys choose an option. Up/Down on a block's right drag
   handle MUST move that block one sequence position earlier or later while keeping focus on the
-  handle. Arrow and Tab navigation MUST be ignored while typing in the composer or block editor.
+  handle. Up/Down in the composer input MUST select the block immediately before/after the
+  composer slot, wrapping at the ends, while leaving the composer open. Arrow and Tab navigation
+  MUST be ignored while typing in a block editor.
 
 ### Key Entities *(include if feature involves data)*
 

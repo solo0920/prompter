@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **83 passing, 0 failing** (required gate). Edge and Firefox
-also report 83 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **84 passing, 0 failing** (required gate). Edge and Firefox
+also report 84 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 83/83 | PASS 83/83 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 83/83 | PASS 83/83 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 83/83 | PASS 83/83 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 84/84 | PASS 84/84 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 84/84 | PASS 84/84 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 84/84 | PASS 84/84 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -189,7 +189,9 @@ opens the Marker flyout without showing a grab cursor.
    through the heading options, and Enter/Space applies the focused option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
     earlier/later, focus stays on the handle, and the move is announced.
-11. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
+11. Focus the composer input, type some text, and press Up/Down. Confirm the block before/after
+    the composer slot is selected, wrapping at the ends, while the composer and its text remain.
+12. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
     unsaved draft is not restored.
 
 Expected: positions are layout-only; Markdown never contains coordinates; unsaved drafts are
