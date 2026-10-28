@@ -210,7 +210,7 @@ is introduced.
 4. **Given** a style is selected, **When** the user edits, reorders, previews, copies, or saves
    a document, **Then** content, ordering, Markdown, and file output are unchanged.
 5. **Given** the user has an existing Paper or Graphite preference, **When** the new version
-   loads, **Then** the existing preference is preserved and Paper remains the default for new
+   loads, **Then** the existing preference is preserved and Apple becomes the default for new
    users.
 6. **Given** a narrow viewport, **When** the style selector is used at 360 px, **Then** every
    style can be reached and the header does not overflow horizontally.
@@ -218,7 +218,7 @@ is introduced.
    **Then** no remote font, image, logo, or stylesheet is requested and no brand asset is
    embedded.
 8. **Given** a stored style value that is missing or unsupported, **When** the page loads,
-   **Then** the workspace falls back to Paper without breaking the rest of the preferences.
+   **Then** the workspace falls back to Apple without breaking the rest of the preferences.
 
 ---
 
@@ -342,7 +342,7 @@ is introduced.
   components. Focus indicators MUST remain visible on every surface.
 - **FR-030**: The selected style MUST persist across reloads and MUST survive clearing the
   local document library, consistent with existing appearance preferences. An unsupported
-  stored value MUST fall back to Paper.
+  stored value MUST fall back to Apple.
 - **FR-031**: Switching styles MUST NOT change document content, sequence, selection, unsaved
   state, Markdown, clipboard payloads, or saved files.
 - **FR-032**: Style names MUST be presented in Traditional Chinese and MUST clearly describe
@@ -352,7 +352,7 @@ is introduced.
 - **FR-033**: The style selector MUST remain reachable and usable at 360 px without horizontal
   scrolling or clipped options.
 - **FR-034**: The existing Paper and Graphite styles MUST remain visually and behaviorally
-  unchanged, and Paper MUST remain the default for users without a preference.
+  unchanged, and Apple MUST be the default for users without a preference.
 
 ### Style Direction
 
@@ -427,7 +427,7 @@ font, or remote asset is bundled.
   active with networking disabled.
 - **SC-016**: All twelve styles remain selectable at 360 px with no horizontal page scrolling.
 - **SC-017**: Existing Paper and Graphite preferences survive the upgrade, and new users see
-  Paper as the default.
+  Apple as the default.
 - **SC-018**: 100% of user-visible style names and any descriptions are in Traditional Chinese
   and contain no claim of affiliation with or endorsement by a referenced company.
 - **SC-019**: The delivered application bundles zero brand logos, official brand artwork, or
@@ -453,8 +453,9 @@ font, or remote asset is bundled.
   Markers, images, and block identity.
 - "Top ten tech websites" is a curated selection from the getdesign.md catalog: Apple, NVIDIA,
   Meta, IBM, Stripe, Vercel, Notion, Figma, SpaceX, and Spotify. It is not an official ranking
-  by getdesign.md. The selection favors recognizable technology brands with distinct design
-  analyses and broad coverage of technology categories. Linear was considered but excluded
+  by getdesign.md. Apple (`apple`, 簡約留白) is the default visual style. The selection
+  favors recognizable technology brands with distinct design analyses and broad coverage of
+  technology categories. Linear was considered but excluded
   because the catalog does not currently provide a design analysis for it.
 - The new styles are independent, inspired interpretations. They do not use brand logos,
   proprietary fonts, official assets, or claims of affiliation.

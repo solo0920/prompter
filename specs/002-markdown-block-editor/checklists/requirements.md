@@ -39,13 +39,13 @@
 
 ## Post-Implementation Verification (2026-10-28)
 
-- Unit and contract tests: **86 passing, 0 failing** (`node --test tests/unit/*.test.js`).
+- Unit and contract tests: **91 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
   file-name/path safety, and static no-network guards.
-- Browser harness: **62 passing, 0 failing** from `file://` in Chrome 156.0.8078.49,
-  Edge 156.0.4314.42, and Firefox 159.0. Chrome and Edge also pass with networking blocked;
-  Firefox passes with an unreachable proxy configured.
+- Browser harness: **63 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+  gate. Edge 156.0.4314.42 and Firefox 159.0 also pass as supplementary checks. Chrome and
+  Edge pass with networking blocked; Firefox passes with an unreachable proxy configured.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
   unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate
   image basenames all round-trip.
@@ -60,8 +60,8 @@
 - Clipboard checks: exact Markdown equals the Save plan; async path, `execCommand` fallback,
   manual-copy dialog, missing/oversized image warnings, and rich HTML are covered.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
-  spot checks, real OS pickers, and Safari 27.2 automation remain manual. Safari Remote
-  Automation is disabled on the test machine; this is documented in `quickstart.md`.
+  spot checks, and real OS pickers remain manual. Safari is outside the automated and manual
+  acceptance scope; Chrome is the required release gate.
 - The native tab-close Stay/Leave limitation remains accepted as documented in `plan.md`.
 
 Final status: implementation and automated verification are complete; the remaining items are

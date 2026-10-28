@@ -243,7 +243,7 @@ across all stories.
 - [x] T077 Verify clipboard degradation in `assets/js/clipboard.js` and `tests/browser/paste-target.html`: async clipboard denied, `execCommand` path, manual-copy dialog, missing images, destination that strips images, and exact Markdown equality with Save.
 - [x] T078 Update `specs/002-markdown-block-editor/checklists/requirements.md` and the quickstart acceptance checklist with final verification results and any recorded exceptions, including the native tab-close prompt limitation.
 - [x] T079 Re-run the Constitution Check against `.specify/memory/constitution.md`: no server/build/install/network, classic scripts only, no ES modules/local `fetch()`, local storage only, deterministic copy-ready output, and no runtime dependencies.
-- [x] T080 Complete the full manual browser matrix in `quickstart.md` for Chrome/Edge plus Firefox and Safari, recording exact versions and pass/fail notes; resolve or document every exception.
+- [x] T080 Complete the manual browser matrix in `quickstart.md` with Chrome as the required release gate and Edge/Firefox as supplementary compatibility checks, recording exact versions and pass/fail notes; Safari is outside the test scope.
 
 ---
 

@@ -48,7 +48,7 @@ test('library, preferences, composer and asset factories provide defaults', func
   const preferences = Model.createPreferences();
   assert.deepEqual(preferences, {
     schemaVersion: 1,
-    style: 'paper',
+    style: 'apple',
     theme: 'system',
     defaultMarker: 'none',
     showGrid: false,
@@ -166,7 +166,7 @@ test('preferences normalize invalid values and validate valid values', function 
     showGrid: 'yes',
     lastDocumentId: 42
   });
-  assert.equal(normalized.style, 'paper');
+  assert.equal(normalized.style, 'apple');
   assert.equal(normalized.theme, 'system');
   assert.equal(normalized.defaultMarker, 'none');
   assert.equal(normalized.showGrid, false);

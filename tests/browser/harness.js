@@ -2654,6 +2654,48 @@
     });
   });
 
+  test('US5 offers twelve styles and applies each without touching content', function () {
+    return appReady().then(function (win) {
+      var styles = [
+        'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
+        'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+      ];
+      return withPreferences(win, {
+        style: 'apple',
+        theme: 'light',
+        showGrid: false,
+        lastDocumentId: null
+      }, function () {
+        var root = win.document.documentElement;
+        var select = byId(win, 'style-select');
+        var options = Array.prototype.map.call(
+          select.querySelectorAll('option'),
+          function (option) { return option.value; }
+        );
+        equal(options.length, 12, 'The style selector must offer twelve styles.');
+        equal(options.join(','), styles.join(','),
+          'The style selector order must start with Apple and keep the legacy styles.');
+        equal(select.value, 'apple');
+        equal(root.getAttribute('data-style'), 'apple',
+          'Apple must be the default style.');
+
+        var state = freshDocument(win);
+        commitComposer(win, '外觀切換不應改動內容');
+        var before = JSON.stringify(state.document);
+        styles.forEach(function (style) {
+          changeSelect(win, select, style);
+          equal(root.getAttribute('data-style'), style,
+            'Selecting ' + style + ' must apply that style immediately.');
+          equal(state.preferences.style, style);
+          equal(state.storage.getPreferences().style, style);
+        });
+        equal(JSON.stringify(state.document), before,
+          'Switching styles must not change document content or order.');
+        changeSelect(win, select, 'apple');
+      });
+    });
+  });
+
   test('US5 clear library confirms, keeps preferences, and removes local records and targets', function () {
     return appReady().then(function (win) {
       return withPreferences(win, {
@@ -3136,7 +3178,7 @@
         defaultMarker: '####',
         showGrid: 'yes'
       });
-      equal(preferences.style, 'paper');
+      equal(preferences.style, 'apple');
       equal(preferences.theme, 'system');
       equal(preferences.defaultMarker, 'none');
       equal(preferences.showGrid, false);

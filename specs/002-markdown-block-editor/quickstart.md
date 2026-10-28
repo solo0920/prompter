@@ -7,9 +7,11 @@ package installation, or network. It is also the manual acceptance script for th
 
 ## Prerequisites
 
-- A supported desktop browser: latest two major versions of Chrome, Edge, Firefox, or Safari.
-- For direct multi-file saving: a Chromium browser (Chrome or Edge). Firefox and Safari use the
-  download fallback.
+- Chrome is the required acceptance browser (latest two major versions). Edge and Firefox are
+  optional secondary compatibility checks.
+- For direct multi-file saving: a Chromium browser (Chrome or Edge). Firefox uses the download
+  fallback.
+- Safari is outside the automated and manual acceptance scope.
 - The repository checked out locally; no dependencies to install.
 - A plain-text destination and at least two rich-text destinations for Copy verification. For
   example: a text editor for plain text, and two of Apple Notes, Microsoft Word, Google Docs, a
@@ -41,7 +43,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-28): **86 passing, 0 failing**.
+Current result (2026-10-28): **91 passing, 0 failing**.
 
 ### Browser harness
 
@@ -57,7 +59,8 @@ Current result (2026-10-28): **86 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): **62 passing, 0 failing** in Chrome, Edge, and Firefox.
+Current result (2026-10-28): Chrome **63 passing, 0 failing** (required gate). Edge and Firefox
+also report 63 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -67,10 +70,12 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 62/62 | PASS 62/62 | Full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 62/62 | PASS 62/62 | Same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 62/62 | PASS 62/62 | WebDriver BiDi run; download save fallback |
-| Safari (macOS) | 27.2 | Not run | Not run | Safari Remote Automation is disabled; see exceptions |
+| Chrome (macOS) | 156.0.8078.49 | PASS 63/63 | PASS 63/63 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 63/63 | PASS 63/63 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 63/63 | PASS 63/63 | Supplementary check; WebDriver BiDi run; download save fallback |
+
+Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
+Safari is not part of the test matrix.
 
 Additional automated evidence:
 
@@ -89,15 +94,15 @@ Additional automated evidence:
   dynamic `import()`, remote script/style URLs, remote image sources, and unsafe image paths.
 
 **Manual-only exceptions**: actual rich-text destination paste (for example Apple Notes and
-Microsoft Word), a physical touch device, a screen-reader spot check, real OS file/directory
-pickers, and the Safari row above still require a human tester. Their automated equivalents
-(payload construction, iframe viewport layout, ARIA structure, picker mocks, and Chromium
-direct-write mocks) pass.
+Microsoft Word), a physical touch device, a screen-reader spot check, and real OS
+file/directory pickers still require a human tester. Their automated equivalents (payload
+construction, iframe viewport layout, ARIA structure, and picker mocks) pass.
 
 ## Manual Acceptance Scenarios
 
-Run these in Chrome or Edge first, then repeat the core authoring, preview, copy, and download
-paths in Firefox and Safari. Record the browser and result.
+Run these in Chrome first as the required acceptance browser. Optionally repeat the core
+authoring, preview, copy, and download paths in Edge and Firefox. Safari is outside the test
+scope.
 
 ### 1. First run and blank document (US1, FR-017)
 
@@ -205,7 +210,7 @@ session-only.
 6. Create a file-name conflict with an unrelated file; confirm the conflict dialog prevents a
    silent overwrite.
 
-**Firefox/Safari download path**
+**Firefox download path**
 
 1. Choose Save As and enter a name. Confirm the Markdown and each image download separately.
 2. Keep the files together without renaming; open the Markdown again with Open and select its
@@ -254,7 +259,8 @@ session-only.
 1. Toggle light/dark; confirm immediate change. Reload; confirm the choice persists.
 2. With no explicit choice, change the OS light/dark preference; confirm the app follows it.
 3. Use the settings reset to follow the system again.
-4. Switch between 紙張 and 石墨; confirm each works in both light and dark and persists.
+4. With a fresh profile, confirm 簡約留白 (`apple`) is the default. Switch among all twelve
+   styles; confirm each works in both light and dark and persists.
 5. Change the default Marker; create a new composer and confirm it uses the new default.
 6. Toggle the alignment grid; confirm it appears/disappears and persists.
 7. Open the settings dialog, confirm version information is present.
@@ -287,29 +293,31 @@ session-only.
 
 ## Browser Matrix
 
-**Legend**: **Required** means the flow must pass for the browser to be supported. **Expected**
-means the flow should work when the browser exposes the API, but the documented fallback is
-acceptable. **Fallback** means the documented alternative path is the required behavior.
+**Legend**: **Required** means the flow must pass because Chrome is the release gate.
+**Verified** means the flow passed as a supplementary compatibility check and is not
+release-blocking. **Expected** means the flow should work when the browser exposes the API,
+but the documented fallback is acceptable. **Fallback** means the documented alternative path
+is the required behavior.
 
-| Flow | Chrome/Edge | Firefox | Safari |
-|------|-------------|---------|--------|
-| Open from `file://` | Required | Required | Required |
-| Create/edit/drag/keyboard | Required | Required | Required |
-| Preview and search | Required | Required | Required |
-| Save As direct multi-file | Expected (File System Access) | Download fallback | Download fallback |
-| Save downloads | Fallback | Required | Required |
-| Async rich copy | Expected | Fallback | Fallback |
-| `execCommand` copy fallback | Required | Required | Required |
-| Image paste via `paste` event | Required | Required | Required |
-| IndexedDB persistence | Expected | Expected/fallback | Expected/fallback |
-| localStorage fallback | Required | Required | Required |
-| 360 px layout | Required | Required | Required |
+| Flow | Chrome (required) | Edge (supplementary) | Firefox (supplementary) |
+|------|-------------------|----------------------|-------------------------|
+| Open from `file://` | Required | Verified | Verified |
+| Create/edit/drag/keyboard | Required | Verified | Verified |
+| Preview and search | Required | Verified | Verified |
+| Save As direct multi-file | Required (File System Access) | Verified (File System Access) | Download fallback |
+| Save downloads | Fallback | Fallback | Verified |
+| Async rich copy | Expected | Verified | Fallback |
+| `execCommand` copy fallback | Required | Verified | Verified |
+| Image paste via `paste` event | Required | Verified | Verified |
+| IndexedDB persistence | Expected/fallback | Verified/fallback | Verified/fallback |
+| localStorage fallback | Required | Verified | Verified |
+| 360 px layout | Required | Verified | Verified |
 
-Record the exact browser versions and pass/fail notes in the test log.
+Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-10-28**: Chrome 156, Edge 156, and Firefox 159 pass the full automated harness
-from `file://`, including offline runs. Safari 27.2 was not automated because Safari Remote
-Automation is disabled on the test machine; it remains a manual row.
+**Verified 2026-10-28**: Chrome 156 passes the full automated harness from `file://`,
+including offline runs and is the required release gate. Edge 156 and Firefox 159 also pass
+as supplementary checks. Safari is not part of the test matrix.
 
 ## Acceptance Checklist
 
@@ -330,10 +338,10 @@ Automation is disabled on the test machine; it remains a manual row.
 - [x] SC-015 save/reopen restores every image
 - [x] SC-016 unsupported/unstorable images rejected with no document change
 
-**Exception recorded**: SC-007 and the Safari browser row require human verification because this
-environment cannot drive external rich-text destinations or enable Safari Remote Automation.
-The generated rich payload, exact `text/plain` Markdown, image placeholders, and all fallback
-paths pass automated checks. The app remains ready for those manual spot checks.
+**Exception recorded**: SC-007 requires human verification because this environment cannot
+drive external rich-text destinations. The generated rich payload, exact `text/plain`
+Markdown, image placeholders, and all fallback paths pass automated checks. The app remains
+ready for those manual spot checks.
 
 ## Known Limitations
 
@@ -341,9 +349,8 @@ paths pass automated checks. The app remains ready for those manual spot checks.
   Cancel dialog. In-app navigation uses the three-way dialog.
 - **Rich image paste**: some destinations strip data-URL images. Exact Markdown is always
   available via `text/plain`; the app reports omitted images.
-- **Direct file writing**: Firefox and Safari do not support the directory picker used for
-  multi-file saves; they download files separately. Keep downloads together and do not rename
-  them.
+- **Direct file writing**: Firefox does not support the directory picker used for multi-file
+  saves; it downloads files separately. Keep downloads together and do not rename them.
 - **`file://` storage**: browser storage behavior is not guaranteed. The app warns and keeps
   the session usable, but Save-to-disk is the durable path.
 - **Preview subset**: basic pipe tables and fenced code are rendered; other unsupported

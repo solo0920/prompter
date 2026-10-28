@@ -209,9 +209,7 @@
     }
     if (elements['style-select']) {
       elements['style-select'].addEventListener('change', function () {
-        updatePreferences({
-          style: elements['style-select'].value === 'graphite' ? 'graphite' : 'paper'
-        });
+        updatePreferences({ style: elements['style-select'].value });
       });
     }
     if (elements['default-marker']) {
@@ -279,11 +277,13 @@
   }
 
   function isSupportedStyle(style) {
-    return style === 'paper' || style === 'graphite';
+    return Model.isSupportedStyle(style);
   }
 
   var api = {
     SCHEMA_VERSION: Model.SCHEMA_VERSION,
+    SUPPORTED_STYLES: Model.SUPPORTED_STYLES,
+    DEFAULT_STYLE: Model.DEFAULT_STYLE,
     init: init,
     normalizePreferences: normalizePreferences,
     effectiveTheme: effectiveTheme,

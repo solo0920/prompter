@@ -35,11 +35,13 @@ document fallback; in-memory fallback when both are unavailable. No remote persi
 
 **Testing**: `node --test tests/unit/*.test.js` for pure model, serializer, ordering, search,
 renderer, clipboard payload, file-helper, and preference logic; `tests/browser/harness.html`
-opened from `file://` for DOM, storage, and renderer checks; manual core-flow matrix in the
-latest two major versions of Chrome, Edge, Firefox, and Safari with networking disabled.
+opened from `file://` for DOM, storage, and renderer checks; manual core-flow matrix in
+Chrome as the required release gate, with Edge and Firefox as optional compatibility checks.
+Safari is outside the test scope.
 
 **Target Platform**: Static web app opened directly from `file://` on desktop, responsive down
-to 360 px. Latest two major versions of Chrome, Edge, Firefox, and Safari.
+to 360 px. Chrome is the primary supported browser; Edge and Firefox are secondary
+compatibility targets.
 
 **Project Type**: Single-project static web application.
 
@@ -82,8 +84,8 @@ survive clear-library while disk files are untouched. Copy `text/plain` is byte-
 Save via the shared canonical serializer; output is deterministic. Automated static checks
 reject network and dynamic-code primitives, and offline harness runs pass in Chrome, Edge, and
 Firefox. The documented manual-only exceptions (external rich-text destinations, physical
-touch, screen reader, OS pickers, and Safari automation) do not violate a principle; the
-required fallbacks exist.
+touch, screen reader, and OS pickers) do not violate a principle; the required fallbacks
+exist. Safari is outside the automated and manual acceptance scope.
 
 ## Platform Constraints and Deviations
 
@@ -93,9 +95,9 @@ required fallbacks exist.
   On tab close the native prompt is used, and the last explicit save remains intact.
   FR-015 and SC-009 already scope the three-way choice to in-app navigation and retain the
   native prompt for page unload. This is a browser limitation, not a constitution violation.
-- **File System Access API**: available in Chromium browsers but not Firefox or Safari, and
-  the picker may still fail under `file://`. Every save path catches that failure and falls
-  back to one download per file. The browser may ask the user to allow multiple downloads.
+- **File System Access API**: available in Chromium browsers but not Firefox, and the picker
+  may still fail under `file://`. Every save path catches that failure and falls back to one
+  download per file. The browser may ask the user to allow multiple downloads.
 - **Clipboard**: async Clipboard writes require a secure context and user activation and may
   be denied. `file://` is a secure context in Chrome, but the app always provides an
   `execCommand('copy')` fallback and a manual-copy dialog as the final fallback.

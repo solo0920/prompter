@@ -32,13 +32,33 @@ test('preferences provide documented defaults and schema version', function () {
   const preferences = Model.createPreferences();
   assert.deepEqual(preferences, {
     schemaVersion: Model.SCHEMA_VERSION,
-    style: 'paper',
+    style: 'apple',
     theme: 'system',
     defaultMarker: 'none',
     showGrid: false,
     lastDocumentId: null
   });
   assert.equal(Settings.SCHEMA_VERSION, Model.SCHEMA_VERSION);
+});
+
+test('all twelve styles are supported and Apple is the default', function () {
+  const styles = [
+    'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
+    'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+  ];
+  assert.deepEqual(Model.SUPPORTED_STYLES, styles);
+  assert.deepEqual(Settings.SUPPORTED_STYLES, styles);
+  assert.equal(Model.DEFAULT_STYLE, 'apple');
+  assert.equal(Settings.DEFAULT_STYLE, 'apple');
+  styles.forEach(function (style) {
+    assert.equal(Model.isSupportedStyle(style), true, style + ' should be supported');
+    assert.equal(Settings.isSupportedStyle(style), true, style + ' should be supported in settings');
+    const preferences = Model.createPreferences({ style: style });
+    assert.equal(preferences.style, style);
+    assert.equal(Model.validatePreferences(preferences).valid, true);
+  });
+  assert.equal(Model.isSupportedStyle('neon'), false);
+  assert.equal(Model.normalizeStyle('neon'), 'apple');
 });
 
 test('preferences preserve valid values and normalize invalid ones', function () {
@@ -66,7 +86,7 @@ test('preferences preserve valid values and normalize invalid ones', function ()
     showGrid: 'yes',
     lastDocumentId: 42
   });
-  assert.equal(invalid.style, 'paper');
+  assert.equal(invalid.style, 'apple');
   assert.equal(invalid.theme, 'system');
   assert.equal(invalid.defaultMarker, 'none');
   assert.equal(invalid.showGrid, false);
@@ -89,7 +109,7 @@ test('style and theme remain independent in preflight output', function () {
   assert.deepEqual(Settings.preflightAppearance({
     style: 'neon',
     theme: 'light'
-  }, { dark: true }), { theme: 'light', style: 'paper' });
+  }, { dark: true }), { theme: 'light', style: 'apple' });
   assert.equal(Settings.isSupportedTheme('system'), true);
   assert.equal(Settings.isSupportedTheme('dim'), false);
   assert.equal(Settings.isSupportedStyle('graphite'), true);

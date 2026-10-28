@@ -189,7 +189,7 @@ Stored per browser/device, not per document.
 | Field | Type | Default | Rules |
 |-------|------|---------|-------|
 | `schemaVersion` | integer | `1` | Preferences schema. |
-| `style` | `"paper"` \| `"graphite"` | `"paper"` | At least two styles; independent of theme. |
+| `style` | style ID | `"apple"` | Twelve styles; independent of theme. Feature 003 defines the expanded set. |
 | `theme` | `"system"` \| `"light"` \| `"dark"` | `"system"` | System follows `prefers-color-scheme` until changed. |
 | `defaultMarker` | Marker | `"none"` | Used by new composers. |
 | `showGrid` | boolean | `false` | Shows the 24 px alignment grid. |

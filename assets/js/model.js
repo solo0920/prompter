@@ -10,6 +10,11 @@
 
   var SCHEMA_VERSION = 1;
   var MAX_TITLE_LENGTH = 200;
+  var SUPPORTED_STYLES = [
+    'apple', 'nvidia', 'meta', 'ibm', 'stripe', 'vercel',
+    'notion', 'figma', 'spacex', 'spotify', 'paper', 'graphite'
+  ];
+  var DEFAULT_STYLE = 'apple';
 
   function valueOr(value, fallback) {
     return value === undefined || value === null ? fallback : value;
@@ -27,8 +32,12 @@
     return Utils.isSupportedMarker(marker) ? marker : 'none';
   }
 
+  function isSupportedStyle(style) {
+    return SUPPORTED_STYLES.indexOf(style) !== -1;
+  }
+
   function normalizeStyle(style) {
-    return style === 'graphite' ? 'graphite' : 'paper';
+    return isSupportedStyle(style) ? style : DEFAULT_STYLE;
   }
 
   function normalizeTheme(theme) {
@@ -344,8 +353,8 @@
     if (preferences.schemaVersion !== SCHEMA_VERSION) {
       errors.push('unsupported preferences schema version');
     }
-    if (preferences.style !== 'paper' && preferences.style !== 'graphite') {
-      errors.push('style must be paper or graphite');
+    if (!isSupportedStyle(preferences.style)) {
+      errors.push('style is not supported');
     }
     if (['system', 'light', 'dark'].indexOf(preferences.theme) === -1) {
       errors.push('theme must be system, light, or dark');
@@ -456,6 +465,10 @@
   var api = {
     SCHEMA_VERSION: SCHEMA_VERSION,
     MAX_TITLE_LENGTH: MAX_TITLE_LENGTH,
+    SUPPORTED_STYLES: SUPPORTED_STYLES.slice(),
+    DEFAULT_STYLE: DEFAULT_STYLE,
+    isSupportedStyle: isSupportedStyle,
+    normalizeStyle: normalizeStyle,
     normalizeTitle: normalizeTitle,
     normalizeMarker: normalizeMarker,
     normalizePreferences: normalizePreferences,

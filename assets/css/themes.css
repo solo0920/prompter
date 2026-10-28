@@ -1,4 +1,719 @@
-/* Theme tokens: 紙張 (paper) and 石墨 (graphite), each light/dark */
+/* Theme tokens: 蘋果 (apple) default, ten tech-site-inspired styles, and legacy 紙張/石墨 */
+:root {
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+    "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-display: var(--font-ui);
+  --radius-block: 10px;
+  --radius-control: 8px;
+  --radius-panel: 10px;
+  --radius-dialog: 14px;
+  --display-weight: 650;
+  --display-spacing: 0;
+  --display-transform: none;
+  --on-accent: #fff;
+  --header-accent: transparent;
+}
+
+html[data-style="apple"][data-theme="light"] {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #f0f0f2;
+  --surface-3: #e8e8ed;
+  --text: #1d1d1f;
+  --muted: #66666c;
+  --border: #d2d2d7;
+  --border-strong: #b8b8bf;
+  --accent: #0071e3;
+  --accent-strong: #005bb5;
+  --accent-soft: #e8f2ff;
+  --focus: #0071e3;
+  --danger: #b3261e;
+  --danger-soft: #fdecea;
+  --canvas-bg: #fbfbfd;
+  --grid-line: rgba(0, 0, 0, .055);
+  --block-bg: #ffffff;
+  --block-border: #d2d2d7;
+  --image-bg: #f2f2f4;
+  --menu-bg: #ffffff;
+  --overlay: rgba(0, 0, 0, .32);
+  --shadow: 0 12px 32px rgba(0, 0, 0, .12);
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, .08);
+  --toast-bg: #1d1d1f;
+  --toast-text: #ffffff;
+  --radius-block: 14px;
+  --radius-control: 10px;
+  --radius-panel: 14px;
+}
+
+html[data-style="apple"][data-theme="dark"] {
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --surface-3: #3a3a3c;
+  --text: #f5f5f7;
+  --muted: #a1a1a6;
+  --border: #38383a;
+  --border-strong: #545458;
+  --accent: #2997ff;
+  --accent-strong: #64b5ff;
+  --accent-soft: #0a2a47;
+  --focus: #64b5ff;
+  --danger: #ff8a80;
+  --danger-soft: #3a1d1b;
+  --canvas-bg: #000000;
+  --grid-line: rgba(255, 255, 255, .07);
+  --block-bg: #1c1c1e;
+  --block-border: #38383a;
+  --image-bg: #111111;
+  --menu-bg: #2c2c2e;
+  --overlay: rgba(0, 0, 0, .72);
+  --shadow: 0 12px 34px rgba(0, 0, 0, .55);
+  --shadow-small: 0 2px 10px rgba(0, 0, 0, .45);
+  --toast-bg: #f5f5f7;
+  --toast-text: #1d1d1f;
+  --on-accent: #001b33;
+  --radius-block: 14px;
+  --radius-control: 10px;
+  --radius-panel: 14px;
+}
+
+html[data-style="nvidia"][data-theme="light"] {
+  --bg: #f6f7f3;
+  --surface: #ffffff;
+  --surface-2: #eef1e9;
+  --surface-3: #e2e7da;
+  --text: #101410;
+  --muted: #545c50;
+  --border: #d5dbcc;
+  --border-strong: #b4bdaa;
+  --accent: #4f7a00;
+  --accent-strong: #3f6600;
+  --accent-soft: #eaf4d4;
+  --focus: #2f7d00;
+  --danger: #b3261e;
+  --danger-soft: #fdecea;
+  --canvas-bg: #f8f9f5;
+  --grid-line: rgba(50, 70, 30, .10);
+  --block-bg: #ffffff;
+  --block-border: #d5dbcc;
+  --image-bg: #eef1e9;
+  --menu-bg: #ffffff;
+  --overlay: rgba(10, 14, 8, .45);
+  --shadow: 0 10px 24px rgba(24, 32, 12, .14);
+  --shadow-small: 0 2px 6px rgba(24, 32, 12, .10);
+  --toast-bg: #101410;
+  --toast-text: #f7f9f4;
+  --font-ui: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 6px;
+  --radius-control: 4px;
+  --radius-panel: 8px;
+  --display-weight: 700;
+  --display-spacing: .02em;
+  --header-accent: #76b900;
+}
+
+html[data-style="nvidia"][data-theme="dark"] {
+  --bg: #080a07;
+  --surface: #11140f;
+  --surface-2: #191e14;
+  --surface-3: #232a1c;
+  --text: #f2f5ed;
+  --muted: #a7b09c;
+  --border: #2b3322;
+  --border-strong: #435035;
+  --accent: #76b900;
+  --accent-strong: #a6e000;
+  --accent-soft: #22330a;
+  --focus: #9ee800;
+  --danger: #ff9b8a;
+  --danger-soft: #3a1d17;
+  --canvas-bg: #080a07;
+  --grid-line: rgba(118, 185, 0, .12);
+  --block-bg: #12160f;
+  --block-border: #2e3725;
+  --image-bg: #0b0d09;
+  --menu-bg: #171c12;
+  --overlay: rgba(0, 0, 0, .70);
+  --shadow: 0 12px 30px rgba(0, 0, 0, .55);
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, .42);
+  --toast-bg: #f2f5ed;
+  --toast-text: #080a07;
+  --font-ui: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 6px;
+  --radius-control: 4px;
+  --radius-panel: 8px;
+  --display-weight: 700;
+  --display-spacing: .02em;
+  --on-accent: #0a1000;
+  --header-accent: #76b900;
+}
+
+html[data-style="meta"][data-theme="light"] {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface-2: #e7ebf0;
+  --surface-3: #dbe1e8;
+  --text: #1c2b33;
+  --muted: #5c6b73;
+  --border: #d4dbe3;
+  --border-strong: #b4bfca;
+  --accent: #0866ff;
+  --accent-strong: #004ecc;
+  --accent-soft: #e7efff;
+  --focus: #0866ff;
+  --danger: #c62828;
+  --danger-soft: #fde8e8;
+  --canvas-bg: #f5f7fa;
+  --grid-line: rgba(30, 50, 70, .08);
+  --block-bg: #ffffff;
+  --block-border: #d4dbe3;
+  --image-bg: #e9eef4;
+  --menu-bg: #ffffff;
+  --overlay: rgba(20, 30, 45, .40);
+  --shadow: 0 12px 30px rgba(20, 40, 70, .14);
+  --shadow-small: 0 2px 8px rgba(20, 40, 70, .10);
+  --toast-bg: #1c2b33;
+  --toast-text: #ffffff;
+  --font-ui: "Segoe UI", Helvetica, Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Segoe UI", Helvetica, Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 14px;
+  --radius-control: 999px;
+  --radius-panel: 16px;
+  --display-weight: 650;
+  --display-spacing: -.01em;
+  --header-accent: #0866ff;
+}
+
+html[data-style="meta"][data-theme="dark"] {
+  --bg: #0b0f16;
+  --surface: #151b24;
+  --surface-2: #1d2531;
+  --surface-3: #28323f;
+  --text: #f5f7fa;
+  --muted: #aeb8c4;
+  --border: #2a3441;
+  --border-strong: #435062;
+  --accent: #4d8dff;
+  --accent-strong: #8fb8ff;
+  --accent-soft: #10264a;
+  --focus: #78a9ff;
+  --danger: #ff8f86;
+  --danger-soft: #3a1d1d;
+  --canvas-bg: #0b0f16;
+  --grid-line: rgba(120, 160, 220, .10);
+  --block-bg: #161d27;
+  --block-border: #2c3745;
+  --image-bg: #0f141b;
+  --menu-bg: #1b2330;
+  --overlay: rgba(0, 0, 0, .70);
+  --shadow: 0 12px 34px rgba(0, 0, 0, .48);
+  --shadow-small: 0 2px 10px rgba(0, 0, 0, .38);
+  --toast-bg: #f5f7fa;
+  --toast-text: #0b0f16;
+  --font-ui: "Segoe UI", Helvetica, Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Segoe UI", Helvetica, Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 14px;
+  --radius-control: 999px;
+  --radius-panel: 16px;
+  --display-weight: 650;
+  --display-spacing: -.01em;
+  --on-accent: #061b3d;
+  --header-accent: #4d8dff;
+}
+
+html[data-style="ibm"][data-theme="light"] {
+  --bg: #f4f4f4;
+  --surface: #ffffff;
+  --surface-2: #e8e8e8;
+  --surface-3: #dcdcdc;
+  --text: #161616;
+  --muted: #525252;
+  --border: #c6c6c6;
+  --border-strong: #8d8d8d;
+  --accent: #0f62fe;
+  --accent-strong: #0043ce;
+  --accent-soft: #edf5ff;
+  --focus: #0f62fe;
+  --danger: #da1e28;
+  --danger-soft: #fff1f1;
+  --canvas-bg: #f4f4f4;
+  --grid-line: rgba(22, 22, 22, .10);
+  --block-bg: #ffffff;
+  --block-border: #c6c6c6;
+  --image-bg: #e8e8e8;
+  --menu-bg: #ffffff;
+  --overlay: rgba(22, 22, 22, .50);
+  --shadow: 0 10px 24px rgba(22, 22, 22, .14);
+  --shadow-small: 0 1px 4px rgba(22, 22, 22, .12);
+  --toast-bg: #161616;
+  --toast-text: #ffffff;
+  --font-ui: "Helvetica Neue", "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Helvetica Neue", "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 0;
+  --radius-control: 0;
+  --radius-panel: 0;
+  --display-weight: 600;
+  --header-accent: #0f62fe;
+}
+
+html[data-style="ibm"][data-theme="dark"] {
+  --bg: #161616;
+  --surface: #262626;
+  --surface-2: #333333;
+  --surface-3: #393939;
+  --text: #f4f4f4;
+  --muted: #c6c6c6;
+  --border: #393939;
+  --border-strong: #525252;
+  --accent: #4589ff;
+  --accent-strong: #78a9ff;
+  --accent-soft: #0f2a52;
+  --focus: #78a9ff;
+  --danger: #ff8389;
+  --danger-soft: #3d1a1c;
+  --canvas-bg: #161616;
+  --grid-line: rgba(255, 255, 255, .08);
+  --block-bg: #262626;
+  --block-border: #393939;
+  --image-bg: #1a1a1a;
+  --menu-bg: #262626;
+  --overlay: rgba(0, 0, 0, .70);
+  --shadow: 0 12px 30px rgba(0, 0, 0, .50);
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, .40);
+  --toast-bg: #f4f4f4;
+  --toast-text: #161616;
+  --font-ui: "Helvetica Neue", "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Helvetica Neue", "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 0;
+  --radius-control: 0;
+  --radius-panel: 0;
+  --display-weight: 600;
+  --on-accent: #001a4d;
+  --header-accent: #4589ff;
+}
+
+html[data-style="stripe"][data-theme="light"] {
+  --bg: #f6f9fc;
+  --surface: #ffffff;
+  --surface-2: #eef3f8;
+  --surface-3: #e3ebf3;
+  --text: #0a2540;
+  --muted: #425466;
+  --border: #e3e8ee;
+  --border-strong: #c4cfda;
+  --accent: #635bff;
+  --accent-strong: #4b45c6;
+  --accent-soft: #efedff;
+  --focus: #635bff;
+  --danger: #c0392b;
+  --danger-soft: #fce8e6;
+  --canvas-bg: #f6f9fc;
+  --grid-line: rgba(10, 37, 64, .06);
+  --block-bg: #ffffff;
+  --block-border: #e3e8ee;
+  --image-bg: #eef3f8;
+  --menu-bg: #ffffff;
+  --overlay: rgba(10, 37, 64, .40);
+  --shadow: 0 12px 30px rgba(10, 37, 64, .12);
+  --shadow-small: 0 2px 8px rgba(10, 37, 64, .08);
+  --toast-bg: #0a2540;
+  --toast-text: #ffffff;
+  --radius-block: 10px;
+  --radius-control: 8px;
+  --radius-panel: 12px;
+  --display-weight: 300;
+  --display-spacing: -.02em;
+  --header-accent: #635bff;
+}
+
+html[data-style="stripe"][data-theme="dark"] {
+  --bg: #0a2540;
+  --surface: #0e2a47;
+  --surface-2: #163a5c;
+  --surface-3: #1e476d;
+  --text: #eef6ff;
+  --muted: #a9c1d6;
+  --border: #1d4363;
+  --border-strong: #356080;
+  --accent: #8a7dff;
+  --accent-strong: #b3a9ff;
+  --accent-soft: #1c2456;
+  --focus: #a99fff;
+  --danger: #ff9b8a;
+  --danger-soft: #3d1e22;
+  --canvas-bg: #081f35;
+  --grid-line: rgba(180, 210, 255, .09);
+  --block-bg: #0f2a47;
+  --block-border: #1d4363;
+  --image-bg: #071b2e;
+  --menu-bg: #123252;
+  --overlay: rgba(0, 0, 0, .65);
+  --shadow: 0 12px 34px rgba(0, 0, 0, .45);
+  --shadow-small: 0 2px 10px rgba(0, 0, 0, .35);
+  --toast-bg: #eef6ff;
+  --toast-text: #0a2540;
+  --radius-block: 10px;
+  --radius-control: 8px;
+  --radius-panel: 12px;
+  --display-weight: 300;
+  --display-spacing: -.02em;
+  --on-accent: #17104d;
+  --header-accent: #8a7dff;
+}
+
+html[data-style="vercel"][data-theme="light"] {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f2f2f2;
+  --surface-3: #eaeaea;
+  --text: #000000;
+  --muted: #666666;
+  --border: #eaeaea;
+  --border-strong: #c9c9c9;
+  --accent: #000000;
+  --accent-strong: #000000;
+  --accent-soft: #f2f2f2;
+  --focus: #0070f3;
+  --danger: #c00000;
+  --danger-soft: #ffe8e8;
+  --canvas-bg: #fafafa;
+  --grid-line: rgba(0, 0, 0, .055);
+  --block-bg: #ffffff;
+  --block-border: #eaeaea;
+  --image-bg: #f2f2f2;
+  --menu-bg: #ffffff;
+  --overlay: rgba(0, 0, 0, .50);
+  --shadow: 0 8px 30px rgba(0, 0, 0, .12);
+  --shadow-small: 0 1px 6px rgba(0, 0, 0, .08);
+  --toast-bg: #000000;
+  --toast-text: #ffffff;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 6px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
+  --display-weight: 600;
+  --display-spacing: -.02em;
+}
+
+html[data-style="vercel"][data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #171717;
+  --surface-3: #262626;
+  --text: #ededed;
+  --muted: #a1a1a1;
+  --border: #333333;
+  --border-strong: #555555;
+  --accent: #ffffff;
+  --accent-strong: #ffffff;
+  --accent-soft: #1f1f1f;
+  --focus: #3291ff;
+  --danger: #ff6b6b;
+  --danger-soft: #3a1515;
+  --canvas-bg: #000000;
+  --grid-line: rgba(255, 255, 255, .07);
+  --block-bg: #0a0a0a;
+  --block-border: #333333;
+  --image-bg: #111111;
+  --menu-bg: #111111;
+  --overlay: rgba(0, 0, 0, .80);
+  --shadow: 0 8px 30px rgba(0, 0, 0, .60);
+  --shadow-small: 0 1px 8px rgba(0, 0, 0, .50);
+  --toast-bg: #ffffff;
+  --toast-text: #000000;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 6px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
+  --display-weight: 600;
+  --display-spacing: -.02em;
+  --on-accent: #000000;
+}
+
+html[data-style="notion"][data-theme="light"] {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #f1f0ed;
+  --surface-3: #e8e6e1;
+  --text: #37352f;
+  --muted: #6b6963;
+  --border: #e9e7e2;
+  --border-strong: #d3d1cb;
+  --accent: #8a5a36;
+  --accent-strong: #6b4226;
+  --accent-soft: #f3e9df;
+  --focus: #2383e2;
+  --danger: #c0392b;
+  --danger-soft: #f8e7e4;
+  --canvas-bg: #fbfaf8;
+  --grid-line: rgba(55, 53, 47, .06);
+  --block-bg: #ffffff;
+  --block-border: #e9e7e2;
+  --image-bg: #f1f0ed;
+  --menu-bg: #ffffff;
+  --overlay: rgba(15, 15, 15, .35);
+  --shadow: 0 10px 28px rgba(55, 53, 47, .12);
+  --shadow-small: 0 2px 6px rgba(55, 53, 47, .08);
+  --toast-bg: #37352f;
+  --toast-text: #ffffff;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Songti TC",
+    "Noto Serif TC", serif;
+  --radius-block: 8px;
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --display-weight: 600;
+}
+
+html[data-style="notion"][data-theme="dark"] {
+  --bg: #191919;
+  --surface: #202020;
+  --surface-2: #2a2a2a;
+  --surface-3: #333333;
+  --text: #e9e7e2;
+  --muted: #a8a29a;
+  --border: #383838;
+  --border-strong: #4a4a4a;
+  --accent: #c99a72;
+  --accent-strong: #e0b58f;
+  --accent-soft: #34281f;
+  --focus: #6ea8fe;
+  --danger: #ff9b8a;
+  --danger-soft: #3a1d1d;
+  --canvas-bg: #1a1a1a;
+  --grid-line: rgba(255, 255, 255, .06);
+  --block-bg: #202020;
+  --block-border: #383838;
+  --image-bg: #151515;
+  --menu-bg: #232323;
+  --overlay: rgba(0, 0, 0, .70);
+  --shadow: 0 12px 30px rgba(0, 0, 0, .50);
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, .40);
+  --toast-bg: #e9e7e2;
+  --toast-text: #191919;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Songti TC",
+    "Noto Serif TC", serif;
+  --radius-block: 8px;
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --display-weight: 600;
+  --on-accent: #1f140b;
+}
+
+html[data-style="figma"][data-theme="light"] {
+  --bg: #fbfbfb;
+  --surface: #ffffff;
+  --surface-2: #f3f1f7;
+  --surface-3: #e9e4f2;
+  --text: #1e1e1e;
+  --muted: #6b6b6b;
+  --border: #e6e2ee;
+  --border-strong: #c9c1d8;
+  --accent: #7b3ff2;
+  --accent-strong: #5b21b6;
+  --accent-soft: #f1e9ff;
+  --focus: #7b3ff2;
+  --danger: #b42318;
+  --danger-soft: #fee4e2;
+  --canvas-bg: #f7f7f9;
+  --grid-line: rgba(80, 50, 120, .07);
+  --block-bg: #ffffff;
+  --block-border: #e6e2ee;
+  --image-bg: #f3f1f7;
+  --menu-bg: #ffffff;
+  --overlay: rgba(30, 20, 45, .40);
+  --shadow: 0 12px 32px rgba(60, 35, 100, .14);
+  --shadow-small: 0 2px 8px rgba(60, 35, 100, .10);
+  --toast-bg: #1e1e1e;
+  --toast-text: #ffffff;
+  --radius-block: 16px;
+  --radius-control: 10px;
+  --radius-panel: 16px;
+  --display-weight: 700;
+}
+
+html[data-style="figma"][data-theme="dark"] {
+  --bg: #1e1e1e;
+  --surface: #2c2c2c;
+  --surface-2: #383838;
+  --surface-3: #444444;
+  --text: #f5f5f5;
+  --muted: #b3b3b3;
+  --border: #444444;
+  --border-strong: #5a5a5a;
+  --accent: #b69cff;
+  --accent-strong: #d4c4ff;
+  --accent-soft: #352a4f;
+  --focus: #c3a6ff;
+  --danger: #ff8f86;
+  --danger-soft: #3a1d1d;
+  --canvas-bg: #1e1e1e;
+  --grid-line: rgba(255, 255, 255, .07);
+  --block-bg: #2c2c2c;
+  --block-border: #444444;
+  --image-bg: #232323;
+  --menu-bg: #2c2c2c;
+  --overlay: rgba(0, 0, 0, .70);
+  --shadow: 0 12px 34px rgba(0, 0, 0, .50);
+  --shadow-small: 0 2px 10px rgba(0, 0, 0, .40);
+  --toast-bg: #f5f5f5;
+  --toast-text: #1e1e1e;
+  --radius-block: 16px;
+  --radius-control: 10px;
+  --radius-panel: 16px;
+  --display-weight: 700;
+  --on-accent: #1b0b3a;
+}
+
+html[data-style="spacex"][data-theme="light"] {
+  --bg: #f4f4f4;
+  --surface: #ffffff;
+  --surface-2: #ededed;
+  --surface-3: #e0e0e0;
+  --text: #000000;
+  --muted: #5a5a5a;
+  --border: #d9d9d9;
+  --border-strong: #b3b3b3;
+  --accent: #000000;
+  --accent-strong: #000000;
+  --accent-soft: #f0f0f0;
+  --focus: #0057d9;
+  --danger: #c62828;
+  --danger-soft: #fbe9e7;
+  --canvas-bg: #f4f4f4;
+  --grid-line: rgba(0, 0, 0, .06);
+  --block-bg: #ffffff;
+  --block-border: #d9d9d9;
+  --image-bg: #ededed;
+  --menu-bg: #ffffff;
+  --overlay: rgba(0, 0, 0, .55);
+  --shadow: 0 12px 34px rgba(0, 0, 0, .18);
+  --shadow-small: 0 1px 5px rgba(0, 0, 0, .10);
+  --toast-bg: #000000;
+  --toast-text: #ffffff;
+  --font-ui: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 0;
+  --radius-control: 0;
+  --radius-panel: 0;
+  --display-weight: 700;
+  --display-spacing: .12em;
+  --display-transform: uppercase;
+}
+
+html[data-style="spacex"][data-theme="dark"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #141414;
+  --surface-3: #202020;
+  --text: #ffffff;
+  --muted: #a3a3a3;
+  --border: #2a2a2a;
+  --border-strong: #444444;
+  --accent: #ffffff;
+  --accent-strong: #ffffff;
+  --accent-soft: #1a1a1a;
+  --focus: #4da3ff;
+  --danger: #ff6b6b;
+  --danger-soft: #3a1515;
+  --canvas-bg: #000000;
+  --grid-line: rgba(255, 255, 255, .06);
+  --block-bg: #0a0a0a;
+  --block-border: #2a2a2a;
+  --image-bg: #111111;
+  --menu-bg: #111111;
+  --overlay: rgba(0, 0, 0, .80);
+  --shadow: 0 12px 34px rgba(0, 0, 0, .60);
+  --shadow-small: 0 1px 8px rgba(0, 0, 0, .50);
+  --toast-bg: #ffffff;
+  --toast-text: #000000;
+  --font-ui: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-display: "Helvetica Neue", Arial, "PingFang TC", "Noto Sans TC", sans-serif;
+  --radius-block: 0;
+  --radius-control: 0;
+  --radius-panel: 0;
+  --display-weight: 700;
+  --display-spacing: .12em;
+  --display-transform: uppercase;
+  --on-accent: #000000;
+}
+
+html[data-style="spotify"][data-theme="light"] {
+  --bg: #f6f6f6;
+  --surface: #ffffff;
+  --surface-2: #eeeeee;
+  --surface-3: #e2e2e2;
+  --text: #121212;
+  --muted: #5c5c5c;
+  --border: #dcdcdc;
+  --border-strong: #b3b3b3;
+  --accent: #0f7a36;
+  --accent-strong: #0a5c28;
+  --accent-soft: #e6f8eb;
+  --focus: #0f7a36;
+  --danger: #b42318;
+  --danger-soft: #fde8e6;
+  --canvas-bg: #f2f2f2;
+  --grid-line: rgba(0, 0, 0, .06);
+  --block-bg: #ffffff;
+  --block-border: #dcdcdc;
+  --image-bg: #ededed;
+  --menu-bg: #ffffff;
+  --overlay: rgba(0, 0, 0, .50);
+  --shadow: 0 12px 30px rgba(0, 0, 0, .16);
+  --shadow-small: 0 2px 8px rgba(0, 0, 0, .10);
+  --toast-bg: #121212;
+  --toast-text: #ffffff;
+  --radius-block: 14px;
+  --radius-control: 999px;
+  --radius-panel: 14px;
+  --display-weight: 800;
+  --display-spacing: -.02em;
+  --header-accent: #1db954;
+}
+
+html[data-style="spotify"][data-theme="dark"] {
+  --bg: #121212;
+  --surface: #181818;
+  --surface-2: #242424;
+  --surface-3: #2e2e2e;
+  --text: #ffffff;
+  --muted: #b3b3b3;
+  --border: #2a2a2a;
+  --border-strong: #444444;
+  --accent: #1ed760;
+  --accent-strong: #5cf08a;
+  --accent-soft: #173d24;
+  --focus: #1ed760;
+  --danger: #ff8f86;
+  --danger-soft: #3a1d1d;
+  --canvas-bg: #121212;
+  --grid-line: rgba(255, 255, 255, .06);
+  --block-bg: #1f1f1f;
+  --block-border: #2a2a2a;
+  --image-bg: #0d0d0d;
+  --menu-bg: #1f1f1f;
+  --overlay: rgba(0, 0, 0, .75);
+  --shadow: 0 12px 32px rgba(0, 0, 0, .55);
+  --shadow-small: 0 2px 10px rgba(0, 0, 0, .42);
+  --toast-bg: #ffffff;
+  --toast-text: #121212;
+  --radius-block: 14px;
+  --radius-control: 999px;
+  --radius-panel: 14px;
+  --display-weight: 800;
+  --display-spacing: -.02em;
+  --on-accent: #06120a;
+  --header-accent: #1ed760;
+}
+
 html[data-style="paper"][data-theme="light"] {
   --bg: #f7f3ea;
   --surface: #fffdf8;
@@ -53,6 +768,7 @@ html[data-style="paper"][data-theme="dark"] {
   --shadow-small: 0 2px 10px rgba(0, 0, 0, .34);
   --toast-bg: #f1e8da;
   --toast-text: #201b16;
+  --on-accent: #2b1a0b;
 }
 
 html[data-style="graphite"][data-theme="light"] {
@@ -109,4 +825,29 @@ html[data-style="graphite"][data-theme="dark"] {
   --shadow-small: 0 2px 10px rgba(0, 0, 0, .38);
   --toast-bg: #e7ecf1;
   --toast-text: #15191e;
+  --on-accent: #0e1a24;
 }
+
+/* A restrained multi-colour rule for the Figma-inspired style; purely decorative. */
+html[data-style="figma"] .app-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: linear-gradient(90deg, #f24e1e, #ffb020, #0acf83, #1abcfe, #a259ff);
+  pointer-events: none;
+}
+
+/* Dialog radius follows each style's shape language; Paper and Graphite keep 14px. */
+html[data-style="apple"] { --radius-dialog: 18px; }
+html[data-style="nvidia"] { --radius-dialog: 8px; }
+html[data-style="meta"] { --radius-dialog: 20px; }
+html[data-style="ibm"] { --radius-dialog: 0; }
+html[data-style="stripe"] { --radius-dialog: 14px; }
+html[data-style="vercel"] { --radius-dialog: 10px; }
+html[data-style="notion"] { --radius-dialog: 12px; }
+html[data-style="figma"] { --radius-dialog: 20px; }
+html[data-style="spacex"] { --radius-dialog: 0; }
+html[data-style="spotify"] { --radius-dialog: 18px; }
