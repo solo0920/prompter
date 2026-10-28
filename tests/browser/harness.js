@@ -869,11 +869,27 @@
       assert(composerMenuRect.right <= composerMarkerRect.left + 0.5,
         'The composer flyout must open to the left of its Marker.');
       leave(composerMarker);
+      var menuCenter = {
+        x: composerMenuRect.left + composerMenuRect.width / 2,
+        y: composerMenuRect.top + composerMenuRect.height / 2
+      };
+      composerMenu.dispatchEvent(new win.PointerEvent('pointerenter', {
+        pointerId: 11,
+        pointerType: 'mouse',
+        bubbles: false
+      }));
+      composerMenu.dispatchEvent(new win.PointerEvent('pointermove', {
+        bubbles: true,
+        pointerId: 11,
+        pointerType: 'mouse',
+        clientX: menuCenter.x,
+        clientY: menuCenter.y
+      }));
       return new Promise(function (resolve) {
         setTimeout(resolve, 300);
       }).then(function () {
         assert(win.document.querySelector('.marker-menu'),
-          'Leaving the Marker must not close the hover flyout before selection.');
+          'The hover flyout must stay open while the pointer is inside it.');
         composerMenu.querySelector('[data-marker="#"]').click();
         equal(win.document.querySelector('.marker-menu'), null,
           'Selecting a Marker option must close the flyout.');
@@ -2125,21 +2141,9 @@
         'Hovering the right side must set the right hover state.');
       equal(win.getComputedStyle(element).cursor, 'grab',
         'The right side must keep the grab cursor.');
-      return new Promise(function (resolve) {
-        setTimeout(resolve, 300);
-      }).then(function () {
-        assert(win.document.querySelector('.marker-menu'),
-          'Moving away from the Marker must keep the flyout open until an outside click.');
-        win.document.body.dispatchEvent(new win.PointerEvent('pointerdown', {
-          bubbles: true,
-          cancelable: true,
-          pointerId: 26,
-          pointerType: 'mouse',
-          button: 0
-        }));
-        equal(win.document.querySelector('.marker-menu'), null,
-          'Clicking outside the flyout must close it.');
-      });
+      return waitFor(function () {
+        return win.document.querySelector('.marker-menu') ? null : true;
+      }, 2000);
     });
   });
 

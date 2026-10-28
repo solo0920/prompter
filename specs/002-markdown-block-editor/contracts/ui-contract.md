@@ -123,8 +123,9 @@ The composer is the only input box that creates a new block.
   `#`, `##`, `###`, `-`, `1.`, `>`, and `.` with descriptive accessible names but no visible
   title text. Arrow Up/Down navigates, Home/End jump to the first/last option, Escape closes,
   and selecting an option applies it, returns focus to the composer text input, and preserves
-  the caret or selection. A hover-opened flyout stays open when the pointer leaves the Marker or
-  block; it closes only after choosing an option, pressing Escape or Tab, or clicking outside.
+  the caret or selection. A hover-opened flyout stays open while the pointer is over the Marker
+  or flyout, including the gap between them, and closes after the pointer leaves both areas,
+  chooses an option, presses Escape or Tab, or clicks outside.
 - Typing a recognized marker token followed by exactly one space at the start shows a live
   detection label (for example `偵測到： ##`). On Enter the marker is stored once and removed
   from the text. If the user selects a different marker from the menu after typing, the menu

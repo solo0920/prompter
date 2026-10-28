@@ -15,6 +15,7 @@
   var objectUrls = {};
   var currentDocumentId = null;
   var markerMenu = null;
+  var markerCloseTimer = null;
   var dragState = null;
   var marqueeState = null;
   var ignoreNextCanvasClick = false;
@@ -238,6 +239,40 @@
     applySequenceLayout();
   }
 
+  function pointerNearRect(event, rect, margin) {
+    return event.clientX >= rect.left - margin &&
+      event.clientX <= rect.right + margin &&
+      event.clientY >= rect.top - margin &&
+      event.clientY <= rect.bottom + margin;
+  }
+
+  function pointerOverMarkerUi(event) {
+    if (!markerMenu || !markerMenu.element || !markerMenu.anchor) {
+      return false;
+    }
+    var margin = 10;
+    return pointerNearRect(event, markerMenu.anchor.getBoundingClientRect(), margin) ||
+      pointerNearRect(event, markerMenu.element.getBoundingClientRect(), margin);
+  }
+
+  function cancelMarkerMenuClose() {
+    if (markerCloseTimer !== null) {
+      global.clearTimeout(markerCloseTimer);
+      markerCloseTimer = null;
+    }
+  }
+
+  function scheduleMarkerMenuClose() {
+    cancelMarkerMenuClose();
+    if (!markerMenu || !markerMenu.hoverOpened) {
+      return;
+    }
+    markerCloseTimer = global.setTimeout(function () {
+      markerCloseTimer = null;
+      closeMarkerMenu();
+    }, 180);
+  }
+
   function clearBlockHover() {
     if (hoveredBlock) {
       hoveredBlock.classList.remove('hover-left', 'hover-right');
@@ -248,6 +283,13 @@
   function handleBlockHover(event) {
     if (dragState || event.pointerType === 'touch') {
       return;
+    }
+    if (markerMenu && markerMenu.hoverOpened) {
+      if (pointerOverMarkerUi(event)) {
+        cancelMarkerMenuClose();
+      } else {
+        scheduleMarkerMenuClose();
+      }
     }
     var target = event.target;
     var block = target && target.closest ? target.closest('.block') : null;
@@ -355,6 +397,12 @@
         return;
       }
       openHoverMenu();
+    });
+    anchor.addEventListener('pointerleave', function (event) {
+      if (event.pointerType === 'touch') {
+        return;
+      }
+      scheduleMarkerMenuClose();
     });
   }
 
@@ -2166,6 +2214,7 @@
     var opts = options || {};
     var focusMenu = opts.focusMenu !== false;
     var hoverOpened = opts.hoverOpened === true;
+    cancelMarkerMenuClose();
     if (markerMenu && markerMenu.anchor === anchor) {
       if (focusMenu) {
         markerMenu.hoverOpened = false;
@@ -2237,6 +2286,12 @@
     if (onToggle) {
       onToggle(true);
     }
+    menu.addEventListener('pointerenter', function () {
+      cancelMarkerMenuClose();
+    });
+    menu.addEventListener('pointerleave', function () {
+      scheduleMarkerMenuClose();
+    });
     var items = Array.prototype.slice.call(menu.querySelectorAll('.marker-menu-item'));
     var checked = menu.querySelector('[aria-checked="true"]') || items[0];
     if (focusMenu && checked) {
@@ -2305,8 +2360,10 @@
 
   function closeMarkerMenu() {
     if (!markerMenu) {
+      cancelMarkerMenuClose();
       return;
     }
+    cancelMarkerMenuClose();
     var menu = markerMenu;
     markerMenu = null;
     global.document.removeEventListener('keydown', onMarkerEscape, true);
