@@ -97,8 +97,9 @@
   sequential shift, Escape/blur/out-of-bounds drops cancel it, and legacy documents migrate on
   their first render without being marked dirty. A multi-selected group drags as one contiguous
   group and stays selected after the drop. A marquee dragged on empty canvas selects the blocks
-  it intersects, including additive Cmd/Ctrl selection.
-- Verification: **93 unit tests** and **77 browser tests** pass in Chrome, Edge, and Firefox,
+  it intersects, including additive Cmd/Ctrl selection. Delete/Backspace removes every selected
+  block and closes the resulting gaps.
+- Verification: **93 unit tests** and **79 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 
 ## Notes

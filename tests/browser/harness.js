@@ -1527,6 +1527,102 @@
         'Escape must restore the pre-marquee selection.');
       equal(canvas.querySelector('.selection-marquee'), null,
         'Escape must remove the marquee rectangle.');
+      canvas.dispatchEvent(new win.MouseEvent('click', {
+        bubbles: true, cancelable: true
+      }));
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','), dId,
+        'The click after a canceled marquee must not change the restored selection.');
+    });
+  });
+
+  test('US1 Delete removes the selected blocks and closes the gaps', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C', 'D']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      var dId = ids[3];
+      state.dirty = false;
+
+      function cmdClick(blockId) {
+        blockById(win, blockId).querySelector('.block-content')
+          .dispatchEvent(new win.MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            metaKey: true
+          }));
+      }
+
+      cmdClick(aId);
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','), aId,
+        'A must be selected by the first Cmd-click.');
+      cmdClick(cId);
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        [aId, cId].join(','), 'A and C must be selected before deletion.');
+
+      press(win, blockById(win, aId), 'Delete');
+      equal(state.document.blocks.map(function (block) { return block.id; }).join(','),
+        [bId, dId].join(','), 'Delete must remove every selected block.');
+      equal(win.Prompter.markdown.serializeDocument(state.document), 'B\nD\n',
+        'Remaining blocks must close the gaps in Markdown order.');
+      equal(win.Prompter.editor.getSelectedBlockIds().length, 0,
+        'Deleted blocks must not remain selected.');
+      equal(state.dirty, true, 'Deleting blocks must mark the document dirty.');
+      equal(byId(win, 'move-announcer').textContent, '已刪除 2 個區塊。');
+      equal(win.document.activeElement, byId(win, 'canvas'),
+        'After deletion, focus must move to the canvas.');
+
+      blockById(win, bId).querySelector('.block-content')
+        .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+      press(win, blockById(win, bId), 'Backspace');
+      equal(state.document.blocks.map(function (block) { return block.id; }).join(','),
+        dId, 'The macOS Delete key (Backspace) must also remove the selection.');
+      equal(byId(win, 'move-announcer').textContent, '已刪除 1 個區塊。');
+
+      blockById(win, dId).querySelector('.block-content')
+        .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+      press(win, blockById(win, dId), 'Delete');
+      equal(state.document.blocks.length, 0,
+        'Deleting the last selected block must empty the document.');
+      assert(state.composer, 'An empty document must show a composer.');
+      equal(win.document.activeElement, composerInput(win),
+        'The composer must receive focus after the last block is deleted.');
+    });
+  });
+
+  test('US1 Delete does not remove blocks while typing', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+
+      blockById(win, aId).querySelector('.block-content')
+        .dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
+      var editInput = blockById(win, aId).querySelector('.block-edit-input');
+      assert(editInput, 'The block must enter edit mode.');
+      press(win, editInput, 'Delete');
+      equal(state.document.blocks.length, 2,
+        'Delete in a block editor must not remove the block.');
+      press(win, editInput, 'Escape');
+      assert(blockById(win, aId), 'Escape must keep the block after canceling the edit.');
+
+      blockById(win, bId).querySelector('.block-content')
+        .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+      var composer = composerInput(win);
+      composer.focus();
+      press(win, composer, 'Delete');
+      equal(state.document.blocks.length, 2,
+        'Delete in the composer must not remove selected blocks.');
+
+      var handle = win.document.querySelector('#canvas .composer-handle');
+      handle.focus();
+      press(win, handle, 'Delete');
+      equal(state.document.blocks.length, 2,
+        'Delete on composer controls must not remove selected blocks.');
     });
   });
 

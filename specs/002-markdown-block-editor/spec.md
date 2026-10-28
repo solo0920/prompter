@@ -90,6 +90,10 @@ and confirm the unsaved draft is not restored.
 13. **Given** an empty area of the canvas, **When** the user drags a selection rectangle over
     several blocks, **Then** every text or image block inside the rectangle is selected as a
     group, and the selection remains after release.
+14. **Given** one or more selected blocks, **When** the user presses Delete (or the macOS
+    Delete/Backspace key), **Then** every selected block is removed, the remaining sequence
+    closes its gaps, and the document is marked as changed. Delete while typing in the composer
+    or a block editor must edit text instead of removing blocks.
 
 ---
 
@@ -438,6 +442,11 @@ settings panel and clear the local library after confirming the warning.
   except that holding Cmd (Ctrl on Windows) MUST add the intersected blocks to the existing
   selection. Releasing MUST keep the selection; Escape or cancellation MUST restore the
   pre-marquee selection; a plain empty-canvas click MUST clear the selection.
+- **FR-048**: With one or more blocks selected, pressing Delete (or Backspace from the macOS
+  Delete key) while focus is within the canvas MUST remove every selected block, release unused
+  image assets, close sequence gaps, adjust the composer slot, mark the document dirty, clear the
+  selection, and focus the canvas or the composer when the document becomes empty. Delete MUST
+  be ignored while focus is in the composer, a block editor, or another input.
 
 ### Key Entities *(include if feature involves data)*
 

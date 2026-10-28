@@ -59,8 +59,8 @@ Current result (2026-10-28): **93 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-28): Chrome **77 passing, 0 failing** (required gate). Edge and Firefox
-also report 77 passing, 0 failing as supplementary checks.
+Current result (2026-10-28): Chrome **79 passing, 0 failing** (required gate). Edge and Firefox
+also report 79 passing, 0 failing as supplementary checks.
 
 ## Verified Results (2026-10-28)
 
@@ -70,9 +70,9 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 77/77 | PASS 77/77 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Edge (macOS) | 156.0.4314.42 | PASS 77/77 | PASS 77/77 | Supplementary check; same Chromium path as Chrome |
-| Firefox (macOS) | 159.0 | PASS 77/77 | PASS 77/77 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 79/79 | PASS 79/79 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Edge (macOS) | 156.0.4314.42 | PASS 79/79 | PASS 79/79 | Supplementary check; same Chromium path as Chrome |
+| Firefox (macOS) | 159.0 | PASS 79/79 | PASS 79/79 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Edge and Firefox are supplementary compatibility checks;
 Safari is not part of the test matrix.
@@ -151,13 +151,17 @@ Expected: each marker appears exactly once; no duplicate prefixes; Copy becomes 
 selected group moves as one unit; the marquee selects the covered blocks; the left border hover
 opens the Marker flyout without showing a grab cursor.
 
-### 3. Edit, cancel, and remove (US1, FR-020..FR-022)
+### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
 1. Double-click a text block; change the text; press Enter. Confirm the new text is shown.
 2. Double-click again; change the text; press Escape. Confirm the original text returns.
 3. Double-click; clear all text; press Enter. Confirm the block disappears.
 4. Confirm the blank-line separation of surrounding blocks remains sensible.
 5. Confirm every block has a labeled `+` control, including image blocks.
+6. Cmd-click two or more blocks and press Delete (or the macOS Delete key). Confirm every
+   selected block disappears, the remaining blocks close their gaps, and the selection clears.
+7. Double-click a block and press Delete inside the editor; confirm it edits text instead of
+   removing the block. Repeat in the composer.
 
 ### 4. Drag and keyboard movement (US1, FR-023..FR-026, SC-011)
 

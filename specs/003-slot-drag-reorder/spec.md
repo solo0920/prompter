@@ -306,7 +306,8 @@ is introduced.
   immediately after the anchor in reading order, with the anchor's following blocks shifting one
   position later. A new block created at the end MUST append.
 - **FR-015**: Removing a block MUST close the gap by shifting every later block one position
-  earlier.
+  earlier. Removing a multi-selected group through Delete/Backspace MUST remove every selected
+  block and close the resulting gaps in one operation.
 - **FR-016**: A blank document MUST place its first composer and first block in the first
   position.
 - **FR-017**: Keyboard users MUST be able to move a focused block one position forward or

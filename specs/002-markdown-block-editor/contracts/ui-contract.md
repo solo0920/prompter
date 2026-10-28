@@ -182,6 +182,8 @@ Each image block shows:
   opened file remain literal text until edited.
 - Image blocks are not text-editable; their remove control is the deletion path.
 - Editing does not disable Preview or Copy; both use committed blocks.
+- Delete/Backspace removes the current selection only when focus is on the canvas or a block;
+  while the composer or block editor input is focused, those keys edit text normally.
 
 ## "+" Insertion
 
@@ -331,6 +333,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
+| Block/canvas | Delete / Backspace | Remove every selected block; ignored while typing in the composer or block editor. |
 | Block | Enter/F2 | Enter edit mode. |
 | Block | Alt+Arrow | Move one sequence position earlier or later. |
 | Block | `+` button | Insert composer below. |

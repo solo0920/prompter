@@ -19,6 +19,7 @@
   var dragState = null;
   var marqueeState = null;
   var ignoreNextCanvasClick = false;
+  var ignoreCanvasClickTimer = null;
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
   var hoveredBlock = null;
@@ -1817,6 +1818,23 @@
     return removed;
   }
 
+  function releaseUnusedAsset(state, assetId) {
+    if (!state || !assetId) {
+      return;
+    }
+    var stillUsed = state.document.blocks.some(function (entry) {
+      return entry.type === 'image' && entry.assetId === assetId;
+    });
+    if (stillUsed) {
+      return;
+    }
+    state.assets = state.assets.filter(function (asset) { return asset.id !== assetId; });
+    if (objectUrls[assetId]) {
+      try { global.URL.revokeObjectURL(objectUrls[assetId]); } catch (error) { /* ignore */ }
+      delete objectUrls[assetId];
+    }
+  }
+
   function removeImageBlock(blockId) {
     var state = getState();
     var block = findBlock(blockId);
@@ -1825,16 +1843,7 @@
     }
     var assetId = block.assetId;
     removeBlockFromDocument(state.document, blockId);
-    var stillUsed = state.document.blocks.some(function (entry) {
-      return entry.type === 'image' && entry.assetId === assetId;
-    });
-    if (!stillUsed) {
-      state.assets = state.assets.filter(function (asset) { return asset.id !== assetId; });
-      if (objectUrls[assetId]) {
-        try { global.URL.revokeObjectURL(objectUrls[assetId]); } catch (error) { /* ignore */ }
-        delete objectUrls[assetId];
-      }
-    }
+    releaseUnusedAsset(state, assetId);
     markDirty();
     removeFromSelection(blockId);
     render();
@@ -1848,6 +1857,78 @@
         canvas.focus();
       }
     }
+  }
+
+  function removeSelectedBlocks() {
+    var state = getState();
+    if (!state || !state.document) {
+      return false;
+    }
+    var ids = selectedBlockIds(state).slice();
+    if (!ids.length && state.selectedBlockId) {
+      ids = [state.selectedBlockId];
+    }
+    if (!ids.length) {
+      return false;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    var indexById = {};
+    ordered.forEach(function (block, index) {
+      indexById[block.id] = index;
+    });
+    ids = ids.filter(function (id) {
+      return indexById[id] !== undefined;
+    });
+    if (!ids.length) {
+      return false;
+    }
+    ids.sort(function (left, right) {
+      return indexById[right] - indexById[left];
+    });
+    var assetIds = [];
+    var removedCount = 0;
+    ids.forEach(function (id) {
+      var block = findBlock(id);
+      if (!block) {
+        return;
+      }
+      if (block.type === 'image') {
+        assetIds.push(block.assetId);
+      }
+      if (removeBlockFromDocument(state.document, id)) {
+        removedCount += 1;
+      }
+    });
+    if (removedCount === 0) {
+      return false;
+    }
+    assetIds.forEach(function (assetId) {
+      releaseUnusedAsset(state, assetId);
+    });
+    if (state.composer) {
+      var remaining = Model.normalizeSequence(state.document);
+      var insertIndex = Math.max(0, Math.min(remaining.length,
+        Number(state.composer.insertIndex) || 0));
+      state.composer.insertIndex = insertIndex;
+      state.composer.anchorBlockId = insertIndex > 0
+        ? remaining[insertIndex - 1].id
+        : null;
+    }
+    setBlockSelection([], null, { focus: false });
+    markDirty();
+    render();
+    if (state.document.blocks.length === 0) {
+      ensureInitialComposer(state);
+      render();
+      focusComposer();
+    } else {
+      var canvas = getCanvas();
+      if (canvas) {
+        canvas.focus();
+      }
+    }
+    announce('已刪除 ' + removedCount + ' 個區塊。');
+    return true;
   }
 
   function waitForBlockImages(blocks) {
@@ -2211,6 +2292,37 @@
     }
   }
 
+  function handleCanvasDeleteKeydown(event) {
+    if (event.defaultPrevented) {
+      return;
+    }
+    if (event.key !== 'Delete' && event.key !== 'Backspace') {
+      return;
+    }
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    var target = event.target;
+    if (target && target.closest &&
+        (target.closest('input, textarea, select, .composer, [contenteditable="true"]') ||
+         target.isContentEditable)) {
+      return;
+    }
+    var state = getState();
+    if (!state || !state.document || state.editingBlockId) {
+      return;
+    }
+    if (!selectedBlockIds(state).length && !state.selectedBlockId) {
+      return;
+    }
+    if (global.document.querySelector('dialog[open]')) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    removeSelectedBlocks();
+  }
+
   function selectionInReadingOrder(ids) {
     var state = getState();
     if (!state || !state.document) {
@@ -2376,7 +2488,7 @@
     if (marquee.element.parentNode) {
       marquee.element.parentNode.removeChild(marquee.element);
     }
-    ignoreNextCanvasClick = true;
+    suppressNextCanvasClick();
     if (!marquee.moved) {
       if (!marquee.additive) {
         clearSelection();
@@ -2402,9 +2514,31 @@
     finishMarquee(false);
   }
 
-  function handleCanvasClick(event) {
-    if (ignoreNextCanvasClick) {
+  function suppressNextCanvasClick() {
+    ignoreNextCanvasClick = true;
+    if (ignoreCanvasClickTimer !== null) {
+      global.clearTimeout(ignoreCanvasClickTimer);
+    }
+    ignoreCanvasClickTimer = global.setTimeout(function () {
+      ignoreCanvasClickTimer = null;
       ignoreNextCanvasClick = false;
+    }, 0);
+  }
+
+  function consumeCanvasClickSuppression() {
+    if (!ignoreNextCanvasClick) {
+      return false;
+    }
+    ignoreNextCanvasClick = false;
+    if (ignoreCanvasClickTimer !== null) {
+      global.clearTimeout(ignoreCanvasClickTimer);
+      ignoreCanvasClickTimer = null;
+    }
+    return true;
+  }
+
+  function handleCanvasClick(event) {
+    if (consumeCanvasClickSuppression()) {
       return;
     }
     var target = event.target;
@@ -2447,7 +2581,7 @@
   }
 
   function handleCanvasPointerDown(event) {
-    ignoreNextCanvasClick = false;
+    consumeCanvasClickSuppression();
     if (marqueeState) {
       return;
     }
@@ -2485,6 +2619,7 @@
     canvas.addEventListener('dblclick', handleCanvasDoubleClick);
     canvas.addEventListener('pointerdown', handleCanvasPointerDown);
     canvas.addEventListener('keydown', handleBlockKeydown);
+    canvas.addEventListener('keydown', handleCanvasDeleteKeydown);
     global.document.addEventListener('pointermove', handleBlockHover);
     global.document.addEventListener('pointerleave', clearBlockHover);
     global.addEventListener('pointerleave', clearBlockHover);
