@@ -2348,7 +2348,7 @@
     }
     var plainArrow = !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey &&
       (event.key === 'ArrowUp' || event.key === 'ArrowDown');
-    if (plainArrow && target.closest('.composer-input')) {
+    if (plainArrow && target.closest('.composer')) {
       event.preventDefault();
       event.stopPropagation();
       selectAdjacentItem('composer', event.key === 'ArrowDown' ? 1 : -1);

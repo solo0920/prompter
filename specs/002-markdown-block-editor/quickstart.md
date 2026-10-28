@@ -190,8 +190,10 @@ opens the Marker flyout without showing a grab cursor.
    through the heading options, and Enter/Space applies the focused option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
     earlier/later, focus stays on the handle, and the move is announced.
-11. Focus the composer input, type some text, and press Up/Down. Confirm the block before/after
+11. Focus the composer input, type some text, and press Up/Down. Confirm the item before/after
     the composer slot is selected, wrapping at the ends, while the composer and its text remain.
+    Repeat with the composer title control and drag handle focused; Up/Down must navigate from
+    every part of the composer.
 12. Reload without saving (choose Leave if the browser's native prompt appears). Confirm the
     unsaved draft is not restored.
 

@@ -1179,6 +1179,18 @@
       press(win, composer, 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), bId,
         'Down from a composer between A and B must select B.');
+
+      var composerMarker = win.document.querySelector('#canvas .composer-marker');
+      composerMarker.focus();
+      press(win, composerMarker, 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), aId,
+        'Up must navigate when the composer title control is active.');
+
+      var composerHandle = win.document.querySelector('#canvas .composer-handle');
+      composerHandle.focus();
+      press(win, composerHandle, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), bId,
+        'Down must navigate when the composer drag handle is active.');
     });
   });
 

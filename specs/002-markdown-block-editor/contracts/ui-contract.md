@@ -227,9 +227,10 @@ Each image block shows:
   the Marker options and Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
   the handle, with the move announced.
-- Up/Down in the composer input moves to the sequence item immediately before or after the
-  composer's slot, wrapping at the ends; the composer remains open. Other keys keep normal text
-  editing, and the block editor input retains its normal caret behavior.
+- Up/Down anywhere in the composer—whether the title control, text input, or drag handle is
+  active—moves to the sequence item immediately before or after the composer's slot, wrapping at
+  the ends; the composer remains open. Other keys keep normal text editing, and the block editor
+  input retains its normal caret behavior.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.
@@ -360,7 +361,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Block | `+` button | Insert composer below. |
 | Editing | Enter | Commit and exit. |
 | Editing | Escape | Cancel edit. |
-| Composer input | Up/Down | Select the block before/after the composer slot; wraps at the ends and leaves the composer open. |
+| Composer (any control) | Up/Down | Select the item before/after the composer slot; wraps at the ends and leaves the composer open. |
 | Composer | Enter | Create block (non-empty). |
 | Composer | Escape | Dismiss inserted composer. |
 | Dialog | Escape | Close (native dialog). |
