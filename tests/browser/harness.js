@@ -3400,6 +3400,9 @@
         var styleRect = styleSelect.getBoundingClientRect();
         assert(styleRect.height >= 44 && styleRect.right <= win.innerWidth + 1,
           'The style selector must be compact and remain inside the viewport.');
+        var railIcon = toggle.querySelector('.button-icon');
+        assert(railIcon && railIcon.getBoundingClientRect().width >= 36,
+          'The directory rail icon must fill the rail button.');
         equal(byId(win, 'file-menu-button').getAttribute('aria-haspopup'), 'menu');
         equal(byId(win, 'preview-button').textContent.trim(), '預覽');
         equal(byId(win, 'copy-button').textContent.trim(), '複製');
