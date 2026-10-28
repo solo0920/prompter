@@ -3142,6 +3142,50 @@
     });
   });
 
+  test('US3 Preview renders KaTeX math without touching code fences', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      var heading = commitComposer(win, '# 公式 $a^2+b^2=c^2$');
+      var display = addBelow(win, heading, '$$\\int_0^1 x^2 dx$$', 'none');
+      var fenceStart = addBelow(win, display, '```tex', 'none');
+      var code = addBelow(win, fenceStart, '$E=mc^2$', 'none');
+      addBelow(win, code, '```', 'none');
+      byId(win, 'preview-button').click();
+      return waitFor(function () {
+        var content = byId(win, 'preview-content');
+        return !byId(win, 'preview-view').hidden &&
+          content.querySelector('.katex') &&
+          content.querySelector('.katex-display') ? content : null;
+      }, 8000).then(function (content) {
+        var fontsReady = win.document.fonts && win.document.fonts.ready
+          ? win.document.fonts.ready
+          : Promise.resolve();
+        return fontsReady.then(function () {
+          assert(win.document.querySelector('link[href="assets/vendor/katex/katex.min.css"]'),
+            'The local KaTeX stylesheet must be loaded.');
+          assert(content.querySelectorAll('.katex').length >= 2,
+            'Inline and display math must render with KaTeX.');
+          var displayMath = content.querySelector('.preview-math-display .katex-display');
+          assert(displayMath, 'Display math must use a KaTeX display block.');
+          assert(content.querySelector('h1 .katex'),
+            'Inline math must render inside a heading.');
+          assert(win.getComputedStyle(content.querySelector('.katex')).fontFamily
+            .indexOf('KaTeX') !== -1,
+          'KaTeX fonts must be available locally.');
+          assert(!win.document.fonts || win.document.fonts.check('16px KaTeX_Main'),
+            'The bundled KaTeX font must load from file://.');
+          var codeElement = content.querySelector('pre code');
+          equal(codeElement.textContent, '$E=mc^2$');
+          equal(codeElement.querySelector('.katex'), null);
+          byId(win, 'preview-button').click();
+          return waitFor(function () {
+            return byId(win, 'preview-view').hidden ? true : null;
+          }, 5000);
+        });
+      });
+    });
+  });
+
   test('US3 Preview shows an empty state for a blank document', function () {
     return appReady().then(function (win) {
       freshDocument(win);

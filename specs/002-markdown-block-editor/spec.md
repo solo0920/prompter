@@ -401,7 +401,8 @@ settings panel and clear the local library after confirming the warning.
   like any intervening item.
 - **FR-028**: Preview MUST render the current document's Markdown in a live pane on the right
   side of the workspace while the editor canvas remains visible, including headings, lists,
-  quotes, fenced code, basic pipe tables, images, and plain text, with raw HTML-looking text
+  quotes, fenced code, basic pipe tables, images, plain text, and KaTeX math using `$...$`,
+  `$$...$$`, `\(...\)`, and `\[...\]` delimiters, with raw HTML-looking text
   escaped, without modifying the document. The preview icon at the right edge of the tab bar MUST toggle the pane; edits and
   tab switches MUST refresh it without closing it. Preview MUST NOT open a dialog or a new
   window.
@@ -601,4 +602,5 @@ settings panel and clear the local library after confirming the warning.
   the editor remains usable.
 - The primary interface language is Traditional Chinese, while prompt content may mix
   Traditional Chinese and English.
-- Preview uses standard Markdown rendering; custom Markdown extensions are out of scope.
+- Preview uses standard Markdown rendering plus KaTeX math; other custom Markdown extensions are
+  out of scope.

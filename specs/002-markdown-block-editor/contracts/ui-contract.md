@@ -44,7 +44,7 @@ behavior so tests can be written against it.
 | File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
 | Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane. While preview is open, the active document name with a file icon appears as a tab-styled label immediately to its left, with an `×` that closes preview. The editor canvas stays visible. Disabled when no document. |
-| Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images. |
+| Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images, with math included as self-contained MathML. |
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
 | Settings | `設定` | Opens the settings dialog. |
@@ -279,7 +279,8 @@ Each image block shows:
 - Renders the canonical Markdown for the active document, including unsaved edits, and refreshes
   after edits and tab switches.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,
-  plain text, fenced code, and basic pipe tables.
+  plain text, fenced code, basic pipe tables, and KaTeX math using `$...$`, `$$...$$`,
+  `\(...\)`, and `\[...\]` delimiters. Math inside fenced code stays literal.
 - Raw HTML is shown as text; other unsupported constructs remain literal.
 - Local images render from local assets. Missing images show alt text or a placeholder plus a
   warning. Remote images are not fetched.

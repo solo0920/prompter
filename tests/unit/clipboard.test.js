@@ -51,6 +51,18 @@ test('builds exact Markdown and self-contained HTML with embedded images', async
   assert.deepEqual(payload.omittedImages, []);
 });
 
+test('uses self-contained MathML for math in rich HTML copy', async function () {
+  const document = documentWith([
+    Model.createTextBlock({ id: 'm', text: '公式 $E=mc^2$', y: 0, seq: 1 }),
+    Model.createImageBlock({ id: 'i', assetId: 'asset-1', alt: '像素', y: 24, seq: 2 })
+  ]);
+  const payload = await Clipboard.buildClipboardPayload(document, [imageAsset()]);
+  assert.match(payload.markdown, /\$E=mc\^2\$/);
+  assert.match(payload.html, /<math /);
+  assert.equal(payload.html.includes('katex-html'), false);
+  assert.equal(payload.html.includes('<script>'), false);
+});
+
 test('marks text-only documents so Copy can avoid a rich HTML flavor', async function () {
   const textOnly = documentWith([
     Model.createTextBlock({ id: 'h', marker: '##', text: '標題', y: 0, seq: 1 })

@@ -188,7 +188,8 @@
       .then(function (urls) {
         var rendered = Preview.renderMarkdown(markdown, {
           assets: assetList,
-          imageUrls: urls
+          imageUrls: urls,
+          mathOutput: 'mathml'
         });
         return {
           markdown: markdown,

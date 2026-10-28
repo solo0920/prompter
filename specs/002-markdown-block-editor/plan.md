@@ -13,9 +13,9 @@ each band). A searchable local library, File menu (New, Open, Save, Save As, Ins
 rendered Preview, mixed text-and-image Copy, themes, settings, and local persistence complete
 the workspace.
 
-Technical approach: dependency-free HTML, CSS, and ES2020 classic scripts; no server, build
-step, or network. One canonical serializer feeds Preview, Save, and Copy. File I/O uses a
-multi-file `<input type="file">` for Open and the File System Access API when available for
+Technical approach: HTML, CSS, and ES2020 classic scripts with no server, build step, or
+network. KaTeX 0.19.1 is vendored locally for math rendering. One canonical serializer feeds
+Preview, Save, and Copy. File I/O uses a multi-file `<input type="file">` for Open and the File System Access API when available for
 directory writes, with per-file downloads as the fallback. Persistence uses IndexedDB for
 documents and image Blobs, localStorage for preferences and as a fallback, and memory as the
 last resort. Clipboard uses the async Clipboard API with an `execCommand('copy')` fallback.
@@ -26,8 +26,9 @@ manual browser matrix.
 
 **Language/Version**: HTML5, CSS3, ES2020 JavaScript delivered as classic scripts (no ES modules)
 
-**Primary Dependencies**: None at runtime. Development-only: Node.js 26 built-in test runner
-(`node:test`) and installed system browsers. No npm install, bundler, or build step.
+**Primary Dependencies**: None at runtime except the locally vendored KaTeX 0.19.1
+distribution (MIT) used for Preview math. Development-only: Node.js 26 built-in test runner
+(`node:test`) and installed system browsers. No npm install, bundler, build step, or network.
 
 **Storage**: Browser-local only. IndexedDB database `prompter-v1` (stores `documents`,
 `assets`, `meta`) for documents and image Blobs; localStorage for preferences and as a
@@ -76,9 +77,10 @@ desktop-first with a 360 px responsive layout.
 `fetch()`, or runtime dependency. The browser tab-close limitation below is documented and
 does not violate the constitution.
 
-**Final Implementation Re-check (2026-10-28)**: PASS. The shipped app remains classic scripts
+**Final Implementation Re-check (2026-10-29)**: PASS. The shipped app remains classic scripts
 only, opens from `file://`, and uses no server, build step, package install, ES module,
-service worker, local `fetch()`, telemetry, remote asset, or runtime dependency. Storage is
+service worker, local `fetch()`, telemetry, remote asset, or runtime dependency downloaded at
+runtime. KaTeX 0.19.1 is vendored locally as a static asset for math rendering. Storage is
 browser-local and degrades through IndexedDB, localStorage, and session memory; preferences
 survive clear-library while disk files are untouched. Copy `text/plain` is byte-identical to
 Save via the shared canonical serializer; output is deterministic. Automated static checks
@@ -132,8 +134,10 @@ Layers:
   naming, conflict handling.
 - `clipboard.js`: Paste handler, `text/plain` Markdown plus `text/html` rich copy when images
   are present, async and fallback copy paths, manual-copy dialog.
-- `preview.js`: live right-side preview, rendered Markdown, image resolution, refresh
-  scheduling, and placeholder handling.
+- `preview.js`: live right-side preview, rendered Markdown including local KaTeX math,
+  image resolution, refresh scheduling, and placeholder handling.
+- `assets/vendor/katex/`: vendored KaTeX 0.19.1 JavaScript, stylesheet, fonts, and MIT
+  license, loaded locally so Preview math works from `file://` with no network.
 - `editor.js`: composer, marker detection, block editing, dragging, keyboard movement,
   selection, and canvas rendering.
 - `settings.js`: appearance, default Marker, grid, clear-library confirmation, version info.
@@ -251,11 +255,13 @@ targets but never files already saved to disk and never preferences.
 
 ### Preview and Copy
 
-Preview is a modal `<dialog>` that renders the canonical Markdown, including headings, lists,
-quotes, images, plain text, fenced code, and basic pipe tables. Raw HTML is escaped, other
-unsupported constructs remain literal text, and remote images are never fetched. Missing images
-show their alternative text or a placeholder plus a warning. The dialog closes with its close
-control or Escape and returns focus to Preview.
+Preview is a live right-side pane that renders the canonical Markdown, including headings,
+lists, quotes, images, plain text, fenced code, basic pipe tables, and KaTeX math. Math
+supports `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters, including multi-line
+display math and common AMS environments; math inside fenced code stays literal. Raw HTML is
+escaped, other unsupported constructs remain literal text, and remote images are never
+fetched. Missing images show their alternative text or a placeholder plus a warning. Closing
+the pane returns focus to the preview toggle.
 
 Copy builds:
 

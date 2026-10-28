@@ -42,7 +42,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-29): **93 passing, 0 failing**.
+Current result (2026-10-29): **99 passing, 0 failing**.
 
 ### Browser harness
 
@@ -50,16 +50,16 @@ Current result (2026-10-29): **93 passing, 0 failing**.
 2. Confirm every check is green and the page reports `PASS` with a count.
 3. The harness checks DOM wiring, Marker composer behavior, block commit/edit/remove, reading
    order, localStorage/IndexedDB capability probes, settings persistence, performance budgets,
-   accessibility structure, responsive layouts, and the renderer in the actual `file://`
-   environment.
+   accessibility structure, responsive layouts, KaTeX math rendering, and the renderer in the
+   actual `file://` environment.
 4. Open `tests/browser/paste-target.html` in a second tab; use it as one rich-text destination
    for the Copy checks.
 
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **89 passing, 0 failing** (required gate). Firefox also
-reports 89 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **90 passing, 0 failing** (required gate). Firefox also
+reports 90 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -69,8 +69,8 @@ request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 89/89 | PASS 89/89 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 89/89 | PASS 89/89 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 90/90 | PASS 90/90 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 90/90 | PASS 90/90 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -87,6 +87,9 @@ Additional automated evidence:
   wrapping, and focus return are covered.
 - Accessibility checks cover unique IDs, accessible names, dialog labelling, live regions,
   skip-link target, focus return, keyboard movement announcements, and reduced-motion CSS.
+- Math checks cover inline and display delimiters, headings, lists, quotes, tables, multi-line
+  display math, common AMS environments, fenced-code exclusion, currency/escaped-dollar
+  literals, and untrusted commands or surrounding raw HTML.
 - Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
   rollback, corrupt-payload isolation, and the dismissible storage-mode banner.
 - Security checks statically reject runtime `fetch`, XHR, WebSocket, `eval`, `new Function`,
@@ -205,13 +208,14 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 ### 5. Live preview and document tabs (US2, US3, FR-028, FR-050, FR-051, SC-008)
 
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
-   pipe table, and a long wrapped line.
+   pipe table, a long wrapped line, inline math such as `$a^2+b^2=c^2$`, and display math such
+   as `$$\int_0^1 x^2 dx$$`.
 2. Confirm the tab bar shows only the preview icon while preview is closed. Activate it and
    confirm a live preview pane opens on the right while the editor canvas remains visible on the
    left; the active document name and file icon appear as a tab-styled label aligned with the
    preview pane's left boundary and immediately left of the preview icon, with an `×` that closes
-   preview. Confirm images render, the code block and table render, and raw HTML-looking text is
-   not executed.
+   preview. Confirm images render, the code block and table render, math renders with the
+   bundled KaTeX fonts, and raw HTML-looking text is not executed.
 3. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
    editor.
 4. Choose File > New twice. Confirm each document opens in a new tab above the editor, each tab
@@ -429,8 +433,12 @@ automated checks. The app remains ready for those manual spot checks.
   saves; it downloads files separately. Keep downloads together and do not rename them.
 - **`file://` storage**: browser storage behavior is not guaranteed. The app warns and keeps
   the session usable, but Save-to-disk is the durable path.
-- **Preview subset**: basic pipe tables and fenced code are rendered; other unsupported
-  Markdown constructs remain literal text; raw HTML is never rendered.
+- **Preview subset**: basic pipe tables, fenced code, and KaTeX math are rendered; other
+  unsupported Markdown constructs remain literal text; raw HTML is never rendered.
+- **Math rendering**: KaTeX 0.19.1 is bundled locally, so math works offline. Supported
+  delimiters are `$...$`, `$$...$$`, `\(...\)`, and `\[...\]`; common AMS environments also
+  render. Invalid or unsupported LaTeX shows KaTeX's inline error instead of breaking Preview.
+  Rich HTML Copy uses MathML-only math so pasted formulas do not require the Preview stylesheet.
 - **Image editing**: resizing, cropping, rotating, and alt-text editing are out of scope.
 
 ## Troubleshooting

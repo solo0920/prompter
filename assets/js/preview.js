@@ -7,6 +7,9 @@
   var Markdown = (typeof module === 'object' && module.exports)
     ? require('./markdown.js')
     : global.Prompter.markdown;
+  var KaTeX = (typeof module === 'object' && module.exports)
+    ? require('../vendor/katex/katex.min.js')
+    : global.katex;
 
   var initialized = false;
   var lastTrigger = null;
@@ -25,6 +28,170 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  var AMS_ENVIRONMENTS = [
+    'equation', 'equation*', 'align', 'align*', 'alignat', 'alignat*',
+    'gather', 'gather*', 'CD'
+  ];
+
+  function getKaTeX() {
+    return KaTeX && typeof KaTeX.renderToString === 'function' ? KaTeX : null;
+  }
+
+  function renderMath(tex, displayMode, output) {
+    var katex = getKaTeX();
+    if (!katex) {
+      return null;
+    }
+    try {
+      return katex.renderToString(String(tex), {
+        displayMode: !!displayMode,
+        throwOnError: false,
+        strict: 'ignore',
+        trust: false,
+        output: output === 'mathml' ? 'mathml' : 'htmlAndMathml',
+        maxExpand: 1000,
+        maxSize: 10
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function findDelimiter(text, start, delimiter) {
+    var escapedAware = delimiter.charAt(0) !== '\\';
+    var index = start;
+    while (index < text.length) {
+      if (escapedAware && text.charAt(index) === '\\') {
+        index += 2;
+        continue;
+      }
+      if (text.slice(index, index + delimiter.length) === delimiter) {
+        return index;
+      }
+      index += 1;
+    }
+    return -1;
+  }
+
+  function findInlineMathEnd(text, start) {
+    var index = start;
+    while (index < text.length) {
+      var character = text.charAt(index);
+      if (character === '\\') {
+        index += 2;
+        continue;
+      }
+      if (character === '$') {
+        return index > start && !/\s/.test(text.charAt(index - 1)) ? index : -1;
+      }
+      index += 1;
+    }
+    return -1;
+  }
+
+  function renderInline(value, mathOutput) {
+    var text = String(value == null ? '' : value);
+    var output = '';
+    var buffer = '';
+
+    function flush() {
+      if (buffer) {
+        output += escapeHtml(buffer);
+        buffer = '';
+      }
+    }
+
+    var index = 0;
+    while (index < text.length) {
+      var character = text.charAt(index);
+
+      if (character === '\\') {
+        var next = text.charAt(index + 1);
+        if (next === '$') {
+          buffer += '$';
+          index += 2;
+          continue;
+        }
+        if (next === '[' || next === '(') {
+          var close = next === '[' ? '\\]' : '\\)';
+          var closeIndex = findDelimiter(text, index + 2, close);
+          if (closeIndex !== -1) {
+            var bracketHtml = renderMath(
+              text.slice(index + 2, closeIndex), next === '[', mathOutput);
+            if (bracketHtml) {
+              flush();
+              output += bracketHtml;
+              index = closeIndex + 2;
+              continue;
+            }
+          }
+        }
+        var environment = /^\\begin\{([A-Za-z*]+)\}/.exec(text.slice(index));
+        if (environment && AMS_ENVIRONMENTS.indexOf(environment[1]) !== -1) {
+          var endToken = '\\end{' + environment[1] + '}';
+          var environmentEnd = text.indexOf(endToken, index + environment[0].length);
+          if (environmentEnd !== -1) {
+            var environmentHtml = renderMath(
+              text.slice(index, environmentEnd + endToken.length), true, mathOutput);
+            if (environmentHtml) {
+              flush();
+              output += environmentHtml;
+              index = environmentEnd + endToken.length;
+              continue;
+            }
+          }
+        }
+        buffer += character;
+        index += 1;
+        continue;
+      }
+
+      if (character === '$') {
+        if (text.charAt(index + 1) === '$') {
+          var displayEnd = findDelimiter(text, index + 2, '$$');
+          if (displayEnd > index + 2) {
+            var displayHtml = renderMath(
+              text.slice(index + 2, displayEnd), true, mathOutput);
+            if (displayHtml) {
+              flush();
+              output += displayHtml;
+              index = displayEnd + 2;
+              continue;
+            }
+          }
+        } else if (text.charAt(index + 1) && !/\s/.test(text.charAt(index + 1))) {
+          var inlineEnd = findInlineMathEnd(text, index + 1);
+          if (inlineEnd > index + 1) {
+            var inlineHtml = renderMath(
+              text.slice(index + 1, inlineEnd), false, mathOutput);
+            if (inlineHtml) {
+              flush();
+              output += inlineHtml;
+              index = inlineEnd + 1;
+              continue;
+            }
+          }
+        }
+      }
+
+      buffer += character;
+      index += 1;
+    }
+    flush();
+    return output;
+  }
+
+  function renderDisplayMathLine(value, mathOutput) {
+    var line = String(value == null ? '' : value).trim();
+    var match = /^\$\$([\s\S]+)\$\$$/.exec(line) ||
+      /^\\\[([\s\S]+)\\\]$/.exec(line);
+    if (!match) {
+      return null;
+    }
+    var html = renderMath(match[1], true, mathOutput);
+    return html ? '<div class="preview-math-display">' + html + '</div>' : null;
   }
 
   function normalizeKey(value) {
@@ -157,9 +324,9 @@
       index + 1 < lines.length && isTableSeparator(lines[index + 1]);
   }
 
-  function renderTableRow(cells, tag) {
+  function renderTableRow(cells, tag, mathOutput) {
     return '<tr>' + cells.map(function (cell) {
-      return '<' + tag + '>' + escapeHtml(cell) + '</' + tag + '>';
+      return '<' + tag + '>' + renderInline(cell, mathOutput) + '</' + tag + '>';
     }).join('') + '</tr>';
   }
 
@@ -171,6 +338,7 @@
       lines.pop();
     }
     var assetIndex = indexAssets(input.assets || []);
+    var mathOutput = input.mathOutput === 'mathml' ? 'mathml' : 'htmlAndMathml';
     var missing = [];
     var missingSeen = {};
     var html = [];
@@ -190,6 +358,47 @@
       if (/^\s*$/.test(line)) {
         index += 1;
         continue;
+      }
+
+      var displayStart = /^\s*(\$\$|\\\[)\s*$/.exec(line);
+      if (displayStart) {
+        var closer = displayStart[1] === '$$' ? /^\s*\$\$\s*$/ : /^\s*\\\]\s*$/;
+        var mathLines = [];
+        var scan = index + 1;
+        while (scan < lines.length && !closer.test(lines[scan])) {
+          mathLines.push(lines[scan]);
+          scan += 1;
+        }
+        if (scan < lines.length) {
+          var blockMath = renderMath(mathLines.join('\n'), true, mathOutput);
+          if (blockMath) {
+            html.push('<div class="preview-math-display">' + blockMath + '</div>');
+            index = scan + 1;
+            continue;
+          }
+        }
+      }
+
+      var environmentStart = /^\s*\\begin\{([A-Za-z*]+)\}\s*$/.exec(line);
+      if (environmentStart && AMS_ENVIRONMENTS.indexOf(environmentStart[1]) !== -1) {
+        var environmentEnd = '\\end{' + environmentStart[1] + '}';
+        var environmentLines = [line];
+        var environmentScan = index + 1;
+        while (environmentScan < lines.length &&
+            lines[environmentScan].trim() !== environmentEnd) {
+          environmentLines.push(lines[environmentScan]);
+          environmentScan += 1;
+        }
+        if (environmentScan < lines.length) {
+          environmentLines.push(lines[environmentScan]);
+          var blockEnvironment = renderMath(
+            environmentLines.join('\n'), true, mathOutput);
+          if (blockEnvironment) {
+            html.push('<div class="preview-math-display">' + blockEnvironment + '</div>');
+            index = environmentScan + 1;
+            continue;
+          }
+        }
       }
 
       var fence = /^```(.*)$/.exec(line);
@@ -219,9 +428,9 @@
           rows.push(splitTableRow(lines[index]));
           index += 1;
         }
-        html.push('<table>\n<thead>\n' + renderTableRow(header, 'th') +
+        html.push('<table>\n<thead>\n' + renderTableRow(header, 'th', mathOutput) +
           '\n</thead>\n<tbody>\n' + rows.map(function (row) {
-            return renderTableRow(row, 'td');
+            return renderTableRow(row, 'td', mathOutput);
           }).join('\n') + '\n</tbody>\n</table>');
         continue;
       }
@@ -229,7 +438,7 @@
       var heading = /^(#{1,3})\s+(.*)$/.exec(line);
       if (heading) {
         html.push('<h' + heading[1].length + '>' +
-          escapeHtml(heading[2]) + '</h' + heading[1].length + '>');
+          renderInline(heading[2], mathOutput) + '</h' + heading[1].length + '>');
         index += 1;
         continue;
       }
@@ -241,7 +450,7 @@
           index += 1;
         }
         html.push('<ul>\n' + bullets.map(function (item) {
-          return '<li>' + escapeHtml(item) + '</li>';
+          return '<li>' + renderInline(item, mathOutput) + '</li>';
         }).join('\n') + '\n</ul>');
         continue;
       }
@@ -259,7 +468,7 @@
         }
         html.push('<ol>\n' + items.map(function (item) {
           return '<li value="' + escapeHtml(item.value) + '">' +
-            escapeHtml(item.text) + '</li>';
+            renderInline(item.text, mathOutput) + '</li>';
         }).join('\n') + '\n</ol>');
         continue;
       }
@@ -271,7 +480,7 @@
           index += 1;
         }
         html.push('<blockquote>\n' + quotes.map(function (quote) {
-          return '<p>' + escapeHtml(quote) + '</p>';
+          return '<p>' + renderInline(quote, mathOutput) + '</p>';
         }).join('\n') + '\n</blockquote>');
         continue;
       }
@@ -283,7 +492,14 @@
         continue;
       }
 
-      html.push('<p>' + escapeHtml(line) + '</p>');
+      var displayMath = renderDisplayMathLine(line, mathOutput);
+      if (displayMath !== null) {
+        html.push(displayMath);
+        index += 1;
+        continue;
+      }
+
+      html.push('<p>' + renderInline(line, mathOutput) + '</p>');
       index += 1;
     }
 
