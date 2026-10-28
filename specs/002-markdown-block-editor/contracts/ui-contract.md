@@ -101,8 +101,8 @@ The composer is the only input box that creates a new block.
 - A drag handle at the composer's right edge moves the composer between slots. Dragging a block
   across the composer shifts the composer one position like any other intervening item.
 - Enter:
-  - With non-empty text: create a text block at the composer position, remove the composer,
-    mark dirty, and select the new block.
+  - With non-empty text: create a text block at the composer slot, mark dirty, keep the next
+    composer focused, and do not leave the committed block selected or outlined.
   - With empty/whitespace-only text: no block, no error.
 - Escape:
   - Inserted via "+": dismiss the composer; no block.
@@ -171,7 +171,8 @@ Each image block shows:
   nearest preceding text block's Marker; with no preceding text block it falls back to the
   default Marker from settings.
 - Escape dismisses the inserted composer without creating a block.
-- Enter commits it and removes the composer; the new block is selected.
+- Enter commits it and removes the composer; the next composer receives focus and the new block
+  is not left selected.
 - If the document has unsaved changes, adding a block marks it dirty; no save prompt is needed.
 
 ## Dragging and Keyboard Movement

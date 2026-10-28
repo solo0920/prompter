@@ -1373,6 +1373,7 @@
       }
     }
     var point = insertionPoint(anchor);
+    clearSelection();
     state.composer = Model.createComposer({
       mode: anchor ? 'inserted' : 'initial',
       anchorBlockId: anchor ? anchor.id : null,
@@ -1444,8 +1445,7 @@
     Model.insertBlocksAtIndex(document, [block], composer.insertIndex);
     state.composer = null;
     markDirty();
-    render();
-    selectBlock(block.id);
+    clearSelection();
     openComposer(block.id);
   }
 

@@ -662,8 +662,10 @@
       equal(win.document.activeElement, nextInput,
         'The new composer should receive focus.');
       assert(state.dirty, 'Committing a block must mark the document dirty.');
-      assert(blockById(win, state.document.blocks[0].id).classList.contains('selected'),
-        'The committed block should be selected.');
+      equal(blockById(win, state.document.blocks[0].id).classList.contains('selected'), false,
+        'The committed block must not stay selected while the composer is focused.');
+      equal(win.document.activeElement, nextInput,
+        'Only the composer input should hold focus after committing.');
     });
   });
 
@@ -862,7 +864,10 @@
       equal(ordered[3].text, 'C');
       assert(b.y > bBefore, 'Block B should shift down.');
       assert(c.y >= cBefore, 'Block C should not move upward.');
-      equal(blockById(win, ordered[1].id).classList.contains('selected'), true);
+      equal(blockById(win, ordered[1].id).classList.contains('selected'), false,
+        'The inserted block must not keep a selection outline.');
+      equal(win.document.activeElement, composerInput(win),
+        'The composer input should keep focus after insertion.');
     });
   });
 
@@ -920,10 +925,13 @@
 
   test('US1 selected blocks use an inset highlight, compact padding and a centered handle', function () {
     return appReady().then(function (win) {
-      freshDocument(win);
-      var element = commitComposer(win, 'Style check');
+      var state = freshDocument(win);
+      commitComposer(win, 'Style check');
+      var block = state.document.blocks[0];
+      var element = blockById(win, block.id);
       assert(element, 'The committed block is missing from the DOM.');
-      assert(element.classList.contains('selected'), 'The new block should be selected.');
+      win.Prompter.editor.selectBlock(block.id, { focus: true });
+      assert(element.classList.contains('selected'), 'The selected block should be highlighted.');
       var style = win.getComputedStyle(element);
       equal(style.outlineStyle, 'solid');
       equal(style.outlineWidth, '2px');
