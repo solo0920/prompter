@@ -143,11 +143,11 @@ expected content.
 
 **Acceptance Scenarios**:
 
-1. **Given** an open document, **When** the user activates Preview, **Then** a preview shows
-   the rendered Markdown for the current content, including unsaved edits.
-2. **Given** the preview is open, **When** the user closes it with the close control or
-   Escape, **Then** the preview closes, the document is unchanged, and focus returns to the
-   Preview control.
+1. **Given** an open document, **When** the user activates Preview, **Then** the rendered
+   Markdown replaces the editor canvas in the same workspace, including unsaved edits, and the
+   header toggle becomes `編輯`.
+2. **Given** the preview is active, **When** the user activates `編輯`, **Then** the editor
+   returns exactly as it was, the document is unchanged, and focus remains on the toggle.
 3. **Given** an open document with content, **When** the user activates Copy, **Then** the
    Markdown source is placed on the clipboard exactly as it would be saved, preserving line
    order, Markers, and line breaks.
@@ -277,13 +277,15 @@ settings panel and clear the local library after confirming the warning.
 
 ### Functional Requirements
 
-- **FR-001**: The homepage MUST provide a top header, a left document directory, and a central
-  editor area.
-- **FR-002**: The header MUST place the File menu at the far left, Preview and Copy in the
-  center, and the style selector, light/dark toggle, and settings button on the right.
+- **FR-001**: The homepage MUST provide a top header, a collapsible left document directory,
+  and a central editor area.
+- **FR-002**: The header MUST place the File menu at the far left, the Preview/Edit toggle and
+  Copy in the center, and the style selector, light/dark toggle, and settings button on the
+  right.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
-- **FR-004**: The directory MUST list saved documents in reverse last-modified order with
-  title and last-modified date/time.
+- **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at every
+  width, and list saved documents in reverse last-modified order with title and last-modified
+  date/time.
 - **FR-005**: The directory MUST provide a search field that matches titles and content using
   case-insensitive partial matching, ignores leading and trailing whitespace, and supports
   Traditional Chinese and English.
@@ -355,10 +357,11 @@ settings panel and clear the local library after confirming the warning.
   preserve the resulting reading order; and a new composer MUST inherit the Marker of its source
   text block, or the nearest preceding text block for an image source, falling back to the
   default Marker selected in settings when no text block precedes it.
-- **FR-028**: Preview MUST render the current document's Markdown, including headings, lists,
-  quotes, fenced code, basic pipe tables, images, and plain text, with raw HTML-looking text
-  escaped, without modifying the document; it MUST close with a close control or Escape and
-  return focus to the Preview control.
+- **FR-028**: Preview MUST render the current document's Markdown in place of the editor canvas
+  within the same workspace, including headings, lists, quotes, fenced code, basic pipe tables,
+  images, and plain text, with raw HTML-looking text escaped, without modifying the document.
+  While preview is active the header toggle MUST read `編輯` and activate the unchanged editor
+  when selected; preview MUST NOT open a dialog or a new window.
 - **FR-029**: Copy MUST place the Markdown source on the clipboard exactly as it would be
   saved, preserving line order, Markers, and line breaks, and MUST show success or failure
   feedback.
@@ -383,9 +386,9 @@ settings panel and clear the local library after confirming the warning.
   after a reload in the same browser on the same device.
 - **FR-037**: All header, directory, editor, preview, and settings controls MUST be operable by
   keyboard alone, expose accessible names, and show a visible focus indicator.
-- **FR-038**: At a 360px-wide viewport, the directory MUST be hidden by default behind a
-  labeled toggle, all header actions MUST remain reachable, and the page MUST NOT require
-  horizontal scrolling.
+- **FR-038**: At a 360px-wide viewport, the directory MUST remain collapsed behind a labeled
+  toggle, all header actions MUST remain reachable, and the page MUST NOT require horizontal
+  scrolling.
 - **FR-039**: If local persistence is unavailable or full, the system MUST show a non-blocking
   warning in the document directory, identify the active storage mode and reason, offer a
   dismiss action, keep the current session usable, and MUST NOT silently discard unsaved edits.

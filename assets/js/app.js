@@ -46,13 +46,13 @@
   function cacheElements() {
     [
       'file-menu-button', 'file-menu', 'directory-toggle', 'directory', 'directory-overlay',
-      'preview-button', 'copy-button', 'style-select', 'theme-toggle', 'settings-button',
+      'app-main', 'preview-button', 'copy-button', 'style-select', 'theme-toggle', 'settings-button',
       'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
       'no-results-clear', 'workspace', 'canvas', 'canvas-empty', 'canvas-new-button',
-      'toast-region', 'alert-region', 'move-announcer', 'preview-dialog', 'preview-content',
-      'preview-close', 'settings-dialog', 'settings-close', 'default-marker', 'show-grid',
+      'toast-region', 'alert-region', 'move-announcer', 'preview-view', 'preview-content',
+      'settings-dialog', 'settings-close', 'default-marker', 'show-grid',
       'follow-system-button', 'clear-library-button', 'app-version', 'schema-version',
       'storage-mode-label', 'clear-dialog', 'clear-cancel', 'clear-confirm',
       'unsaved-dialog', 'unsaved-save', 'unsaved-discard', 'unsaved-cancel',
@@ -270,8 +270,17 @@
     }
   }
 
+  function closePreviewIfOpen() {
+    var preview = global.Prompter && global.Prompter.preview;
+    if (preview && typeof preview.isOpen === 'function' && preview.isOpen() &&
+        typeof preview.close === 'function') {
+      preview.close();
+    }
+  }
+
   function setDocument(document, assets, options) {
     var opts = options || {};
+    closePreviewIfOpen();
     state.document = document || null;
     state.assets = assets ? assets.slice() : [];
     state.documentPersisted = opts.persisted === true;
@@ -493,20 +502,39 @@
     }, 80);
   }
 
+  function setDirectoryOpen(open) {
+    if (!elements.directory) {
+      return;
+    }
+    elements.directory.classList.toggle('open', !!open);
+    if (elements['app-main']) {
+      elements['app-main'].classList.toggle('directory-open', !!open);
+    }
+    if (elements['directory-toggle']) {
+      elements['directory-toggle'].setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    if (elements['directory-overlay']) {
+      elements['directory-overlay'].hidden = !open;
+    }
+    if (global.Prompter.editor && typeof global.Prompter.editor.reflowLayout === 'function') {
+      global.Prompter.editor.reflowLayout();
+    }
+  }
+
   function closeDirectoryDrawer() {
     if (!elements.directory) {
       return;
     }
     var wasOpen = elements.directory.classList.contains('open');
-    elements.directory.classList.remove('open');
-    if (elements['directory-toggle']) {
-      elements['directory-toggle'].setAttribute('aria-expanded', 'false');
-    }
-    if (elements['directory-overlay']) {
-      elements['directory-overlay'].hidden = true;
-    }
+    setDirectoryOpen(false);
     if (wasOpen && elements['directory-toggle']) {
       elements['directory-toggle'].focus();
+    }
+  }
+
+  function closeDirectoryDrawerIfNarrow() {
+    if (global.innerWidth <= 768) {
+      closeDirectoryDrawer();
     }
   }
 
@@ -515,12 +543,12 @@
       return Promise.resolve({ ok: false });
     }
     if (state.document && state.document.id === documentId) {
-      closeDirectoryDrawer();
+      closeDirectoryDrawerIfNarrow();
       return Promise.resolve({ ok: true, same: true });
     }
     return requestOpenSavedDocument(documentId).then(function (result) {
       if (result && result.ok) {
-        closeDirectoryDrawer();
+        closeDirectoryDrawerIfNarrow();
         renderDirectory();
       }
       return result;
@@ -888,8 +916,11 @@
         if (!state.document) {
           return;
         }
-        if (global.Prompter.preview && typeof global.Prompter.preview.open === 'function') {
-          global.Prompter.preview.open(elements['preview-button']);
+        var preview = global.Prompter.preview;
+        if (preview && typeof preview.toggle === 'function') {
+          preview.toggle(elements['preview-button']);
+        } else if (preview && typeof preview.open === 'function') {
+          preview.open(elements['preview-button']);
         } else {
           toast('預覽將在後續版本提供。');
         }
@@ -910,13 +941,10 @@
     if (elements['directory-toggle']) {
       elements['directory-toggle'].addEventListener('click', function () {
         var open = !elements.directory.classList.contains('open');
-        elements.directory.classList.toggle('open', open);
-        elements['directory-toggle'].setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (elements['directory-overlay']) {
-          elements['directory-overlay'].hidden = !open;
-        }
+        setDirectoryOpen(open);
         if (open) {
-          var first = elements.directory.querySelector('input, button');
+          var first = elements['search-input'] ||
+            elements.directory.querySelector('input, button');
           if (first) {
             first.focus();
           }
@@ -1026,10 +1054,7 @@
           elements['file-menu-button'].focus();
         }
         if (elements.directory.classList.contains('open')) {
-          elements.directory.classList.remove('open');
-          elements['directory-toggle'].setAttribute('aria-expanded', 'false');
-          elements['directory-overlay'].hidden = true;
-          elements['directory-toggle'].focus();
+          closeDirectoryDrawer();
         }
       }
     });
@@ -1044,6 +1069,7 @@
       global.Prompter.settings.init();
     }
     wireDirectory();
+    setDirectoryOpen(false);
     wireTitle();
     wireImagePicker();
     wireOpenPicker();

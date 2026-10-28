@@ -209,7 +209,8 @@
   }
 
   function reflowSequenceLayout() {
-    if (dragState) {
+    var canvas = getCanvas();
+    if (dragState || (canvas && (canvas.hidden || canvas.offsetParent === null))) {
       return;
     }
     applySequenceLayout();

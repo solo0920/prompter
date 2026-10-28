@@ -76,11 +76,17 @@
     </div>
 
     <div class="header-group header-center">
-      <button id="preview-button" class="button button-with-icon" type="button">
-        <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <button id="preview-button" class="button button-with-icon" type="button"
+              aria-pressed="false" aria-label="預覽">
+        <svg class="button-icon preview-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M2.8 12s3.3-6 9.2-6 9.2 6 9.2 6-3.3 6-9.2 6-9.2-6-9.2-6Z"
                 fill="none" stroke="currentColor" stroke-width="1.8"/>
           <circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        <svg class="button-icon edit-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" hidden>
+          <path d="M4 20h4.2L19 9.2 14.8 5 4 15.8V20Z" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M12.8 7l4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
         </svg>
         <span class="button-label">預覽</span>
       </button>
@@ -137,7 +143,7 @@
     <span id="document-status" class="document-status" role="status" aria-live="polite"></span>
   </div>
 
-  <div class="app-main">
+  <div id="app-main" class="app-main">
     <aside id="directory" class="directory" aria-label="文件目錄">
       <div id="storage-warning" class="storage-warning" role="status" hidden>
         <p id="storage-warning-text"></p>
@@ -173,20 +179,15 @@
           <button id="canvas-new-button" class="button" type="button">新增文件</button>
         </div>
       </div>
+      <section id="preview-view" class="preview-view" aria-label="提示詞預覽" tabindex="-1" hidden>
+        <div id="preview-content" class="preview-content"></div>
+      </section>
     </main>
   </div>
 
   <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
   <div id="alert-region" class="alert-region" role="alert" aria-live="assertive" aria-atomic="true"></div>
   <div id="move-announcer" class="visually-hidden" role="status" aria-live="polite"></div>
-
-  <dialog id="preview-dialog" class="dialog dialog-wide" aria-labelledby="preview-title">
-    <div class="dialog-header">
-      <h2 id="preview-title">預覽</h2>
-      <button id="preview-close" class="button button-small" type="button" aria-label="關閉預覽">關閉預覽</button>
-    </div>
-    <div id="preview-content" class="preview-content"></div>
-  </dialog>
 
   <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
     <div class="dialog-header">

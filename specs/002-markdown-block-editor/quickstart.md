@@ -85,7 +85,8 @@ Additional automated evidence:
 - Performance budgets pass: 500-document directory render under 1 s, 500-document search under
   300 ms, 500-block Preview under 1 s, and an inserted image visible under 1 s.
 - Layout checks pass at 1280×720, 768 px, and 360×800 with no horizontal page scrolling; the
-  directory drawer, compact header, long-text wrapping, and focus return are covered.
+  default-collapsed directory, expanded sidebar/drawer, compact header, long-text wrapping, and
+  focus return are covered.
 - Accessibility checks cover unique IDs, accessible names, dialog labelling, live regions,
   skip-link target, focus return, keyboard movement announcements, and reduced-motion CSS.
 - Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
@@ -107,7 +108,8 @@ scope.
 ### 1. First run and blank document (US1, FR-017)
 
 1. Clear the site's local data or use a fresh browser profile.
-2. Open `index.html`. The directory shows the empty state with `新增文件`.
+2. Open `index.html`. The directory starts collapsed; use `文件目錄` to open it and see the empty
+   state with `新增文件`.
 3. Choose `新增文件` from the File menu.
 4. Confirm the title is `Untitled`, one composer appears at the top-left with the Marker control,
    and Copy is disabled.
@@ -159,9 +161,11 @@ session-only.
 
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
    pipe table, and a long wrapped line.
-2. Activate Preview. Confirm the rendered content matches the blocks, includes images, renders
-   the code block and table, and does not execute raw HTML-looking text.
-3. Close with the close control; reopen and close with Escape. Confirm focus returns to Preview.
+2. Activate Preview. Confirm the rendered content replaces the editor canvas in the same
+   workspace, includes images, renders the code block and table, and does not execute raw
+   HTML-looking text.
+3. Confirm the header button now reads `編輯`; activate it and confirm the editor returns with
+   its selection, composer, and scroll position unchanged and focus on the toggle.
 4. Confirm raw HTML-looking text is displayed as text, not executed.
 5. Confirm a document with 500 blocks renders in under 1 second on a mid-range laptop.
 
@@ -242,7 +246,7 @@ session-only.
 ### 10. Library and search (US4, FR-004..FR-008, SC-003, SC-005, SC-006, SC-013)
 
 1. Save five documents with distinct Traditional Chinese and English titles/content.
-2. Confirm the directory is newest-first with title and last-modified time.
+2. Open `文件目錄`; confirm the directory is newest-first with title and last-modified time.
 3. Search by a title term, a content term, a mixed-language term, punctuation, and a term with
    leading/trailing spaces. Confirm literal case-insensitive matches and a match count.
 4. Search for gibberish; confirm the no-results message and clear-search action.
@@ -272,9 +276,11 @@ session-only.
 
 ### 12. Responsive and accessibility (FR-037, FR-038, SC-011, SC-012)
 
-1. At 1280×720, confirm no horizontal page scrolling and all regions visible.
-2. Resize to 360×800. Confirm the directory is behind a labeled toggle, all header actions are
-   reachable, blocks stay within the sequence column, and there is no horizontal page scrolling.
+1. At 1280×720, confirm no horizontal page scrolling, the directory starts collapsed, and
+   `文件目錄` opens it as a left column.
+2. Resize to 360×800. Confirm the directory remains behind a labeled toggle, all header actions
+   are reachable, blocks stay within the sequence column, and there is no horizontal page
+   scrolling.
 3. On touch, confirm dragging uses the handle and vertical scrolling still works.
 4. Complete create, edit, add, move, preview, copy, and save using only the keyboard. Confirm a
    visible focus indicator on every control.

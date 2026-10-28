@@ -112,18 +112,24 @@ body {
 
 .app-main {
   display: grid;
-  grid-template-columns: 292px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   min-height: 0;
+}
+.app-main.directory-open {
+  grid-template-columns: 292px minmax(0, 1fr);
 }
 
 .directory {
+  display: none;
   min-height: 0;
   overflow: auto;
   padding: 14px;
   background: var(--surface);
   border-right: 1px solid var(--border);
 }
-.directory-toggle { display: none; }
+.app-main.directory-open .directory { display: block; }
+.directory-toggle { display: inline-flex; }
 .search-block { display: grid; gap: 6px; }
 .field-label { color: var(--muted); font-size: 13px; font-weight: 600; }
 .search-row { display: flex; gap: 6px; }
@@ -375,7 +381,12 @@ body {
   color: var(--accent-strong);
 }
 
-.preview-content { max-height: 70vh; overflow: auto; padding: 4px 2px 12px; }
+.preview-view {
+  min-height: 100%;
+  padding: 28px 32px 48px;
+  background: var(--canvas-bg);
+}
+.preview-content { max-width: 760px; margin: 0 auto; padding: 0 0 32px; user-select: text; }
 .preview-content h1 { font-family: var(--font-display); font-size: 1.55em; margin: .6em 0 .3em; }
 .preview-content h2 { font-family: var(--font-display); font-size: 1.3em; margin: .6em 0 .3em; }
 .preview-content h3 { font-family: var(--font-display); font-size: 1.12em; margin: .6em 0 .3em; }
@@ -473,13 +484,15 @@ body {
 }
 
 @media (max-width: 900px) {
-  .app-main { grid-template-columns: 250px minmax(0, 1fr); }
+  .app-main.directory-open { grid-template-columns: 250px minmax(0, 1fr); }
   .block-image-wrap { max-width: min(420px, calc(100vw - 310px)); }
 }
 
 @media (max-width: 768px) {
-  .app-main { grid-template-columns: minmax(0, 1fr); }
+  .app-main,
+  .app-main.directory-open { grid-template-columns: minmax(0, 1fr); }
   .directory {
+    display: block;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -491,7 +504,6 @@ body {
     box-shadow: var(--shadow);
   }
   .directory.open { transform: translateX(0); }
-  .directory-toggle { display: inline-flex; }
   .directory-overlay:not([hidden]) {
     display: block;
     position: fixed;
@@ -528,4 +540,5 @@ body {
   .app-header .select { min-height: 44px; width: 104px; padding-left: 6px; padding-right: 22px; }
   .block { max-width: calc(100% - 48px); }
   .block-image-wrap { max-width: calc(100vw - 44px); }
+  .preview-view { padding: 16px 14px 40px; }
 }

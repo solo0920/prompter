@@ -25,12 +25,13 @@ behavior so tests can be written against it.
 +----------------------+---------------------------------------------------------+
 ```
 
-- Header: File menu far left; Preview and Copy centered; style selector, light/dark toggle, and
-  settings on the right.
+- Header: File menu far left; Preview/Edit and Copy centered; style selector, light/dark toggle,
+  and settings on the right.
 - Below the header: a document title field (metadata, not Markdown) and a status area.
-- Left: directory with search, match count, and document list.
-- Center: scrollable workspace containing the canvas with absolutely positioned blocks.
-- The directory is hidden behind a labeled toggle below 768 px and becomes an off-canvas drawer.
+- Left: a collapsible directory with search, match count, and document list; it starts collapsed.
+- Center: scrollable workspace containing the editor canvas, or the inline preview while active.
+- The directory toggle is available at every width: it pushes the sidebar open on wide screens
+  and opens an off-canvas drawer below 768 px.
 
 ## Header Controls
 
@@ -42,12 +43,12 @@ behavior so tests can be written against it.
 | File > Save | `儲存` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
 | File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
 | File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
-| Preview | `預覽` | Opens the Preview dialog for the current content. |
+| Preview / Edit | `預覽` / `編輯` | Shows the rendered preview in the workspace and changes the toggle to `編輯`; activating `編輯` returns to the same editor state. Disabled when no document. |
 | Copy | `複製` | Disabled when the document is empty. Copies Markdown plus rich content. |
 | Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
 | Settings | `設定` | Opens the settings dialog. |
-| Directory toggle | `文件目錄` | Shows/hides the directory drawer at narrow widths. `aria-expanded` reflects state. |
+| Directory toggle | `文件目錄` | Shows/hides the document directory at every width. Collapsed by default; `aria-expanded` reflects state. |
 
 ### File menu keyboard behavior
 
@@ -59,6 +60,10 @@ behavior so tests can be written against it.
 
 ## Directory
 
+- Starts collapsed on every page load; the `文件目錄` toggle expands it.
+- On wide screens the open directory occupies a left column and pushes the workspace.
+- At 768 px and below it opens as an off-canvas drawer with an overlay; Escape or the overlay
+  closes it and returns focus to the toggle.
 - Search input label: `搜尋提示詞文件`.
 - Placeholder: `搜尋標題或內容…`.
 - Results count: `N 個文件` or `N 個結果`.
@@ -67,6 +72,8 @@ behavior so tests can be written against it.
 - Empty library: message `尚未儲存任何文件。` plus a `新增文件` action.
 - Each item shows the title and localized last-modified date/time; the selected item has
   `aria-current="true"` and a visible selected style.
+- Selecting an item keeps the sidebar open on wide screens and closes the narrow drawer after
+  the document loads.
 - Selecting an item with unsaved changes runs the Save/Discard/Cancel flow before opening.
 - Creating a new document clears an active search so the new document is visible after save.
 - The list is sorted by `updatedAt` descending.
@@ -187,16 +194,19 @@ Each image block shows:
 
 ## Preview
 
-- Opens a modal `<dialog>` labeled `預覽`.
+- Preview replaces the editor canvas inside the same workspace; it is not a dialog or a new
+  window.
+- The header toggle changes from `預覽` to `編輯` with `aria-pressed="true"` while preview is
+  active; activating `編輯` restores the editor exactly as it was.
 - Renders the canonical Markdown for the current document, including unsaved edits.
 - Supports headings, bullet lists, ordered lists with literal values, blockquotes, images,
   plain text, fenced code, and basic pipe tables.
 - Raw HTML is shown as text; other unsupported constructs remain literal.
 - Local images render from local assets. Missing images show alt text or a placeholder plus a
   warning. Remote images are not fetched.
-- Close control labeled `關閉預覽`; Escape also closes.
-- Closing returns focus to the Preview button.
-- Preview never modifies the document.
+- Activating `編輯` restores the editor and focus to the toggle; the editor selection, composer,
+  and scroll position are preserved.
+- Preview never modifies the document or marks it dirty.
 - If rendering fails, show an error and the raw Markdown in a selectable `<pre>` block.
 
 ## Copy Feedback
@@ -252,6 +262,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | No documents | Directory empty state with `新增文件`; canvas empty state `建立第一個提示詞區塊`. |
 | Blank document | One composer at top-left; Save enabled; Copy disabled; Preview shows empty state. |
 | Document open | Blocks in reading order; title field populated; Copy enabled when non-empty. |
+| Preview active | Canvas replaced inline by rendered Markdown; header toggle reads `編輯`. |
 | Dirty | Unsaved indicator near the title/status area; no modal until navigation. |
 | Saving | Save/Save As disabled with busy label; no duplicate writes. |
 | Storage warning | Non-blocking banner in the directory with details and a dismiss action. |
@@ -261,11 +272,13 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 
 ## Responsive Behavior
 
-- 1280×720: header, directory, and canvas visible without horizontal scrolling.
-- 768 px and below: directory becomes a labeled drawer; header actions remain reachable.
-- 360×800: compact icon buttons for File, drawer, Preview, Copy, Style, Theme, Settings; product
-  name and non-essential labels hidden; 44 px touch targets where possible; no horizontal page
-  scrolling; canvas width fits the viewport.
+- 1280×720: header and canvas visible without horizontal scrolling; directory starts collapsed
+  and opens as a left column when toggled.
+- 768 px and below: directory becomes a labeled off-canvas drawer; header actions remain
+  reachable.
+- 360×800: compact icon buttons for File, drawer, Preview/Edit, Copy, Style, Theme, Settings;
+  product name and non-essential labels hidden; 44 px touch targets where possible; no horizontal
+  page scrolling; canvas width fits the viewport.
 - Blocks clamp to the current canvas width; long text wraps; images scale down.
 - The header may wrap to two rows if needed at 360 px, but all actions must remain reachable
   without horizontal scrolling.
@@ -277,10 +290,10 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Global | Tab / Shift+Tab | Move focus through controls in visual order. |
 | File menu | Enter/Space, Arrow Up/Down, Home/End, Escape | Open/navigate/close. |
 | Directory | Tab, Enter/Space | Focus/open a document. |
+| Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
 | Block | Tab | Focus block in reading order. |
 | Block | Enter/F2 | Enter edit mode. |
-| Block | Alt+Arrow | Move by 24 px. |
-| Block | Alt+Shift+Arrow | Move by 1 px. |
+| Block | Alt+Arrow | Move one sequence position earlier or later. |
 | Block | `+` button | Insert composer below. |
 | Editing | Enter | Commit and exit. |
 | Editing | Escape | Cancel edit. |
@@ -297,7 +310,8 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 - Status toasts use `role="status"`; errors use `role="alert"`.
 - The selected block, dirty state, busy state, and storage warning are exposed programmatically.
 - Image blocks use meaningful alt text; decorative icons use `aria-hidden="true"`.
-- Native `<dialog>` provides focus containment and restores focus on close.
+- Native `<dialog>` provides focus containment for settings and confirmation dialogs; the inline
+  preview keeps focus on its toggle.
 - Reduced-motion preference disables non-essential transitions.
 - A keyboard-only user can create, edit, add, move, preview, copy, and save without a pointer.
 

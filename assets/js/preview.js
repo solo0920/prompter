@@ -11,6 +11,8 @@
   var initialized = false;
   var lastTrigger = null;
   var renderToken = 0;
+  var active = false;
+  var editorScrollTop = 0;
 
   function getApp() {
     return global.Prompter && global.Prompter.app ? global.Prompter.app : null;
@@ -392,27 +394,82 @@
     content.insertBefore(warning, content.firstChild);
   }
 
+  function setPreviewMode(on) {
+    var app = getApp();
+    if (!app || !app.elements) {
+      return;
+    }
+    var canvas = app.elements.canvas;
+    var view = app.elements['preview-view'];
+    if (canvas) {
+      canvas.hidden = !!on;
+    }
+    if (view) {
+      view.hidden = !on;
+    }
+    var button = app.elements['preview-button'];
+    if (!button) {
+      return;
+    }
+    button.setAttribute('aria-pressed', on ? 'true' : 'false');
+    button.setAttribute('aria-label', on ? '切換回編輯' : '預覽');
+    var label = button.querySelector('.button-label');
+    if (label) {
+      label.textContent = on ? '編輯' : '預覽';
+    }
+    var eye = button.querySelector('.preview-icon');
+    var edit = button.querySelector('.edit-icon');
+    if (eye) {
+      if (on) {
+        eye.setAttribute('hidden', '');
+      } else {
+        eye.removeAttribute('hidden');
+      }
+    }
+    if (edit) {
+      if (on) {
+        edit.removeAttribute('hidden');
+      } else {
+        edit.setAttribute('hidden', '');
+      }
+    }
+  }
+
+  function clearPreviewContent() {
+    var app = getApp();
+    var content = app && app.elements ? app.elements['preview-content'] : null;
+    if (content) {
+      content.textContent = '';
+    }
+  }
+
   function open(trigger) {
     var app = getApp();
     if (!app || !app.state || !app.elements) {
       return Promise.resolve({ ok: false, empty: true });
     }
-    var dialog = app.elements['preview-dialog'];
     var content = app.elements['preview-content'];
-    if (!dialog || !content) {
+    var view = app.elements['preview-view'];
+    if (!content || !view) {
       app.toast('預覽功能尚未就緒。');
       return Promise.resolve({ ok: false });
     }
+    var wasActive = active;
+    active = true;
     lastTrigger = trigger || app.elements['preview-button'] ||
       (global.document ? global.document.activeElement : null);
+    if (!wasActive) {
+      var workspace = app.elements.workspace;
+      editorScrollTop = workspace ? workspace.scrollTop : 0;
+      if (workspace) {
+        workspace.scrollTop = 0;
+      }
+    }
+    setPreviewMode(true);
     var document = app.state.document;
     if (!document || !document.blocks || document.blocks.length === 0) {
+      renderToken += 1;
       emptyState(content);
-      if (typeof app.openDialog === 'function') {
-        app.openDialog(dialog);
-      } else {
-        dialog.showModal();
-      }
       return Promise.resolve({ ok: true, empty: true });
     }
 
@@ -422,11 +479,6 @@
     loading.className = 'preview-empty';
     loading.textContent = '正在準備預覽…';
     content.appendChild(loading);
-    if (typeof app.openDialog === 'function') {
-      app.openDialog(dialog);
-    } else {
-      dialog.showModal();
-    }
 
     var token = renderToken + 1;
     renderToken = token;
@@ -454,41 +506,61 @@
     });
   }
 
+  function close() {
+    if (!active) {
+      return;
+    }
+    active = false;
+    renderToken += 1;
+    setPreviewMode(false);
+    var app = getApp();
+    if (app && app.elements) {
+      var workspace = app.elements.workspace;
+      if (workspace) {
+        workspace.scrollTop = editorScrollTop;
+      }
+    }
+    clearPreviewContent();
+    if (app && global.Prompter.editor && typeof global.Prompter.editor.reflowLayout === 'function') {
+      global.Prompter.editor.reflowLayout();
+    }
+    var target = lastTrigger;
+    lastTrigger = null;
+    if (target && typeof target.focus === 'function') {
+      try {
+        target.focus();
+      } catch (error) {
+        // The trigger may have been removed by a document change.
+      }
+    }
+  }
+
+  function toggle(trigger) {
+    if (active) {
+      close();
+      return Promise.resolve({ ok: true, closed: true });
+    }
+    return open(trigger);
+  }
+
+  function isOpen() {
+    return active;
+  }
+
   function init() {
     if (initialized) {
       return;
     }
     initialized = true;
-    var app = getApp();
-    if (!app || !app.elements) {
-      return;
-    }
-    var dialog = app.elements['preview-dialog'];
-    var close = app.elements['preview-close'];
-    if (close) {
-      close.addEventListener('click', function () {
-        if (typeof app.closeDialog === 'function') {
-          app.closeDialog(dialog);
-        } else {
-          dialog.close();
-        }
-      });
-    }
-    if (dialog) {
-      dialog.addEventListener('close', function () {
-        renderToken += 1;
-        var target = lastTrigger;
-        lastTrigger = null;
-        if (target && typeof target.focus === 'function') {
-          target.focus();
-        }
-      });
-    }
+    setPreviewMode(false);
   }
 
   var api = {
     init: init,
     open: open,
+    close: close,
+    toggle: toggle,
+    isOpen: isOpen,
     renderMarkdown: renderMarkdown,
     buildImageDataUrlMap: buildImageDataUrlMap,
     escapeHtml: escapeHtml

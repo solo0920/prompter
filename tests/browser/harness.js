@@ -1737,11 +1737,21 @@
         button.click();
         return waitFor(function () {
           var content = byId(win, 'preview-content');
-          return byId(win, 'preview-dialog').open &&
+          return !byId(win, 'preview-view').hidden &&
             content.querySelector('h1') ? content : null;
         }, 8000);
       }).then(function (content) {
         equal(content.querySelector('h1').textContent, '預覽標題');
+        equal(byId(win, 'canvas').hidden, true,
+          'Preview must replace the editor canvas in place.');
+        equal(byId(win, 'preview-button').textContent.trim(), '編輯');
+        equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'true');
+        var previewButton = byId(win, 'preview-button');
+        assert(previewButton.querySelector('.preview-icon').hasAttribute('hidden'),
+          'The eye icon must be hidden in preview mode.');
+        assert(!previewButton.querySelector('.edit-icon').hasAttribute('hidden'),
+          'The edit icon must be shown in preview mode.');
+        assert(!byId(win, 'preview-dialog'), 'Preview must not use a dialog.');
         var quoteElement = content.querySelector('blockquote');
         assert(quoteElement, 'Quote lines must render as a blockquote.');
         assert(quoteElement.textContent.indexOf('引言 <script>alert(1)</script>') !== -1,
@@ -1760,13 +1770,21 @@
         var warning = content.querySelector('.preview-warning');
         assert(warning && warning.textContent.indexOf('https://example.com/remote.png') !== -1,
           'Preview must list images that could not be displayed.');
-        byId(win, 'preview-close').click();
+        byId(win, 'preview-button').click();
         return waitFor(function () {
-          return byId(win, 'preview-dialog').open ? null : true;
+          return byId(win, 'preview-view').hidden && !byId(win, 'canvas').hidden
+            ? true
+            : null;
         }, 5000);
       }).then(function () {
         equal(win.document.activeElement, byId(win, 'preview-button'),
-          'Closing Preview must return focus to its trigger.');
+          'Returning to edit must restore focus to the toggle.');
+        equal(byId(win, 'preview-button').textContent.trim(), '預覽');
+        equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
+        assert(!byId(win, 'preview-button').querySelector('.preview-icon').hasAttribute('hidden'),
+          'The eye icon must return in edit mode.');
+        assert(byId(win, 'preview-button').querySelector('.edit-icon').hasAttribute('hidden'),
+          'The edit icon must be hidden in edit mode.');
       });
     });
   });
@@ -1779,19 +1797,20 @@
       button.click();
       return waitFor(function () {
         var content = byId(win, 'preview-content');
-        return byId(win, 'preview-dialog').open &&
+        return !byId(win, 'preview-view').hidden &&
           content.querySelector('.preview-empty') ? content : null;
       }, 5000).then(function (content) {
         equal(content.querySelector('.preview-empty').textContent,
           '目前沒有可預覽的內容。');
-        byId(win, 'preview-close').click();
+        byId(win, 'preview-button').click();
         return waitFor(function () {
-          return !byId(win, 'preview-dialog').open &&
+          return byId(win, 'preview-view').hidden &&
+            !byId(win, 'canvas').hidden &&
             win.document.activeElement === byId(win, 'preview-button');
         }, 5000);
       }).then(function () {
         equal(win.document.activeElement, byId(win, 'preview-button'),
-          'Closing the empty Preview must return focus to its trigger.');
+          'Returning to edit must restore focus to the toggle.');
       });
     });
   });
@@ -1822,7 +1841,7 @@
       byId(win, 'preview-button').click();
       return waitFor(function () {
         var content = byId(win, 'preview-content');
-        return byId(win, 'preview-dialog').open &&
+        return !byId(win, 'preview-view').hidden &&
           content.textContent.indexOf('第 499 個區塊內容') !== -1
           ? content
           : null;
@@ -1832,9 +1851,9 @@
           'Rendering a 500-block Preview took ' + Math.round(elapsed) + ' ms.');
         assert(content.querySelectorAll('h1, h2, h3, blockquote, pre, table, p, li').length >= 300,
           'The 500-block Preview must render the document content.');
-        byId(win, 'preview-close').click();
+        byId(win, 'preview-button').click();
         return waitFor(function () {
-          return byId(win, 'preview-dialog').open ? null : true;
+          return byId(win, 'preview-view').hidden ? true : null;
         }, 5000);
       });
     });
@@ -3238,19 +3257,35 @@
         frame.style.width = '';
         frame.style.height = '';
       }
+      var toggle = byId(win, 'directory-toggle');
+      var directory = byId(win, 'directory');
       return waitFor(function () {
-        return win.innerWidth === 1280 && byId(win, 'directory-toggle').offsetParent === null
+        return win.innerWidth === 1280 && toggle.offsetParent !== null
           ? true
           : null;
       }, 5000).then(function () {
         assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
           'The 1280 px layout must not scroll horizontally.');
-        assert(byId(win, 'directory').getBoundingClientRect().width > 0,
-          'The directory must be visible at 1280 px.');
+        equal(toggle.getAttribute('aria-expanded'), 'false');
+        assert(directory.getBoundingClientRect().width === 0,
+          'The directory must start collapsed at 1280 px.');
+        toggle.click();
+        return waitFor(function () {
+          return directory.getBoundingClientRect().width > 0 ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(toggle.getAttribute('aria-expanded'), 'true',
+          'The directory toggle must expand the sidebar.');
+        toggle.click();
+        return waitFor(function () {
+          return directory.getBoundingClientRect().width === 0 ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(toggle.getAttribute('aria-expanded'), 'false');
         frame.style.width = '360px';
         frame.style.height = '800px';
         return waitFor(function () {
-          return byId(win, 'directory-toggle').offsetParent !== null ? true : null;
+          return win.innerWidth === 360 && toggle.offsetParent !== null ? true : null;
         }, 5000);
       }).then(function () {
         assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
