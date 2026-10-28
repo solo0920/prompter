@@ -1481,20 +1481,27 @@
     return true;
   }
 
-  function selectAdjacentBlock(currentId, delta) {
+  function selectAdjacentItem(currentItem, delta) {
     var state = getState();
     if (!state || !state.document) {
-      return;
+      return false;
     }
-    var ordered = Model.normalizeSequence(state.document);
-    if (!ordered.length) {
-      return;
+    var items = dragItemsFor(state);
+    if (!items.length) {
+      return false;
     }
     var index = -1;
-    if (currentId) {
-      for (var i = 0; i < ordered.length; i += 1) {
-        if (ordered[i].id === currentId) {
+    if (currentItem === 'composer') {
+      for (var i = 0; i < items.length; i += 1) {
+        if (isComposerItem(items[i])) {
           index = i;
+          break;
+        }
+      }
+    } else if (currentItem) {
+      for (var j = 0; j < items.length; j += 1) {
+        if (items[j].id === currentItem) {
+          index = j;
           break;
         }
       }
@@ -1502,37 +1509,14 @@
     if (index === -1) {
       index = delta > 0 ? -1 : 0;
     }
-    var next = (index + delta + ordered.length) % ordered.length;
-    selectBlock(ordered[next].id, { focus: true });
-  }
-
-  function selectBlockFromComposer(delta) {
-    var state = getState();
-    if (!state || !state.document || !state.composer) {
-      return false;
-    }
-    var ordered = Model.normalizeSequence(state.document);
-    if (!ordered.length) {
-      return false;
-    }
-    var insertIndex = Number(state.composer.insertIndex);
-    if (!isFinite(insertIndex)) {
-      insertIndex = ordered.length;
-    }
-    insertIndex = Math.max(0, Math.min(ordered.length, insertIndex));
-    var target;
-    if (delta < 0) {
-      target = insertIndex - 1;
-      if (target < 0) {
-        target = ordered.length - 1;
-      }
+    var next = (index + delta + items.length) % items.length;
+    var item = items[next];
+    if (isComposerItem(item)) {
+      clearSelection();
+      focusComposer();
     } else {
-      target = insertIndex;
-      if (target >= ordered.length) {
-        target = 0;
-      }
+      selectBlock(item.id, { focus: true });
     }
-    selectBlock(ordered[target].id, { focus: true });
     return true;
   }
 
@@ -2367,7 +2351,7 @@
     if (plainArrow && target.closest('.composer-input')) {
       event.preventDefault();
       event.stopPropagation();
-      selectBlockFromComposer(event.key === 'ArrowDown' ? 1 : -1);
+      selectAdjacentItem('composer', event.key === 'ArrowDown' ? 1 : -1);
       return;
     }
     if (target.closest('input, textarea, select, [contenteditable="true"]') ||
@@ -2390,7 +2374,7 @@
       }
       event.preventDefault();
       event.stopPropagation();
-      selectAdjacentBlock(block ? block.id : (state ? state.selectedBlockId : null), delta);
+      selectAdjacentItem(block ? block.id : (state ? state.selectedBlockId : null), delta);
       return;
     }
     if (!block) {

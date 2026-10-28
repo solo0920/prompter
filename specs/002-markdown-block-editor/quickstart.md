@@ -178,9 +178,9 @@ opens the Marker flyout without showing a grab cursor.
 6. Drag the composer by its handle to another slot; confirm blocks shift to make room and the
    Markdown order remains unchanged. Then drag a block across the composer and confirm the
    composer shifts one position.
-7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next block is
-   selected, and that Up on the first block wraps to the last while Down on the last wraps to
-   the first.
+7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next sequence
+   item is selected, including the composer at its own slot, and that Up on the first item wraps
+   to the last while Down on the last wraps to the first.
 8. Select a block and press Tab repeatedly. Confirm focus cycles only through that block's own
    root, title, action controls, and drag handle, wrapping inside the block without moving to
    another block, the composer, header, or left rail. Shift+Tab must wrap in the opposite

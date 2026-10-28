@@ -1055,7 +1055,7 @@
     });
   });
 
-  test('US1 arrow keys select adjacent blocks and wrap around', function () {
+  test('US1 arrow keys select adjacent items and wrap through the composer', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       createSequence(win, ['A', 'B', 'C']);
@@ -1074,13 +1074,24 @@
         'Focus must move to the selected block.');
 
       press(win, blockById(win, aId), 'ArrowUp');
+      equal(win.Prompter.editor.getSelectedBlockId(), null,
+        'Up from the first item must move focus to the composer at the end.');
+      equal(win.document.activeElement, composerInput(win),
+        'The composer input must receive focus.');
+
+      press(win, composerInput(win), 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), cId,
-        'Up from the first block must wrap to the last block.');
+        'Up from the composer must select the previous block.');
       equal(win.document.activeElement, blockById(win, cId));
 
       press(win, blockById(win, cId), 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), null,
+        'Down from the last block must move focus back to the composer.');
+      equal(win.document.activeElement, composerInput(win));
+
+      press(win, composerInput(win), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), aId,
-        'Down from the last block must wrap to the first block.');
+        'Down from the end composer must wrap to the first item.');
       equal(win.document.activeElement, blockById(win, aId));
 
       press(win, blockById(win, aId), 'ArrowDown');

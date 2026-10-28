@@ -98,9 +98,10 @@
   their first render without being marked dirty. A multi-selected group drags as one contiguous
   group and stays selected after the drop. A marquee dragged on empty canvas selects the blocks
   it intersects, including additive Cmd/Ctrl selection. Delete/Backspace removes every selected
-  block and closes the resulting gaps. Up/Down selects blocks with first/last wrap; Tab cycles
-  within the selected block (or within editor items when nothing is selected); and Up/Down on a
-  drag handle reorders the block while retaining focus.
+  block and closes the resulting gaps. Up/Down moves through blocks and the composer at its
+  sequence slot with first/last wrap; Tab cycles within the selected block (or within editor
+  items when nothing is selected); and Up/Down on a drag handle reorders the block while
+  retaining focus.
 - Verification: **93 unit tests** and **84 browser tests** pass in Chrome, Edge, and Firefox,
   online and offline.
 

@@ -68,10 +68,10 @@
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.
-- Keyboard navigation checks: Up/Down block selection with first/last wrap, composer-input
-  Up/Down selection relative to the composer slot, Tab/Shift+Tab cycling confined to editor
-  items or the selected block, Space-opened Marker menu with arrow selection, and drag-handle
-  Up/Down reordering with retained handle focus.
+- Keyboard navigation checks: Up/Down sequence-item selection including the composer at its slot
+  with first/last wrap, Tab/Shift+Tab cycling confined to editor items or the selected block,
+  Space-opened Marker menu with arrow selection, and drag-handle Up/Down reordering with retained
+  handle focus.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
   spot checks, and real OS pickers remain manual. Safari is outside the automated and manual
   acceptance scope; Chrome is the required release gate.

@@ -215,8 +215,9 @@ Each image block shows:
 
 ## Keyboard Navigation
 
-- With focus on a block or the canvas, Up/Down selects the previous/next block and wraps at the
-  ends. The focused block is selected and revealed in the reading order.
+- With focus on a block or the canvas, Up/Down moves through the previous/next sequence item and
+  wraps at the ends. The composer participates at its own sequence slot; focusing it clears the
+  block selection and places the caret in the composer input.
 - When a block is selected, Tab/Shift+Tab cycles only that block's own root, title, action, and
   drag-handle controls and wraps within them; it does not move to another block or the composer.
   With no block selected, Tab/Shift+Tab cycles editor items without leaving the canvas; both
@@ -225,8 +226,8 @@ Each image block shows:
   the Marker options and Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
   the handle, with the move announced.
-- Up/Down in the composer input selects the block immediately before or after the composer's
-  sequence slot, wrapping at the ends; the composer remains open. Other keys keep normal text
+- Up/Down in the composer input moves to the sequence item immediately before or after the
+  composer's slot, wrapping at the ends; the composer remains open. Other keys keep normal text
   editing, and the block editor input retains its normal caret behavior.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
@@ -349,7 +350,7 @@ three-way unload dialog. This limitation is recorded in `../plan.md`.
 | Preview/Edit | Enter/Space | Toggle between the inline preview and the editor. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
-| Block/canvas | Up/Down | Select the previous/next block; wraps from first to last and last to first. |
+| Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. |
 | Block/canvas | Delete / Backspace | Remove every selected block; ignored while typing in the composer or block editor. |
 | Block | Enter/F2 | Enter edit mode. |
 | Title/Marker | Space/Enter | Open the Marker menu; Up/Down choose an option; Enter/Space apply it. |
