@@ -247,23 +247,34 @@ body {
   flex: 0 1 auto;
   align-items: center;
   gap: 6px;
-  min-width: 0;
-  max-width: 220px;
-  padding: 0 10px;
-  color: var(--muted);
-  font-size: 13px;
+  min-width: 140px;
+  max-width: 260px;
+  padding: 4px 4px 4px 8px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  background: var(--canvas-bg);
+  color: var(--text);
+  box-shadow: inset 0 2px 0 var(--accent);
 }
 .preview-file-icon {
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
+  color: var(--muted);
 }
 .preview-file-name {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-spacing);
+  text-transform: var(--display-transform);
+  font-size: 14px;
 }
+.preview-close { flex: 0 0 auto; }
 .document-tabs .preview-toggle {
   flex: 0 0 auto;
   align-self: center;
@@ -776,7 +787,7 @@ body {
   .block-image-wrap { max-width: calc(100vw - 44px); }
   .preview-content { padding: 14px 14px 0; }
   .document-tab { min-width: 110px; max-width: 200px; }
-  .preview-label { max-width: 110px; padding: 0 6px; }
+  .preview-label { min-width: 0; max-width: 110px; padding: 0 6px; }
   .document-tabs .preview-toggle {
     width: 44px;
     min-width: 44px;

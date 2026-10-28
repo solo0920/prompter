@@ -54,7 +54,8 @@
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
       'no-results-clear', 'workspace', 'editor-pane', 'document-tabs', 'document-tab-items',
-      'preview-label', 'preview-file-name', 'canvas', 'canvas-empty', 'canvas-new-button',
+      'preview-label', 'preview-file-name', 'preview-close', 'canvas', 'canvas-empty',
+      'canvas-new-button',
       'toast-region', 'alert-region', 'move-announcer', 'preview-view', 'preview-content',
       'settings-dialog', 'settings-close', 'default-marker', 'show-grid',
       'follow-system-button', 'clear-library-button', 'app-version', 'schema-version',
@@ -1216,6 +1217,16 @@
           preview.open(elements['preview-button']);
         } else {
           toast('預覽將在後續版本提供。');
+        }
+      });
+    }
+    if (elements['preview-close']) {
+      elements['preview-close'].addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var preview = global.Prompter.preview;
+        if (preview && typeof preview.close === 'function') {
+          preview.close();
         }
       });
     }

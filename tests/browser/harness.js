@@ -678,6 +678,14 @@
         assert(byId(win, 'preview-label').getBoundingClientRect().right <=
           byId(win, 'preview-button').getBoundingClientRect().left + 1,
         'The preview filename must sit to the left of the preview icon.');
+        var activeDocTab = win.document.querySelector('.document-tab.active');
+        equal(win.getComputedStyle(byId(win, 'preview-label')).backgroundColor,
+          win.getComputedStyle(activeDocTab).backgroundColor,
+          'The preview tab must use the same active-tab color as the document tab.');
+        var previewClose = byId(win, 'preview-close');
+        assert(previewClose, 'The preview tab must include a close control.');
+        equal(previewClose.textContent, '×');
+        equal(previewClose.getAttribute('aria-label'), '關閉即時預覽');
         tabElements[0].querySelector('.document-tab-label').click();
         return waitFor(function () {
           return state.document && state.document.id === 'tab-first' ? true : null;
@@ -687,12 +695,20 @@
         equal(byId(win, 'preview-file-name').textContent, '甲文件');
         equal(win.document.querySelector(
           '.document-tab[data-document-id="tab-first"]').classList.contains('active'), true);
+        byId(win, 'preview-close').click();
+        return waitFor(function () {
+          return byId(win, 'preview-view').hidden &&
+            byId(win, 'preview-label').hidden &&
+            byId(win, 'preview-button').getAttribute('aria-pressed') === 'false'
+            ? true : null;
+        }, 5000).then(function () {
         var firstClose = win.document.querySelector(
           '.document-tab[data-document-id="tab-first"] .document-tab-close');
         firstClose.click();
         return waitFor(function () {
           return state.tabs.length === 1 ? true : null;
         }, 5000);
+        });
       }).then(function () {
         equal(state.document.id, 'tab-second');
         equal(byId(win, 'document-title').value, '乙文件');
