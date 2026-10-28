@@ -442,6 +442,9 @@
     markerButton.setAttribute('aria-expanded', 'false');
     markerButton.addEventListener('click', function (event) {
       event.stopPropagation();
+      var composerInput = element.querySelector('.composer-input');
+      var caretStart = composerInput ? composerInput.selectionStart : null;
+      var caretEnd = composerInput ? composerInput.selectionEnd : null;
       openMarkerMenu(markerButton, composer.marker, function (marker) {
         composer.markerOverride = marker;
         composer.marker = marker;
@@ -449,7 +452,7 @@
         markerButton.classList.toggle('none', marker === 'none');
         markerButton.setAttribute('aria-label', '選擇標記，目前為' + markerLabel(marker));
         updateComposerDetection(element, composer);
-        focusComposer();
+        focusComposer(caretStart, caretEnd);
       }, function (open) {
         markerButton.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
@@ -1227,7 +1230,7 @@
     openComposer(block.id);
   }
 
-  function focusComposer() {
+  function focusComposer(selectionStart, selectionEnd) {
     var canvas = getCanvas();
     if (!canvas) {
       return;
@@ -1236,7 +1239,15 @@
     if (input) {
       input.focus();
       try {
-        input.setSelectionRange(input.value.length, input.value.length);
+        var start = selectionStart === undefined || selectionStart === null
+          ? input.value.length
+          : selectionStart;
+        var end = selectionEnd === undefined || selectionEnd === null
+          ? start
+          : selectionEnd;
+        start = Math.max(0, Math.min(start, input.value.length));
+        end = Math.max(0, Math.min(end, input.value.length));
+        input.setSelectionRange(start, end);
       } catch (error) {
         // Ignore.
       }
@@ -1474,7 +1485,10 @@
       item.addEventListener('click', function () {
         closeMarkerMenu();
         onSelect(marker);
-        anchor.focus();
+        var active = global.document.activeElement;
+        if (!active || active === global.document.body || !active.isConnected) {
+          anchor.focus();
+        }
       });
       menu.appendChild(item);
     });

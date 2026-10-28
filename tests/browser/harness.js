@@ -702,6 +702,11 @@
     return appReady().then(function (win) {
       var state = freshDocument(win);
       var markerButton = win.document.querySelector('#canvas .composer-marker');
+      var input = composerInput(win);
+      setValue(win, input, '測試內容');
+      input.focus();
+      input.setSelectionRange(2, 2);
+      markerButton.focus();
       markerButton.click();
       var menu = win.document.querySelector('.marker-menu');
       assert(menu, 'The Marker menu did not open.');
@@ -710,7 +715,10 @@
       option.click();
       equal(win.document.querySelector('.marker-menu'), null);
       equal(markerButton.getAttribute('aria-label'), '選擇標記，目前為1.');
-      var input = composerInput(win);
+      equal(win.document.activeElement, input,
+        'Choosing a Marker must keep focus in the composer input.');
+      equal(input.selectionStart, 2, 'The caret position must be preserved.');
+      equal(input.selectionEnd, 2, 'The selection must be preserved.');
       setValue(win, input, '第一項');
       press(win, input, 'Enter');
       equal(state.document.blocks[0].marker, '1.');

@@ -99,7 +99,8 @@ The composer is the only input box that creates a new block.
 - The Marker control opens a menu with None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`.
   Each option has a visible label and accessible name. Enter/Space opens it, Arrow Up/Down
   navigates, Home/End jump to the first/last option, Escape closes and returns focus to the
-  control, and selecting an option applies it and returns focus.
+  control, and selecting an option applies it, returns focus to the composer text input, and
+  preserves the caret or selection.
 - Typing a recognized marker token followed by exactly one space at the start shows a live
   detection label (for example `偵測到： ##`). On Enter the marker is stored once and removed
   from the text. If the user selects a different marker from the menu after typing, the menu
