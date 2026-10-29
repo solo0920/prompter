@@ -259,6 +259,7 @@ across all stories.
 - [x] T093 Remove the Marker menu close delay: keep the hover-opened panel while the pointer is over the Marker, panel, or connecting corridor, and close it immediately once the pointer leaves that region.
 - [x] T094 Add a second left-rail button and vertical seven-layer toolbar (`#`, `##`, `###`, `-`, `1.`, `>`, `.`): choosing a layer edits its first block, automatically collapses that layer's child items, dims and locks all other layers, hides the composer, and restricts Up/Down navigation to matching blocks in edit mode with full selection; add `全部收合`/`全部展開` actions that target the active layer or whole document; exiting restores normal interaction without changing content or output.
 - [x] T095 Add a shared block delete control above `+` on right-side hover and an undo history: Cmd/Ctrl+Z outside text inputs restores up to 50 prior content states including image assets, selection, and dirty state; native text undo remains inside inputs, and view-only changes do not consume history.
+- [x] T096 Recognize every numbered ordered prefix (`1.`, `2.`, `3.`, ...) in composer splitting, file parsing, validation, indentation, and the ordered-list layer focus, preserving each block's original number.
 
 ---
 

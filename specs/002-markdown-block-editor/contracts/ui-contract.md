@@ -116,10 +116,10 @@ The composer is the only input box that creates a new block.
   - With non-empty text: create a text block at the composer slot, mark dirty, keep the next
     composer focused, and do not leave the committed block selected or outlined.
   - With multiple lines where a non-blank line starts with an obvious Marker (`#`, `##`, `###`,
-    `-`, `1.`, `>`, `.`): create one block per marked line in source order, keep contiguous
-    unmarked prose together, preserve blank-line separators, and keep fenced code together.
-    Focus the next composer after the last created block. Multi-line text without an obvious
-    Marker stays one block.
+    `-`, any numbered ordered prefix `N.`, `>`, `.`): create one block per marked line in source
+    order, keep contiguous unmarked prose together, preserve blank-line separators, and keep
+    fenced code together. Numbered lines retain their original number. Focus the next composer
+    after the last created block. Multi-line text without an obvious Marker stays one block.
   - With empty/whitespace-only text: no block, no error.
 - Shift+Enter inserts a line break without committing the composer.
 - Escape:
@@ -183,8 +183,9 @@ Each image block shows:
   outline indentation and does not consume title-row width. It points down when expanded and
   right when collapsed, is sized with the surrounding text, exposes `aria-expanded`, and has an
   accessible label naming the block and hidden item count.
-- Rank order from highest to lowest is `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then unmarked text
-  and image content. A section ends at the next block of the same or higher rank.
+- Rank order from highest to lowest is `#`, `##`, `###`, `-`, any numbered ordered prefix
+  (`1.`, `2.`, ...), `>`, `.`, then unmarked text and image content. A section ends at the next
+  block of the same or higher rank.
 - Activating the control hides every following block in that section, including images and
   unmarked text, and removes those blocks from the visible layout. Activating it again restores
   them; nested sections keep their own collapse state.
@@ -200,8 +201,8 @@ Each image block shows:
 ## Outline Indentation
 
 - The editor assigns fixed horizontal levels to Markers: `#` = 0, `##` = 1, `###` = 2, `-` = 3,
-  `1.` = 4, `>` = 5, `.` = 6, each 20 px apart. Unmarked content and images sit one level below
-  the last Marker; a plain text document starts at 0.
+  any numbered ordered prefix (`1.`, `2.`, ...) = 4, `>` = 5, `.` = 6, each 20 px apart. Unmarked
+  content and images sit one level below the last Marker; a plain text document starts at 0.
 - The level never depends on preceding blocks, so `###` is always two steps from the base and
   `##` is always one step; switching between them changes the column immediately.
 - A composer opened after a block aligns with that block's level.
@@ -216,8 +217,9 @@ Each image block shows:
   exposes `aria-expanded`; toolbar buttons expose `aria-pressed`.
 - Activating a layer makes every text block with that Marker the active layer, starts editing
   the first match with all text selected, and automatically collapses each matching block that
-  has child items. Matching headers remain visible; blocks of other layers and image blocks are
-  dimmed, locked, and cannot be selected or focused.
+  has child items. The `1.` layer includes all numbered ordered prefixes (`1.`, `2.`, ...).
+  Matching headers remain visible; blocks of other layers and image blocks are dimmed, locked,
+  and cannot be selected or focused.
 - While a layer is active, Up/Down moves only through matching blocks, commits the current edit,
   and reopens the destination in edit mode with all text selected, wrapping at the ends.
 - `全部收合` collapses every collapsible block in the active layer without hiding that layer's own

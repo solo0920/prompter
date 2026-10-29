@@ -110,10 +110,11 @@ and confirm the unsaved draft is not restored.
     first/last wrap; Up/Down on the composer drag handle moves the composer one slot and keeps
     focus on the handle.
 16. **Given** the input box contains multiple lines, **When** a non-blank line starts with an
-    obvious Markdown Marker (`#`, `##`, `###`, `-`, `1.`, `>`, `.`) and the user presses Enter,
-    **Then** each such line becomes its own block in source order with its Marker stored once,
-    contiguous unmarked lines stay grouped as prose, blank lines remain separators, fenced code
-    is never split, and a multi-line input without any such Marker remains one block.
+    obvious Markdown Marker (`#`, `##`, `###`, `-`, `1.`, any later `N.` ordered number, `>`,
+    `.`) and the user presses Enter, **Then** each such line becomes its own block in source
+    order with its Marker stored once, contiguous unmarked lines stay grouped as prose, blank
+    lines remain separators, fenced code is never split, and a multi-line input without any such
+    Marker remains one block.
 17. **Given** a text block followed by blocks of lower rank, **When** the user activates its
     collapse control, **Then** the chevron points right and every following lower-ranked block
     is hidden until the next block of the same or higher rank, while the document content,
@@ -127,8 +128,8 @@ and confirm the unsaved draft is not restored.
     handle's Up/Down keys, **Then** the hidden descendants move with it as one unit and remain
     hidden until the section is expanded.
 21. **Given** any Marker, **Then** it uses its fixed indentation level: `#`=0, `##`=1,
-    `###`=2, `-`=3, `1.`=4, `>`=5, `.`=6, with content one level below the last Marker; the
-    Markdown order and text remain unchanged.
+    `###`=2, `-`=3, any `N.` numbered item=4, `>`=5, `.`=6, with content one level below the
+    last Marker; the Markdown order and text remain unchanged.
 22. **Given** a block, **When** the right side is hovered, **Then** a delete control appears
     above the `+`; activating it removes only that block (and its image asset when applicable),
     without changing other blocks.
@@ -391,10 +392,11 @@ settings panel and clear the local library after confirming the warning.
   left; typing text and pressing Enter MUST create a block, Shift+Enter MUST insert a line
   break without committing, and pressing Enter with empty text MUST do nothing. When Enter is
   pressed on a multi-line value, every non-blank line that starts with a recognized Marker MUST
-  become its own block in source order with the Marker stored once, contiguous unmarked prose
-  lines MUST stay grouped, blank lines MUST remain separators, and fenced code MUST NOT be
-  split. A multi-line value without an obvious Marker, including ordinary Shift+Enter prose,
-  MUST remain one block.
+  become its own block in source order with the Marker stored once; numbered ordered prefixes
+  (`1.`, `2.`, `3.`, and later numbers) MUST each become their own block and keep their original
+  number. Contiguous unmarked prose lines MUST stay grouped, blank lines MUST remain separators,
+  and fenced code MUST NOT be split. A multi-line value without an obvious Marker, including
+  ordinary Shift+Enter prose, MUST remain one block.
 - **FR-018**: The Marker control MUST offer None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`
   options (None is represented by `×` in the flyout), and the selected Marker MUST be displayed
   in front of the block and included once in Markdown output. Block Markers MUST be visible
@@ -410,7 +412,9 @@ settings panel and clear the local library after confirming the warning.
   both the Marker and the connecting hover corridor. It MUST also close after choosing an option,
   pressing Escape or Tab, or clicking outside. The left Marker area MUST NOT show a grab cursor;
   the right side of the block retains the drag cursor and drag handle. Choosing an option MUST
-  return focus to the composer text input and preserve its caret or selection.
+  return focus to the composer text input and preserve its caret or selection. Numbered ordered
+  markers other than `1.` MUST retain their number when loaded, pasted, or committed; the menu
+  MUST treat them as the ordered-list Marker type.
 - **FR-019**: When the user types a recognized Marker followed by a space in an input box, the
   Marker MUST be detected live and shown as a prefix; on commit it MUST become the block
   Marker without being duplicated in the block text.
@@ -568,14 +572,14 @@ settings panel and clear the local library after confirming the warning.
   one unit. The control MUST expose its expanded state and an accessible label, focus MUST remain
   on it after toggling, and collapse state MUST NOT be written into Markdown.
 - **FR-053**: The editor canvas MUST assign a fixed indentation level to each Marker:
-  `#` = 0, `##` = 1, `###` = 2, `-` = 3, `1.` = 4, `>` = 5, `.` = 6, with
-  unmarked content and images one level below the last Marker and plain text documents starting
-  at 0. The level MUST NOT depend on which other Markers happen to precede the block, so `###`
-  is always two steps right, `-` always three, `1.` always four, `>` always five, and `.` always
-  six. Content beneath a Marker MUST use the next depth. Indentation MUST be layout-only: it MUST
-  NOT change block text, Markers, Save, Preview, Copy, or Markdown reading order. A composer
-  opened after a block MUST align with that block's level, and indented blocks MUST stay within
-  the available canvas width.
+  `#` = 0, `##` = 1, `###` = 2, `-` = 3, any numbered ordered prefix (`1.`, `2.`, `3.`, ...) =
+  4, `>` = 5, `.` = 6, with unmarked content and images one level below the last Marker and plain
+  text documents starting at 0. The level MUST NOT depend on which other Markers happen to
+  precede the block, so `###` is always two steps right, `-` always three, numbered items always
+  four, `>` always five, and `.` always six. Content beneath a Marker MUST use the next depth.
+  Indentation MUST be layout-only: it MUST NOT change block text, Markers, Save, Preview, Copy,
+  or Markdown reading order. A composer opened after a block MUST align with that block's level,
+  and indented blocks MUST stay within the available canvas width.
 - **FR-054**: The left directory rail MUST provide a second button below `文件目錄` that opens a
   vertical layer-focus toolbar listing `#`, `##`, `###`, `-`, `1.`, `>`, `.`, followed by
   `全部收合` and `全部展開` actions. Activating one layer MUST mark every text block with that
@@ -609,7 +613,7 @@ settings panel and clear the local library after confirming the warning.
   of text, a Marker, a canvas position, and a stacking order. An image block contains an image
   asset, alternative text, a canvas position, and a stacking order.
 - **Marker**: The optional line prefix chosen from None, `#`, `##`, `###`, `-`, `1.`, `>`, or
-  `.`. It is displayed with a text block and included once in Markdown output.
+  `.`. Open, pasted, or committed ordered lists may retain later numbers such as `2.` and `3.`. It is displayed with a text block and included once in Markdown output.
 - **Image Asset**: An image inserted from a file, pasted from the clipboard, or imported with
   an opened Markdown file. It is stored locally with the document, has a unique file name and
   default alternative text, and is used by Preview, Save, and rich Copy.
@@ -676,7 +680,8 @@ settings panel and clear the local library after confirming the warning.
   Save persists a document; closing or reloading with unsaved changes triggers the browser's
   native leave confirmation and does not restore the unsaved draft.
 - The `.` Marker is a literal prefix. Standard Markdown semantics apply to `#`, `##`, `###`,
-  `-`, `1.`, and `>`. Ordered-list numbers are literal and are not automatically renumbered.
+  `-`, numbered ordered prefixes (`1.`, `2.`, `3.`, ...), and `>`. Ordered-list prefixes
+  preserve their original number and are not automatically renumbered.
 - "Related files" means images referenced by the Markdown document. Other attachment types are
   out of scope.
 - Images can enter a document through Open with matching image files, through Insert Image, or

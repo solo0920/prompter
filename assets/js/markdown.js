@@ -43,6 +43,13 @@
         return { marker: 'none', text: line };
       }
     }
+    var ordered = /^(\d+)\. /.exec(line);
+    if (ordered) {
+      var orderedRest = line.slice(ordered[0].length);
+      if (orderedRest.trim() !== '') {
+        return { marker: ordered[1] + '.', text: orderedRest };
+      }
+    }
     return { marker: 'none', text: line };
   }
 
@@ -51,6 +58,9 @@
   }
 
   function markerRank(marker) {
+    if (/^\d+\.$/.test(String(marker || ''))) {
+      return MARKER_RANKS['1.'];
+    }
     return Object.prototype.hasOwnProperty.call(MARKER_RANKS, marker)
       ? MARKER_RANKS[marker]
       : CONTENT_RANK;

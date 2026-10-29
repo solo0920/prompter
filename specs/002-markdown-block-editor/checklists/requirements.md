@@ -44,7 +44,7 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
-- Browser harness: **107 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **108 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
   browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -55,9 +55,10 @@
   inserts a line break, Enter commits, width grows up to the maximum before wrapping, and
   height grows so every line remains visible.
 - Composer Markdown splitting: pressing Enter on a pasted multi-line Markdown value creates one
-  block per obvious marker line in source order, keeps contiguous unmarked prose grouped,
-  preserves blank-line separation, leaves plain multi-line text and fenced code intact, and
-  focuses the next composer after the last block.
+  block per obvious marker line in source order, including every numbered ordered prefix (`1.`,
+  `2.`, `3.`, ...) with its original number, keeps contiguous unmarked prose grouped, preserves
+  blank-line separation, leaves plain multi-line text and fenced code intact, and focuses the
+  next composer after the last block.
 - Collapsible sections: blocks with lower-ranked content show a text-sized chevron icon outside
   the card, immediately to its left and aligned with the title row; `#` > `##` > `###` > `-` >
   `1.` > `>` > `.` > unmarked content. Collapsing hides the section from the canvas but not from

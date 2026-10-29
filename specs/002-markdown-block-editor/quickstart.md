@@ -61,8 +61,8 @@ Current result (2026-10-30): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-30): Chrome **107 passing, 0 failing** (required gate). Firefox also
-reports 107 passing, 0 failing as the supplementary check.
+Current result (2026-10-30): Chrome **108 passing, 0 failing** (required gate). Firefox also
+reports 108 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-30)
 
@@ -72,8 +72,8 @@ unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 107/107 | PASS 107/107 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 107/107 | PASS 107/107 | Supplementary check; WebDriver run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 108/108 | PASS 108/108 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 108/108 | PASS 108/108 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -175,9 +175,10 @@ opens the Marker flyout without showing a grab cursor.
    press Enter to commit.
 5. Create a multi-line fenced code block or display formula in one composer using Shift+Enter;
    confirm Preview renders it as one code block or formula rather than separate lines.
-6. Paste a multi-line Markdown sample such as `# 標題`, a prose paragraph, `- 項目一`, and
-   `- 項目二` on separate lines, then press Enter. Confirm each marked line becomes its own block
-   in source order, the prose stays grouped, blank lines between groups survive in the saved
+6. Paste a multi-line Markdown sample such as `# 標題`, a prose paragraph, `- 項目一`,
+   `- 項目二`, `1. 第一項`, `2. 第二項`, and `3. 第三項` on separate lines, then press Enter.
+   Confirm each marked line becomes its own block in source order, each numbered item keeps its
+   original number, the prose stays grouped, blank lines between groups survive in the saved
    Markdown, the next composer opens below the last block, and a fenced code sample is not split.
 
 ### 2b. Collapse sections by Marker rank (FR-052)

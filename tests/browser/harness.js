@@ -1315,6 +1315,45 @@
     });
   });
 
+  test('US1 multi-line ordered lists split every number into its own block', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var input = composerInput(win);
+      var source = '1. 先分析現況\n' +
+        '2. 優先採用簡單實作\n' +
+        '3. 遇到不確定事項先驗證\n' +
+        '4. 避免無關修改\n' +
+        '5. 回報結果\n';
+      setValue(win, input, source);
+      press(win, input, 'Enter');
+
+      equal(state.document.blocks.length, 5,
+        'Every numbered line must become its own block.');
+      var ordered = readingOrder(win);
+      equal(ordered.map(function (block) { return block.marker; }).join(','),
+        '1.,2.,3.,4.,5.', 'Numbered list markers must preserve their numbers.');
+      equal(ordered.map(function (block) { return block.text; }).join('|'),
+        '先分析現況|優先採用簡單實作|遇到不確定事項先驗證|避免無關修改|回報結果');
+      equal(win.Prompter.markdown.serializeDocument(state.document), source);
+
+      byId(win, 'layer-toggle').click();
+      byId(win, 'layer-toolbar').querySelector('[data-layer="1."]').click();
+      equal(state.editingBlockId, ordered[0].id,
+        'The ordered-list layer must edit its first numbered item.');
+      press(win, blockById(win, ordered[0].id).querySelector('.block-edit-input'),
+        'ArrowDown');
+      equal(state.editingBlockId, ordered[1].id,
+        'Up/Down must move through every numbered item in the 1. layer.');
+      press(win, blockById(win, ordered[1].id).querySelector('.block-edit-input'),
+        'ArrowDown');
+      equal(state.editingBlockId, ordered[2].id,
+        'The numbered layer must include 2., 3., and later numbers.');
+      byId(win, 'layer-toggle').click();
+      assert(byId(win, 'layer-toolbar').hidden,
+        'The numbered-list test must leave layer focus closed for the next test.');
+    });
+  });
+
   test('US1 marker hierarchy collapses descendants without changing content', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;

@@ -396,9 +396,24 @@
     return !!(activeCollapse && activeCollapse.hidden[blockId]);
   }
 
+  function markerMatchesLayer(marker, filter) {
+    if (!filter) {
+      return true;
+    }
+    if (filter === '1.' && /^\d+\.$/.test(String(marker || ''))) {
+      return true;
+    }
+    return marker === filter;
+  }
+
   function blockMatchesLayer(block) {
-    return !layerFilter ||
-      !!(block && block.type === 'text' && block.marker === layerFilter);
+    if (!layerFilter) {
+      return true;
+    }
+    if (!block || block.type !== 'text') {
+      return false;
+    }
+    return markerMatchesLayer(block.marker, layerFilter);
   }
 
   function blockAllowed(blockId) {
@@ -576,7 +591,7 @@
     var matches = [];
     if (next) {
       matches = Model.normalizeSequence(state.document).filter(function (block) {
-        return block.type === 'text' && block.marker === next;
+        return block.type === 'text' && markerMatchesLayer(block.marker, next);
       });
       if (!matches.length) {
         announce('文件中沒有 ' + layerLabel(next) + ' 層級的項目。');
@@ -3402,12 +3417,13 @@
       '.': '. 點號'
     };
     var menuOrder = ['none', '1.', '>', '.', '-', '#', '##', '###'];
+    var checkedMarker = /^\d+\.$/.test(String(currentMarker || '')) ? '1.' : currentMarker;
     menuOrder.forEach(function (marker) {
       var item = global.document.createElement('button');
       item.type = 'button';
       item.className = 'menu-item marker-menu-item';
       item.setAttribute('role', 'menuitemradio');
-      item.setAttribute('aria-checked', marker === currentMarker ? 'true' : 'false');
+      item.setAttribute('aria-checked', marker === checkedMarker ? 'true' : 'false');
       item.setAttribute('aria-label', labels[marker] || marker);
       item.dataset.marker = marker;
       item.textContent = marker === 'none' ? '×' : markerToken(marker);

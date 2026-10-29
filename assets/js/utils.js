@@ -197,7 +197,7 @@
   }
 
   function isSupportedMarker(marker) {
-    return MARKER_VALUES.indexOf(marker) !== -1;
+    return MARKER_VALUES.indexOf(marker) !== -1 || /^\d+\.$/.test(String(marker || ''));
   }
 
   function formatDate(value, locale) {

@@ -70,11 +70,12 @@ test('detectMarker requires exactly one space and a non-empty remainder', functi
   assert.deepEqual(Markdown.detectMarker('### Heading'), { marker: '###', text: 'Heading' });
   assert.deepEqual(Markdown.detectMarker('- Item'), { marker: '-', text: 'Item' });
   assert.deepEqual(Markdown.detectMarker('1. First'), { marker: '1.', text: 'First' });
+  assert.deepEqual(Markdown.detectMarker('2. Item'), { marker: '2.', text: 'Item' });
+  assert.deepEqual(Markdown.detectMarker('12. Twelfth'), { marker: '12.', text: 'Twelfth' });
   assert.deepEqual(Markdown.detectMarker('> Quote'), { marker: '>', text: 'Quote' });
   assert.deepEqual(Markdown.detectMarker('. Dot'), { marker: '.', text: 'Dot' });
   assert.deepEqual(Markdown.detectMarker('#Heading'), { marker: 'none', text: '#Heading' });
   assert.deepEqual(Markdown.detectMarker('#### Heading'), { marker: 'none', text: '#### Heading' });
-  assert.deepEqual(Markdown.detectMarker('2. Item'), { marker: 'none', text: '2. Item' });
   assert.deepEqual(Markdown.detectMarker(' - Item'), { marker: 'none', text: ' - Item' });
   assert.deepEqual(Markdown.detectMarker('#'), { marker: 'none', text: '#' });
   assert.deepEqual(Markdown.detectMarker('- '), { marker: 'none', text: '- ' });
@@ -93,6 +94,8 @@ test('markerRank orders headings, lists, quotes and plain content', function () 
   }
   assert.equal(Markdown.markerRank('none'), 7);
   assert.equal(Markdown.markerRank('unknown'), 7);
+  assert.equal(Markdown.markerRank('2.'), 4);
+  assert.equal(Markdown.markerRank('12.'), 4);
 });
 
 test('splitComposerItems separates obvious Markdown lines and keeps prose grouped', function () {
@@ -105,6 +108,8 @@ test('splitComposerItems separates obvious Markdown lines and keeps prose groupe
     '- 項目二\n' +
     '> 引言\n' +
     '1. 有序\n' +
+    '2. 第二項\n' +
+    '3. 第三項\n' +
     '. 點\n' +
     '### 小標題\n'
   );
@@ -115,6 +120,8 @@ test('splitComposerItems separates obvious Markdown lines and keeps prose groupe
     { marker: '-', text: '項目二', blankLinesAfter: 0 },
     { marker: '>', text: '引言', blankLinesAfter: 0 },
     { marker: '1.', text: '有序', blankLinesAfter: 0 },
+    { marker: '2.', text: '第二項', blankLinesAfter: 0 },
+    { marker: '3.', text: '第三項', blankLinesAfter: 0 },
     { marker: '.', text: '點', blankLinesAfter: 0 },
     { marker: '###', text: '小標題', blankLinesAfter: 0 }
   ]);
