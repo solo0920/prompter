@@ -1731,11 +1731,12 @@
       equal(hashButton.getAttribute('aria-pressed'), 'true');
       equal(state.editingBlockId, 'layer-h1',
         'Switching layers must edit the first # heading.');
+      ['layer-b1', 'layer-q1', 'layer-b2', 'layer-q2', 'layer-o1'].forEach(function (id) {
+        equal(blockById(win, id), null,
+          id + ' must be collapsed when its heading layer is focused.');
+      });
       collapseAll.click();
       assert(blockById(win, 'layer-h1'), 'The focused heading itself must stay visible.');
-      ['layer-b1', 'layer-q1', 'layer-b2', 'layer-q2', 'layer-o1'].forEach(function (id) {
-        equal(blockById(win, id), null, id + ' must be hidden by collapse all.');
-      });
       expandAll.click();
       ['layer-b1', 'layer-q1', 'layer-b2', 'layer-q2', 'layer-o1'].forEach(function (id) {
         assert(blockById(win, id), id + ' must return after expand all.');

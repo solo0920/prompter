@@ -69,11 +69,11 @@
   Marker and plain text starts at 0. Composers align with the prior block; Markdown order and
   text stay unchanged; indented blocks remain inside the canvas at 360 px.
 - Layer focus: the rail's second button opens a seven-layer toolbar; choosing a layer edits its
-  first block, dims and locks other layers, hides the composer, and lets Up/Down cycle only that
-  layer's blocks in edit mode with full selection. `全部收合`/`全部展開` collapse or restore the
-  active layer's sections, or the whole document when no layer is active. Repeating the layer,
-  closing the toolbar, or switching documents restores normal interaction without changing
-  Markdown, Preview, or Copy.
+  first block, automatically collapses that layer's child items, dims and locks other layers,
+  hides the composer, and lets Up/Down cycle only that layer's blocks in edit mode with full
+  selection. `全部收合`/`全部展開` collapse or restore the active layer's sections, or the whole
+  document when no layer is active. Repeating the layer, closing the toolbar, or switching
+  documents restores normal interaction without changing Markdown, Preview, or Copy.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and

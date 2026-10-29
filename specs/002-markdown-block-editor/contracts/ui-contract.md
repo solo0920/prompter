@@ -212,9 +212,10 @@ Each image block shows:
 - A second rail button below `文件目錄` opens a vertical toolbar with seven buttons in this order:
   `#`, `##`, `###`, `-`, `1.`, `>`, `.`, followed by `全部收合` and `全部展開` actions. The toggle
   exposes `aria-expanded`; toolbar buttons expose `aria-pressed`.
-- Activating a layer makes every text block with that Marker the active layer and starts editing
-  the first match with all text selected. Matching blocks keep normal styling; blocks of other
-  layers and image blocks are dimmed, locked, and cannot be selected or focused.
+- Activating a layer makes every text block with that Marker the active layer, starts editing
+  the first match with all text selected, and automatically collapses each matching block that
+  has child items. Matching headers remain visible; blocks of other layers and image blocks are
+  dimmed, locked, and cannot be selected or focused.
 - While a layer is active, Up/Down moves only through matching blocks, commits the current edit,
   and reopens the destination in edit mode with all text selected, wrapping at the ends.
 - `全部收合` collapses every collapsible block in the active layer without hiding that layer's own

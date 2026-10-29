@@ -472,10 +472,25 @@
       }
     }
     layerFilter = next;
+    var autoCollapsed = 0;
+    if (next) {
+      var autoOrdered = Model.normalizeSequence(state.document);
+      var autoModel = collapseModelForDocument(state.document, autoOrdered);
+      var autoSet = collapseSetFor(state.document);
+      autoOrdered.forEach(function (block) {
+        if (blockMatchesLayer(block) && autoModel.hasChildren[block.id]) {
+          if (!autoSet[block.id]) {
+            autoCollapsed += 1;
+          }
+          autoSet[block.id] = true;
+        }
+      });
+    }
     clearSelection();
     render();
     if (next) {
-      announce('已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length + ' 個項目。');
+      announce('已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length + ' 個項目' +
+        (autoCollapsed ? '，子項目已收合。' : '。'));
       beginEditing(matches[0].id);
     } else {
       ensureInitialComposer(state);

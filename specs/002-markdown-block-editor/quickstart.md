@@ -216,13 +216,14 @@ opens the Marker flyout without showing a grab cursor.
 1. Confirm a second rail button with a `#` icon sits below `文件目錄`. Activate it and confirm a
    vertical toolbar lists `#`, `##`, `###`, `-`, `1.`, `>`, `.` plus `全部收合` and `全部展開`.
 2. With a document containing headings, bullets, and quotes, choose `>`. Confirm the first quote
-   opens in edit mode with all text selected, other layers turn gray and cannot be clicked or
-   focused, and the composer is hidden.
+   opens in edit mode with all text selected, that quote's child items are already collapsed,
+   other layers turn gray and cannot be clicked or focused, and the composer is hidden.
 3. Press Down/Up repeatedly. Confirm editing moves only between quote blocks with first/last
    wrap, and every destination opens in edit mode with all text selected.
-4. Choose `#`, press `全部收合`, and confirm only the `#` headers remain visible in that layer;
-   press `全部展開` and confirm their content returns dimmed. Choose `#` again, close the toolbar,
-   or switch tabs and confirm all blocks return to normal interaction without any Markdown change.
+4. Choose `#` and confirm its child items are automatically collapsed while the `#` headers stay
+   visible. Press `全部展開` and confirm their content returns dimmed. Choose `#` again, close
+   the toolbar, or switch tabs and confirm all blocks return to normal interaction without any
+   Markdown change.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
