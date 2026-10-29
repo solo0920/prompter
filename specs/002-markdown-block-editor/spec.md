@@ -399,8 +399,9 @@ settings panel and clear the local library after confirming the warning.
   pressing Enter/Space MUST also open it for keyboard and touch input. The upper row MUST show
   `×`, `1.`, `>`, `.` and the lower row MUST show `-`, `#`, `##`, `###`. A hover-opened flyout
   MUST remain open while the pointer is over the Marker or the flyout, including while crossing
-  the gap between them, and MUST close after the pointer leaves both areas, chooses an option,
-  presses Escape or Tab, or clicks outside. The left Marker area MUST NOT show a grab cursor;
+  the gap between them, and MUST close immediately, with no close timer, once the pointer leaves
+  both the Marker and the connecting hover corridor. It MUST also close after choosing an option,
+  pressing Escape or Tab, or clicking outside. The left Marker area MUST NOT show a grab cursor;
   the right side of the block retains the drag cursor and drag handle. Choosing an option MUST
   return focus to the composer text input and preserve its caret or selection.
 - **FR-019**: When the user types a recognized Marker followed by a space in an input box, the

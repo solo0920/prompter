@@ -256,6 +256,7 @@ across all stories.
 - [x] T090 Use text-sized SVG chevrons for collapse controls and move the Marker menu above the active title block as a two-row panel (`× 1. > .` over `- # ## ###`) with grid arrow-key navigation so it never covers the collapse control; center it on the Marker when there is room and align its left edge to the page edge when centering would clip.
 - [x] T091 Give every Marker a fixed indentation level (`#`=0, `##`=1, `###`=2, `-`=3, `1.`=4, `>`=5, `.`=6), with unmarked content one level lower and plain text starting at 0. Keep Markdown order/text unchanged, align composers with the prior block, and shrink indented block widths so they stay inside the 360 px canvas.
 - [x] T092 Version the local CSS and JavaScript URLs so reloading from `file://` after an update cannot keep using a stale cached script; document that the version query must be bumped with future asset edits.
+- [x] T093 Remove the Marker menu close delay: keep the hover-opened panel while the pointer is over the Marker, panel, or connecting corridor, and close it immediately once the pointer leaves that region.
 
 ---
 

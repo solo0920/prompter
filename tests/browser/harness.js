@@ -2994,9 +2994,8 @@
         'Hovering the right side must set the right hover state.');
       equal(win.getComputedStyle(element).cursor, 'grab',
         'The right side must keep the grab cursor.');
-      return waitFor(function () {
-        return win.document.querySelector('.marker-menu') ? null : true;
-      }, 2000);
+      equal(win.document.querySelector('.marker-menu'), null,
+        'The hover menu must close immediately after leaving the Marker area.');
     });
   });
 

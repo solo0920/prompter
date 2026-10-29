@@ -16,7 +16,6 @@
   var objectUrls = {};
   var currentDocumentId = null;
   var markerMenu = null;
-  var markerCloseTimer = null;
   var measureCanvas = null;
   var dragState = null;
   var marqueeState = null;
@@ -449,26 +448,27 @@
       return false;
     }
     var margin = 10;
-    return pointerNearRect(event, markerMenu.anchor.getBoundingClientRect(), margin) ||
-      pointerNearRect(event, markerMenu.element.getBoundingClientRect(), margin);
-  }
-
-  function cancelMarkerMenuClose() {
-    if (markerCloseTimer !== null) {
-      global.clearTimeout(markerCloseTimer);
-      markerCloseTimer = null;
+    var anchorRect = markerMenu.anchor.getBoundingClientRect();
+    var menuRect = markerMenu.element.getBoundingClientRect();
+    if (pointerNearRect(event, anchorRect, margin) ||
+        pointerNearRect(event, menuRect, margin)) {
+      return true;
     }
-  }
-
-  function scheduleMarkerMenuClose() {
-    cancelMarkerMenuClose();
-    if (!markerMenu || !markerMenu.hoverOpened) {
-      return;
+    var bridgeTop;
+    var bridgeBottom;
+    if (menuRect.bottom <= anchorRect.top) {
+      bridgeTop = menuRect.bottom - margin;
+      bridgeBottom = anchorRect.top + margin;
+    } else if (anchorRect.bottom <= menuRect.top) {
+      bridgeTop = anchorRect.bottom - margin;
+      bridgeBottom = menuRect.top + margin;
+    } else {
+      return false;
     }
-    markerCloseTimer = global.setTimeout(function () {
-      markerCloseTimer = null;
-      closeMarkerMenu();
-    }, 180);
+    return event.clientY >= bridgeTop &&
+      event.clientY <= bridgeBottom &&
+      event.clientX >= Math.min(menuRect.left, anchorRect.left) - margin &&
+      event.clientX <= Math.max(menuRect.right, anchorRect.right) + margin;
   }
 
   function clearBlockHover() {
@@ -482,12 +482,8 @@
     if (dragState || event.pointerType === 'touch') {
       return;
     }
-    if (markerMenu && markerMenu.hoverOpened) {
-      if (pointerOverMarkerUi(event)) {
-        cancelMarkerMenuClose();
-      } else {
-        scheduleMarkerMenuClose();
-      }
+    if (markerMenu && markerMenu.hoverOpened && !pointerOverMarkerUi(event)) {
+      closeMarkerMenu();
     }
     var target = event.target;
     var block = target && target.closest ? target.closest('.block') : null;
@@ -627,12 +623,6 @@
         return;
       }
       openHoverMenu();
-    });
-    anchor.addEventListener('pointerleave', function (event) {
-      if (event.pointerType === 'touch') {
-        return;
-      }
-      scheduleMarkerMenuClose();
     });
   }
 
@@ -2949,7 +2939,6 @@
     var opts = options || {};
     var focusMenu = opts.focusMenu !== false;
     var hoverOpened = opts.hoverOpened === true;
-    cancelMarkerMenuClose();
     if (markerMenu && markerMenu.anchor === anchor) {
       if (focusMenu) {
         markerMenu.hoverOpened = false;
@@ -3042,12 +3031,6 @@
     if (onToggle) {
       onToggle(true);
     }
-    menu.addEventListener('pointerenter', function () {
-      cancelMarkerMenuClose();
-    });
-    menu.addEventListener('pointerleave', function () {
-      scheduleMarkerMenuClose();
-    });
     var items = Array.prototype.slice.call(menu.querySelectorAll('.marker-menu-item'));
     var checked = menu.querySelector('[aria-checked="true"]') || items[0];
     if (focusMenu && checked) {
@@ -3134,10 +3117,8 @@
 
   function closeMarkerMenu() {
     if (!markerMenu) {
-      cancelMarkerMenuClose();
       return;
     }
-    cancelMarkerMenuClose();
     var menu = markerMenu;
     markerMenu = null;
     global.document.removeEventListener('keydown', onMarkerEscape, true);
@@ -3686,8 +3667,18 @@
     canvas.addEventListener('keydown', handleCanvasDeleteKeydown);
     canvas.addEventListener('keydown', handleCanvasTabKeydown);
     global.document.addEventListener('pointermove', handleBlockHover);
-    global.document.addEventListener('pointerleave', clearBlockHover);
-    global.addEventListener('pointerleave', clearBlockHover);
+    global.document.addEventListener('pointerleave', function () {
+      clearBlockHover();
+      if (markerMenu && markerMenu.hoverOpened) {
+        closeMarkerMenu();
+      }
+    });
+    global.addEventListener('pointerleave', function () {
+      clearBlockHover();
+      if (markerMenu && markerMenu.hoverOpened) {
+        closeMarkerMenu();
+      }
+    });
     canvas.addEventListener('pointerup', function (event) {
       if (event.pointerType === 'touch' && !dragState) {
         var block = event.target.closest ? event.target.closest('.block') : null;

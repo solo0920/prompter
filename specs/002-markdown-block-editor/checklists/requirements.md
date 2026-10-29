@@ -96,8 +96,8 @@
   while the right side retains the grab cursor and add control; the flyout sits above the active
   title block, centers on the Marker when space allows, and otherwise aligns to the page edge so
   the whole two-row `× 1. > .` / `- # ## ###` panel stays visible; hover flyouts stay open while
-  the pointer is over the Marker or flyout, then close after leaving both, selecting, Escape/Tab,
-  or an outside click.
+  the pointer is over the Marker, panel, or connecting corridor, then close immediately with no
+  timer after leaving it, selecting, Escape/Tab, or an outside click.
 - Workspace checks: the right-side live preview opens by default for new, opened, and restored
   documents, refreshes after edits and tab switches without hiding the canvas, and stays closed
   after the user closes it; document tabs open, switch, keep their active title editable, close

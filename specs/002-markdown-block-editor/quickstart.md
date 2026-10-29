@@ -138,8 +138,8 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
    active title block: `× 1. > .` on top and `- # ## ###` below. Confirm the panel centers on
    the Marker when there is room, and that it shifts to the left page edge instead of being
    clipped when the Marker is near the left side. Move the pointer into the panel and pause;
-   confirm it stays open. Move the pointer away and confirm it closes; reopen it, choose `.`,
-   type `literal`, and press Enter.
+   confirm it stays open. Move the pointer away and confirm it closes immediately without a
+   delay; reopen it, choose `.`, type `literal`, and press Enter.
 8. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
    shows `##`; press Enter.
 9. Press Enter in an empty composer; confirm nothing is created.
