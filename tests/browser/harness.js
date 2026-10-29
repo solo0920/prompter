@@ -1756,6 +1756,65 @@
     });
   });
 
+  test('US1 right-side delete removes a block and Cmd+Z restores it', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['Alpha', 'Beta', 'Gamma']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var before = win.Prompter.markdown.serializeDocument(state.document);
+      state.dirty = false;
+      var element = blockById(win, ids[1]);
+      var rect = element.getBoundingClientRect();
+      element.dispatchEvent(new win.PointerEvent('pointermove', {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 31,
+        pointerType: 'mouse',
+        clientX: rect.right - 6,
+        clientY: rect.top + rect.height / 2
+      }));
+      assert(element.classList.contains('hover-right'));
+      var remove = element.querySelector('.block-delete');
+      var plus = element.querySelector('.block-plus');
+      assert(remove, 'A text block must expose a delete control.');
+      equal(remove.getAttribute('aria-label'), '刪除區塊');
+      equal(win.getComputedStyle(remove).opacity, '1',
+        'The delete control must appear on right-side hover.');
+      assert(remove.getBoundingClientRect().bottom <=
+        plus.getBoundingClientRect().top + 1,
+      'The delete control must sit above the add control.');
+
+      remove.click();
+      equal(state.document.blocks.length, 2);
+      equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
+        'Alpha,Gamma');
+
+      var undoEvent = new win.KeyboardEvent('keydown', {
+        key: 'z', code: 'KeyZ', metaKey: true, bubbles: true, cancelable: true
+      });
+      byId(win, 'canvas').dispatchEvent(undoEvent);
+      equal(undoEvent.defaultPrevented, true,
+        'Cmd+Z outside an input must be handled by the editor.');
+      equal(state.document.blocks.length, 3,
+        'Undo must restore the deleted block.');
+      equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
+        'Alpha,Beta,Gamma');
+      equal(win.Prompter.markdown.serializeDocument(state.document), before,
+        'Undo must restore the exact Markdown content.');
+
+      var content = blockById(win, ids[0]).querySelector('.block-content');
+      content.dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
+      var editInput = blockById(win, ids[0]).querySelector('.block-edit-input');
+      assert(editInput, 'The block editor must open for the native undo check.');
+      var nativeUndo = new win.KeyboardEvent('keydown', {
+        key: 'z', code: 'KeyZ', metaKey: true, bubbles: true, cancelable: true
+      });
+      editInput.dispatchEvent(nativeUndo);
+      equal(nativeUndo.defaultPrevented, false,
+        'Cmd+Z inside a text input must remain available for native text undo.');
+    });
+  });
+
   test('US1 empty editing removes only the edited block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
@@ -2072,6 +2131,7 @@
       var refreshed = blockById(win, ids[0]);
       var marker = refreshed.querySelector('.block-marker');
       var plus = refreshed.querySelector('.block-plus');
+      var remove = refreshed.querySelector('.block-delete');
       var handle = refreshed.querySelector('.drag-handle');
       equal(win.document.activeElement, marker,
         'The second Tab stop must be the title area.');
@@ -2083,8 +2143,11 @@
       equal(win.document.activeElement, handle,
         'The third Tab stop must be the drag handle.');
       press(win, handle, 'Tab');
+      equal(win.document.activeElement, remove,
+        'Tab must reach the delete control.');
+      press(win, remove, 'Tab');
       equal(win.document.activeElement, plus,
-        'Tab must continue through the remaining block controls.');
+        'Tab must continue to the add control.');
       press(win, plus, 'Tab');
       equal(win.document.activeElement, refreshed,
         'Tab must wrap back to the block root.');
@@ -2294,6 +2357,7 @@
       bElement = blockById(win, bId);
       var marker = bElement.querySelector('.block-marker');
       var plus = bElement.querySelector('.block-plus');
+      var remove = bElement.querySelector('.block-delete');
       var handle = bElement.querySelector('.drag-handle');
       equal(win.document.activeElement, marker,
         'The second Tab stop must be the selected block title area.');
@@ -2301,6 +2365,9 @@
       equal(win.document.activeElement, handle,
         'The third Tab stop must be the selected block drag handle.');
       press(win, handle, 'Tab');
+      equal(win.document.activeElement, remove,
+        'Tab must reach the selected block delete control.');
+      press(win, remove, 'Tab');
       equal(win.document.activeElement, plus,
         'Tab must stay within the selected block.');
       press(win, plus, 'Tab');
@@ -3280,6 +3347,20 @@
         equal(state.document.blocks.length, 0);
         equal(state.assets.length, 0);
         assert(composerInput(win), 'Removing the last image must restore the composer.');
+
+        var undo = new win.KeyboardEvent('keydown', {
+          key: 'z', code: 'KeyZ', metaKey: true, bubbles: true, cancelable: true
+        });
+        byId(win, 'canvas').dispatchEvent(undo);
+        equal(undo.defaultPrevented, true);
+        equal(state.document.blocks.length, 1,
+          'Undo must restore the removed image block.');
+        equal(state.document.blocks[0].type, 'image');
+        equal(state.assets.length, 1,
+          'Undo must restore the image asset.');
+        var restored = blockById(win, state.document.blocks[0].id);
+        assert(restored && restored.querySelector('img.block-image'),
+          'The restored image must render again.');
       });
     });
   });

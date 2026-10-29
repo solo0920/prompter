@@ -27,6 +27,10 @@
   var activeCollapse = null;
   var layerFilter = null;
   var layerToolbarOpen = false;
+  var historyStack = [];
+  var lastHistory = null;
+  var restoringHistory = false;
+  var HISTORY_LIMIT = 50;
   var collapsedByDocument = typeof global.WeakMap === 'function' ? new global.WeakMap() : null;
   var collapsedFallback = {};
 
@@ -104,6 +108,115 @@
     if (app) {
       app.setDirty(true);
     }
+  }
+
+  function cloneJson(value) {
+    return value === undefined || value === null ? value : JSON.parse(JSON.stringify(value));
+  }
+
+  function historyKey(document) {
+    return document ? Markdown.serializeDocument(document) : '';
+  }
+
+  function captureHistoryState(state, key) {
+    var document = state.document;
+    return {
+      documentId: document.id,
+      key: key,
+      blocks: cloneJson(document.blocks || []),
+      leadingBlankLines: document.leadingBlankLines,
+      trailingBlankLines: document.trailingBlankLines,
+      trailingNewline: document.trailingNewline,
+      layoutVersion: document.layoutVersion,
+      assets: (state.assets || []).slice(),
+      selectedBlockIds: selectedBlockIds(state).slice(),
+      selectedBlockId: state.selectedBlockId,
+      composer: cloneJson(state.composer),
+      dirty: state.dirty === true
+    };
+  }
+
+  function resetHistory() {
+    historyStack = [];
+    lastHistory = null;
+  }
+
+  function noteHistory(state) {
+    if (!state || !state.document) {
+      resetHistory();
+      return;
+    }
+    var key = historyKey(state.document);
+    if (!lastHistory || lastHistory.documentId !== state.document.id) {
+      historyStack = [];
+      lastHistory = captureHistoryState(state, key);
+      return;
+    }
+    if (key !== lastHistory.key) {
+      if (!restoringHistory) {
+        historyStack.push(lastHistory);
+        if (historyStack.length > HISTORY_LIMIT) {
+          historyStack.shift();
+        }
+      }
+      lastHistory = captureHistoryState(state, key);
+      return;
+    }
+    lastHistory.assets = (state.assets || []).slice();
+    lastHistory.selectedBlockIds = selectedBlockIds(state).slice();
+    lastHistory.selectedBlockId = state.selectedBlockId;
+    lastHistory.composer = cloneJson(state.composer);
+    lastHistory.dirty = state.dirty === true;
+  }
+
+  function undoLastAction() {
+    var state = getState();
+    if (!state || !state.document || !historyStack.length || state.fileBusy) {
+      return false;
+    }
+    var snapshot = historyStack[historyStack.length - 1];
+    if (snapshot.documentId !== state.document.id) {
+      resetHistory();
+      return false;
+    }
+    historyStack.pop();
+    var document = state.document;
+    restoringHistory = true;
+    try {
+      document.blocks = cloneJson(snapshot.blocks || []);
+      document.leadingBlankLines = snapshot.leadingBlankLines || 0;
+      document.trailingBlankLines = snapshot.trailingBlankLines || 0;
+      document.trailingNewline = snapshot.trailingNewline !== false;
+      document.layoutVersion = snapshot.layoutVersion || 2;
+      state.assets = (snapshot.assets || []).slice();
+      state.composer = cloneJson(snapshot.composer);
+      state.selectedBlockIds = (snapshot.selectedBlockIds || []).slice();
+      state.selectedBlockId = snapshot.selectedBlockId || null;
+      state.editingBlockId = null;
+      editDraft = null;
+      var app = getApp();
+      if (app && typeof app.setDirty === 'function') {
+        app.setDirty(snapshot.dirty === true);
+      }
+      render();
+      lastHistory = captureHistoryState(state, historyKey(document));
+    } finally {
+      restoringHistory = false;
+    }
+    schedulePreviewRefresh();
+    var target = state.selectedBlockId ? blockElement(state.selectedBlockId) : null;
+    if (target) {
+      target.focus();
+    } else if (state.composer) {
+      focusComposer();
+    } else {
+      var canvas = getCanvas();
+      if (canvas) {
+        canvas.focus();
+      }
+    }
+    announce('已復原上一步動作。');
+    return true;
   }
 
   function schedulePreviewRefresh() {
@@ -767,7 +880,7 @@
     var side;
     if (target.closest('.block-marker')) {
       side = 'left';
-    } else if (target.closest('.block-plus, .drag-handle, .block-remove')) {
+    } else if (target.closest('.block-plus, .block-delete, .drag-handle, .block-remove')) {
       side = 'right';
     } else {
       side = event.clientX < rect.left + rect.width / 2 ? 'left' : 'right';
@@ -1099,14 +1212,16 @@
     });
     element.appendChild(plus);
 
-    if (block.type === 'image') {
-      var remove = createButton('block-remove', '移除圖片', '×');
-      remove.addEventListener('click', function (event) {
-        event.stopPropagation();
-        removeImageBlock(block.id);
-      });
-      element.appendChild(remove);
-    }
+    var remove = createButton(
+      'block-delete' + (block.type === 'image' ? ' block-remove' : ''),
+      block.type === 'image' ? '移除圖片' : '刪除區塊',
+      '×'
+    );
+    remove.addEventListener('click', function (event) {
+      event.stopPropagation();
+      removeSingleBlock(block.id);
+    });
+    element.appendChild(remove);
 
     var handle = createButton('drag-handle', '拖曳區塊', '⠿');
     handle.addEventListener('pointerdown', function (event) {
@@ -1378,6 +1493,7 @@
         empty.hidden = false;
       }
       updateLayerToolbar();
+      resetHistory();
       updateCanvasSize();
       return;
     }
@@ -1426,6 +1542,7 @@
         }
       }
     }
+    noteHistory(state);
   }
 
   function refreshSelectionDom() {
@@ -2311,7 +2428,8 @@
     if (element.classList.contains('block-plus')) {
       return 'plus';
     }
-    if (element.classList.contains('block-remove')) {
+    if (element.classList.contains('block-delete') ||
+        element.classList.contains('block-remove')) {
       return 'remove';
     }
     if (element === block) {
@@ -2346,7 +2464,7 @@
     } else if (zone === 'plus') {
       selector = '.block-plus';
     } else if (zone === 'remove') {
-      selector = '.block-remove';
+      selector = '.block-delete, .block-remove';
     }
     var target = zone === 'root' ? block : (selector ? block.querySelector(selector) : null);
     if (!target) {
@@ -2982,17 +3100,21 @@
     }
   }
 
-  function removeImageBlock(blockId) {
+  function removeSingleBlock(blockId) {
     var state = getState();
     var block = findBlock(blockId);
-    if (!state || !block || block.type !== 'image') {
-      return;
+    if (!state || !state.document || !block) {
+      return false;
     }
-    var assetId = block.assetId;
-    removeBlockFromDocument(state.document, blockId);
-    releaseUnusedAsset(state, assetId);
-    markDirty();
+    var assetIds = block.type === 'image' && block.assetId ? [block.assetId] : [];
+    if (!removeBlockFromDocument(state.document, blockId)) {
+      return false;
+    }
+    assetIds.forEach(function (assetId) {
+      releaseUnusedAsset(state, assetId);
+    });
     removeFromSelection(blockId);
+    markDirty();
     render();
     if (state.document.blocks.length === 0) {
       ensureInitialComposer(state);
@@ -3004,6 +3126,8 @@
         canvas.focus();
       }
     }
+    announce('已刪除區塊。');
+    return true;
   }
 
   function removeSelectedBlocks() {
@@ -3586,7 +3710,8 @@
     if (node.classList.contains('drag-handle')) {
       return 4;
     }
-    if (node.classList.contains('block-remove')) {
+    if (node.classList.contains('block-delete') ||
+        node.classList.contains('block-remove')) {
       return 5;
     }
     if (node.classList.contains('block-plus')) {
@@ -3901,8 +4026,29 @@
     return true;
   }
 
-  function handleCanvasClick(event) {
-    if (consumeCanvasClickSuppression()) {
+  function handleUndoKeydown(event) {
+    if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey) {
+      return;
+    }
+    if (!(event.metaKey || event.ctrlKey) || String(event.key).toLowerCase() !== 'z') {
+      return;
+    }
+    var target = event.target;
+    if (target && target.closest &&
+        (target.closest('input, textarea, select, [contenteditable="true"]') ||
+         target.isContentEditable)) {
+      return;
+    }
+    var state = getState();
+    if (!state || state.fileBusy || global.document.querySelector('dialog[open]')) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    undoLastAction();
+  }
+
+  function handleCanvasClick(event) {    if (consumeCanvasClickSuppression()) {
       return;
     }
     var target = event.target;
@@ -3986,6 +4132,7 @@
       return;
     }
     wireLayerToolbar();
+    global.document.addEventListener('keydown', handleUndoKeydown);
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('dblclick', handleCanvasDoubleClick);
     canvas.addEventListener('pointerdown', handleCanvasPointerDown);

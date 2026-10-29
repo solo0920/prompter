@@ -61,8 +61,8 @@ Current result (2026-10-30): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-30): Chrome **106 passing, 0 failing** (required gate). Firefox also
-reports 106 passing, 0 failing as the supplementary check.
+Current result (2026-10-30): Chrome **107 passing, 0 failing** (required gate). Firefox also
+reports 107 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-30)
 
@@ -72,8 +72,8 @@ unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 106/106 | PASS 106/106 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 106/106 | PASS 106/106 | Supplementary check; WebDriver run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 107/107 | PASS 107/107 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 107/107 | PASS 107/107 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -232,11 +232,17 @@ opens the Marker flyout without showing a grab cursor.
 2. Double-click again; change the text; press Escape. Confirm the original text returns.
 3. Double-click; clear all text; press Enter. Confirm the block disappears.
 4. Confirm the blank-line separation of surrounding blocks remains sensible.
-5. Confirm every block has a labeled `+` control, including image blocks.
+5. Confirm every block has a labeled `+` control and a delete control above it, including image
+   blocks; the delete control appears on right-side hover.
 6. Cmd-click two or more blocks and press Delete (or the macOS Delete key). Confirm every
    selected block disappears, the remaining blocks close their gaps, and the selection clears.
 7. Double-click a block and press Delete inside the editor; confirm it edits text instead of
    removing the block. Repeat in the composer.
+8. Hover the right side of a single block and activate the delete control above `+`. Confirm only
+   that block is removed. Press Cmd+Z outside the input and confirm the block returns in its
+   original position; repeat undo to walk back further document changes.
+9. With focus inside the composer or block editor, press Cmd+Z and confirm text undo remains
+   native instead of removing blocks or changing the document structure.
 
 ### 4. Drag and keyboard movement (US1, FR-023..FR-026, FR-049, SC-011)
 

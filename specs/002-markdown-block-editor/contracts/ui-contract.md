@@ -162,6 +162,8 @@ Each text block is a floating box showing:
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
   right half of the block is hovered or keyboard-focused, and always visible on touch devices.
+- A delete control above `+`, labeled `刪除區塊`, revealed with the same right-side hover/focus
+  behavior. Activating it removes only that block.
 - A selected/focus style with a visible outline. Multi-selected blocks use a bright orange
   highlight; the composer uses its own accent border only while its input or controls hold
   focus.
@@ -170,7 +172,7 @@ Each image block shows:
 
 - The image scaled to fit the canvas width, preserving aspect ratio.
 - The alternative text as the image's alt text (visually hidden if the image loads).
-- A remove button labeled `移除圖片`.
+- The shared delete control above `+`, labeled `移除圖片`, which also releases the image asset.
 - The same `+`, drag, select, and focus behavior as text blocks.
 - A missing-image placeholder with the alt text when the asset cannot be loaded.
 
@@ -315,6 +317,10 @@ Each image block shows:
 - Plain Up/Down have priority even while a block is in edit mode: they commit the current edit
   and continue into the adjacent item, and a text-block destination stays in edit mode with all
   text selected. Tab continues to the current block's title/Marker control.
+- Cmd+Z (macOS) or Ctrl+Z (Windows) outside a text input undoes the most recent document-changing
+  action, up to 50 steps for the active document. It restores the previous blocks, markers,
+  ordering, image assets, selection, and dirty state. Inside the composer or block editor,
+  Cmd/Ctrl+Z remains native text undo.
 - Space/Enter on the title/Marker control opens the symbol-only flyout; Down/Up on the focused
   title/Marker also enters an already-open flyout. Once inside, Up/Down moves between the two
   rows, Left/Right moves within a row, and Enter/Space applies the focused option.

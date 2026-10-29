@@ -599,17 +599,35 @@ body {
     pointer-events: auto;
   }
 }
-.block-remove {
+.block-delete {
   position: absolute;
-  right: 5px;
-  top: 5px;
-  width: 26px;
-  height: 26px;
+  right: -9px;
+  bottom: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--danger);
+  font-size: 14px;
   line-height: 1;
+  box-shadow: var(--shadow-small);
+  z-index: 5;
+  opacity: 1;
+}
+.block-delete:hover { background: var(--danger-soft); }
+
+@media (hover: hover) {
+  .block-delete {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .block.hover-right .block-delete,
+  .block:focus-visible .block-delete,
+  .block-delete:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 .drag-handle {
   position: absolute;

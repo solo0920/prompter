@@ -129,6 +129,13 @@ and confirm the unsaved draft is not restored.
 21. **Given** any Marker, **Then** it uses its fixed indentation level: `#`=0, `##`=1,
     `###`=2, `-`=3, `1.`=4, `>`=5, `.`=6, with content one level below the last Marker; the
     Markdown order and text remain unchanged.
+22. **Given** a block, **When** the right side is hovered, **Then** a delete control appears
+    above the `+`; activating it removes only that block (and its image asset when applicable),
+    without changing other blocks.
+23. **Given** a document-changing action just completed, **When** the user presses Cmd/Ctrl+Z
+    outside a text input, **Then** the previous content state is restored, including its blocks,
+    markers, order, selection, and image assets. Repeated undo walks backward through up to 50
+    steps; native text undo remains active inside the composer and block editor.
 
 ---
 
@@ -583,6 +590,15 @@ settings panel and clear the local library after confirming the warning.
   documents MUST exit layer focus and restore normal block interaction. The composer MUST stay
   hidden during layer focus, and layer focus MUST NOT change Markdown content, Save, Preview, or
   Copy output.
+- **FR-055**: Every block MUST show a delete control on right-side hover/focus, positioned above
+  the `+` control. Activating it MUST remove only that block, and image deletion MUST also release
+  its asset when no longer referenced. Outside text inputs, Cmd+Z (macOS) or Ctrl+Z (Windows) MUST
+  undo the most recent document-changing action, restoring blocks, markers, ordering, blank
+  lines, image assets, selection, and dirty state from the previous content state. Undo MUST cover
+  at least insertion, deletion, text edits, Marker changes, and drag/keyboard reordering, retain
+  up to 50 steps for the active document, and reset when another document is opened or activated.
+  Cmd/Ctrl+Z inside the composer or a block editor MUST remain native text undo. View-only changes
+  such as selection, collapse, or layer focus MUST NOT consume an undo step.
 
 
 ### Key Entities *(include if feature involves data)*
