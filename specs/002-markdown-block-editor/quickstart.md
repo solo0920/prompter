@@ -202,8 +202,9 @@ opens the Marker flyout without showing a grab cursor.
    `0, 1, 1, 2, 3, 4, 2, 3, 0` 20 px units, so the quote and dot item are indented more than
    the bullet.
 2. Create `# 第一章`, its bullet, a quote, `### 子標題`, and another bullet. Confirm the heading
-   closes the deeper quote and returns to the shallower outline column, and the following bullet
-   indents from that heading rather than from the quote.
+   returns to the second indentation step and the following content indents from that heading.
+   Then add `## 後續標題` and confirm it returns to the first heading step rather than staying
+   level with `###`.
 3. Confirm Save, Preview, and Copy still output the same Markdown order and text, with no
    indentation characters added.
 4. Open the composer under `### 細項` and confirm it aligns with that section's content column.

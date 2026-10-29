@@ -1604,7 +1604,7 @@
     });
   });
 
-  test('US1 a higher-level heading outdents after a nested item', function () {
+  test('US1 headings keep fixed levels and outdent deeper items', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var Model = win.Prompter.model;
@@ -1616,20 +1616,39 @@
           Model.createTextBlock({ id: 'outdent-b1', marker: '-', text: '項目', seq: 2 }),
           Model.createTextBlock({ id: 'outdent-q1', marker: '>', text: '引言', seq: 3 }),
           Model.createTextBlock({ id: 'outdent-h3', marker: '###', text: '子標題', seq: 4 }),
-          Model.createTextBlock({ id: 'outdent-b2', marker: '-', text: '後續項目', seq: 5 })
+          Model.createTextBlock({ id: 'outdent-b2', marker: '-', text: '後續項目', seq: 5 }),
+          Model.createTextBlock({ id: 'outdent-h1b', marker: '#', text: '第二章', seq: 6 }),
+          Model.createTextBlock({ id: 'outdent-b3', marker: '-', text: '第二項目', seq: 7 }),
+          Model.createTextBlock({ id: 'outdent-h3b', marker: '###', text: '第三層', seq: 8 }),
+          Model.createTextBlock({ id: 'outdent-h2b', marker: '##', text: '第二層', seq: 9 })
         ]
       }), [], { persisted: false });
       var base = win.Prompter.files.COLUMN_X;
-      equal(blockById(win, 'outdent-b1').style.left, (base + 20) + 'px',
-        'A bullet under # must indent one level.');
-      equal(blockById(win, 'outdent-q1').style.left, (base + 40) + 'px',
-        'A quote under the bullet must indent one more level.');
-      equal(blockById(win, 'outdent-h3').style.left, (base + 20) + 'px',
-        'A higher-level heading after the quote must return to its outline level.');
-      equal(blockById(win, 'outdent-b2').style.left, (base + 40) + 'px',
-        'Content after the heading must indent from that heading level.');
+      var expected = {
+        'outdent-h1': base,
+        'outdent-b1': base + 20,
+        'outdent-q1': base + 40,
+        'outdent-h3': base + 40,
+        'outdent-b2': base + 60,
+        'outdent-h1b': base,
+        'outdent-b3': base + 20,
+        'outdent-h3b': base + 40,
+        'outdent-h2b': base + 20
+      };
+      Object.keys(expected).forEach(function (id) {
+        equal(blockById(win, id).style.left, expected[id] + 'px',
+          id + ' must render at its outline level.');
+      });
+      equal(blockById(win, 'outdent-h3').style.left,
+        blockById(win, 'outdent-q1').style.left,
+        'A ### after a quote must return to its own level, not indent deeper.');
+      equal(blockById(win, 'outdent-h3b').style.left, (base + 40) + 'px',
+        '### must use the third-level column even without an explicit ## parent.');
+      equal(blockById(win, 'outdent-h2b').style.left, (base + 20) + 'px',
+        'A following ## must outdent to the second-level column.');
       equal(win.Prompter.markdown.serializeDocument(app.state.document),
-        '# 第一章\n- 項目\n> 引言\n### 子標題\n- 後續項目\n');
+        '# 第一章\n- 項目\n> 引言\n### 子標題\n- 後續項目\n' +
+        '# 第二章\n- 第二項目\n### 第三層\n## 第二層\n');
     });
   });
 

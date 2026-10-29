@@ -198,12 +198,12 @@ Each image block shows:
 ## Outline Indentation
 
 - The editor shows the Marker outline as horizontal indentation using the rank order `#`, `##`,
-  `###`, `-`, `1.`, `>`, `.`, then unmarked content and images. Each block nests under the
-  nearest open higher-ranked ancestor, with list, ordered, quote, and dot markers one step deeper
-  per rank.
-- A heading of a higher rank closes any deeper list, quote, or dot ancestors before it is placed.
-  A `###` following a `>` item therefore returns to its shallower outline column instead of
-  indenting further.
+  `###`, `-`, `1.`, `>`, `.`, then unmarked content and images. Headings use their fixed levels:
+  `#` at the base column, `##` one 20 px step right, and `###` two steps right even without an
+  explicit `##` parent. List, ordered, quote, and dot markers nest below the current heading
+  level, one step per rank.
+- A heading after a deeper list, quote, or dot item returns to its fixed heading column instead
+  of staying at the deeper item's indentation.
 - Content beneath a Marker aligns with the next nesting step, so it remains visually inside the
   current parent.
 - A new block of the same or higher rank closes the earlier nesting, so it and its following
