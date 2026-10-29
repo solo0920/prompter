@@ -29,6 +29,9 @@ package installation, or network. It is also the manual acceptance script for th
 
 There is no install, build, or dev-server command.
 
+Local CSS and JavaScript links carry a `?v=...` version query. Bump it after editing those files
+so a normal reload from `file://` cannot keep using a stale cached copy.
+
 ## Automated Checks
 
 ### Unit and contract tests (development only)

@@ -255,6 +255,7 @@ across all stories.
 - [x] T089 Add collapsible sections ranked `#` > `##` > `###` > `-` > `1.` > `>` > `.` > unmarked content: show a chevron outside the card at its left edge for blocks with lower-ranked descendants, hide the section from the canvas without changing Save, Preview, Copy, or Markdown, restore nested states on expansion, skip hidden blocks in keyboard navigation, move the composer after a collapsed section, and move hidden descendants with the section when dragging or using the drag handle's Up/Down keys.
 - [x] T090 Use text-sized SVG chevrons for collapse controls and move the Marker menu above the active title block as a two-row panel (`× 1. > .` over `- # ## ###`) with grid arrow-key navigation so it never covers the collapse control; center it on the Marker when there is room and align its left edge to the page edge when centering would clip.
 - [x] T091 Indent the Marker outline in the editor canvas: headings use fixed `#` levels (`#` base, `##` one step, `###` two steps) even without an explicit parent; list, ordered, quote, and dot markers step deeper per rank; a heading after a deeper item returns to its fixed heading column. Keep Markdown order/text unchanged, align composers with the section, and shrink indented block widths so they stay inside the 360 px canvas.
+- [x] T092 Version the local CSS and JavaScript URLs so reloading from `file://` after an update cannot keep using a stale cached script; document that the version query must be bumped with future asset edits.
 
 ---
 
