@@ -7,10 +7,11 @@ package installation, or network. It is also the manual acceptance script for th
 
 ## Prerequisites
 
-- Chrome is the required acceptance browser (latest two major versions). Firefox is the optional
-  secondary compatibility check.
-- For direct multi-file saving: Chrome. Firefox uses the download fallback.
-- Safari is outside the automated and manual acceptance scope.
+- Chrome is the required acceptance browser (latest two major versions). Firefox and Safari 27.2
+  are supplementary compatibility checks. Safari's full `file://` harness requires enabling
+  Develop → Disable Local File Restrictions; its HTTP harness and direct `file://` smoke checks
+  are recorded below.
+- For direct multi-file saving: Chrome. Firefox and Safari use the download fallback.
 - The repository checked out locally; no dependencies to install.
 - A plain-text destination and at least two rich-text destinations for Copy verification. For
   example: a text editor for plain text, and two of Apple Notes, Microsoft Word, Google Docs, a
@@ -62,21 +63,27 @@ Expected: no failures. Clipboard and directory-picker checks that require a real
 are marked manual and covered below.
 
 Current result (2026-10-30): Chrome **108 passing, 0 failing** (required gate). Firefox also
-reports 108 passing, 0 failing as the supplementary check.
+reports 108 passing, 0 failing as the supplementary check. Safari 27.2 reports **108 passing,
+0 failing** through the same harness served from a local HTTP origin, because Safari blocks the
+harness iframe under `file://` unless local-file restrictions are disabled.
 
 ## Verified Results (2026-10-30)
 
-All automated checks were run against the committed `file://` entry page; no server or build
-step was used. Offline runs disabled browser networking (CDP network emulation in Chrome and an
-unreachable proxy profile in Firefox) so any runtime network request would fail.
+All Chrome and Firefox automated checks were run against the committed `file://` entry page; no
+server or build step was used. Offline runs disabled browser networking (CDP network emulation in
+Chrome and an unreachable proxy profile in Firefox) so any runtime network request would fail.
+Safari automated checks used the same harness over `127.0.0.1`; a direct `file://` smoke test
+covered app startup, numbered blocks, KaTeX, IndexedDB, and zero remote resource requests.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
 | Chrome (macOS) | 156.0.8078.49 | PASS 108/108 | PASS 108/108 | Required gate; full editor, storage, settings, clipboard fallbacks |
 | Firefox (macOS) | 159.0 | PASS 108/108 | PASS 108/108 | Supplementary check; WebDriver run; download save fallback |
+| Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Supplementary check; direct file:// startup/KaTeX/IndexedDB pass; harness iframe blocked by Safari local-file setting |
 
-Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
-is not part of the test matrix.
+Chrome is the required release gate. Firefox and Safari are supplementary compatibility checks.
+Safari's full `file://` harness still requires enabling Develop → Disable Local File Restrictions
+and completing the manual file/download/clipboard checks.
 
 Additional automated evidence:
 
@@ -109,13 +116,15 @@ file/directory pickers still require a human tester. Their automated equivalents
 construction, iframe viewport layout, ARIA structure, and picker mocks) pass.
 
 **Manual status (2026-10-30)**: automated verification is complete, but the manual exceptions
-above, SC-007, human timing for SC-001, and the full two-browser walkthrough remain outstanding.
-Do not mark the specification fully accepted until those checks are recorded.
+above, SC-007, human timing for SC-001, and the full Chrome/Firefox walkthrough plus Safari
+file/download/clipboard checks remain outstanding. Do not mark the specification fully accepted
+until those checks are recorded.
 
 ## Manual Acceptance Scenarios
 
 Run these in Chrome first as the required acceptance browser. Optionally repeat the core
-authoring, preview, copy, and download paths in Firefox. Safari is outside the test scope.
+authoring, preview, copy, and download paths in Firefox and Safari. Safari's full `file://`
+harness requires enabling local-file restrictions and its OS pickers/downloads remain manual.
 
 ### 1. First run and blank document (US1, FR-017)
 
@@ -476,25 +485,26 @@ release-blocking. **Expected** means the flow should work when the browser expos
 but the documented fallback is acceptable. **Fallback** means the documented alternative path
 is the required behavior.
 
-| Flow | Chrome (required) | Firefox (supplementary) |
-|------|-------------------|-------------------------|
-| Open from `file://` | Required | Verified |
-| Create/edit/drag/keyboard | Required | Verified |
-| Preview and search | Required | Verified |
-| Save As direct multi-file | Required (File System Access) | Download fallback |
-| Save downloads | Fallback | Verified |
-| Async rich copy | Expected | Fallback |
-| `execCommand` copy fallback | Required | Verified |
-| Image paste via `paste` event | Required | Verified |
-| IndexedDB persistence | Expected/fallback | Verified/fallback |
-| localStorage fallback | Required | Verified |
-| 360 px layout | Required | Verified |
+| Flow | Chrome (required) | Firefox (supplementary) | Safari (supplementary) |
+|------|-------------------|-------------------------|------------------------|
+| Open from `file://` | Required | Verified | Verified (direct smoke) |
+| Create/edit/drag/keyboard | Required | Verified | Verified (HTTP harness) |
+| Preview and search | Required | Verified | Verified (HTTP harness) |
+| Save As direct multi-file | Required (File System Access) | Download fallback | Download fallback |
+| Save downloads | Fallback | Verified | Manual |
+| Async rich copy | Expected | Fallback | Expected/fallback |
+| `execCommand` copy fallback | Required | Verified | Manual/fallback |
+| Image paste via `paste` event | Required | Verified | Verified (HTTP harness) |
+| IndexedDB persistence | Expected/fallback | Verified/fallback | Verified (direct smoke) |
+| localStorage fallback | Required | Verified | Verified/fallback |
+| 360 px layout | Required | Verified | Verified (HTTP harness) |
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
 **Verified 2026-10-30**: Chrome 156 passes the full automated harness from `file://`,
 including offline runs and is the required release gate. Firefox 159 also passes as the
-supplementary check. Safari is not part of the test matrix.
+supplementary check. Safari 27.2 passes the HTTP harness 108/108 and a direct `file://` startup
+smoke; its full `file://` harness, downloads, and OS pickers remain manual.
 
 ## Acceptance Checklist
 

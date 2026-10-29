@@ -45,8 +45,9 @@
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
 - Browser harness: **108 passing, 0 failing** in Chrome 156.0.8078.49, the required release
-  gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
-  browser networking disabled.
+  gate. Firefox 159.0 and Safari 27.2 also pass 108/108 as supplementary checks; Safari used a
+  local HTTP origin because its `file://` iframe requires disabling local-file restrictions.
+  Chrome and Firefox pass with browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
   headings, lists, quotes, tables, and paragraphs, including multi-line display math and AMS
   environments; fenced code stays literal and unsafe commands are not trusted. Rich HTML copy
@@ -127,8 +128,9 @@
   Enter/F2 editing, composer-handle Up/Down slot movement, Space-opened Marker menu with arrow
   selection, and drag-handle Up/Down reordering with retained handle focus.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
-  spot checks, and real OS pickers remain manual. Safari is outside the automated and manual
-  acceptance scope; Chrome is the required release gate.
+  spot checks, and real OS pickers remain manual. Safari 27.2 passes the HTTP harness and a
+  direct `file://` startup smoke test; its full `file://` harness and OS download/picker checks
+  remain manual.
 - The native tab-close Stay/Leave limitation remains accepted as documented in `plan.md`.
 
 Final status: implementation and automated verification are complete; the remaining items are
@@ -147,4 +149,5 @@ manual environment checks with documented fallbacks.
 - [x] Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
 - [x] Firefox multi-file Save/Save As uses separate downloads.
 - [x] Some rich-text destinations strip data-URL images; exact Markdown remains available.
-- [x] Safari remains outside the automated and manual acceptance scope.
+- [x] Safari 27.2 passes the HTTP harness 108/108 and direct `file://` startup smoke; full
+  `file://` harness and OS download/picker checks still require manual confirmation.

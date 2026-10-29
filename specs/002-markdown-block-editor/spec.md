@@ -726,4 +726,5 @@ settings panel and clear the local library after confirming the warning.
   - Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
   - Firefox falls back to separate downloads for multi-file Save/Save As.
   - Some rich-text destinations strip data-URL images; exact Markdown remains available.
-  - Safari is outside the automated and manual acceptance scope.
+  - Safari 27.2 is supplementary: HTTP harness 108/108 and direct `file://` startup smoke pass;
+    full `file://` harness, downloads, and OS pickers remain manual.

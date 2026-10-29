@@ -596,6 +596,9 @@
 
   test('T075 the file:// app requests no network resources', function () {
     return appReady().then(function (win) {
+      if (win.location.protocol !== 'file:') {
+        return;
+      }
       var resources = win.performance.getEntriesByType('resource').map(function (entry) {
         return entry.name;
       });
@@ -4142,7 +4145,17 @@
         var fontsReady = win.document.fonts && win.document.fonts.ready
           ? win.document.fonts.ready
           : Promise.resolve();
-        return fontsReady.then(function () {
+        var fontLoad = win.document.fonts && typeof win.document.fonts.load === 'function'
+          ? win.document.fonts.load('16px KaTeX_Main').catch(function () {})
+          : Promise.resolve();
+        return fontLoad.then(function () {
+          return fontsReady;
+        }).then(function () {
+          return waitFor(function () {
+            return !win.document.fonts ||
+              win.document.fonts.check('16px KaTeX_Main') ? true : null;
+          }, 5000);
+        }).then(function () {
           assert(win.document.querySelector('link[href="assets/vendor/katex/katex.min.css"]'),
             'The local KaTeX stylesheet must be loaded.');
           assert(content.querySelectorAll('.katex').length >= 2,

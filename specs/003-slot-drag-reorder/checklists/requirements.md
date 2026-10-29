@@ -104,7 +104,8 @@
   selected. Tab cycles within the current block or composer item; and Up/Down on a drag handle
   reorders the block while retaining focus.
 - Verification: **105 unit tests** and **108 browser tests** pass in Chrome and Firefox,
-  online and offline.
+  online and offline. Safari 27.2 also passes 108/108 through the HTTP harness and a direct
+  `file://` startup smoke test.
 
 ## Notes
 
