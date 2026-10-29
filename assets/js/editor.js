@@ -3017,10 +3017,20 @@
       anchor.closest('.composer') ||
       anchor;
     var rect = row.getBoundingClientRect();
+    var markerRect = anchor.getBoundingClientRect();
     var menuWidth = menu.offsetWidth;
     var menuHeight = menu.offsetHeight;
-    var left = rect.left + (rect.width - menuWidth) / 2;
-    left = Math.max(8, Math.min(left, global.innerWidth - menuWidth - 8));
+    var left = markerRect.left + (markerRect.width - menuWidth) / 2;
+    var alignment = 'marker-center';
+    var pageLeft = 8;
+    var pageRight = global.innerWidth - menuWidth - 8;
+    if (left < pageLeft) {
+      left = pageLeft;
+      alignment = 'page-left';
+    } else if (left > pageRight) {
+      left = pageRight;
+      alignment = 'page-right';
+    }
     var top = rect.top - menuHeight - 8;
     var placement = 'above';
     if (top < 4) {
@@ -3029,7 +3039,7 @@
     }
     top = Math.max(4, Math.min(top, global.innerHeight - menuHeight - 4));
     menu.dataset.placement = placement;
-    menu.dataset.alignment = 'center';
+    menu.dataset.alignment = alignment;
     menu.style.left = Math.round(left) + 'px';
     menu.style.top = Math.round(top) + 'px';
     markerMenu = {

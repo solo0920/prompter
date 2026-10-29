@@ -393,15 +393,16 @@ settings panel and clear the local library after confirming the warning.
   in front of the block and included once in Markdown output. Block Markers MUST be visible
   without hover; when no Marker is set, the prefix MUST be blank with no `×` or text. Moving the
   pointer anywhere from the block's left border through the Marker prefix MUST open a
-  symbol-only two-row panel above the active title block, horizontally centered on that block.
-  Clicking or pressing Enter/Space MUST also open it for keyboard and touch input. The upper
-  row MUST show `×`, `1.`, `>`, `.` and the lower row MUST show `-`, `#`, `##`, `###`. A
-  hover-opened flyout MUST remain open while the pointer is over the Marker or the flyout,
-  including while crossing the gap between them, and MUST close after the pointer leaves both
-  areas, chooses an option, presses Escape or Tab, or clicks outside. The left Marker area MUST
-  NOT show a grab cursor; the right side of the block retains the drag cursor and drag handle.
-  Choosing an option MUST return focus to the composer text input and preserve its caret or
-  selection.
+  symbol-only two-row panel above the active title block. The panel MUST be horizontally centered
+  on the Marker when there is enough space; if centering would cross the left page edge, its left
+  edge MUST align with that page edge so the whole menu stays visible and clickable. Clicking or
+  pressing Enter/Space MUST also open it for keyboard and touch input. The upper row MUST show
+  `×`, `1.`, `>`, `.` and the lower row MUST show `-`, `#`, `##`, `###`. A hover-opened flyout
+  MUST remain open while the pointer is over the Marker or the flyout, including while crossing
+  the gap between them, and MUST close after the pointer leaves both areas, chooses an option,
+  presses Escape or Tab, or clicks outside. The left Marker area MUST NOT show a grab cursor;
+  the right side of the block retains the drag cursor and drag handle. Choosing an option MUST
+  return focus to the composer text input and preserve its caret or selection.
 - **FR-019**: When the user types a recognized Marker followed by a space in an input box, the
   Marker MUST be detected live and shown as a prefix; on commit it MUST become the block
   Marker without being duplicated in the block text.

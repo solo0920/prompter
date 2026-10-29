@@ -58,8 +58,8 @@ Current result (2026-10-29): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **103 passing, 0 failing** (required gate). Firefox also
-reports 103 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **104 passing, 0 failing** (required gate). Firefox also
+reports 104 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -69,8 +69,8 @@ unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 103/103 | PASS 103/103 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 103/103 | PASS 103/103 | Supplementary check; WebDriver run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 104/104 | PASS 104/104 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 104/104 | PASS 104/104 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -132,9 +132,11 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
 5. Type `- 限制一` and press Enter.
 6. Add another block and type `> 只輸出結果` and press Enter.
 7. Add another block, hover the Marker control, and confirm a two-row panel appears above the
-   active title block, horizontally centered on that block: `× 1. > .` on top and `- # ## ###`
-   below. Move the pointer into the panel and pause; confirm it stays open. Move the pointer
-   away and confirm it closes; reopen it, choose `.`, type `literal`, and press Enter.
+   active title block: `× 1. > .` on top and `- # ## ###` below. Confirm the panel centers on
+   the Marker when there is room, and that it shifts to the left page edge instead of being
+   clipped when the Marker is near the left side. Move the pointer into the panel and pause;
+   confirm it stays open. Move the pointer away and confirm it closes; reopen it, choose `.`,
+   type `literal`, and press Enter.
 8. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
    shows `##`; press Enter.
 9. Press Enter in an empty composer; confirm nothing is created.

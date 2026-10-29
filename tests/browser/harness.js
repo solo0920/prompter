@@ -898,9 +898,14 @@
         'The flyout must open above the title when there is room.');
       assert(menuRect.bottom <= blockRect.top + 0.5,
         'The flyout must sit above the active title block.');
-      assert(Math.abs((menuRect.left + menuRect.width / 2) -
-        (blockRect.left + blockRect.width / 2)) <= 1,
-      'The flyout must be horizontally centered on the active title block.');
+      equal(menu.dataset.alignment, 'page-left',
+        'A Marker near the left edge must align the flyout to the page edge.');
+      assert(Math.abs(menuRect.left - 8) <= 1,
+        'The left-clamped flyout must start at the page edge.');
+      var markerCenter = marker.getBoundingClientRect().left +
+        marker.getBoundingClientRect().width / 2;
+      assert(markerCenter >= menuRect.left && markerCenter <= menuRect.right,
+        'The Marker must remain inside the visible menu.');
       var firstRowTop = menu.querySelector('[data-marker="none"]')
         .getBoundingClientRect().top;
       var secondRowTop = menu.querySelector('[data-marker="-"]')
@@ -943,11 +948,15 @@
         'The composer flyout must open above the composer.');
       assert(composerMenuRect.bottom <= composerRect.top + 0.5,
         'The composer flyout must sit above the composer title row.');
-      equal(composerMenu.dataset.alignment, 'center',
-        'The composer flyout must use centered alignment.');
-      assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
-        (composerRect.left + composerRect.width / 2)) <= 1,
-      'The composer flyout must be horizontally centered on the composer.');
+      equal(composerMenu.dataset.alignment, 'page-left',
+        'A composer Marker near the left edge must clamp the flyout to the page edge.');
+      assert(Math.abs(composerMenuRect.left - 8) <= 1,
+        'The composer flyout must start at the page edge when clamped.');
+      var composerMarkerCenter = composerMarker.getBoundingClientRect().left +
+        composerMarker.getBoundingClientRect().width / 2;
+      assert(composerMarkerCenter >= composerMenuRect.left &&
+        composerMarkerCenter <= composerMenuRect.right,
+      'The composer Marker must remain inside the visible menu.');
       leave(composerMarker);
       var menuCenter = {
         x: composerMenuRect.left + composerMenuRect.width / 2,
@@ -977,7 +986,7 @@
     });
   });
 
-  test('US1 a wide block centers the Marker menu on its title card', function () {
+  test('US1 a wide block keeps the Marker menu inside the left page edge', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       var element = commitComposer(win, '- ' + '很長的項目文字'.repeat(20));
@@ -990,12 +999,10 @@
       var menu = win.document.querySelector('.marker-menu');
       assert(menu, 'Hovering the wide block Marker must open the menu.');
       var menuRect = menu.getBoundingClientRect();
-      var blockRect = element.getBoundingClientRect();
-      equal(menu.dataset.alignment, 'center',
-        'A wide block must use the same centered alignment as a short block.');
-      assert(Math.abs((menuRect.left + menuRect.width / 2) -
-        (blockRect.left + blockRect.width / 2)) <= 1,
-      'The wide-block menu must be centered on the active title card.');
+      equal(menu.dataset.alignment, 'page-left',
+        'A wide block near the left edge must clamp the menu to the page edge.');
+      assert(Math.abs(menuRect.left - 8) <= 1,
+        'The clamped menu must start at the page edge.');
       assert(menuRect.right <= win.innerWidth + 1,
         'The wide-block menu must stay inside the viewport.');
       win.Prompter.editor.closeMarkerMenu();
@@ -2848,6 +2855,41 @@
     });
   });
 
+  test('US1 centers the Marker menu on the Marker when there is room', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'marker-center-document',
+        title: '選單置中',
+        blocks: [
+          Model.createTextBlock({ id: 'center-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'center-h2', marker: '##', text: '第一節', seq: 2 }),
+          Model.createTextBlock({ id: 'center-h3', marker: '###', text: '細項', seq: 3 }),
+          Model.createTextBlock({ id: 'center-b1', marker: '-', text: '子項', seq: 4 })
+        ]
+      }), [], { persisted: false });
+      var marker = blockById(win, 'center-h3').querySelector('.block-marker');
+      marker.dispatchEvent(new win.PointerEvent('pointerenter', {
+        pointerId: 14,
+        pointerType: 'mouse',
+        bubbles: false
+      }));
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Hovering the indented Marker must open the menu.');
+      var menuRect = menu.getBoundingClientRect();
+      var markerRect = marker.getBoundingClientRect();
+      equal(menu.dataset.alignment, 'marker-center',
+        'An indented Marker with enough space must center the menu on itself.');
+      assert(Math.abs((menuRect.left + menuRect.width / 2) -
+        (markerRect.left + markerRect.width / 2)) <= 1,
+      'The menu centerline must align with the Marker centerline.');
+      assert(menuRect.left > 8,
+        'A truly centered menu must not be clamped to the page edge.');
+      win.Prompter.editor.closeMarkerMenu();
+    });
+  });
+
   test('US1 left border hover opens the Marker flyout without a grab cursor', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win, '##');
@@ -2878,9 +2920,9 @@
       equal(menu.dataset.placement, 'above');
       assert(menuRect.bottom <= rect.top + 0.5,
         'The flyout must sit above the active title block.');
-      assert(Math.abs((menuRect.left + menuRect.width / 2) -
-        (rect.left + rect.width / 2)) <= 1,
-      'The flyout must be horizontally centered on the active title block.');
+      equal(menu.dataset.alignment, 'page-left');
+      assert(Math.abs(menuRect.left - 8) <= 1,
+        'The flyout must align to the page edge when the Marker is near the left.');
 
       move(rect.right - 6, rect.top + rect.height / 2);
       equal(element.classList.contains('hover-right'), true,

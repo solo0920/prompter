@@ -126,16 +126,18 @@ The composer is the only input box that creates a new block.
   - Inserted via "+": dismiss the composer; no block.
   - Initial blank-document composer: keep it (a blank document always has an input).
 - Moving the pointer anywhere from the block's left border through the Marker prefix opens a
-  symbol-only two-row panel above the active title block and horizontally centers it on that
-  block. Clicking or pressing Enter/Space also opens it for keyboard and touch input. The left
-  side uses the default cursor, while the right side keeps the grab cursor and drag handle. The
-  upper row lists `×` (no Marker), `1.`, `>`, and `.`; the lower row lists `-`, `#`, `##`, and
-  `###`. Options have descriptive accessible names but no visible title text. Arrow Left/Right
-  and Up/Down navigate the grid, Home/End jump to the first/last option, Escape closes, and
-  selecting an option applies it, returns focus to the composer text input, and preserves the
-  caret or selection. A hover-opened flyout stays open while the pointer is over the Marker or
-  flyout, including the gap between them, and closes after the pointer leaves both areas,
-  chooses an option, presses Escape or Tab, or clicks outside.
+  symbol-only two-row panel above the active title block. The panel is horizontally centered on
+  the Marker when there is room; when centering would cross the left page edge, the panel's left
+  edge aligns with the page edge so every option remains visible and clickable. Clicking or
+  pressing Enter/Space also opens it for keyboard and touch input. The left side uses the default
+  cursor, while the right side keeps the grab cursor and drag handle. The upper row lists `×`
+  (no Marker), `1.`, `>`, and `.`; the lower row lists `-`, `#`, `##`, and `###`. Options have
+  descriptive accessible names but no visible title text. Arrow Left/Right and Up/Down navigate
+  the grid, Home/End jump to the first/last option, Escape closes, and selecting an option
+  applies it, returns focus to the composer text input, and preserves the caret or selection. A
+  hover-opened flyout stays open while the pointer is over the Marker or flyout, including the
+  gap between them, and closes after the pointer leaves both areas, chooses an option, presses
+  Escape or Tab, or clicks outside.
 - Typing a recognized marker token followed by exactly one space at the start shows a live
   detection label (for example `偵測到： ##`). On Enter the marker is stored once and removed
   from the text. If the user selects a different marker from the menu after typing, the menu
