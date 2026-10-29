@@ -160,11 +160,11 @@ Layers:
 - The Marker menu offers None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`. Typing a recognised
   Marker followed by one space shows a live detection label; on commit the prefix is stored
   once as the Marker and removed from the text. A typed prefix wins over a menu selection.
-- Double-click or Enter/F2 on a selected text block enters edit mode. Enter commits,
-  Shift+Enter inserts a line break, Escape cancels, and clicking outside commits. The editor
-  grows with its content like the composer. Clearing the text removes the block and transfers
-  its blank-line separation to the preceding block or document leading blanks. If the last
-  block is removed, the blank-document composer reappears.
+- Double-click, Tab into the text area, or press Enter/F2 on a selected text block to enter
+  edit mode. Enter commits, Shift+Enter inserts a line break, Escape cancels, and clicking
+  outside commits. The editor grows with its content like the composer. Clearing the text
+  removes the block and transfers its blank-line separation to the preceding block or document
+  leading blanks. If the last block is removed, the blank-document composer reappears.
 - Every block exposes a small lower-left "+" control. Image blocks also expose their image,
   a file-name-based alternative text, a remove control, and the same "+" and drag behavior.
 - Dragging uses Pointer Events and `requestAnimationFrame`, clamps the block inside the canvas,

@@ -1367,26 +1367,33 @@
       createSequence(win, ['A', 'B']);
       var ids = state.document.blocks.map(function (block) { return block.id; });
       var aElement = blockById(win, ids[0]);
-      var marker = aElement.querySelector('.block-marker');
-      var content = aElement.querySelector('.block-content');
-      var plus = aElement.querySelector('.block-plus');
-      var handle = aElement.querySelector('.drag-handle');
 
       aElement.focus();
       press(win, aElement, 'Tab');
-      equal(win.document.activeElement, content,
-        'The first Tab stop must be the block text area.');
-      press(win, content, 'Tab');
+      var editInput = blockById(win, ids[0]).querySelector('.block-edit-input');
+      assert(editInput, 'Tab into the block text area must start editing.');
+      equal(win.document.activeElement, editInput,
+        'The first Tab stop must start editing the block text area.');
+
+      press(win, editInput, 'Tab');
+      var refreshed = blockById(win, ids[0]);
+      var marker = refreshed.querySelector('.block-marker');
+      var plus = refreshed.querySelector('.block-plus');
+      var handle = refreshed.querySelector('.drag-handle');
       equal(win.document.activeElement, marker,
         'The second Tab stop must be the title area.');
+      assert(win.document.querySelector('.marker-menu'),
+        'Tabbing to the title area must open the Marker menu.');
       press(win, marker, 'Tab');
+      equal(win.document.querySelector('.marker-menu'), null,
+        'Tabbing away from the title area must close the Marker menu.');
       equal(win.document.activeElement, handle,
         'The third Tab stop must be the drag handle.');
       press(win, handle, 'Tab');
       equal(win.document.activeElement, plus,
         'Tab must continue through the remaining block controls.');
       press(win, plus, 'Tab');
-      equal(win.document.activeElement, aElement,
+      equal(win.document.activeElement, refreshed,
         'Tab must wrap back to the block root.');
 
       var composer = composerInput(win);
@@ -1407,7 +1414,36 @@
     });
   });
 
-  test('US1 Tab reaches the block text area and Enter starts editing', function () {
+  test('US1 Tab into the title area opens the Marker menu directly', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['Menu']);
+      var id = state.document.blocks[0].id;
+      var element = blockById(win, id);
+      element.focus();
+      press(win, element, 'Tab');
+      press(win, win.document.activeElement, 'Tab');
+      var marker = blockById(win, id).querySelector('.block-marker');
+      equal(win.document.activeElement, marker,
+        'Tab must focus the title area.');
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Tabbing to the title area must open the Marker menu directly.');
+      press(win, marker, 'ArrowDown');
+      var checked = menu.querySelector('[aria-checked="true"]');
+      equal(win.document.activeElement, checked,
+        'Down from the focused title area must enter the open menu.');
+      press(win, checked, 'ArrowDown');
+      equal(win.document.activeElement.dataset.marker, '#',
+        'Down must continue through the Marker options.');
+      press(win, win.document.activeElement, 'Escape');
+      equal(win.document.querySelector('.marker-menu'), null,
+        'Escape must close the Marker menu.');
+      equal(win.document.activeElement, marker,
+        'Escape must return focus to the title area.');
+    });
+  });
+
+  test('US1 Tab starts editing directly and Enter still starts editing', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       commitComposer(win, 'Edit through the text area');
@@ -1419,14 +1455,20 @@
 
       element.focus();
       press(win, element, 'Tab');
-      equal(win.document.activeElement, content,
-        'The first Tab must reach the block text area.');
-
-      press(win, content, 'Enter');
       var input = blockById(win, block.id).querySelector('.block-edit-input');
-      assert(input, 'Enter in the text area must start editing.');
+      assert(input, 'Tab into the text area must start editing directly.');
       equal(win.document.activeElement, input,
-        'The block editor must receive focus.');
+        'The block editor must receive focus directly from Tab.');
+      press(win, input, 'Escape');
+      assert(blockById(win, block.id), 'Escape must keep the block.');
+
+      content = blockById(win, block.id).querySelector('.block-content');
+      content.focus();
+      press(win, content, 'Enter');
+      input = blockById(win, block.id).querySelector('.block-edit-input');
+      assert(input, 'Enter in the focused text area must still start editing.');
+      equal(win.document.activeElement, input,
+        'The block editor must receive focus from Enter.');
       press(win, input, 'Escape');
       assert(blockById(win, block.id), 'Escape must keep the block.');
     });
@@ -1529,16 +1571,17 @@
       equal(win.Prompter.editor.getSelectedBlockId(), bId,
         'B must be selected before the Tab check.');
       var bElement = blockById(win, bId);
-      var marker = bElement.querySelector('.block-marker');
-      var content = bElement.querySelector('.block-content');
-      var plus = bElement.querySelector('.block-plus');
-      var handle = bElement.querySelector('.drag-handle');
-
       bElement.focus();
       press(win, bElement, 'Tab');
-      equal(win.document.activeElement, content,
-        'The first Tab stop must be the selected block text area.');
-      press(win, content, 'Tab');
+      var editInput = blockById(win, bId).querySelector('.block-edit-input');
+      assert(editInput, 'Tab into the selected block text area must start editing.');
+      equal(win.document.activeElement, editInput,
+        'The first Tab stop must edit the selected block text area.');
+      press(win, editInput, 'Tab');
+      bElement = blockById(win, bId);
+      var marker = bElement.querySelector('.block-marker');
+      var plus = bElement.querySelector('.block-plus');
+      var handle = bElement.querySelector('.drag-handle');
       equal(win.document.activeElement, marker,
         'The second Tab stop must be the selected block title area.');
       press(win, marker, 'Tab');
@@ -1557,8 +1600,9 @@
 
       byId(win, 'canvas').focus();
       press(win, byId(win, 'canvas'), 'Tab');
-      equal(win.document.activeElement, content,
-        'Tab from the canvas must enter the selected block text area.');
+      editInput = blockById(win, bId).querySelector('.block-edit-input');
+      equal(win.document.activeElement, editInput,
+        'Tab from the canvas must edit the selected block text area.');
     });
   });
 
@@ -1598,9 +1642,10 @@
       press(win, win.document.activeElement, 'Tab');
       equal(win.document.querySelector('.marker-menu'), null,
         'Tab from the Marker menu must close the menu.');
-      equal(win.document.activeElement,
-        blockById(win, aId).querySelector('.block-content'),
-        'Tab from the Marker menu must move to the text area.');
+      var menuTabTarget = blockById(win, aId).querySelector('.block-edit-input');
+      assert(menuTabTarget, 'Tab from the Marker menu must start editing the text area.');
+      equal(win.document.activeElement, menuTabTarget,
+        'Tab from the Marker menu must enter the block editor.');
 
       var handle = blockById(win, bId).querySelector('.drag-handle');
       handle.focus();

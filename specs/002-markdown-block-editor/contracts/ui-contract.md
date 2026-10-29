@@ -146,9 +146,10 @@ Each text block is a floating box showing:
 - The Marker prefix (if any) as a non-editable visual prefix that is also a button for changing
   the Marker. Markers are always visible without hover; when no Marker is set, the prefix is a
   blank clickable area with no `×` or text. The flyout opens when the pointer enters anywhere
-  from the block's left border through this prefix, on click, or on keyboard activation.
-- The text, wrapped visually and representing one or more Markdown lines. The text area is a
-  Tab stop; Enter/F2 while it is focused starts block editing.
+  from the block's left border through this prefix, on click, on keyboard activation, or when
+  Tab focus reaches it.
+- The text, wrapped visually and representing one or more Markdown lines. Tabbing to the text
+  area starts block editing directly; Enter/F2 while it is already focused also starts editing.
 - A drag handle/affordance (the block body when not editing, plus a visible handle on touch).
 - A small lower-right `+` button with accessible name `在此區塊下方新增`, revealed while the
   right half of the block is hovered or keyboard-focused, and always visible on touch devices.
@@ -183,8 +184,8 @@ Each image block shows:
 
 ## Editing a Block
 
-- Double-click a text block (double-tap on touch), or focus it and press Enter/F2, to enter
-  edit mode.
+- Double-click a text block (double-tap on touch), Tab into its text area, or focus it and press
+  Enter/F2, to enter edit mode.
 - Edit mode shows a multi-line text area containing the block text and the Marker button. The
   text area grows wider with its content up to the block maximum and grows taller as text
   wraps.
@@ -237,15 +238,17 @@ Each image block shows:
   wraps at the ends. The composer participates at its own sequence slot; focusing it clears the
   block selection and places the caret in the composer input.
 - While focus is inside a text block, the Tab order is text area → title/Marker → drag handle →
-  remaining action controls → block root, wrapping within that block. While focus is inside the
-  composer, it cycles only the composer's marker, input, and handle. When focus is on the canvas,
-  it uses the selected block if one exists; otherwise it cycles editor items. It never moves to
-  the header or left rail, and both directions wrap.
+  remaining action controls → block root, wrapping within that block. Tabbing into the text area
+  starts editing directly; tabbing into the title/Marker opens its flyout. While focus is inside
+  the composer, it cycles only the composer's marker, input, and handle. When focus is on the
+  canvas, it uses the selected block if one exists; otherwise it cycles editor items. It never
+  moves to the header or left rail, and both directions wrap.
 - Up/Down select the previous/next item and preserve the active focus zone (text, title, action,
   handle, or root) in the destination item when available, so repeated navigation keeps the same
   control type active.
-- Space/Enter on the title/Marker control opens the symbol-only flyout; Up/Down moves through
-  the Marker options and Enter/Space applies the focused option.
+- Space/Enter on the title/Marker control opens the symbol-only flyout; Down/Up on the focused
+  title/Marker also enters an already-open flyout, and Up/Down moves through the Marker options;
+  Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
   the handle, with the move announced.
 - Up/Down on the composer title control or text input moves to the sequence item immediately
@@ -386,7 +389,9 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
 | Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. |
 | Block/canvas | Delete / Backspace | Remove every selected block; ignored while typing in the composer or block editor. |
+| Block | Tab | Focus the block text area and enter edit mode. |
 | Block | Enter/F2 | Enter edit mode. |
+| Title/Marker | Tab | Open the Marker menu without leaving the Tab cycle; Down/Up then choose an option. |
 | Title/Marker | Space/Enter | Open the Marker menu; Up/Down choose an option; Enter/Space apply it. |
 | Drag handle | Up/Down | Move the focused block one sequence position earlier or later; focus stays on the handle. |
 | Block | Alt+Arrow | Move one sequence position earlier or later. |

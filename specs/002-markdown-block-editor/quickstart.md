@@ -58,19 +58,20 @@ Current result (2026-10-29): **101 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **92 passing, 0 failing** (required gate). Firefox also
-reports 92 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **93 passing, 0 failing** (required gate). Firefox also
+reports 93 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
 All automated checks were run against the committed `file://` entry page; no server or build
-step was used. Offline runs used an unreachable proxy/network resolver so any runtime network
-request would fail.
+step was used. Offline runs disabled browser networking (CDP network emulation in Chrome and
+WebDriver BiDi network-condition emulation in Firefox) so any runtime network request would
+fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 92/92 | PASS 92/92 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 92/92 | PASS 92/92 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 93/93 | PASS 93/93 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 93/93 | PASS 93/93 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -200,14 +201,16 @@ opens the Marker flyout without showing a grab cursor.
 7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next sequence
    item is selected, including the composer at its own slot, and that Up on the first item wraps
    to the last while Down on the last wraps to the first.
-8. Focus a block and press Tab repeatedly. Confirm the first stop is the text area, the second
-   is the title/Marker, the third is the drag handle, then the remaining controls and block root,
-   wrapping inside the block without moving to another block, composer, header, or left rail.
-   With the text area focused, press Enter or F2 and confirm edit mode starts. Focus the composer
-   input and confirm Tab cycles only its marker, input, and handle. Shift+Tab must wrap in the
-   opposite direction. With focus on the canvas, confirm Tab uses the selected block if one exists.
-9. Tab to a block's title area and press Space. Confirm the Marker menu opens, Up/Down moves
-   through the heading options, and Enter/Space applies the focused option.
+8. Focus a block and press Tab repeatedly. Confirm Tab into the text area starts edit mode
+   directly, the next Tab reaches the title/Marker and opens its menu, the next reaches the drag
+   handle, then the remaining controls and block root, wrapping inside the block without moving
+   to another block, composer, header, or left rail. Confirm Enter/F2 also starts edit mode when
+   the text area already has focus. Focus the composer input and confirm Tab cycles only its
+   marker, input, and handle. Shift+Tab must wrap in the opposite direction. With focus on the
+   canvas, confirm Tab uses the selected block if one exists.
+9. Tab to a block's title area and confirm the Marker menu opens automatically. Press Down to
+   enter the options, use Up/Down to move through them, and Enter/Space to apply the focused
+   option. Confirm Space/Enter on the title area still opens and focuses the current option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
     earlier/later, focus stays on the handle, and the move is announced. From the text area or
     title area, press Up/Down to change items and confirm focus stays in the same zone on the new

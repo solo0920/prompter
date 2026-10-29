@@ -393,6 +393,11 @@
     anchor._prompterMarkerHover = {
       open: openHoverMenu
     };
+    anchor._prompterMarkerMenu = {
+      open: function () {
+        show(false, false);
+      }
+    };
     anchor.addEventListener('click', function (event) {
       event.stopPropagation();
       show(true, false);
@@ -402,6 +407,16 @@
         event.preventDefault();
         event.stopPropagation();
         show(true, false);
+      } else if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') &&
+          markerMenu && markerMenu.anchor === anchor) {
+        event.preventDefault();
+        event.stopPropagation();
+        var menuItems = markerMenu.element.querySelectorAll('.marker-menu-item');
+        var checked = markerMenu.element.querySelector('[aria-checked="true"]') ||
+          menuItems[event.key === 'ArrowDown' ? 0 : menuItems.length - 1];
+        if (checked) {
+          checked.focus();
+        }
       }
     });
     anchor.addEventListener('pointerenter', function (event) {
@@ -2531,7 +2546,7 @@
             ? focusables[focusables.length - 1]
             : focusables[0];
           if (target) {
-            target.focus();
+            focusTabTarget(target);
           } else {
             anchor.focus();
           }
@@ -2774,6 +2789,26 @@
     return canvasFocusables(canvas);
   }
 
+  function focusTabTarget(target) {
+    if (!target) {
+      return;
+    }
+    closeMarkerMenu();
+    if (target.classList.contains('block-content')) {
+      var block = target.closest('.block');
+      if (block && block.dataset.blockId) {
+        beginEditing(block.dataset.blockId);
+        return;
+      }
+    }
+    target.focus();
+    if ((target.classList.contains('block-marker') ||
+        target.classList.contains('composer-marker')) &&
+        target._prompterMarkerMenu) {
+      target._prompterMarkerMenu.open();
+    }
+  }
+
   function handleCanvasTabKeydown(event) {
     if (dragState || marqueeState || event.key !== 'Tab' || event.defaultPrevented) {
       return;
@@ -2801,7 +2836,7 @@
     }
     event.preventDefault();
     event.stopPropagation();
-    focusables[next].focus();
+    focusTabTarget(focusables[next]);
   }
 
   function selectionInReadingOrder(ids) {
