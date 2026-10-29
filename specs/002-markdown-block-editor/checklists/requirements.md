@@ -44,7 +44,7 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
-- Browser harness: **104 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **105 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
   browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -64,11 +64,11 @@
   states; hidden blocks are skipped by keyboard navigation; the composer moves after a collapsed
   section; and dragging or moving a collapsed section with the keyboard carries its hidden
   descendants.
-- Outline indentation: `#` stays at the base column and each nested lower rank
-  (`##`, `###`, `-`, `1.`, `>`, `.`, content) steps right once, so quotes and dot items indent
-  more than a preceding bullet. New same/higher ranks restore shallower columns; composers align
-  with their section; Markdown order and text stay unchanged; indented blocks remain inside the
-  canvas at 360 px.
+- Outline indentation: `#` stays at the base column; `##` and `###` use their own heading levels
+  even without an explicit parent heading; nested list, ordered, quote, and dot markers step
+  right one level per rank, so quotes and dot items indent more than a preceding bullet. New
+  same/higher ranks restore shallower columns; composers align with their section; Markdown
+  order and text stay unchanged; indented blocks remain inside the canvas at 360 px.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and
