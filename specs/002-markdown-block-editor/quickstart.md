@@ -58,8 +58,8 @@ Current result (2026-10-29): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **101 passing, 0 failing** (required gate). Firefox also
-reports 101 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **102 passing, 0 failing** (required gate). Firefox also
+reports 102 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -69,8 +69,8 @@ unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 101/101 | PASS 101/101 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 101/101 | PASS 101/101 | Supplementary check; WebDriver run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 102/102 | PASS 102/102 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 102/102 | PASS 102/102 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -191,6 +191,16 @@ opens the Marker flyout without showing a grab cursor.
    section collapses.
 6. Drag the collapsed `## 第一節`, or use its drag handle's Up/Down keys, and confirm its hidden
    descendants move with it and remain collapsed.
+
+### 2c. Heading indentation (FR-053)
+
+1. Create `# 第一章`, its paragraph, `## 第一節`, its bullet, `### 細項`, its paragraph, and
+   `# 第二章`. Confirm the columns step right as `0, 1, 1, 2, 2, 3, 0` 20 px units.
+2. Confirm Save, Preview, and Copy still output the same Markdown order and text, with no
+   indentation characters added.
+3. Open the composer under `### 細項` and confirm it aligns with that section's content column.
+4. At 360 px width, confirm indented blocks and composers stay inside the canvas without
+   horizontal page scrolling.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 

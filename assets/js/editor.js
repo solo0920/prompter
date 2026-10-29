@@ -7,6 +7,7 @@
   var Files = global.Prompter.files;
 
   var GAP = 8;
+  var INDENT_STEP = 20;
   var DEFAULT_BLOCK_HEIGHT = 72;
   var DRAG_THRESHOLD = 4;
   var COMPOSER_ITEM_ID = '__prompter_composer__';
@@ -193,6 +194,42 @@
     return Markdown.markerRank(block.marker);
   }
 
+  function headingLevel(block) {
+    if (!block || block.type !== 'text') {
+      return 0;
+    }
+    if (block.marker === '#') {
+      return 1;
+    }
+    if (block.marker === '##') {
+      return 2;
+    }
+    if (block.marker === '###') {
+      return 3;
+    }
+    return 0;
+  }
+
+  function headingIndentation(ordered) {
+    var levels = {};
+    var after = [];
+    var stack = [];
+    (ordered || []).forEach(function (block, index) {
+      var level = headingLevel(block);
+      if (level > 0) {
+        while (stack.length && stack[stack.length - 1] >= level) {
+          stack.pop();
+        }
+        levels[block.id] = stack.length;
+        stack.push(level);
+      } else {
+        levels[block.id] = stack.length;
+      }
+      after[index] = stack.length;
+    });
+    return { levels: levels, after: after };
+  }
+
   function collapseModelForDocument(document, ordered) {
     var order = ordered || (document ? Model.normalizeSequence(document) : []);
     var collapsed = collapseSetFor(document);
@@ -297,17 +334,21 @@
     canvas.style.height = height + 'px';
   }
 
-  function computeSequenceLayout(ordered, composer, heights, collapse) {
+  function computeSequenceLayout(ordered, composer, heights, collapse, indentInfo) {
     var positions = {};
     var hidden = collapse && collapse.hidden ? collapse.hidden : {};
+    var indentation = indentInfo || headingIndentation(ordered);
     var y = Files.COLUMN_START_Y;
     var composerTop = null;
+    var composerX = Files.COLUMN_X;
     var composerIndex = composer && composer.insertIndex !== undefined
       ? Math.max(0, Math.min(ordered.length, Number(composer.insertIndex)))
       : null;
     ordered.forEach(function (block, index) {
       if (composer && composerIndex === index) {
         composerTop = y;
+        composerX = Files.COLUMN_X +
+          ((index > 0 ? indentation.after[index - 1] : 0) * INDENT_STEP);
         y += (composer.height || 0) + GAP;
       }
       if (hidden[block.id]) {
@@ -317,13 +358,35 @@
       var height = heights && heights[block.id] !== undefined
         ? heights[block.id]
         : elementHeightFor(block);
-      positions[block.id] = { x: Files.COLUMN_X, y: y };
+      positions[block.id] = {
+        x: Files.COLUMN_X + ((indentation.levels[block.id] || 0) * INDENT_STEP),
+        y: y
+      };
       y += height + GAP;
     });
     if (composer && composerTop === null) {
       composerTop = y;
+      composerX = Files.COLUMN_X + ((indentation.after[ordered.length - 1] || 0) * INDENT_STEP);
     }
-    return { positions: positions, composerTop: composerTop, nextY: y };
+    return {
+      positions: positions,
+      composerTop: composerTop,
+      composerX: composerX,
+      nextY: y
+    };
+  }
+
+  function applyIndentedWidth(element, x, basePadding) {
+    if (!element) {
+      return;
+    }
+    var offset = Math.max(0, Number(x) - Files.COLUMN_X);
+    if (offset > 0) {
+      element.style.maxWidth = 'min(560px, calc(100% - ' +
+        (basePadding + offset) + 'px))';
+    } else {
+      element.style.removeProperty('max-width');
+    }
   }
 
   function applySequenceLayout() {
@@ -333,19 +396,27 @@
       updateCanvasSize();
       return;
     }
+    var ordered = Model.normalizeSequence(state.document);
+    activeCollapse = collapseModelForDocument(state.document, ordered);
+    sanitizeCollapsedView(state, activeCollapse);
+    var indentInfo = headingIndentation(ordered);
+    ordered.forEach(function (block) {
+      if (activeCollapse.hidden[block.id]) {
+        return;
+      }
+      applyIndentedWidth(blockElement(block.id), Files.COLUMN_X +
+        ((indentInfo.levels[block.id] || 0) * INDENT_STEP), 48);
+    });
     Array.prototype.forEach.call(
       canvas.querySelectorAll('.composer-input, .block-edit-input'),
       autoResizeTextarea
     );
-    var ordered = Model.normalizeSequence(state.document);
-    activeCollapse = collapseModelForDocument(state.document, ordered);
-    sanitizeCollapsedView(state, activeCollapse);
     var composerElement = canvas.querySelector('.composer');
     var composer = state.composer ? {
       insertIndex: state.composer.insertIndex,
       height: composerElement ? composerElement.offsetHeight : 0
     } : null;
-    var layout = computeSequenceLayout(ordered, composer, null, activeCollapse);
+    var layout = computeSequenceLayout(ordered, composer, null, activeCollapse, indentInfo);
     ordered.forEach(function (block, index) {
       var point = layout.positions[block.id];
       block.x = point.x;
@@ -358,10 +429,11 @@
       }
     });
     if (composer && composerElement && layout.composerTop !== null) {
-      state.composer.x = Files.COLUMN_X;
+      state.composer.x = layout.composerX;
       state.composer.y = layout.composerTop;
-      composerElement.style.left = Files.COLUMN_X + 'px';
+      composerElement.style.left = layout.composerX + 'px';
       composerElement.style.top = layout.composerTop + 'px';
+      applyIndentedWidth(composerElement, layout.composerX, 32);
     }
     updateCanvasSize();
   }
@@ -1334,13 +1406,15 @@
       var point = layout.positions[block.id];
       var element = blockElement(block.id);
       if (element) {
+        applyIndentedWidth(element, point.x, 48);
         element.style.left = point.x + 'px';
         element.style.top = point.y + 'px';
       }
     });
     if (composer && composerElement && layout.composerTop !== null) {
-      composerElement.style.left = Files.COLUMN_X + 'px';
+      composerElement.style.left = layout.composerX + 'px';
       composerElement.style.top = layout.composerTop + 'px';
+      applyIndentedWidth(composerElement, layout.composerX, 32);
     }
     drag.layout = layout;
   }
@@ -1348,7 +1422,7 @@
   function applyDragTransform(drag) {
     if (drag.kind === 'composer') {
       var composerPoint = drag.layout && drag.layout.composerTop !== null
-        ? { x: Files.COLUMN_X, y: drag.layout.composerTop }
+        ? { x: drag.layout.composerX, y: drag.layout.composerTop }
         : null;
       if (!composerPoint) {
         drag.element.style.transform = '';

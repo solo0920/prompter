@@ -192,6 +192,20 @@ Each image block shows:
 - Changing a Marker recomputes which blocks are collapsible. A block with no lower-ranked
   following block shows no collapse control.
 
+## Heading Indentation
+
+- The editor shows the heading outline as horizontal indentation. `#` stays at the base column,
+  `##` under an open `#` moves one 20 px step right, and `###` under two open ancestors moves two
+  steps right.
+- Content beneath a heading aligns with the next nesting step: content under a `#` heading aligns
+  with `##`, content under `##` aligns with `###`, and content under `###` moves one step deeper.
+- A new heading of the same or higher level closes the earlier nested sections, so its following
+  blocks return to the matching shallower column.
+- Indentation is layout-only. It never changes Markdown order, text, Markers, Preview, Copy, or
+  Save output. Indented blocks and composers shrink their maximum width so they remain inside the
+  canvas at narrow viewports.
+- A composer inserted inside a section aligns with that section's content column.
+
 ## Selection
 
 - Cmd-click (Ctrl-click on Windows) toggles a block in the current selection without clearing
@@ -237,7 +251,8 @@ Each image block shows:
 
 - Every block has a "+" control at its lower-right, revealed while the right half of the block
   is hovered or keyboard-focused, and kept visible on touch devices.
-- Activating it creates one composer directly below the source block, aligned to the source x.
+- Activating it creates one composer directly below the source block, aligned to the content
+  column for that insertion slot.
 - The composer inherits the Marker of the source text block. For an image source, it inherits the
   nearest preceding text block's Marker; with no preceding text block it falls back to the
   default Marker from settings.

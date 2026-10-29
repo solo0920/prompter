@@ -1503,6 +1503,55 @@
     });
   });
 
+  test('US1 subordinate headings and their content indent by heading depth', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      var blocks = [
+        Model.createTextBlock({ id: 'indent-h1', marker: '#', text: '第一章', seq: 1 }),
+        Model.createTextBlock({ id: 'indent-p1', marker: 'none', text: '章內容', seq: 2 }),
+        Model.createTextBlock({ id: 'indent-h2', marker: '##', text: '第一節', seq: 3 }),
+        Model.createTextBlock({ id: 'indent-b1', marker: '-', text: '節內容', seq: 4 }),
+        Model.createTextBlock({ id: 'indent-h3', marker: '###', text: '細項', seq: 5 }),
+        Model.createTextBlock({ id: 'indent-p2', marker: 'none', text: '細項內容', seq: 6 }),
+        Model.createTextBlock({ id: 'indent-h1b', marker: '#', text: '第二章', seq: 7 }),
+        Model.createTextBlock({ id: 'indent-p3', marker: 'none', text: '第二章內容', seq: 8 })
+      ];
+      app.setDocument(Model.createPromptDocument({
+        id: 'indent-document',
+        title: '縮排測試',
+        blocks: blocks
+      }), [], { persisted: false });
+      var base = win.Prompter.files.COLUMN_X;
+      var expected = {
+        'indent-h1': base,
+        'indent-p1': base + 20,
+        'indent-h2': base + 20,
+        'indent-b1': base + 40,
+        'indent-h3': base + 40,
+        'indent-p2': base + 60,
+        'indent-h1b': base,
+        'indent-p3': base + 20
+      };
+      state.document.blocks.forEach(function (block) {
+        equal(block.x, expected[block.id],
+          block.id + ' must use its heading depth for horizontal placement.');
+        equal(blockById(win, block.id).style.left, block.x + 'px',
+          block.id + ' must render at its computed indentation.');
+      });
+      var before = win.Prompter.markdown.serializeDocument(state.document);
+      equal(before,
+        '# 第一章\n章內容\n## 第一節\n- 節內容\n### 細項\n細項內容\n# 第二章\n第二章內容\n',
+        'Indentation must not change Markdown order or text.');
+
+      blockById(win, 'indent-h3').querySelector('.block-plus').click();
+      var composer = win.document.querySelector('#canvas .composer');
+      equal(parseFloat(composer.style.left), base + 60,
+        'A composer under a third-level heading must align with its content.');
+    });
+  });
+
   test('US1 empty editing removes only the edited block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
@@ -3111,8 +3160,11 @@
         equal(document.blocks[2].text, '![遠端](https://example.com/remote.png)');
         equal(document.blocks[3].text, '![缺少](not-selected.png)');
         equal(document.blocks[0].blankLinesAfter, 1);
-        document.blocks.forEach(function (block) {
-          equal(block.x, win.Prompter.files.COLUMN_X);
+        equal(document.blocks[0].x, win.Prompter.files.COLUMN_X,
+          'A top-level heading must stay at the base column.');
+        document.blocks.slice(1).forEach(function (block) {
+          equal(block.x, win.Prompter.files.COLUMN_X + 20,
+            'Content under a heading must indent one level.');
         });
         for (var i = 1; i < document.blocks.length; i += 1) {
           assert(document.blocks[i].y > document.blocks[i - 1].y,
