@@ -2155,6 +2155,32 @@
       focusComposer();
       return;
     }
+    var document = state.document;
+    var items = composer.markerOverride
+      ? null
+      : Markdown.splitComposerItems(value);
+    if (items) {
+      var nextZ = Model.nextZ(document);
+      var blocks = items.map(function (item, index) {
+        return Model.createTextBlock({
+          id: Utils.randomUUID(),
+          text: item.text,
+          marker: item.marker,
+          x: Files.COLUMN_X,
+          y: Files.COLUMN_START_Y,
+          z: nextZ + index,
+          seq: 0,
+          blankLinesAfter: item.blankLinesAfter || 0
+        });
+      });
+      Model.insertBlocksAtIndex(document, blocks, composer.insertIndex);
+      var last = blocks[blocks.length - 1];
+      state.composer = null;
+      markDirty();
+      clearSelection();
+      openComposer(last.id);
+      return;
+    }
     var detected = Markdown.detectMarker(value);
     var marker = composer.markerOverride ||
       (detected.marker !== 'none' ? detected.marker : composer.marker);
@@ -2163,7 +2189,6 @@
       focusComposer();
       return;
     }
-    var document = state.document;
     var block = Model.createTextBlock({
       id: Utils.randomUUID(),
       text: text,

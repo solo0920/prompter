@@ -1176,6 +1176,75 @@
     });
   });
 
+  test('US1 multi-line Markdown input splits obvious lines into separate blocks on Enter', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var input = composerInput(win);
+      var source = '# 專案標題\n' +
+        '這是第一段第一行\n' +
+        '這是第一段第二行\n' +
+        '\n' +
+        '- 項目一\n' +
+        '- 項目二\n' +
+        '> 引言\n' +
+        '## 子標題\n';
+      setValue(win, input, source);
+      press(win, input, 'Enter');
+
+      equal(state.document.blocks.length, 6,
+        'Each obvious Markdown line must become its own block.');
+      var ordered = readingOrder(win);
+      equal(ordered[0].marker, '#');
+      equal(ordered[0].text, '專案標題');
+      equal(ordered[1].marker, 'none');
+      equal(ordered[1].text, '這是第一段第一行\n這是第一段第二行');
+      equal(ordered[1].blankLinesAfter, 1,
+        'A blank line before a new item must stay in the Markdown output.');
+      equal(ordered[2].marker, '-');
+      equal(ordered[2].text, '項目一');
+      equal(ordered[3].marker, '-');
+      equal(ordered[3].text, '項目二');
+      equal(ordered[4].marker, '>');
+      equal(ordered[4].text, '引言');
+      equal(ordered[5].marker, '##');
+      equal(ordered[5].text, '子標題');
+      equal(win.Prompter.markdown.serializeDocument(state.document), source,
+        'The split blocks must serialize back to the pasted Markdown.');
+      var next = composerInput(win);
+      assert(next, 'A fresh composer must open after the split blocks.');
+      equal(win.document.activeElement, next,
+        'The fresh composer must receive focus.');
+      equal(next.value, '');
+    });
+  });
+
+  test('US1 multi-line Markdown splitting keeps fenced code intact', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var input = composerInput(win);
+      setValue(win, input,
+        '# 安裝\n' +
+        '\n' +
+        '```sh\n' +
+        '# 這是註解\n' +
+        '- 不是項目\n' +
+        '```\n' +
+        '- 完成\n');
+      press(win, input, 'Enter');
+
+      equal(state.document.blocks.length, 3,
+        'Markers inside a fenced code block must not create new blocks.');
+      var ordered = readingOrder(win);
+      equal(ordered[0].marker, '#');
+      equal(ordered[0].text, '安裝');
+      equal(ordered[1].marker, 'none');
+      equal(ordered[1].text, '```sh\n# 這是註解\n- 不是項目\n```');
+      equal(ordered[1].blankLinesAfter, 0);
+      equal(ordered[2].marker, '-');
+      equal(ordered[2].text, '完成');
+    });
+  });
+
   test('US1 empty editing removes only the edited block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

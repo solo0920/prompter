@@ -115,6 +115,11 @@ The composer is the only input box that creates a new block.
 - Enter:
   - With non-empty text: create a text block at the composer slot, mark dirty, keep the next
     composer focused, and do not leave the committed block selected or outlined.
+  - With multiple lines where a non-blank line starts with an obvious Marker (`#`, `##`, `###`,
+    `-`, `1.`, `>`, `.`): create one block per marked line in source order, keep contiguous
+    unmarked prose together, preserve blank-line separators, and keep fenced code together.
+    Focus the next composer after the last created block. Multi-line text without an obvious
+    Marker stays one block.
   - With empty/whitespace-only text: no block, no error.
 - Shift+Enter inserts a line break without committing the composer.
 - Escape:

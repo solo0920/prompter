@@ -39,11 +39,11 @@
 
 ## Post-Implementation Verification (2026-10-29)
 
-- Unit and contract tests: **101 passing, 0 failing** (`node --test tests/unit/*.test.js`).
+- Unit and contract tests: **104 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
   order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
-  file-name/path safety, and static no-network guards.
-- Browser harness: **94 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+  file-name/path safety, composer Markdown splitting, and static no-network guards.
+- Browser harness: **96 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
   browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -53,6 +53,10 @@
 - Multi-line input: the composer and block editor are auto-growing text areas; Shift+Enter
   inserts a line break, Enter commits, width grows up to the maximum before wrapping, and
   height grows so every line remains visible.
+- Composer Markdown splitting: pressing Enter on a pasted multi-line Markdown value creates one
+  block per obvious marker line in source order, keeps contiguous unmarked prose grouped,
+  preserves blank-line separation, leaves plain multi-line text and fenced code intact, and
+  focuses the next composer after the last block.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and

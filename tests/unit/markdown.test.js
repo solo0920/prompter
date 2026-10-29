@@ -81,6 +81,68 @@ test('detectMarker requires exactly one space and a non-empty remainder', functi
   assert.deepEqual(Markdown.detectMarker('#   '), { marker: 'none', text: '#   ' });
 });
 
+test('splitComposerItems separates obvious Markdown lines and keeps prose grouped', function () {
+  const items = Markdown.splitComposerItems(
+    '# 標題\n' +
+    '第一段第一行\n' +
+    '第一段第二行\n' +
+    '\n' +
+    '- 項目一\n' +
+    '- 項目二\n' +
+    '> 引言\n' +
+    '1. 有序\n' +
+    '. 點\n' +
+    '### 小標題\n'
+  );
+  assert.deepEqual(items, [
+    { marker: '#', text: '標題', blankLinesAfter: 0 },
+    { marker: 'none', text: '第一段第一行\n第一段第二行', blankLinesAfter: 1 },
+    { marker: '-', text: '項目一', blankLinesAfter: 0 },
+    { marker: '-', text: '項目二', blankLinesAfter: 0 },
+    { marker: '>', text: '引言', blankLinesAfter: 0 },
+    { marker: '1.', text: '有序', blankLinesAfter: 0 },
+    { marker: '.', text: '點', blankLinesAfter: 0 },
+    { marker: '###', text: '小標題', blankLinesAfter: 0 }
+  ]);
+});
+
+test('splitComposerItems keeps plain multiline text and fenced code intact', function () {
+  assert.equal(Markdown.splitComposerItems('第一行\n第二行'), null);
+  assert.equal(Markdown.splitComposerItems('# 單行標題'), null);
+  const items = Markdown.splitComposerItems(
+    '# 安裝\n' +
+    '\n' +
+    '```sh\n' +
+    '# 這是註解\n' +
+    '- 不是項目\n' +
+    '\n' +
+    'npm install\n' +
+    '```\n' +
+    '- 完成\n'
+  );
+  assert.deepEqual(items, [
+    { marker: '#', text: '安裝', blankLinesAfter: 1 },
+    {
+      marker: 'none',
+      text: '```sh\n# 這是註解\n- 不是項目\n\nnpm install\n```',
+      blankLinesAfter: 0
+    },
+    { marker: '-', text: '完成', blankLinesAfter: 0 }
+  ]);
+});
+
+test('splitComposerItems attaches indented continuations to the preceding item', function () {
+  const items = Markdown.splitComposerItems(
+    '- 第一行很長的項目\n' +
+    '  續行內容\n' +
+    '- 第二個項目\n'
+  );
+  assert.deepEqual(items, [
+    { marker: '-', text: '第一行很長的項目\n  續行內容', blankLinesAfter: 0 },
+    { marker: '-', text: '第二個項目', blankLinesAfter: 0 }
+  ]);
+});
+
 test('marker-only source lines stay literal text blocks', function () {
   const parsed = Markdown.parseMarkdown('#\n- \n# Heading\n');
   assert.equal(parsed.lines.length, 3);

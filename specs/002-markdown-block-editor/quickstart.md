@@ -42,7 +42,7 @@ Markdown serializer, reading order, blank-line/newline preservation, search matc
 reference matching, the HTML renderer, preferences, storage degradation, and security guards.
 They do not require npm packages.
 
-Current result (2026-10-29): **101 passing, 0 failing**.
+Current result (2026-10-29): **104 passing, 0 failing**.
 
 ### Browser harness
 
@@ -58,20 +58,19 @@ Current result (2026-10-29): **101 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **94 passing, 0 failing** (required gate). Firefox also
-reports 94 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **96 passing, 0 failing** (required gate). Firefox also
+reports 96 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
 All automated checks were run against the committed `file://` entry page; no server or build
-step was used. Offline runs disabled browser networking (CDP network emulation in Chrome and
-WebDriver BiDi network-condition emulation in Firefox) so any runtime network request would
-fail.
+step was used. Offline runs disabled browser networking (CDP network emulation in Chrome and an
+unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 94/94 | PASS 94/94 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 94/94 | PASS 94/94 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 96/96 | PASS 96/96 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 96/96 | PASS 96/96 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -170,6 +169,10 @@ opens the Marker flyout without showing a grab cursor.
    press Enter to commit.
 5. Create a multi-line fenced code block or display formula in one composer using Shift+Enter;
    confirm Preview renders it as one code block or formula rather than separate lines.
+6. Paste a multi-line Markdown sample such as `# 標題`, a prose paragraph, `- 項目一`, and
+   `- 項目二` on separate lines, then press Enter. Confirm each marked line becomes its own block
+   in source order, the prose stays grouped, blank lines between groups survive in the saved
+   Markdown, the next composer opens below the last block, and a fenced code sample is not split.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 

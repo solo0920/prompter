@@ -251,6 +251,7 @@ across all stories.
 - [x] T085 Make Up/Down into an adjacent text block start editing and select all text on every edit entry path.
 - [x] T086 Give plain Up/Down top priority while editing: commit the current block, continue to the adjacent item, and reopen a text destination in edit mode with all text selected.
 - [x] T087 Open the live preview pane by default for new, opened, and restored documents, keep it closed after an explicit close, and preserve the state across tab switches.
+- [x] T088 Split obvious Markdown lines into separate blocks when Enter commits a multi-line composer value: detect `#`, `##`, `###`, `-`, `1.`, `>`, and `.` at line starts, keep unmarked prose grouped, preserve blank-line separators, leave fenced code and plain multi-line text intact, and focus the next composer after the last block.
 
 ---
 

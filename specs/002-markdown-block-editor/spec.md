@@ -109,6 +109,11 @@ and confirm the unsaved draft is not restored.
     Up/Down on the composer title control or input moves to the adjacent item with the same
     first/last wrap; Up/Down on the composer drag handle moves the composer one slot and keeps
     focus on the handle.
+16. **Given** the input box contains multiple lines, **When** a non-blank line starts with an
+    obvious Markdown Marker (`#`, `##`, `###`, `-`, `1.`, `>`, `.`) and the user presses Enter,
+    **Then** each such line becomes its own block in source order with its Marker stored once,
+    contiguous unmarked lines stay grouped as prose, blank lines remain separators, fenced code
+    is never split, and a multi-line input without any such Marker remains one block.
 
 ---
 
@@ -362,7 +367,12 @@ settings panel and clear the local library after confirming the warning.
   document editable.
 - **FR-017**: A blank document MUST show one multi-line input box with a Marker control on its
   left; typing text and pressing Enter MUST create a block, Shift+Enter MUST insert a line
-  break without committing, and pressing Enter with empty text MUST do nothing.
+  break without committing, and pressing Enter with empty text MUST do nothing. When Enter is
+  pressed on a multi-line value, every non-blank line that starts with a recognized Marker MUST
+  become its own block in source order with the Marker stored once, contiguous unmarked prose
+  lines MUST stay grouped, blank lines MUST remain separators, and fenced code MUST NOT be
+  split. A multi-line value without an obvious Marker, including ordinary Shift+Enter prose,
+  MUST remain one block.
 - **FR-018**: The Marker control MUST offer None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`
   options (None is represented by `×` in the flyout), and the selected Marker MUST be displayed
   in front of the block and included once in Markdown output. Block Markers MUST be visible
