@@ -45,9 +45,9 @@
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
 - Browser harness: **108 passing, 0 failing** in Chrome 156.0.8078.49, the required release
-  gate. Firefox 159.0 and Safari 27.2 also pass 108/108 as supplementary checks; Safari used a
-  local HTTP origin because its `file://` iframe requires disabling local-file restrictions.
-  Chrome and Firefox pass with browser networking disabled.
+  gate. Firefox 159.0, Edge 156.0.4314.50, and Safari 27.2 also pass 108/108 as supplementary
+  checks; Safari used a local HTTP origin because its `file://` iframe requires disabling
+  local-file restrictions. Chrome, Firefox, and Edge pass online and offline.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
   headings, lists, quotes, tables, and paragraphs, including multi-line display math and AMS
   environments; fenced code stays literal and unsafe commands are not trusted. Rich HTML copy

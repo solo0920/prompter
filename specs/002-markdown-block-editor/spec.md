@@ -715,16 +715,19 @@ settings panel and clear the local library after confirming the warning.
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
 - Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156 and
-  Firefox 159, online and offline, from `file://`.
+  Firefox 159, online and offline, from `file://`; Edge 156 passes 108/108 in headless runs.
+  Safari 27.2 passes 108/108 through the HTTP harness and a direct `file://` startup smoke.
 - Manual acceptance still pending:
   - SC-007: paste rich text and images into two real rich-text destinations.
   - Physical touch-device checks.
   - Screen-reader spot checks.
   - Real OS file and directory pickers.
-  - Human timing for SC-001 and the manual walkthrough in both release browsers.
+  - Human timing for SC-001 and the manual walkthrough in the release browsers.
 - Accepted limitations:
   - Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
-  - Firefox falls back to separate downloads for multi-file Save/Save As.
+  - Firefox and Safari fall back to separate downloads for multi-file Save/Save As.
   - Some rich-text destinations strip data-URL images; exact Markdown remains available.
   - Safari 27.2 is supplementary: HTTP harness 108/108 and direct `file://` startup smoke pass;
     full `file://` harness, downloads, and OS pickers remain manual.
+  - Safari has no supported headless mode; hidden/background tabs are throttled and stall the
+    harness, so Safari runs need a visible GUI session or a separate macOS VM.

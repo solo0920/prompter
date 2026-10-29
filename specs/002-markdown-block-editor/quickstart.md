@@ -7,10 +7,10 @@ package installation, or network. It is also the manual acceptance script for th
 
 ## Prerequisites
 
-- Chrome is the required acceptance browser (latest two major versions). Firefox and Safari 27.2
-  are supplementary compatibility checks. Safari's full `file://` harness requires enabling
-  Develop → Disable Local File Restrictions; its HTTP harness and direct `file://` smoke checks
-  are recorded below.
+- Chrome is the required acceptance browser (latest two major versions). Firefox, Safari 27.2,
+  and Edge 156 are supplementary compatibility checks. Safari's full `file://` harness requires
+  enabling Develop → Disable Local File Restrictions; its HTTP harness and direct `file://` smoke
+  checks are recorded below.
 - For direct multi-file saving: Chrome. Firefox and Safari use the download fallback.
 - The repository checked out locally; no dependencies to install.
 - A plain-text destination and at least two rich-text destinations for Copy verification. For
@@ -63,9 +63,10 @@ Expected: no failures. Clipboard and directory-picker checks that require a real
 are marked manual and covered below.
 
 Current result (2026-10-30): Chrome **108 passing, 0 failing** (required gate). Firefox also
-reports 108 passing, 0 failing as the supplementary check. Safari 27.2 reports **108 passing,
-0 failing** through the same harness served from a local HTTP origin, because Safari blocks the
-harness iframe under `file://` unless local-file restrictions are disabled.
+reports 108 passing, 0 failing as the supplementary check. Edge 156 passes 108/108 in headless
+Chromium runs. Safari 27.2 reports **108 passing, 0 failing** through the same harness served
+from a local HTTP origin, because Safari blocks the harness iframe under `file://` unless
+local-file restrictions are disabled.
 
 ## Verified Results (2026-10-30)
 
@@ -79,11 +80,14 @@ covered app startup, numbered blocks, KaTeX, IndexedDB, and zero remote resource
 |---------|---------|-------------------|-----------------|-------|
 | Chrome (macOS) | 156.0.8078.49 | PASS 108/108 | PASS 108/108 | Required gate; full editor, storage, settings, clipboard fallbacks |
 | Firefox (macOS) | 159.0 | PASS 108/108 | PASS 108/108 | Supplementary check; WebDriver run; download save fallback |
+| Edge (macOS) | 156.0.4314.50 | PASS 108/108 | PASS 108/108 | Supplementary Chromium check; headless CDP run |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Supplementary check; direct file:// startup/KaTeX/IndexedDB pass; harness iframe blocked by Safari local-file setting |
 
-Chrome is the required release gate. Firefox and Safari are supplementary compatibility checks.
-Safari's full `file://` harness still requires enabling Develop → Disable Local File Restrictions
-and completing the manual file/download/clipboard checks.
+Chrome is the required release gate. Firefox, Edge, and Safari are supplementary compatibility
+checks. Safari's full `file://` harness still requires enabling
+Develop → Disable Local File Restrictions and completing the manual file/download/clipboard
+checks. Safari has no supported headless mode; a hidden/background tab is throttled by Safari and
+leaves the harness stalled, so Safari runs require a visible GUI session or a separate macOS VM.
 
 Additional automated evidence:
 
@@ -123,7 +127,7 @@ until those checks are recorded.
 ## Manual Acceptance Scenarios
 
 Run these in Chrome first as the required acceptance browser. Optionally repeat the core
-authoring, preview, copy, and download paths in Firefox and Safari. Safari's full `file://`
+authoring, preview, copy, and download paths in Firefox, Edge, and Safari. Safari's full `file://`
 harness requires enabling local-file restrictions and its OS pickers/downloads remain manual.
 
 ### 1. First run and blank document (US1, FR-017)
@@ -503,8 +507,9 @@ Record the exact Chrome version and pass/fail notes in the test log.
 
 **Verified 2026-10-30**: Chrome 156 passes the full automated harness from `file://`,
 including offline runs and is the required release gate. Firefox 159 also passes as the
-supplementary check. Safari 27.2 passes the HTTP harness 108/108 and a direct `file://` startup
-smoke; its full `file://` harness, downloads, and OS pickers remain manual.
+supplementary check. Edge 156 matches Chrome's Chromium matrix and passes 108/108 in headless
+runs, online and offline. Safari 27.2 passes the HTTP harness 108/108 and a direct `file://`
+startup smoke; its full `file://` harness, downloads, and OS pickers remain manual.
 
 ## Acceptance Checklist
 

@@ -504,10 +504,11 @@ font, or remote asset is bundled.
 - Implementation: complete. This feature was delivered as an increment to feature 002, so no
   separate `plan.md` or `tasks.md` was produced; the verification record lives in the checklist.
 - Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156, Firefox
-  159, online and offline. Safari 27.2 also passes the HTTP harness 108/108 plus a direct
-  `file://` startup smoke test.
+  159, online and offline. Edge 156 passes 108/108 headless; Safari 27.2 also passes the
+  HTTP harness 108/108 plus a direct `file://` startup smoke test.
 - Manual exceptions from feature 002 remain outstanding: SC-007 rich-text destination paste,
   physical touch-device checks, screen-reader spot checks, real OS pickers, and human timing.
 - Accepted limitations from feature 002 remain in force: native tab-close prompt, Firefox and
-  Safari multi-file download fallback, rich-text destinations that strip data-URL images, and
-  Safari's full `file://` harness/download/picker checks requiring manual confirmation.
+  Safari multi-file download fallback, rich-text destinations that strip data-URL images,
+  Safari's full `file://` harness/download/picker checks requiring manual confirmation, and no
+  supported Safari headless/background automation mode.
