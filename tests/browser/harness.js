@@ -1191,6 +1191,24 @@
       equal(state.document.blocks.length, 1);
       equal(state.document.blocks[0].id, secondId);
       equal(composerInput(win), null);
+
+      state = freshDocument(win);
+      createSequence(win, ['Alpha', 'Beta', 'Gamma']);
+      blockById(win, state.document.blocks[1].id).focus();
+      press(win, blockById(win, state.document.blocks[1].id), 'Tab');
+      input = blockById(win, state.document.blocks[1].id)
+        .querySelector('.block-edit-input');
+      setValue(win, input, '');
+      press(win, input, 'ArrowDown');
+      equal(state.document.blocks.length, 2,
+        'Down from an emptied editor must remove the emptied block.');
+      equal(state.document.blocks[0].text, 'Alpha');
+      equal(state.document.blocks[1].text, 'Gamma');
+      var gammaInput = blockById(win, state.document.blocks[1].id)
+        .querySelector('.block-edit-input');
+      assertEditingSelection(win, gammaInput,
+        'Down after removing an empty block must edit the following block.');
+      press(win, gammaInput, 'Escape');
     });
   });
 
@@ -1299,10 +1317,29 @@
         'Up from the composer must start editing the previous block text area.');
 
       press(win, cInput, 'ArrowDown');
-      equal(win.Prompter.editor.getSelectedBlockId(), cId,
-        'Arrow keys inside the editor must move the caret instead of changing items.');
-      equal(state.editingBlockId, cId,
-        'Arrow keys inside the editor must keep the block in edit mode.');
+      equal(win.Prompter.editor.getSelectedBlockId(), null,
+        'Down inside the editor must jump to the next item.');
+      equal(win.document.activeElement, composerInput(win),
+        'Down from the last block editor must focus the composer.');
+      equal(state.editingBlockId, null,
+        'Down inside the editor must commit the current block.');
+
+      press(win, composerInput(win), 'ArrowUp');
+      cInput = blockById(win, cId).querySelector('.block-edit-input');
+      assertEditingSelection(win, cInput,
+        'Up from the composer must resume editing the previous block.');
+
+      press(win, cInput, 'ArrowUp');
+      var bInput = blockById(win, bId).querySelector('.block-edit-input');
+      assertEditingSelection(win, bInput,
+        'Up inside the editor must continue to the previous block.');
+      equal(state.editingBlockId, bId,
+        'Up inside the editor must keep editing the destination block.');
+
+      press(win, bInput, 'ArrowDown');
+      cInput = blockById(win, cId).querySelector('.block-edit-input');
+      assertEditingSelection(win, cInput,
+        'Down inside the editor must return to the next block.');
       press(win, cInput, 'Escape');
 
       press(win, blockById(win, cId), 'ArrowDown');
@@ -1322,6 +1359,60 @@
       equal(win.Prompter.editor.getSelectedBlockId(), bId,
         'Down must select the next block.');
       equal(state.dirty, false, 'Arrow selection must not mark the document dirty.');
+    });
+  });
+
+  test('US1 Up/Down commits the current edit and continues into adjacent blocks', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      createSequence(win, ['A', 'B', 'C']);
+      var ids = state.document.blocks.map(function (block) { return block.id; });
+      var aId = ids[0];
+      var bId = ids[1];
+      var cId = ids[2];
+      state.dirty = false;
+
+      var aElement = blockById(win, aId);
+      aElement.focus();
+      press(win, aElement, 'Tab');
+      var aInput = blockById(win, aId).querySelector('.block-edit-input');
+      assertEditingSelection(win, aInput,
+        'Tab must start editing the first block with all text selected.');
+      setValue(win, aInput, 'A edited');
+
+      press(win, aInput, 'ArrowDown');
+      var bInput = blockById(win, bId).querySelector('.block-edit-input');
+      assertEditingSelection(win, bInput,
+        'Down must commit the first block and start editing the second.');
+      equal(state.editingBlockId, bId,
+        'Editing must continue in the second block.');
+      equal(state.document.blocks[0].text, 'A edited',
+        'Down must commit the first block before moving.');
+      equal(state.dirty, true,
+        'Committing a changed block through Up/Down must mark the document dirty.');
+
+      setValue(win, bInput, 'B edited');
+      press(win, bInput, 'ArrowDown');
+      var cInput = blockById(win, cId).querySelector('.block-edit-input');
+      assertEditingSelection(win, cInput,
+        'Down must continue editing in the third block.');
+      equal(state.document.blocks[1].text, 'B edited',
+        'Down must commit the second block before moving.');
+
+      press(win, cInput, 'ArrowUp');
+      bInput = blockById(win, bId).querySelector('.block-edit-input');
+      assertEditingSelection(win, bInput,
+        'Up must return to editing the previous block.');
+      equal(bInput.value, 'B edited',
+        'Up must reopen the committed text in the previous block.');
+
+      press(win, bInput, 'ArrowUp');
+      aInput = blockById(win, aId).querySelector('.block-edit-input');
+      assertEditingSelection(win, aInput,
+        'Up must continue editing in the first block.');
+      equal(aInput.value, 'A edited',
+        'Up must reopen the committed text in the first block.');
+      press(win, aInput, 'Escape');
     });
   });
 

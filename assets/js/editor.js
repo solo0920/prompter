@@ -1708,6 +1708,68 @@
     return true;
   }
 
+  function navigateFromEditing(delta) {
+    var state = getState();
+    if (!state || !state.editingBlockId) {
+      return false;
+    }
+    var editingId = state.editingBlockId;
+    var before = dragItemsFor(state);
+    var indexBefore = -1;
+    for (var i = 0; i < before.length; i += 1) {
+      if (before[i].id === editingId) {
+        indexBefore = i;
+        break;
+      }
+    }
+
+    commitEditing();
+
+    var nextState = getState();
+    if (!nextState || !nextState.document) {
+      return false;
+    }
+    var items = dragItemsFor(nextState);
+    if (!items.length) {
+      return true;
+    }
+
+    var index = -1;
+    for (var j = 0; j < items.length; j += 1) {
+      if (items[j].id === editingId) {
+        index = j;
+        break;
+      }
+    }
+
+    var target = null;
+    if (index !== -1) {
+      target = items[(index + delta + items.length) % items.length];
+    } else if (indexBefore !== -1) {
+      var fallback = delta < 0 ? indexBefore - 1 : indexBefore;
+      if (fallback < 0) {
+        fallback = items.length - 1;
+      } else if (fallback >= items.length) {
+        fallback = 0;
+      }
+      target = items[fallback];
+    }
+
+    if (!target) {
+      return true;
+    }
+    if (isComposerItem(target)) {
+      clearSelection();
+      focusComposerZone('content');
+    } else if (target.type === 'text') {
+      beginEditing(target.id);
+    } else {
+      selectBlock(target.id, { focus: false });
+      focusZoneInBlock(target.id, 'content');
+    }
+    return true;
+  }
+
   function beginEditing(blockId, options) {
     var block = findBlock(blockId);
     var state = getState();
@@ -2643,6 +2705,12 @@
       event.stopPropagation();
       selectAdjacentItem('composer', arrowDelta,
         focusZoneOfElement(target, null));
+      return;
+    }
+    if (plainArrow && target.closest('.block-edit-input')) {
+      event.preventDefault();
+      event.stopPropagation();
+      navigateFromEditing(arrowDelta);
       return;
     }
     if (target.closest('input, textarea, select, [contenteditable="true"]') ||

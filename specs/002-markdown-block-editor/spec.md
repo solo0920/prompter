@@ -101,10 +101,11 @@ and confirm the unsaved draft is not restored.
     the current item's controls, including a text block's text area, and wrap within it; with
     focus on the canvas they use the selected block if one exists. Tabbing or pressing Up/Down
     into the text area starts editing and selects the whole block text; Enter/F2 on the focused
-    text area also starts editing with the whole text selected. Once editing, Up/Down move the
-    caret instead of changing items. Tabbing to a title control opens the Marker menu for
-    arrow-key selection, and Up/Down on a drag handle moves the block one position while keeping
-    focus on that handle.
+    text area also starts editing with the whole text selected. While a block is being edited,
+    plain Up/Down still take priority: they commit the current edit and continue into the
+    adjacent item, with a text destination opening directly in edit mode. Tabbing to a title
+    control opens the Marker menu for arrow-key selection, and Up/Down on a drag handle moves the
+    block one position while keeping focus on that handle.
     Up/Down on the composer title control or input moves to the adjacent item with the same
     first/last wrap; Up/Down on the composer drag handle moves the composer one slot and keeps
     focus on the handle.
@@ -496,11 +497,12 @@ settings panel and clear the local library after confirming the warning.
   otherwise cycle only among editor items; they MUST NOT move to the header or left rail.
   Up/Down that changes the selected item MUST preserve the active focus zone (text, title,
   action, handle, or root) in the destination item when that zone exists; when the destination
-  is a text block's text zone, it MUST enter edit mode and select the whole block text. Once a
-  block is in edit mode, Up/Down MUST move the caret within the text area instead of changing
-  items. The Marker menu's Up/Down keys choose an option. Up/Down on a block's right drag handle
-  MUST move that block one sequence position earlier or later while keeping focus on the handle.
-  Up/Down on the composer title control or text input
+  is a text block's text zone, it MUST enter edit mode and select the whole block text. Plain
+  Up/Down MUST have priority over caret movement: while a block is in edit mode they MUST commit
+  the current edit and continue into the adjacent item, and a text-block destination MUST stay
+  in edit mode with all text selected. The Marker menu's Up/Down keys choose an option. Up/Down
+  on a block's right drag handle MUST move that block one sequence position earlier or later
+  while keeping focus on the handle. Up/Down on the composer title control or text input
   MUST select the adjacent sequence item, wrapping at the ends, while leaving the composer open.
   Up/Down on the composer's right drag handle MUST move the composer one slot earlier or later
   and keep focus on that handle. Tab from a block editor MUST continue to the current block's

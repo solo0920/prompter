@@ -370,6 +370,7 @@ opened/saved document
 ```text
 idle -> Tab/Up/Down into text area/double-click/Enter/F2 -> editing (all text selected)
 editing -> Enter -> committed (marker detection applied)
+editing -> Up/Down -> committed; adjacent item selected (text destination enters editing)
 editing -> Escape -> cancelled (original text/marker restored)
 editing -> click outside -> committed
 editing -> empty text -> removed (blank-line transfer)

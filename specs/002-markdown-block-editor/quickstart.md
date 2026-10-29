@@ -58,8 +58,8 @@ Current result (2026-10-29): **101 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **93 passing, 0 failing** (required gate). Firefox also
-reports 93 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **94 passing, 0 failing** (required gate). Firefox also
+reports 94 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -70,8 +70,8 @@ fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 93/93 | PASS 93/93 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 93/93 | PASS 93/93 | Supplementary check; WebDriver BiDi run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 94/94 | PASS 94/94 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 94/94 | PASS 94/94 | Supplementary check; WebDriver BiDi run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -92,7 +92,8 @@ Additional automated evidence:
   display math, common AMS environments, fenced-code exclusion, currency/escaped-dollar
   literals, and untrusted commands or surrounding raw HTML.
 - Input checks cover multi-line composer and block editing, Shift+Enter line breaks, Enter
-  commit, auto-growing width and height, and full-text selection when editing starts.
+  commit, auto-growing width and height, full-text selection when editing starts, and Up/Down
+  commit-and-continue navigation while editing.
 - Preview checks cover live composer and block-editor drafts, draft Marker changes, and
   reverting drafts on dismiss or cancel.
 - Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
@@ -200,9 +201,9 @@ opens the Marker flyout without showing a grab cursor.
    composer shifts one position.
 7. With a block root or the canvas focused, press Up/Down repeatedly. Confirm the previous/next
    sequence item is selected, including the composer at its own slot, and that Up on the first
-   item wraps to the last while Down on the last wraps to the first. Pressing Up/Down from a text
-   area into another text block starts editing that block with all text selected; further
-   Up/Down move the caret instead of changing items.
+   item wraps to the last while Down on the last wraps to the first. Start editing a block, change
+   its text, and press Up/Down again: confirm the current text is committed and the adjacent item
+   is selected, with a text destination entering edit mode and all text selected.
 8. Focus a block and press Tab repeatedly. Confirm Tab into the text area starts edit mode
    directly with all text selected, the next Tab reaches the title/Marker and opens its menu, the
    next reaches the drag handle, then the remaining controls and block root, wrapping inside the
@@ -217,8 +218,9 @@ opens the Marker flyout without showing a grab cursor.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
     earlier/later, focus stays on the handle, and the move is announced. From the title area,
     action controls, or block root, press Up/Down to change items and confirm focus stays in the
-    same zone on the new item. From a text area, confirm Up/Down enter the adjacent text block in
-    edit mode with all text selected.
+    same zone on the new item. From a text area, confirm Up/Down commit the current edit and
+    continue to the adjacent item; a text destination must open in edit mode with all text
+    selected, and repeated Up/Down must keep moving without requiring Escape.
 11. Focus the composer input, type some text, and press Up/Down. Confirm the item before/after
     the composer slot is selected, wrapping at the ends, while the composer and its text remain.
     Repeat with the composer title control focused. Then focus the composer drag handle and press

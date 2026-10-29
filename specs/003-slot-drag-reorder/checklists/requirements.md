@@ -99,10 +99,11 @@
   group and stays selected after the drop. A marquee dragged on empty canvas selects the blocks
   it intersects, including additive Cmd/Ctrl selection. Delete/Backspace removes every selected
   block and closes the resulting gaps. Up/Down moves through blocks and the composer at its
-  sequence slot with first/last wrap, and entering a text block through Up/Down or Tab starts
-  editing with all text selected; Tab cycles within the current block or composer item; and
-  Up/Down on a drag handle reorders the block while retaining focus.
-- Verification: **101 unit tests** and **93 browser tests** pass in Chrome and Firefox,
+  sequence slot with first/last wrap, including while a block is being edited: the current edit
+  commits and navigation continues with the destination text block in edit mode and all text
+  selected. Tab cycles within the current block or composer item; and Up/Down on a drag handle
+  reorders the block while retaining focus.
+- Verification: **101 unit tests** and **94 browser tests** pass in Chrome and Firefox,
   online and offline.
 
 ## Notes

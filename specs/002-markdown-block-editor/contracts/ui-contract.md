@@ -192,8 +192,8 @@ Each image block shows:
   text area grows wider with its content up to the block maximum and grows taller as text
   wraps.
 - Enter commits and exits edit mode; Shift+Enter inserts a line break; Escape cancels and
-  restores the original text and marker; clicking outside commits. Up/Down move the caret while
-  editing instead of changing the selected item.
+  restores the original text and marker; clicking outside commits. Plain Up/Down take priority:
+  they commit the current edit and move to the adjacent item instead of moving the caret.
 - After committing a text block, the next composer inherits that block's Marker.
 - Marker detection applies on commit: a recognized prefix typed at the start is extracted once.
   If the block already has a marker, a second typed marker is treated as literal text.
@@ -250,8 +250,9 @@ Each image block shows:
   handle, or root) in the destination item when available, so repeated navigation keeps the same
   control type active. When the destination is a text block's text zone, Up/Down enter edit mode
   and select the whole block text.
-- Once a block is in edit mode, Up/Down move the caret within its text area and do not change
-  the selected item; Tab continues to the current block's title/Marker control.
+- Plain Up/Down have priority even while a block is in edit mode: they commit the current edit
+  and continue into the adjacent item, and a text-block destination stays in edit mode with all
+  text selected. Tab continues to the current block's title/Marker control.
 - Space/Enter on the title/Marker control opens the symbol-only flyout; Down/Up on the focused
   title/Marker also enters an already-open flyout, and Up/Down moves through the Marker options;
   Enter/Space applies the focused option.
@@ -260,8 +261,7 @@ Each image block shows:
 - Up/Down on the composer title control or text input moves to the sequence item immediately
   before or after the composer's slot, wrapping at the ends; the composer remains open. Up/Down
   on the composer drag handle moves the composer one slot earlier or later and keeps focus on the
-  handle. Other keys keep normal text editing, and the block editor input retains its normal
-  caret behavior.
+  handle. Other keys keep normal text editing.
 - Every block occupies a contiguous sequence position; there are no free-floating coordinates
   or empty gaps.
 - The selected/dragged block is raised above the other blocks while dragging.
@@ -393,7 +393,7 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | Preview | Enter/Space | Toggle the live right-side preview pane. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
-| Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. Entering a text block's text zone starts editing with all text selected; once editing, Up/Down move the caret instead. |
+| Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. Entering a text block's text zone starts editing with all text selected. Plain Up/Down also navigate while editing: the current edit commits first, and a text destination stays in edit mode. |
 | Block/canvas | Delete / Backspace | Remove every selected block; ignored while typing in the composer or block editor. |
 | Block | Tab | Focus the block text area, enter edit mode, and select all text. |
 | Block | Enter/F2 | Enter edit mode and select all text. |
