@@ -501,6 +501,23 @@
     return button;
   }
 
+  function createChevronIcon(direction) {
+    var namespace = 'http://www.w3.org/2000/svg';
+    var svg = global.document.createElementNS(namespace, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    var path = global.document.createElementNS(namespace, 'path');
+    path.setAttribute('d', direction === 'right' ? 'M9 5l7 7-7 7' : 'M5 9l7 7 7-7');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'currentColor');
+    path.setAttribute('stroke-width', '2.2');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(path);
+    return svg;
+  }
+
   function wireMarkerMenu(anchor, getMarker, onSelect, onToggle) {
     anchor.setAttribute('aria-haspopup', 'menu');
     anchor.setAttribute('aria-expanded', 'false');
@@ -701,11 +718,12 @@
     var label = (collapsed ? '展開' : '收合') + '「' + preview + '」下的 ' + count + ' 個區塊';
     var button = createButton(
       'block-collapse' + (collapsed ? ' collapsed' : ''),
-      label,
-      collapsed ? '▸' : '▾'
+      label
     );
+    button.dataset.direction = collapsed ? 'right' : 'down';
     button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     button.title = label;
+    button.appendChild(createChevronIcon(collapsed ? 'right' : 'down'));
     button.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -2880,7 +2898,7 @@
     }
     closeMarkerMenu();
     var menu = global.document.createElement('div');
-    menu.className = 'marker-menu menu';
+    menu.className = 'marker-menu menu marker-menu-grid';
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', '選擇標記');
     var labels = {
@@ -2893,7 +2911,8 @@
       '>': '> 引用',
       '.': '. 點號'
     };
-    Utils.MARKER_VALUES.forEach(function (marker) {
+    var menuOrder = ['none', '1.', '>', '.', '-', '#', '##', '###'];
+    menuOrder.forEach(function (marker) {
       var item = global.document.createElement('button');
       item.type = 'button';
       item.className = 'menu-item marker-menu-item';
@@ -2920,13 +2939,23 @@
       menu.appendChild(item);
     });
     global.document.body.appendChild(menu);
-    var rect = anchor.getBoundingClientRect();
+    var row = anchor.closest('.block-text') ||
+      anchor.closest('.composer') ||
+      anchor.closest('.block') ||
+      anchor;
+    var rect = row.getBoundingClientRect();
     var menuWidth = menu.offsetWidth;
     var menuHeight = menu.offsetHeight;
-    var left = rect.left - menuWidth - 6;
+    var left = rect.left + (rect.width - menuWidth) / 2;
     left = Math.max(8, Math.min(left, global.innerWidth - menuWidth - 8));
-    var top = rect.top + rect.height / 2 - menuHeight / 2;
+    var top = rect.top - menuHeight - 8;
+    var placement = 'above';
+    if (top < 4) {
+      top = rect.bottom + 8;
+      placement = 'below';
+    }
     top = Math.max(4, Math.min(top, global.innerHeight - menuHeight - 4));
+    menu.dataset.placement = placement;
     menu.style.left = Math.round(left) + 'px';
     menu.style.top = Math.round(top) + 'px';
     markerMenu = {
@@ -2951,12 +2980,19 @@
     }
     menu.addEventListener('keydown', function (event) {
       var current = items.indexOf(global.document.activeElement);
+      var target = null;
       if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        items[(current + 1) % items.length].focus();
+        target = current + 4;
       } else if (event.key === 'ArrowUp') {
+        target = current - 4;
+      } else if (event.key === 'ArrowRight') {
+        target = current + 1;
+      } else if (event.key === 'ArrowLeft') {
+        target = current - 1;
+      }
+      if (target !== null) {
         event.preventDefault();
-        items[(current - 1 + items.length) % items.length].focus();
+        items[(target + items.length * 2) % items.length].focus();
       } else if (event.key === 'Home') {
         event.preventDefault();
         items[0].focus();
@@ -2970,11 +3006,11 @@
         var item = anchor.closest ? (anchor.closest('.block') || anchor.closest('.composer')) : null;
         var focusables = item ? focusablesForItem(item) : canvasFocusables(getCanvas());
         if (item && item.classList.contains('block')) {
-          var target = event.shiftKey
+          var targetNode = event.shiftKey
             ? focusables[focusables.length - 1]
             : focusables[0];
-          if (target) {
-            focusTabTarget(target);
+          if (targetNode) {
+            focusTabTarget(targetNode);
           } else {
             anchor.focus();
           }

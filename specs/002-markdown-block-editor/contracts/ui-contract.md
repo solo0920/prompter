@@ -126,15 +126,16 @@ The composer is the only input box that creates a new block.
   - Inserted via "+": dismiss the composer; no block.
   - Initial blank-document composer: keep it (a blank document always has an input).
 - Moving the pointer anywhere from the block's left border through the Marker prefix opens a
-  symbol-only flyout to its left; clicking or pressing Enter/Space also opens it for keyboard
-  and touch input. The left side uses the default cursor, while the right side keeps the grab
-  cursor and drag handle. The flyout lists `×` (no Marker),
-  `#`, `##`, `###`, `-`, `1.`, `>`, and `.` with descriptive accessible names but no visible
-  title text. Arrow Up/Down navigates, Home/End jump to the first/last option, Escape closes,
-  and selecting an option applies it, returns focus to the composer text input, and preserves
-  the caret or selection. A hover-opened flyout stays open while the pointer is over the Marker
-  or flyout, including the gap between them, and closes after the pointer leaves both areas,
-  chooses an option, presses Escape or Tab, or clicks outside.
+  symbol-only two-row panel above the title row, horizontally centered on that row; clicking or
+  pressing Enter/Space also opens it for keyboard and touch input. The left side uses the default
+  cursor, while the right side keeps the grab cursor and drag handle. The upper row lists `×`
+  (no Marker), `1.`, `>`, and `.`; the lower row lists `-`, `#`, `##`, and `###`. Options have
+  descriptive accessible names but no visible title text. Arrow Left/Right and Up/Down navigate
+  the grid, Home/End jump to the first/last option, Escape closes, and selecting an option
+  applies it, returns focus to the composer text input, and preserves the caret or selection. A
+  hover-opened flyout stays open while the pointer is over the Marker or flyout, including the
+  gap between them, and closes after the pointer leaves both areas, chooses an option, presses
+  Escape or Tab, or clicks outside.
 - Typing a recognized marker token followed by exactly one space at the start shows a live
   detection label (for example `偵測到： ##`). On Enter the marker is stored once and removed
   from the text. If the user selects a different marker from the menu after typing, the menu
@@ -173,9 +174,10 @@ Each image block shows:
 
 ## Collapsible Sections
 
-- A text block with at least one following lower-ranked block shows a chevron control immediately
-  left of its Marker. The control uses `▾` when expanded and `▸` when collapsed, exposes
-  `aria-expanded`, and has an accessible label naming the block and hidden item count.
+- A text block with at least one following lower-ranked block shows a chevron icon immediately
+  left of its Marker. The icon points down when expanded and right when collapsed, is sized with
+  the surrounding text, exposes `aria-expanded`, and has an accessible label naming the block
+  and hidden item count.
 - Rank order from highest to lowest is `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then unmarked text
   and image content. A section ends at the next block of the same or higher rank.
 - Activating the control hides every following block in that section, including images and
@@ -278,8 +280,8 @@ Each image block shows:
   and continue into the adjacent item, and a text-block destination stays in edit mode with all
   text selected. Tab continues to the current block's title/Marker control.
 - Space/Enter on the title/Marker control opens the symbol-only flyout; Down/Up on the focused
-  title/Marker also enters an already-open flyout, and Up/Down moves through the Marker options;
-  Enter/Space applies the focused option.
+  title/Marker also enters an already-open flyout. Once inside, Up/Down moves between the two
+  rows, Left/Right moves within a row, and Enter/Space applies the focused option.
 - Up/Down on a drag handle moves the focused block one position earlier/later and keeps focus on
   the handle, with the move announced.
 - Up/Down on the composer title control or text input moves to the sequence item immediately

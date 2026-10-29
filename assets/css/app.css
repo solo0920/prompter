@@ -409,15 +409,22 @@ body {
 .block-text { display: flex; align-items: flex-start; gap: 7px; min-height: 24px; }
 .block-collapse {
   flex: 0 0 auto;
-  width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
   height: 24px;
   padding: 0;
   border: 0;
   border-radius: calc(var(--radius-control) - 2px);
   background: transparent;
   color: var(--muted);
-  font-size: 13px;
   line-height: 1;
+}
+.block-collapse svg {
+  display: block;
+  width: 18px;
+  height: 18px;
 }
 .block-collapse:hover,
 .block-collapse:focus-visible {
@@ -621,15 +628,20 @@ body {
   top: 0;
   left: 0;
   z-index: 90;
+  display: grid;
+  grid-template-columns: repeat(4, 48px);
+  gap: 4px;
   max-height: min(360px, calc(100vh - 16px));
   overflow-y: auto;
   min-width: 0;
-  padding: 4px;
+  padding: 6px;
 }
 .marker-menu .marker-menu-item {
+  width: 100%;
   text-align: center;
-  padding: 6px 10px;
+  padding: 7px 10px;
   min-width: 42px;
+  white-space: nowrap;
 }
 .marker-menu .marker-menu-item[aria-checked="true"] {
   background: var(--surface-2);

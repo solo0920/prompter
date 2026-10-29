@@ -131,8 +131,9 @@ Expected: no errors; the canvas is usable at 1280×720 and 360×800.
    appears directly below.
 5. Type `- 限制一` and press Enter.
 6. Add another block and type `> 只輸出結果` and press Enter.
-7. Add another block, hover the Marker control, move the pointer into the flyout and pause;
-   confirm it stays open while inside the flyout. Move the pointer away and confirm it closes;
+7. Add another block, hover the Marker control, and confirm a two-row panel appears above the
+   title row, horizontally centered: `× 1. > .` on top and `- # ## ###` below. Move the pointer
+   into the panel and pause; confirm it stays open. Move the pointer away and confirm it closes;
    reopen it, choose `.`, type `literal`, and press Enter.
 8. Add a block, type `## 目標` (without choosing a marker), and confirm the live detection label
    shows `##`; press Enter.
@@ -233,8 +234,9 @@ opens the Marker flyout without showing a grab cursor.
    in the opposite direction. With focus on the canvas, confirm Tab uses the selected block if
    one exists.
 9. Tab to a block's title area and confirm the Marker menu opens automatically. Press Down to
-   enter the options, use Up/Down to move through them, and Enter/Space to apply the focused
-   option. Confirm Space/Enter on the title area still opens and focuses the current option.
+   enter the options, use Up/Down to move between the two rows and Left/Right within a row, and
+   Enter/Space to apply the focused option. Confirm Space/Enter on the title area still opens
+   and focuses the current option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
     earlier/later, focus stays on the handle, and the move is announced. From the title area,
     action controls, or block root, press Up/Down to change items and confirm focus stays in the

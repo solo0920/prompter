@@ -856,7 +856,7 @@
     });
   });
 
-  test('US1 hovering a Marker control opens a symbol-only flyout on its left', function () {
+  test('US1 hovering a Marker control opens a symbol-only flyout above the title', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win, '##');
       commitComposer(win, 'Hover marker');
@@ -888,18 +888,45 @@
         menu.querySelectorAll('.marker-menu-item'),
         function (item) { return item.textContent.trim(); }
       );
-      equal(symbols.join(','), '×,#,##,###,-,1.,>,.',
-        'The flyout must show Marker symbols only.');
+      equal(symbols.join(','), '×,1.,>,.,-,#,##,###',
+        'The flyout must show the requested two-row Marker order.');
       assert(menu.textContent.indexOf('標題') === -1,
         'The flyout must not show descriptive Marker labels.');
-      var markerRect = marker.getBoundingClientRect();
+      var titleRect = element.querySelector('.block-text').getBoundingClientRect();
       var menuRect = menu.getBoundingClientRect();
-      assert(menuRect.right <= markerRect.left + 0.5,
-        'The flyout must open to the left of the Marker.');
-      var menuCenter = menuRect.top + menuRect.height / 2;
-      var markerCenter = markerRect.top + markerRect.height / 2;
-      assert(Math.abs(menuCenter - markerCenter) <= 8,
-        'The flyout must stay vertically centered on the Marker when viewport-clamped.');
+      equal(menu.dataset.placement, 'above',
+        'The flyout must open above the title when there is room.');
+      assert(menuRect.bottom <= titleRect.top + 0.5,
+        'The flyout must sit above the title row.');
+      assert(Math.abs((menuRect.left + menuRect.width / 2) -
+        (titleRect.left + titleRect.width / 2)) <= 1,
+      'The flyout must be horizontally centered on the title row.');
+      var firstRowTop = menu.querySelector('[data-marker="none"]')
+        .getBoundingClientRect().top;
+      var secondRowTop = menu.querySelector('[data-marker="-"]')
+        .getBoundingClientRect().top;
+      ['1.', '>', '.'].forEach(function (markerValue) {
+        assert(Math.abs(menu.querySelector('[data-marker="' + markerValue + '"]')
+          .getBoundingClientRect().top - firstRowTop) <= 1,
+        markerValue + ' must sit in the first Marker row.');
+      });
+      ['#', '##', '###'].forEach(function (markerValue) {
+        assert(Math.abs(menu.querySelector('[data-marker="' + markerValue + '"]')
+          .getBoundingClientRect().top - secondRowTop) <= 1,
+        markerValue + ' must sit in the second Marker row.');
+      });
+      assert(secondRowTop > firstRowTop,
+        'The flyout must render the requested upper and lower rows.');
+      ['1.', '>', '.'].forEach(function (markerValue, index) {
+        var upper = menu.querySelector('[data-marker="' + markerValue + '"]')
+          .getBoundingClientRect();
+        var lower = menu.querySelector('[data-marker="' +
+          ['#', '##', '###'][index] + '"]').getBoundingClientRect();
+        assert(Math.abs((upper.left + upper.width / 2) -
+          (lower.left + lower.width / 2)) <= 1,
+        markerValue + ' and ' + ['#', '##', '###'][index] +
+          ' must share a vertical grid column.');
+      });
       equal(win.document.activeElement, composerInput(win),
         'Hovering the Marker must not move focus out of the composer.');
 
@@ -910,10 +937,15 @@
       enter(composerMarker);
       var composerMenu = win.document.querySelector('.marker-menu');
       assert(composerMenu, 'Hovering the composer Marker must open the flyout.');
-      var composerMarkerRect = composerMarker.getBoundingClientRect();
+      var composerRect = composerMarker.closest('.composer').getBoundingClientRect();
       var composerMenuRect = composerMenu.getBoundingClientRect();
-      assert(composerMenuRect.right <= composerMarkerRect.left + 0.5,
-        'The composer flyout must open to the left of its Marker.');
+      equal(composerMenu.dataset.placement, 'above',
+        'The composer flyout must open above the composer.');
+      assert(composerMenuRect.bottom <= composerRect.top + 0.5,
+        'The composer flyout must sit above the composer title row.');
+      assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
+        (composerRect.left + composerRect.width / 2)) <= 1,
+      'The composer flyout must be horizontally centered on the composer.');
       leave(composerMarker);
       var menuCenter = {
         x: composerMenuRect.left + composerMenuRect.width / 2,
@@ -1272,6 +1304,7 @@
       var h2Toggle = blockById(win, 'collapse-h2').querySelector('.block-collapse');
       assert(h2Toggle, 'A heading with lower-ranked blocks must show a collapse control.');
       equal(h2Toggle.getAttribute('aria-expanded'), 'true');
+      equal(h2Toggle.dataset.direction, 'down');
       equal(blockById(win, 'collapse-p1').querySelector('.block-collapse'), null,
         'Plain text must not show a collapse control.');
       equal(blockById(win, 'collapse-h1b').querySelector('.block-collapse'), null,
@@ -1289,7 +1322,12 @@
       assert(blockById(win, 'collapse-h1b'), 'The next top-level heading must stay visible.');
       var collapsedToggle = blockById(win, 'collapse-h2').querySelector('.block-collapse');
       equal(collapsedToggle.getAttribute('aria-expanded'), 'false');
-      equal(collapsedToggle.textContent, '▸');
+      equal(collapsedToggle.dataset.direction, 'right',
+        'A collapsed section must point its chevron to the right.');
+      var chevron = collapsedToggle.querySelector('svg');
+      assert(chevron, 'The collapse control must render a chevron icon.');
+      assert(chevron.getBoundingClientRect().width >= 16,
+        'The chevron icon must match the surrounding text size.');
       equal(state.document.blocks.length, 7,
         'Collapsing must not remove blocks from the document.');
       equal(win.Prompter.markdown.serializeDocument(state.document), before,
@@ -1835,7 +1873,7 @@
       equal(win.document.activeElement, checked,
         'Down from the focused title area must enter the open menu.');
       press(win, checked, 'ArrowDown');
-      equal(win.document.activeElement.dataset.marker, '#',
+      equal(win.document.activeElement.dataset.marker, '-',
         'Down must continue through the Marker options.');
       press(win, win.document.activeElement, 'Escape');
       equal(win.document.querySelector('.marker-menu'), null,
@@ -2047,11 +2085,14 @@
         'The Marker menu must focus the current option.');
 
       press(win, win.document.activeElement, 'ArrowDown');
+      equal(win.document.activeElement.dataset.marker, '-',
+        'Down must move to the matching column in the lower row.');
+      press(win, win.document.activeElement, 'ArrowRight');
       equal(win.document.activeElement.dataset.marker, '#',
-        'Down must move to the next Marker option.');
-      press(win, win.document.activeElement, 'ArrowDown');
+        'Right must continue through the lower row.');
+      press(win, win.document.activeElement, 'ArrowRight');
       equal(win.document.activeElement.dataset.marker, '##',
-        'Down must continue through the Marker options.');
+        'Right must continue through the Marker options.');
       press(win, win.document.activeElement, 'Enter');
       equal(state.document.blocks[0].marker, '##',
         'Enter on the focused option must apply the Marker.');
@@ -2757,12 +2798,16 @@
         'The left side must not show a grab cursor.');
       var menu = win.document.querySelector('.marker-menu');
       assert(menu, 'Hovering the left border must open the Marker flyout.');
-      var markerRect = marker.getBoundingClientRect();
+      var titleRect = element.querySelector('.block-text').getBoundingClientRect();
       var menuRect = menu.getBoundingClientRect();
-      assert(menuRect.right <= markerRect.left + 0.5,
-        'The flyout must still open to the left of the Marker.');
+      equal(menu.dataset.placement, 'above');
+      assert(menuRect.bottom <= titleRect.top + 0.5,
+        'The flyout must sit above the title row.');
+      assert(Math.abs((menuRect.left + menuRect.width / 2) -
+        (titleRect.left + titleRect.width / 2)) <= 1,
+      'The flyout must be horizontally centered on the title row.');
 
-      move(rect.right - 6, rect.top + 2);
+      move(rect.right - 6, rect.top + rect.height / 2);
       equal(element.classList.contains('hover-right'), true,
         'Hovering the right side must set the right hover state.');
       equal(win.getComputedStyle(element).cursor, 'grab',

@@ -58,11 +58,12 @@
   block per obvious marker line in source order, keeps contiguous unmarked prose grouped,
   preserves blank-line separation, leaves plain multi-line text and fenced code intact, and
   focuses the next composer after the last block.
-- Collapsible sections: blocks with lower-ranked content show a chevron before the Marker; `#` >
-  `##` > `###` > `-` > `1.` > `>` > `.` > unmarked content. Collapsing hides the section from the
-  canvas but not from Save, Preview, or Copy; expanding preserves nested states; hidden blocks
-  are skipped by keyboard navigation; the composer moves after a collapsed section; and dragging
-  or moving a collapsed section with the keyboard carries its hidden descendants.
+- Collapsible sections: blocks with lower-ranked content show a text-sized chevron icon before
+  the Marker; `#` > `##` > `###` > `-` > `1.` > `>` > `.` > unmarked content. Collapsing hides
+  the section from the canvas but not from Save, Preview, or Copy; expanding preserves nested
+  states; hidden blocks are skipped by keyboard navigation; the composer moves after a collapsed
+  section; and dragging or moving a collapsed section with the keyboard carries its hidden
+  descendants.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and
@@ -88,9 +89,10 @@
   marquee range selection with additive Cmd/Ctrl behavior, whole-group pointer dragging with
   relative-order preservation, and Escape restoration are covered.
 - Hover checks: the left border-to-Marker hover zone opens the flyout without a grab cursor,
-  while the right side retains the grab cursor and add control; hover flyouts stay open while
-  the pointer is over the Marker or flyout, then close after leaving both, selecting, Escape/Tab,
-  or an outside click.
+  while the right side retains the grab cursor and add control; the flyout sits above the title
+  row, is horizontally centered there, and shows `× 1. > .` over `- # ## ###`; hover flyouts
+  stay open while the pointer is over the Marker or flyout, then close after leaving both,
+  selecting, Escape/Tab, or an outside click.
 - Workspace checks: the right-side live preview opens by default for new, opened, and restored
   documents, refreshes after edits and tab switches without hiding the canvas, and stays closed
   after the user closes it; document tabs open, switch, keep their active title editable, close
