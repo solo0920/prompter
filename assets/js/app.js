@@ -49,6 +49,7 @@
   function cacheElements() {
     [
       'file-menu-button', 'file-menu', 'directory-toggle', 'directory', 'directory-overlay',
+      'layer-toggle', 'layer-toolbar',
       'app-main', 'preview-button', 'copy-button', 'style-select', 'theme-toggle', 'settings-button',
       'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',

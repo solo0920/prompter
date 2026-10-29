@@ -126,9 +126,12 @@ body {
 
 .directory-rail {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 0;
+  overflow-y: auto;
   background: var(--surface);
   box-shadow: inset -1px 0 0 var(--border);
 }
@@ -141,7 +144,38 @@ body {
   border-radius: calc(var(--radius-control) - 2px);
 }
 .directory-rail-button .button-icon { width: 40px; height: 40px; }
-.app-main.directory-open .directory-rail-button { background: var(--surface-2); }
+.app-main.directory-open .directory-toggle { background: var(--surface-2); }
+.layer-toggle[aria-expanded="true"] { background: var(--surface-2); }
+.layer-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 40px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-control) + 1px);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-small);
+}
+.layer-toolbar[hidden] { display: none; }
+.layer-button {
+  width: 32px;
+  min-width: 32px;
+  min-height: 28px;
+  padding: 2px;
+  border: 0;
+  border-radius: calc(var(--radius-control) - 2px);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+.layer-button:hover,
+.layer-button:focus-visible { background: var(--surface); color: var(--text); }
+.layer-button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
 
 .directory {
   display: none;
@@ -402,6 +436,13 @@ body {
   outline: 2px solid var(--selection);
   outline-offset: -2px;
 }
+.block.layer-match { border-color: var(--accent); }
+.block.layer-dimmed {
+  opacity: .34;
+  filter: grayscale(1);
+}
+.block.layer-dimmed .block-plus,
+.block.layer-dimmed .drag-handle { visibility: hidden; }
 .block.dragging { cursor: grabbing; box-shadow: var(--shadow); transition: none; }
 .block.group-dragging { cursor: grabbing; box-shadow: var(--shadow); }
 .canvas.reordering .block.group-dragging { transition: none; }

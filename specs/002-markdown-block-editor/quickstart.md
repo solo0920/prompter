@@ -45,7 +45,7 @@ canonical Markdown serializer, reading order, blank-line/newline preservation, s
 image reference matching, the HTML renderer, preferences, storage degradation, composer
 Markdown splitting, and security guards. They do not require npm packages.
 
-Current result (2026-10-29): **105 passing, 0 failing**.
+Current result (2026-10-30): **105 passing, 0 failing**.
 
 ### Browser harness
 
@@ -61,10 +61,10 @@ Current result (2026-10-29): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **105 passing, 0 failing** (required gate). Firefox also
-reports 105 passing, 0 failing as the supplementary check.
+Current result (2026-10-30): Chrome **106 passing, 0 failing** (required gate). Firefox also
+reports 106 passing, 0 failing as the supplementary check.
 
-## Verified Results (2026-10-29)
+## Verified Results (2026-10-30)
 
 All automated checks were run against the committed `file://` entry page; no server or build
 step was used. Offline runs disabled browser networking (CDP network emulation in Chrome and an
@@ -72,8 +72,8 @@ unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 105/105 | PASS 105/105 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 105/105 | PASS 105/105 | Supplementary check; WebDriver run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 106/106 | PASS 106/106 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 106/106 | PASS 106/106 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -210,6 +210,18 @@ opens the Marker flyout without showing a grab cursor.
 4. Open the composer under `### 細項` and confirm it aligns with that section's content column.
 5. At 360 px width, confirm indented blocks and composers stay inside the canvas without
    horizontal page scrolling.
+
+### 2d. Layer focus toolbar (FR-054)
+
+1. Confirm a second rail button with a `#` icon sits below `文件目錄`. Activate it and confirm a
+   vertical toolbar lists `#`, `##`, `###`, `-`, `1.`, `>`, `.`.
+2. With a document containing headings, bullets, and quotes, choose `>`. Confirm the first quote
+   opens in edit mode with all text selected, other layers turn gray and cannot be clicked or
+   focused, and the composer is hidden.
+3. Press Down/Up repeatedly. Confirm editing moves only between quote blocks with first/last
+   wrap, and every destination opens in edit mode with all text selected.
+4. Choose `>` again, close the toolbar, or switch tabs. Confirm all blocks return to normal
+   interaction and the Markdown, Preview, and Copy output never changed.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
@@ -467,7 +479,7 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-10-29**: Chrome 156 passes the full automated harness from `file://`,
+**Verified 2026-10-30**: Chrome 156 passes the full automated harness from `file://`,
 including offline runs and is the required release gate. Firefox 159 also passes as the
 supplementary check. Safari is not part of the test matrix.
 

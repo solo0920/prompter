@@ -77,7 +77,7 @@ desktop-first with a 360 px responsive layout.
 `fetch()`, or runtime dependency. The browser tab-close limitation below is documented and
 does not violate the constitution.
 
-**Final Implementation Re-check (2026-10-29)**: PASS. The shipped app remains classic scripts
+**Final Implementation Re-check (2026-10-30)**: PASS. The shipped app remains classic scripts
 only, opens from `file://`, and uses no server, build step, package install, ES module,
 service worker, local `fetch()`, telemetry, remote asset, or runtime dependency downloaded at
 runtime. KaTeX 0.19.1 is vendored locally as a static asset for math rendering. Storage is

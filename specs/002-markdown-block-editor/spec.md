@@ -569,6 +569,15 @@ settings panel and clear the local library after confirming the warning.
   NOT change block text, Markers, Save, Preview, Copy, or Markdown reading order. A composer
   opened after a block MUST align with that block's level, and indented blocks MUST stay within
   the available canvas width.
+- **FR-054**: The left directory rail MUST provide a second button below `文件目錄` that opens a
+  vertical layer-focus toolbar listing `#`, `##`, `###`, `-`, `1.`, `>`, `.`. Activating one layer
+  MUST mark every text block with that Marker as the active layer, begin editing the first one,
+  and make blocks of all other layers visually de-emphasized, inert, and unselectable; image
+  blocks are also de-emphasized. Up/Down MUST then move only among blocks of the selected layer,
+  entering edit mode and selecting the full text on each step, with first/last wrap. Opening the
+  same layer again, closing the toolbar, or switching documents MUST exit layer focus and restore
+  normal block interaction. The composer MUST stay hidden during layer focus, and layer focus
+  MUST NOT change Markdown content, Save, Preview, or Copy output.
 
 
 ### Key Entities *(include if feature involves data)*

@@ -37,10 +37,10 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261029-3">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261029-5">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261029-3">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261029-3">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261029-5">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261029-5">
 </head>
 <body>
   <a class="skip-link" href="#canvas">跳至編輯畫布</a>
@@ -126,6 +126,32 @@
                 stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
       </button>
+      <button id="layer-toggle" class="button button-quiet layer-toggle directory-rail-button"
+              type="button" aria-expanded="false" aria-controls="layer-toolbar"
+              aria-label="依標題層級聚焦" title="依標題層級聚焦">
+        <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M9.2 3.8 7.4 20.2M16.6 3.8l-1.8 16.4M4 8.6h16M3 15.4h16"
+                fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div id="layer-toolbar" class="layer-toolbar" role="toolbar"
+           aria-label="依標題層級聚焦" aria-orientation="vertical" hidden>
+        <button class="button button-quiet layer-button" type="button" data-layer="#"
+                aria-pressed="false" aria-label="聚焦 # 標題" title="聚焦 # 標題">#</button>
+        <button class="button button-quiet layer-button" type="button" data-layer="##"
+                aria-pressed="false" aria-label="聚焦 ## 標題" title="聚焦 ## 標題">##</button>
+        <button class="button button-quiet layer-button" type="button" data-layer="###"
+                aria-pressed="false" aria-label="聚焦 ### 標題" title="聚焦 ### 標題">###</button>
+        <button class="button button-quiet layer-button" type="button" data-layer="-"
+                aria-pressed="false" aria-label="聚焦 - 項目" title="聚焦 - 項目">-</button>
+        <button class="button button-quiet layer-button" type="button" data-layer="1."
+                aria-pressed="false" aria-label="聚焦 1. 項目" title="聚焦 1. 項目">1.</button>
+        <button class="button button-quiet layer-button" type="button" data-layer=">"
+                aria-pressed="false" aria-label="聚焦 > 引用" title="聚焦 > 引用">&gt;</button>
+        <button class="button button-quiet layer-button" type="button" data-layer="."
+                aria-pressed="false" aria-label="聚焦 . 項目" title="聚焦 . 項目">.</button>
+      </div>
     </div>
     <aside id="directory" class="directory" aria-label="文件目錄">
       <div id="storage-warning" class="storage-warning" role="status" hidden>
@@ -319,16 +345,16 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261029-3"></script>
-  <script defer src="assets/js/markdown.js?v=20261029-3"></script>
-  <script defer src="assets/js/model.js?v=20261029-3"></script>
-  <script defer src="assets/js/storage.js?v=20261029-3"></script>
-  <script defer src="assets/js/search.js?v=20261029-3"></script>
-  <script defer src="assets/js/files.js?v=20261029-3"></script>
-  <script defer src="assets/js/preview.js?v=20261029-3"></script>
-  <script defer src="assets/js/clipboard.js?v=20261029-3"></script>
-  <script defer src="assets/js/editor.js?v=20261029-3"></script>
-  <script defer src="assets/js/settings.js?v=20261029-3"></script>
-  <script defer src="assets/js/app.js?v=20261029-3"></script>
+  <script defer src="assets/js/utils.js?v=20261029-5"></script>
+  <script defer src="assets/js/markdown.js?v=20261029-5"></script>
+  <script defer src="assets/js/model.js?v=20261029-5"></script>
+  <script defer src="assets/js/storage.js?v=20261029-5"></script>
+  <script defer src="assets/js/search.js?v=20261029-5"></script>
+  <script defer src="assets/js/files.js?v=20261029-5"></script>
+  <script defer src="assets/js/preview.js?v=20261029-5"></script>
+  <script defer src="assets/js/clipboard.js?v=20261029-5"></script>
+  <script defer src="assets/js/editor.js?v=20261029-5"></script>
+  <script defer src="assets/js/settings.js?v=20261029-5"></script>
+  <script defer src="assets/js/app.js?v=20261029-5"></script>
 </body>
 </html>

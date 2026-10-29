@@ -37,14 +37,14 @@
 - 45 functional requirements and 16 measurable outcomes are defined.
 - The specification is ready for `/speckit.plan`.
 
-## Post-Implementation Verification (2026-10-29)
+## Post-Implementation Verification (2026-10-30)
 
 - Unit and contract tests: **105 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection and rank ordering, blank-line/newline
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
-- Browser harness: **105 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **106 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
   browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -68,6 +68,10 @@
   `>`=5, `.`=6) independent of preceding blocks; unmarked content sits one level below the last
   Marker and plain text starts at 0. Composers align with the prior block; Markdown order and
   text stay unchanged; indented blocks remain inside the canvas at 360 px.
+- Layer focus: the rail's second button opens a seven-layer toolbar; choosing a layer edits its
+  first block, dims and locks other layers, hides the composer, and lets Up/Down cycle only that
+  layer's blocks in edit mode with full selection. Repeating the layer, closing the toolbar, or
+  switching documents restores normal interaction without changing Markdown, Preview, or Copy.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and

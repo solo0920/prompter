@@ -25,6 +25,8 @@
   var lastTap = { blockId: null, time: 0 };
   var hoveredBlock = null;
   var activeCollapse = null;
+  var layerFilter = null;
+  var layerToolbarOpen = false;
   var collapsedByDocument = typeof global.WeakMap === 'function' ? new global.WeakMap() : null;
   var collapsedFallback = {};
 
@@ -214,6 +216,9 @@
   function collapseModelForDocument(document, ordered) {
     var order = ordered || (document ? Model.normalizeSequence(document) : []);
     var collapsed = collapseSetFor(document);
+    if (layerFilter) {
+      collapsed = {};
+    }
     var model = {
       ordered: order,
       hasChildren: {},
@@ -272,6 +277,18 @@
     return !!(activeCollapse && activeCollapse.hidden[blockId]);
   }
 
+  function blockMatchesLayer(block) {
+    return !layerFilter ||
+      !!(block && block.type === 'text' && block.marker === layerFilter);
+  }
+
+  function blockAllowed(blockId) {
+    if (!layerFilter) {
+      return true;
+    }
+    return blockMatchesLayer(findBlock(blockId));
+  }
+
   function sanitizeCollapsedView(state, collapse) {
     if (!state || !collapse) {
       return;
@@ -296,6 +313,177 @@
         }
       });
     }
+  }
+
+  function sanitizeLayerSelection(state, blocks) {
+    if (!state || !layerFilter) {
+      return;
+    }
+    var allowed = {};
+    (blocks || []).forEach(function (block) {
+      if (blockMatchesLayer(block)) {
+        allowed[block.id] = true;
+      }
+    });
+    var ids = selectedBlockIds(state).filter(function (id) {
+      return allowed[id];
+    });
+    state.selectedBlockIds = ids;
+    if (state.selectedBlockId && !allowed[state.selectedBlockId]) {
+      state.selectedBlockId = ids.length ? ids[ids.length - 1] : null;
+    }
+    if (state.editingBlockId && !allowed[state.editingBlockId]) {
+      state.editingBlockId = null;
+      editDraft = null;
+    }
+    if (state.composer) {
+      state.composer = null;
+    }
+  }
+
+  function updateLayerToolbar() {
+    var toggle = global.document.getElementById('layer-toggle');
+    var toolbar = global.document.getElementById('layer-toolbar');
+    if (!toggle || !toolbar) {
+      return;
+    }
+    toggle.setAttribute('aria-expanded', layerToolbarOpen ? 'true' : 'false');
+    toolbar.hidden = !layerToolbarOpen;
+    Array.prototype.forEach.call(toolbar.querySelectorAll('.layer-button'), function (button) {
+      button.setAttribute('aria-pressed',
+        layerFilter && button.dataset.layer === layerFilter ? 'true' : 'false');
+    });
+  }
+
+  function layerLabel(marker) {
+    if (marker === '>') {
+      return '引用';
+    }
+    if (marker === '1.') {
+      return '編號項目';
+    }
+    if (marker === '-') {
+      return '項目';
+    }
+    if (marker === '.') {
+      return '點項目';
+    }
+    return marker + ' 標題';
+  }
+
+  function setLayerToolbarOpen(open) {
+    if (open === layerToolbarOpen) {
+      updateLayerToolbar();
+      return;
+    }
+    layerToolbarOpen = !!open;
+    if (!layerToolbarOpen && layerFilter) {
+      setLayerFilter(null);
+      return;
+    }
+    updateLayerToolbar();
+  }
+
+  function setLayerFilter(marker) {
+    var state = getState();
+    if (!state || !state.document) {
+      layerFilter = null;
+      updateLayerToolbar();
+      return;
+    }
+    if (marker && ['#', '##', '###', '-', '1.', '>', '.'].indexOf(marker) === -1) {
+      return;
+    }
+    if (state.editingBlockId) {
+      commitEditing();
+      state = getState();
+    }
+    if (!state || !state.document) {
+      return;
+    }
+    if (state.composer) {
+      if (String(state.composer.text || '').trim() !== '') {
+        commitComposer();
+      } else {
+        state.composer = null;
+      }
+      state = getState();
+      if (!state || !state.document) {
+        return;
+      }
+    }
+    var next = marker === layerFilter ? null : marker;
+    var matches = [];
+    if (next) {
+      matches = Model.normalizeSequence(state.document).filter(function (block) {
+        return block.type === 'text' && block.marker === next;
+      });
+      if (!matches.length) {
+        announce('文件中沒有 ' + layerLabel(next) + ' 層級的項目。');
+        updateLayerToolbar();
+        return;
+      }
+    }
+    layerFilter = next;
+    clearSelection();
+    render();
+    if (next) {
+      announce('已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length + ' 個項目。');
+      beginEditing(matches[0].id);
+    } else {
+      ensureInitialComposer(state);
+      render();
+    }
+  }
+
+  function wireLayerToolbar() {
+    var toggle = global.document.getElementById('layer-toggle');
+    var toolbar = global.document.getElementById('layer-toolbar');
+    if (!toggle || !toolbar) {
+      return;
+    }
+    var buttons = Array.prototype.slice.call(toolbar.querySelectorAll('.layer-button'));
+    toggle.addEventListener('click', function () {
+      setLayerToolbarOpen(!layerToolbarOpen);
+    });
+    toggle.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        setLayerToolbarOpen(true);
+        var pressed = toolbar.querySelector('.layer-button[aria-pressed="true"]') || buttons[0];
+        if (pressed) {
+          pressed.focus();
+        }
+      }
+    });
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        setLayerToolbarOpen(true);
+        setLayerFilter(button.dataset.layer);
+      });
+    });
+    toolbar.addEventListener('keydown', function (event) {
+      var index = buttons.indexOf(global.document.activeElement);
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        buttons[(index + 1 + buttons.length) % buttons.length].focus();
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        buttons[(index - 1 + buttons.length) % buttons.length].focus();
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        buttons[0].focus();
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        buttons[buttons.length - 1].focus();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        setLayerToolbarOpen(false);
+        toggle.focus();
+      }
+    });
+    updateLayerToolbar();
   }
 
   function updateCanvasSize() {
@@ -389,6 +577,7 @@
     var ordered = Model.normalizeSequence(state.document);
     activeCollapse = collapseModelForDocument(state.document, ordered);
     sanitizeCollapsedView(state, activeCollapse);
+    sanitizeLayerSelection(state, ordered);
     var indentInfo = outlineIndentation(ordered);
     ordered.forEach(function (block) {
       if (activeCollapse.hidden[block.id]) {
@@ -402,7 +591,7 @@
       autoResizeTextarea
     );
     var composerElement = canvas.querySelector('.composer');
-    var composer = state.composer ? {
+    var composer = state.composer && !layerFilter ? {
       insertIndex: state.composer.insertIndex,
       height: composerElement ? composerElement.offsetHeight : 0
     } : null;
@@ -488,6 +677,10 @@
     var target = event.target;
     var block = target && target.closest ? target.closest('.block') : null;
     if (!block) {
+      clearBlockHover();
+      return;
+    }
+    if (layerFilter && !blockMatchesLayer(findBlock(block.dataset.blockId))) {
       clearBlockHover();
       return;
     }
@@ -788,10 +981,12 @@
   function createBlockElement(block, collapse) {
     var state = getState();
     var element = global.document.createElement('div');
-    element.className = 'block' + (block.type === 'image' ? ' block-image-block' : '');
+    var dimmed = !!layerFilter && !blockMatchesLayer(block);
+    element.className = 'block' + (block.type === 'image' ? ' block-image-block' : '') +
+      (dimmed ? ' layer-dimmed' : (layerFilter ? ' layer-match' : ''));
     element.dataset.blockId = block.id;
     element.setAttribute('role', 'listitem');
-    element.tabIndex = 0;
+    element.tabIndex = dimmed ? -1 : 0;
     element.style.left = block.x + 'px';
     element.style.top = block.y + 'px';
     element.style.zIndex = String(block.z || 1);
@@ -800,7 +995,11 @@
     if (selected) {
       element.classList.add('selected');
     }
-    element.setAttribute('aria-label', blockLabel(block));
+    if (dimmed) {
+      element.setAttribute('aria-disabled', 'true');
+    }
+    element.setAttribute('aria-label', blockLabel(block) +
+      (dimmed ? '，非目前聚焦層級' : ''));
     if (state && state.editingBlockId === block.id) {
       element.classList.add('editing');
     }
@@ -808,7 +1007,7 @@
     if (block.type === 'image') {
       element.appendChild(createImageContent(block));
     } else {
-      if (collapse && collapse.hasChildren[block.id]) {
+      if (!layerFilter && collapse && collapse.hasChildren[block.id]) {
         element.appendChild(createCollapseToggle(block, collapse));
       }
       var row = global.document.createElement('div');
@@ -840,6 +1039,19 @@
       beginDrag(event, block.id, element, true);
     });
     element.appendChild(handle);
+
+    if (dimmed) {
+      Array.prototype.forEach.call(
+        element.querySelectorAll('button, input, textarea, select, a[href], [tabindex]'),
+        function (node) {
+          node.tabIndex = -1;
+          if (node.tagName === 'BUTTON' || node.tagName === 'INPUT' ||
+              node.tagName === 'TEXTAREA' || node.tagName === 'SELECT') {
+            node.disabled = true;
+          }
+        }
+      );
+    }
 
     return element;
   }
@@ -923,6 +1135,9 @@
   }
 
   function renderComposer(state) {
+    if (layerFilter) {
+      return null;
+    }
     var composer = state.composer;
     if (!composer) {
       return null;
@@ -1043,7 +1258,7 @@
   }
 
   function ensureInitialComposer(state) {
-    if (!state.document || state.document.blocks.length > 0 || state.composer) {
+    if (layerFilter || !state.document || state.document.blocks.length > 0 || state.composer) {
       return;
     }
     var preferences = state.preferences || Model.createPreferences();
@@ -1069,11 +1284,13 @@
     if (state.document && currentDocumentId !== state.document.id) {
       revokeObjectUrls();
       editDraft = null;
+      layerFilter = null;
       currentDocumentId = state.document.id;
     } else if (!state.document) {
       revokeObjectUrls();
       currentDocumentId = null;
       editDraft = null;
+      layerFilter = null;
     }
 
     Array.prototype.forEach.call(canvas.querySelectorAll('.block, .composer'), function (element) {
@@ -1085,6 +1302,7 @@
       if (empty) {
         empty.hidden = false;
       }
+      updateLayerToolbar();
       updateCanvasSize();
       return;
     }
@@ -1092,10 +1310,17 @@
     if (empty) {
       empty.hidden = true;
     }
-    ensureInitialComposer(state);
     var blocks = Model.normalizeSequence(state.document);
+    if (layerFilter && !blocks.some(function (block) {
+      return blockMatchesLayer(block);
+    })) {
+      layerFilter = null;
+    }
+    updateLayerToolbar();
+    ensureInitialComposer(state);
     activeCollapse = collapseModelForDocument(state.document, blocks);
     sanitizeCollapsedView(state, activeCollapse);
+    sanitizeLayerSelection(state, blocks);
     blocks.forEach(function (block) {
       if (activeCollapse.hidden[block.id]) {
         return;
@@ -1143,7 +1368,8 @@
       var block = findBlock(id);
       if (block) {
         element.style.zIndex = String(block.z || 1);
-        element.setAttribute('aria-label', blockLabel(block));
+        element.setAttribute('aria-label', blockLabel(block) +
+          (layerFilter && !blockMatchesLayer(block) ? '，非目前聚焦層級' : ''));
       }
     });
   }
@@ -1156,7 +1382,8 @@
     }
     var unique = [];
     (ids || []).forEach(function (id) {
-      if (findBlock(id) && unique.indexOf(id) === -1) {
+      var block = findBlock(id);
+      if (block && blockMatchesLayer(block) && unique.indexOf(id) === -1) {
         unique.push(id);
       }
     });
@@ -1254,6 +1481,9 @@
 
   function navigationItemsFor(state) {
     return dragItemsFor(state).filter(function (item) {
+      if (layerFilter) {
+        return !isComposerItem(item) && blockAllowed(item.id);
+      }
       return isComposerItem(item) || !blockIsHidden(item.id);
     });
   }
@@ -1620,6 +1850,9 @@
     }
     var state = getState();
     if (!state || state.editingBlockId === blockId) {
+      return;
+    }
+    if (!blockAllowed(blockId)) {
       return;
     }
     if (event.pointerType === 'touch' && !fromHandle) {
@@ -2098,7 +2331,7 @@
     if (isComposerItem(item)) {
       clearSelection();
       focusComposerZone(zone);
-    } else if (zone === 'content' && item.type === 'text') {
+    } else if (item.type === 'text' && (zone === 'content' || layerFilter)) {
       beginEditing(item.id);
     } else if (zone) {
       selectBlock(item.id, { focus: false });
@@ -2174,7 +2407,7 @@
   function beginEditing(blockId, options) {
     var block = findBlock(blockId);
     var state = getState();
-    if (!block || block.type !== 'text' || !state) {
+    if (!block || block.type !== 'text' || !state || !blockMatchesLayer(block)) {
       return;
     }
     var caret = options && options.caret !== undefined ? options.caret : 0;
@@ -2488,6 +2721,10 @@
   function openComposer(anchorId) {
     var state = getState();
     if (!state || !state.document) {
+      return;
+    }
+    if (layerFilter) {
+      announce('請先關閉層級聚焦再新增項目。');
       return;
     }
     if (state.composer) {
@@ -3171,6 +3408,9 @@
     var state = getState();
     var blockElementNode = target.closest('.block');
     var block = blockElementNode ? findBlock(blockElementNode.dataset.blockId) : null;
+    if (block && !blockAllowed(block.id)) {
+      return;
+    }
     if (plainArrow) {
       if (block && target.closest('.drag-handle')) {
         event.preventDefault();
@@ -3245,7 +3485,8 @@
       if (node.hidden || node.disabled) {
         return false;
       }
-      if (node.getAttribute('aria-hidden') === 'true' || node.closest('[hidden]')) {
+      if (node.getAttribute('aria-hidden') === 'true' || node.closest('[hidden]') ||
+          node.closest('[inert]')) {
         return false;
       }
       if (node.tabIndex < 0 || node.getClientRects().length === 0) {
@@ -3395,6 +3636,9 @@
     var canvasRect = canvas.getBoundingClientRect();
     var ids = [];
     state.document.blocks.forEach(function (block) {
+      if (!blockMatchesLayer(block)) {
+        return;
+      }
       var element = blockElement(block.id);
       if (!element) {
         return;
@@ -3598,6 +3842,9 @@
     if (!block) {
       return;
     }
+    if (!blockAllowed(block.dataset.blockId)) {
+      return;
+    }
     if (control && !control.classList.contains('drag-handle')) {
       return;
     }
@@ -3619,7 +3866,7 @@
       return;
     }
     var model = findBlock(block.dataset.blockId);
-    if (model && model.type === 'text') {
+    if (model && model.type === 'text' && blockMatchesLayer(model)) {
       event.preventDefault();
       beginEditing(model.id);
     }
@@ -3641,6 +3888,9 @@
       beginMarquee(event);
       return;
     }
+    if (!blockAllowed(blockElementNode.dataset.blockId)) {
+      return;
+    }
     var state = getState();
     if (state && state.editingBlockId === blockElementNode.dataset.blockId) {
       return;
@@ -3660,6 +3910,7 @@
     if (!canvas) {
       return;
     }
+    wireLayerToolbar();
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('dblclick', handleCanvasDoubleClick);
     canvas.addEventListener('pointerdown', handleCanvasPointerDown);

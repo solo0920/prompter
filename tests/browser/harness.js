@@ -1651,6 +1651,91 @@
     });
   });
 
+  test('US1 layer toolbar focuses one Marker level and dims the rest', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-focus-document',
+        title: '層級聚焦',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-h1', marker: '#', text: '標題', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-b1', marker: '-', text: '項目一', seq: 2 }),
+          Model.createTextBlock({ id: 'layer-q1', marker: '>', text: '引用一', seq: 3 }),
+          Model.createTextBlock({ id: 'layer-b2', marker: '-', text: '項目二', seq: 4 }),
+          Model.createTextBlock({ id: 'layer-q2', marker: '>', text: '引用二', seq: 5 }),
+          Model.createTextBlock({ id: 'layer-o1', marker: '1.', text: '編號', seq: 6 })
+        ]
+      }), [], { persisted: false });
+      var before = win.Prompter.markdown.serializeDocument(state.document);
+      var toggle = byId(win, 'layer-toggle');
+      toggle.click();
+      var toolbar = byId(win, 'layer-toolbar');
+      assert(!toolbar.hidden, 'The layer toolbar must open from the rail button.');
+      equal(toggle.getAttribute('aria-expanded'), 'true');
+      var buttons = Array.prototype.slice.call(toolbar.querySelectorAll('.layer-button'));
+      equal(buttons.map(function (button) { return button.dataset.layer; }).join(','),
+        '#,##,###,-,1.,>,.', 'The layer toolbar must list the seven Marker levels.');
+
+      var quoteButton = toolbar.querySelector('[data-layer=">"]');
+      quoteButton.click();
+      equal(quoteButton.getAttribute('aria-pressed'), 'true');
+      equal(state.editingBlockId, 'layer-q1',
+        'Selecting a layer must start editing its first matching block.');
+      assertEditingSelection(win,
+        blockById(win, 'layer-q1').querySelector('.block-edit-input'),
+        'The first matching block must be selected and editable.');
+      ['layer-q1', 'layer-q2'].forEach(function (id) {
+        assert(blockById(win, id).classList.contains('layer-match'));
+        equal(blockById(win, id).querySelector('.block-marker').disabled, false);
+      });
+      ['layer-h1', 'layer-b1', 'layer-b2', 'layer-o1'].forEach(function (id) {
+        var element = blockById(win, id);
+        assert(element.classList.contains('layer-dimmed'), id + ' must be dimmed.');
+        equal(element.getAttribute('aria-disabled'), 'true');
+        equal(element.tabIndex, -1);
+        equal(element.querySelector('.block-content').tabIndex, -1,
+          id + ' text must not be tabbable.');
+        equal(element.querySelector('.block-marker').disabled, true,
+          id + ' Marker must be disabled.');
+      });
+      var dimmedRect = blockById(win, 'layer-h1').getBoundingClientRect();
+      var hit = win.document.elementFromPoint(
+        dimmedRect.left + 10,
+        dimmedRect.top + dimmedRect.height / 2
+      );
+      assert(hit && hit.closest('.block') === blockById(win, 'layer-h1'),
+        'A dimmed block must stay at its hit-test position instead of exposing the canvas.');
+
+      blockById(win, 'layer-h1').querySelector('.block-content').click();
+      equal(state.selectedBlockId, 'layer-q1',
+        'A dimmed block must not replace the focused layer selection.');
+
+      press(win, blockById(win, 'layer-q1').querySelector('.block-edit-input'), 'ArrowDown');
+      equal(state.editingBlockId, 'layer-q2',
+        'Down must move to the next block in the selected layer.');
+      assertEditingSelection(win,
+        blockById(win, 'layer-q2').querySelector('.block-edit-input'),
+        'The next matching block must open in edit mode with all text selected.');
+      press(win, blockById(win, 'layer-q2').querySelector('.block-edit-input'), 'ArrowUp');
+      equal(state.editingBlockId, 'layer-q1',
+        'Up must return to the previous block in the selected layer.');
+
+      quoteButton.click();
+      equal(quoteButton.getAttribute('aria-pressed'), 'false');
+      ['layer-h1', 'layer-b1', 'layer-q1', 'layer-q2', 'layer-o1'].forEach(function (id) {
+        assert(!blockById(win, id).classList.contains('layer-dimmed'));
+        equal(blockById(win, id).querySelector('.block-marker').disabled, false);
+      });
+      toggle.click();
+      assert(toolbar.hidden, 'Clicking the rail button again must close the layer toolbar.');
+      equal(toggle.getAttribute('aria-expanded'), 'false');
+      equal(win.Prompter.markdown.serializeDocument(state.document), before,
+        'Layer focus must not change Markdown content.');
+    });
+  });
+
   test('US1 empty editing removes only the edited block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

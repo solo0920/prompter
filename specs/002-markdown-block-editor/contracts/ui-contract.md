@@ -207,6 +207,22 @@ Each image block shows:
   Save output. Indented blocks and composers shrink their maximum width so they remain inside the
   canvas at narrow viewports.
 
+## Layer Focus Toolbar
+
+- A second rail button below `文件目錄` opens a vertical toolbar with seven buttons in this order:
+  `#`, `##`, `###`, `-`, `1.`, `>`, `.`. The toggle exposes `aria-expanded`; toolbar buttons expose
+  `aria-pressed`.
+- Activating a layer makes every text block with that Marker the active layer and starts editing
+  the first match with all text selected. Matching blocks keep normal styling; blocks of other
+  layers and image blocks are dimmed, inert, and cannot be selected or focused.
+- While a layer is active, Up/Down moves only through matching blocks, commits the current edit,
+  and reopens the destination in edit mode with all text selected, wrapping at the ends.
+- Activating the same layer again, closing the toolbar, pressing Escape in the toolbar, or
+  switching documents clears layer focus and restores all blocks. The composer is hidden while
+  layer focus is active.
+- Layer focus is a view-only aid. It does not alter Markdown, Save, Preview, or Copy output, and
+  collapse arrows are hidden while it is active.
+
 ## Selection
 
 - Cmd-click (Ctrl-click on Windows) toggles a block in the current selection without clearing
