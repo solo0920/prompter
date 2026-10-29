@@ -126,10 +126,12 @@ The composer is the only input box that creates a new block.
   - Inserted via "+": dismiss the composer; no block.
   - Initial blank-document composer: keep it (a blank document always has an input).
 - Moving the pointer anywhere from the block's left border through the Marker prefix opens a
-  symbol-only two-row panel above the title row, horizontally centered on that row; clicking or
-  pressing Enter/Space also opens it for keyboard and touch input. The left side uses the default
-  cursor, while the right side keeps the grab cursor and drag handle. The upper row lists `×`
-  (no Marker), `1.`, `>`, and `.`; the lower row lists `-`, `#`, `##`, and `###`. Options have
+  symbol-only two-row panel above the title row. When the title row is narrower than the panel,
+  the panel is horizontally centered; otherwise its left edge aligns with the Marker/title start
+  so it stays attached to a long block instead of drifting to the middle. Clicking or pressing
+  Enter/Space also opens it for keyboard and touch input. The left side uses the default cursor,
+  while the right side keeps the grab cursor and drag handle. The upper row lists `×` (no
+  Marker), `1.`, `>`, and `.`; the lower row lists `-`, `#`, `##`, and `###`. Options have
   descriptive accessible names but no visible title text. Arrow Left/Right and Up/Down navigate
   the grid, Home/End jump to the first/last option, Escape closes, and selecting an option
   applies it, returns focus to the composer text input, and preserves the caret or selection. A

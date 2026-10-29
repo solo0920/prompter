@@ -3018,9 +3018,18 @@
       anchor.closest('.block') ||
       anchor;
     var rect = row.getBoundingClientRect();
+    var markerRect = anchor.getBoundingClientRect();
     var menuWidth = menu.offsetWidth;
     var menuHeight = menu.offsetHeight;
-    var left = rect.left + (rect.width - menuWidth) / 2;
+    var left;
+    var alignment;
+    if (rect.width <= menuWidth) {
+      left = rect.left + (rect.width - menuWidth) / 2;
+      alignment = 'center';
+    } else {
+      left = markerRect.left;
+      alignment = 'title-start';
+    }
     left = Math.max(8, Math.min(left, global.innerWidth - menuWidth - 8));
     var top = rect.top - menuHeight - 8;
     var placement = 'above';
@@ -3030,6 +3039,7 @@
     }
     top = Math.max(4, Math.min(top, global.innerHeight - menuHeight - 4));
     menu.dataset.placement = placement;
+    menu.dataset.alignment = alignment;
     menu.style.left = Math.round(left) + 'px';
     menu.style.top = Math.round(top) + 'px';
     markerMenu = {

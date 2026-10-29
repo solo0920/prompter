@@ -44,7 +44,7 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
-- Browser harness: **102 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **103 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
   browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -94,7 +94,8 @@
   relative-order preservation, and Escape restoration are covered.
 - Hover checks: the left border-to-Marker hover zone opens the flyout without a grab cursor,
   while the right side retains the grab cursor and add control; the flyout sits above the title
-  row, is horizontally centered there, and shows `× 1. > .` over `- # ## ###`; hover flyouts
+  row, centers on short titles, and starts at the Marker for wide titles so it stays attached
+  instead of drifting to the block middle, showing `× 1. > .` over `- # ## ###`; hover flyouts
   stay open while the pointer is over the Marker or flyout, then close after leaving both,
   selecting, Escape/Tab, or an outside click.
 - Workspace checks: the right-side live preview opens by default for new, opened, and restored

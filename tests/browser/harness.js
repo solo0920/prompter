@@ -937,15 +937,21 @@
       enter(composerMarker);
       var composerMenu = win.document.querySelector('.marker-menu');
       assert(composerMenu, 'Hovering the composer Marker must open the flyout.');
+      var composerMarkerRect = composerMarker.getBoundingClientRect();
       var composerRect = composerMarker.closest('.composer').getBoundingClientRect();
       var composerMenuRect = composerMenu.getBoundingClientRect();
       equal(composerMenu.dataset.placement, 'above',
         'The composer flyout must open above the composer.');
       assert(composerMenuRect.bottom <= composerRect.top + 0.5,
         'The composer flyout must sit above the composer title row.');
-      assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
-        (composerRect.left + composerRect.width / 2)) <= 1,
-      'The composer flyout must be horizontally centered on the composer.');
+      if (composerMenu.dataset.alignment === 'title-start') {
+        assert(Math.abs(composerMenuRect.left - composerMarkerRect.left) <= 1,
+          'A wide composer flyout must start at its Marker.');
+      } else {
+        assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
+          (composerRect.left + composerRect.width / 2)) <= 1,
+        'A short composer flyout must be horizontally centered on the composer.');
+      }
       leave(composerMarker);
       var menuCenter = {
         x: composerMenuRect.left + composerMenuRect.width / 2,
@@ -972,6 +978,33 @@
         equal(win.document.querySelector('.marker-menu'), null,
           'Selecting a Marker option must close the flyout.');
       });
+    });
+  });
+
+  test('US1 a wide block anchors the Marker menu at its title start', function () {
+    return appReady().then(function (win) {
+      var state = freshDocument(win);
+      var element = commitComposer(win, '- ' + '很長的項目文字'.repeat(20));
+      var marker = element.querySelector('.block-marker');
+      marker.dispatchEvent(new win.PointerEvent('pointerenter', {
+        pointerId: 13,
+        pointerType: 'mouse',
+        bubbles: false
+      }));
+      var menu = win.document.querySelector('.marker-menu');
+      assert(menu, 'Hovering the wide block Marker must open the menu.');
+      var menuRect = menu.getBoundingClientRect();
+      var markerRect = marker.getBoundingClientRect();
+      var rowRect = element.querySelector('.block-text').getBoundingClientRect();
+      equal(menu.dataset.alignment, 'title-start',
+        'A block wider than the menu must align to its title start.');
+      assert(Math.abs(menuRect.left - markerRect.left) <= 1,
+        'The wide-block menu must start at the Marker instead of the block center.');
+      assert(menuRect.left < rowRect.left + rowRect.width / 2,
+        'The wide-block menu must not drift to the middle of a long block.');
+      assert(menuRect.right <= win.innerWidth + 1,
+        'The wide-block menu must stay inside the viewport.');
+      win.Prompter.editor.closeMarkerMenu();
     });
   });
 
