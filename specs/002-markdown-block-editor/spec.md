@@ -162,19 +162,20 @@ so that I can verify the result and paste it directly into an AI tool or rich-te
 **Why this priority**: Preview and copy are the bridge between authoring and using a prompt.
 They deliver value after the core authoring and file workflows exist.
 
-**Independent Test**: Create a document with headings, bullets, and an image, open Preview,
-then copy the document and paste it into a rich-text destination and a plain-text destination.
-The story is complete when the preview matches the Markdown and both destinations receive the
-expected content.
+**Independent Test**: Create a document with headings, bullets, and an image, confirm Preview
+opens by default, then copy the document and paste it into a rich-text destination and a
+plain-text destination. The story is complete when the preview matches the Markdown and both
+destinations receive the expected content.
 
 **Acceptance Scenarios**:
 
-1. **Given** an open document, **When** the user activates the preview icon, **Then** a live
-   rendered preview opens on the right side while the editor canvas remains visible.
+1. **Given** a new or restored document, **When** the workspace opens, **Then** a live rendered
+   preview opens on the right side by default while the editor canvas remains visible, without
+   requiring the user to activate the preview icon first.
 2. **Given** the preview pane is open, **When** the user edits the document or switches tabs,
    **Then** the preview updates to the active document without hiding the editor.
-3. **Given** the preview pane is open, **When** the user activates the preview icon again, **Then**
-   the pane closes, the editor is unchanged, and focus remains on the toggle.
+3. **Given** the preview pane is open, **When** the user activates the preview icon, **Then** the
+   pane closes, the editor is unchanged, and focus remains on the toggle.
 4. **Given** an open document with content, **When** the user activates Copy, **Then** the
    Markdown source is placed on the clipboard exactly as it would be saved, preserving line
    order, Markers, and line breaks.
@@ -514,8 +515,10 @@ settings panel and clear the local library after confirming the warning.
   and file target. Closing a dirty tab MUST offer Save, Discard, or Cancel; closing a clean tab
   MUST remove it and activate a neighboring tab, and closing the last tab MUST return to the
   empty workspace. The active tab's title MUST remain editable.
-- **FR-051**: The preview pane MUST remain open across tab switches and updates, and MUST show
-  the empty state when the active document has no previewable content.
+- **FR-051**: The preview pane MUST open by default when a document is created, opened, or
+  restored, and MUST remain open across tab switches and updates. It MUST stay closed after the
+  user closes it until another document is created or opened, and MUST show the empty state when
+  the active document has no previewable content.
 
 
 ### Key Entities *(include if feature involves data)*

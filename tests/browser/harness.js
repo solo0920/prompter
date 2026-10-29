@@ -669,8 +669,10 @@
       equal(tabElements[1].getAttribute('data-document-id'), 'tab-second');
       equal(tabElements[1].classList.contains('active'), true);
       equal(byId(win, 'document-title').value, '乙文件');
-      equal(byId(win, 'preview-label').hidden, true,
-        'The preview filename must stay hidden until preview opens.');
+      equal(byId(win, 'preview-label').hidden, false,
+        'Preview must open by default for a new document.');
+      equal(byId(win, 'preview-file-name').textContent, '乙文件',
+        'The default preview label must show the active document name.');
       tabElements.forEach(function (tab) {
         var close = tab.querySelector('.document-tab-close');
         assert(close, 'Each tab must include a close control.');
@@ -678,7 +680,6 @@
         assert(close.getAttribute('aria-label').indexOf('關閉文件') !== -1);
       });
 
-      byId(win, 'preview-button').click();
       return waitFor(function () {
         return !byId(win, 'preview-label').hidden &&
           byId(win, 'preview-file-name').textContent === '乙文件' ? true : null;
@@ -3302,7 +3303,6 @@
       return addPickerImage(win, 'preview.png').then(function () {
         var button = byId(win, 'preview-button');
         button.focus();
-        button.click();
         return waitFor(function () {
           var content = byId(win, 'preview-content');
           return !byId(win, 'preview-view').hidden &&
@@ -3390,7 +3390,6 @@
       var fenceStart = addBelow(win, display, '```tex', 'none');
       var code = addBelow(win, fenceStart, '$E=mc^2$', 'none');
       addBelow(win, code, '```', 'none');
-      byId(win, 'preview-button').click();
       return waitFor(function () {
         var content = byId(win, 'preview-content');
         return !byId(win, 'preview-view').hidden &&
@@ -3431,7 +3430,6 @@
       var state = freshDocument(win);
       var first = commitComposer(win, '# 原始內容');
       var firstId = first.dataset.blockId;
-      byId(win, 'preview-button').click();
       return waitFor(function () {
         return byId(win, 'preview-content').textContent.indexOf('原始內容') !== -1
           ? true
@@ -3493,7 +3491,6 @@
       freshDocument(win);
       var button = byId(win, 'preview-button');
       button.focus();
-      button.click();
       return waitFor(function () {
         var content = byId(win, 'preview-content');
         return !byId(win, 'preview-view').hidden &&
@@ -5120,7 +5117,7 @@
         assert(railIcon && railIcon.getBoundingClientRect().width >= 36,
           'The directory rail icon must fill the rail button.');
         equal(byId(win, 'file-menu-button').getAttribute('aria-haspopup'), 'menu');
-        equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
+        equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
         equal(byId(win, 'preview-button').textContent.trim(), '');
         equal(byId(win, 'copy-button').textContent.trim(), '複製');
         equal(byId(win, 'settings-button').textContent.trim(), '設定');

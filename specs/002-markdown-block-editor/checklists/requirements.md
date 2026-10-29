@@ -81,12 +81,13 @@
   while the right side retains the grab cursor and add control; hover flyouts stay open while
   the pointer is over the Marker or flyout, then close after leaving both, selecting, Escape/Tab,
   or an outside click.
-- Workspace checks: the right-side live preview refreshes after edits and tab switches without
-  hiding the canvas; document tabs open, switch, keep their active title editable, close with an
-  `×`, prompt on dirty close, and restore the empty workspace after the last tab. While preview
-  is open, the active filename and file icon appear as a tab-styled label aligned with the preview
-  pane boundary, with its own `×` next to the preview toggle; closing preview by either control
-  leaves only the preview icon.
+- Workspace checks: the right-side live preview opens by default for new, opened, and restored
+  documents, refreshes after edits and tab switches without hiding the canvas, and stays closed
+  after the user closes it; document tabs open, switch, keep their active title editable, close
+  with an `×`, prompt on dirty close, and restore the empty workspace after the last tab. While
+  preview is open, the active filename and file icon appear as a tab-styled label aligned with the
+  preview pane boundary, with its own `×` next to the preview toggle; closing preview by either
+  control leaves only the preview icon.
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.

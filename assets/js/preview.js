@@ -722,6 +722,17 @@
     return renderCurrent();
   }
 
+  function openDefault() {
+    var app = getApp();
+    if (!app || !app.state || !app.state.document) {
+      return Promise.resolve({ ok: false, empty: true });
+    }
+    if (active) {
+      return Promise.resolve({ ok: true, alreadyOpen: true });
+    }
+    return open(app.elements['preview-button']);
+  }
+
   function refresh() {
     if (!active) {
       return Promise.resolve({ ok: false, inactive: true });
@@ -788,6 +799,7 @@
   var api = {
     init: init,
     open: open,
+    openDefault: openDefault,
     close: close,
     toggle: toggle,
     isOpen: isOpen,

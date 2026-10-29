@@ -460,6 +460,13 @@
     }
   }
 
+  function openPreviewByDefault() {
+    var preview = global.Prompter && global.Prompter.preview;
+    if (preview && typeof preview.openDefault === 'function') {
+      preview.openDefault();
+    }
+  }
+
   function rememberDocument(documentId) {
     if (!state.storage || typeof state.storage.setLastDocumentId !== 'function') {
       return;
@@ -554,6 +561,7 @@
       clearAllTabs();
       return;
     }
+    var hadActiveDocument = !!activeTab();
     var existing = findTab(document.id);
     if (opts.newTab && existing) {
       return activateTab(document.id, opts);
@@ -581,6 +589,9 @@
       rememberDocument(document.id);
     }
     renderActiveDocument({ focus: opts.focus });
+    if (opts.newTab || !hadActiveDocument) {
+      openPreviewByDefault();
+    }
   }
 
   function closeTab(documentId) {
@@ -903,6 +914,7 @@
     }
     clearDirectorySearch();
     renderActiveDocument({ focus: 'composer' });
+    openPreviewByDefault();
   }
 
   function toggleFileMenu(open) {

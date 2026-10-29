@@ -237,12 +237,12 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
    pipe table, a long wrapped line, inline math such as `$a^2+b^2=c^2$`, and display math such
    as `$$\int_0^1 x^2 dx$$`.
-2. Confirm the tab bar shows only the preview icon while preview is closed. Activate it and
-   confirm a live preview pane opens on the right while the editor canvas remains visible on the
-   left; the active document name and file icon appear as a tab-styled label aligned with the
-   preview pane's left boundary and immediately left of the preview icon, with an `×` that closes
-   preview. Confirm images render, the code block and table render, math renders with the
-   bundled KaTeX fonts, and raw HTML-looking text is not executed.
+2. Confirm the live preview pane is already open on the right by default while the editor canvas
+   remains visible on the left; the active document name and file icon appear as a tab-styled
+   label aligned with the preview pane's left boundary and immediately left of the preview icon,
+   with an `×` that closes preview. Confirm images render, the code block and table render, math
+   renders with the bundled KaTeX fonts, and raw HTML-looking text is not executed. Close and
+   reopen preview with the icon; confirm the closed state shows only the preview icon.
 3. With the composer focused, type text but do not press Enter. Confirm the preview shows that
    draft at the composer slot; clear the text and confirm the draft disappears.
 4. Double-click a block and change its text without committing. Confirm the preview follows the

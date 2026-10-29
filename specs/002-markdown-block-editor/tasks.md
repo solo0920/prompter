@@ -250,6 +250,7 @@ across all stories.
 - [x] T084 Make Tab into a block's text area start editing directly, and make Tab to the title/Marker control open the Marker menu while keeping the Tab cycle and Escape behavior intact.
 - [x] T085 Make Up/Down into an adjacent text block start editing and select all text on every edit entry path.
 - [x] T086 Give plain Up/Down top priority while editing: commit the current block, continue to the adjacent item, and reopen a text destination in edit mode with all text selected.
+- [x] T087 Open the live preview pane by default for new, opened, and restored documents, keep it closed after an explicit close, and preserve the state across tab switches.
 
 ---
 

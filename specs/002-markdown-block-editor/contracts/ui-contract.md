@@ -282,9 +282,10 @@ Each image block shows:
 
 ## Preview
 
-- Preview opens as a live pane on the right side of the workspace; the editor canvas remains
-  visible on the left. It is not a dialog or a new window.
-- The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open.
+- Preview opens by default as a live pane on the right side of the workspace whenever a document
+  is created, opened, or restored; the editor canvas remains visible on the left. It is not a
+  dialog or a new window.
+- The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open. Closing the pane keeps it closed for the current document and across tab switches until another document is created or opened.
 - Only while the preview pane is open, the active document name with a file icon appears
   immediately to the left of the preview icon as a tab-styled label matching the active document
   tab's colors and shape. Its left edge aligns with the preview pane's left boundary, so the tab
