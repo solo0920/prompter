@@ -55,8 +55,10 @@
   height grows so every line remains visible.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
-- Tab focus: tabbing into a text block starts editing directly, and tabbing into its
-  title/Marker opens the Marker menu without leaving the Tab cycle.
+- Tab focus: tabbing into a text block starts editing directly with all text selected, and
+  tabbing into its title/Marker opens the Marker menu without leaving the Tab cycle.
+- Arrow focus: Up/Down into an adjacent text block starts editing with all text selected; once
+  editing, Up/Down move the caret and keep the item unchanged.
 - Golden fixtures: markers, marker-only lines, blank lines, CRLF/BOM, no final newline,
   unicode, trailing spaces, code, tables, data-URL images, unmatched images, and duplicate
   image basenames all round-trip.
@@ -88,7 +90,8 @@
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.
 - Keyboard navigation checks: Up/Down sequence-item selection including the composer at its slot
-  with first/last wrap, focus-zone preservation across items, Tab/Shift+Tab cycling confined to
+  with first/last wrap, focus-zone preservation across items, text-zone entry into edit mode with
+  all text selected, caret-only Up/Down behavior while editing, Tab/Shift+Tab cycling confined to
   the current block or composer with text → title → drag handle → actions → root order,
   Tab-started editing, Tab-opened Marker menu, Enter/F2 editing, composer-handle Up/Down slot
   movement, Space-opened Marker menu with arrow selection, and drag-handle Up/Down reordering

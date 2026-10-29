@@ -368,7 +368,7 @@ opened/saved document
 ### Block editing
 
 ```text
-idle -> Tab into text area/double-click/Enter/F2 -> editing
+idle -> Tab/Up/Down into text area/double-click/Enter/F2 -> editing (all text selected)
 editing -> Enter -> committed (marker detection applied)
 editing -> Escape -> cancelled (original text/marker restored)
 editing -> click outside -> committed

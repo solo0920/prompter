@@ -99,10 +99,12 @@ and confirm the unsaved draft is not restored.
     previous/next sequence item is selected—including the composer at its own slot—and the
     selection wraps between the first and last items. Tab and Shift+Tab must cycle only through
     the current item's controls, including a text block's text area, and wrap within it; with
-    focus on the canvas they use the selected block if one exists. Tabbing into the text area
-    starts editing; Enter/F2 on the focused text area also starts editing. Tabbing to a title
-    control opens the Marker menu for arrow-key selection, and Up/Down on a drag handle moves the
-    block one position while keeping focus on that handle.
+    focus on the canvas they use the selected block if one exists. Tabbing or pressing Up/Down
+    into the text area starts editing and selects the whole block text; Enter/F2 on the focused
+    text area also starts editing with the whole text selected. Once editing, Up/Down move the
+    caret instead of changing items. Tabbing to a title control opens the Marker menu for
+    arrow-key selection, and Up/Down on a drag handle moves the block one position while keeping
+    focus on that handle.
     Up/Down on the composer title control or input moves to the adjacent item with the same
     first/last wrap; Up/Down on the composer drag handle moves the composer one slot and keeps
     focus on the handle.
@@ -377,9 +379,9 @@ settings panel and clear the local library after confirming the warning.
 - **FR-020**: Every block MUST expose a "+" control at its lower-right, revealed when the right
   half of the block is hovered; activating it MUST insert a new input box directly below that
   block, and Escape MUST dismiss the inserted input without creating a block.
-- **FR-021**: Double-clicking a text block MUST enter edit mode; Enter MUST commit and exit
-  edit mode, Shift+Enter MUST insert a line break, Escape MUST cancel the edit, and clicking
-  outside MUST commit the edit.
+- **FR-021**: Double-clicking a text block MUST enter edit mode; entering edit mode MUST select
+  the block's full text by default. Enter MUST commit and exit edit mode, Shift+Enter MUST insert
+  a line break, Escape MUST cancel the edit, and clicking outside MUST commit the edit.
 - **FR-022**: A text block MUST hold one or more lines of text. Enter MUST commit rather than
   insert a line break; Shift+Enter MUST insert a line break. The input box MUST grow wider as
   text exceeds its current width, up to its maximum width, and MUST grow taller as content
@@ -486,20 +488,23 @@ settings panel and clear the local library after confirming the warning.
   the last to the first. Tab and Shift+Tab MUST cycle focus only among the controls of the
   current item (the focused block or composer) and wrap within it. Within a text block, the Tab
   order MUST be text area, title/Marker, drag handle, then the remaining action controls and the
-  block root. Tab into the text area MUST start editing directly; Enter/F2 on the focused text
-  area MUST also enter edit mode. Tab into the title/Marker control MUST open the Marker menu,
-  with Down/Up then focusing its options; Space or Enter MUST continue to open the menu with the
-  current option focused. When focus is on the canvas, Tab/Shift+Tab MUST use the selected block
-  if one exists, otherwise cycle only among editor items; they MUST NOT move to the header or
-  left rail. Up/Down that changes the selected item MUST preserve the active focus zone (text,
-  title, action, handle, or root) in the destination item when that zone exists. The Marker
-  menu's Up/Down keys choose an option. Up/Down on a block's right drag handle MUST move that
-  block one sequence position earlier or later while keeping focus on the handle. Up/Down on the
-  composer title control or text input
+  block root. Tab into the text area MUST start editing directly with the full block text
+  selected; Enter/F2 on the focused text area MUST also enter edit mode with the full text
+  selected. Tab into the title/Marker control MUST open the Marker menu, with Down/Up then
+  focusing its options; Space or Enter MUST continue to open the menu with the current option
+  focused. When focus is on the canvas, Tab/Shift+Tab MUST use the selected block if one exists,
+  otherwise cycle only among editor items; they MUST NOT move to the header or left rail.
+  Up/Down that changes the selected item MUST preserve the active focus zone (text, title,
+  action, handle, or root) in the destination item when that zone exists; when the destination
+  is a text block's text zone, it MUST enter edit mode and select the whole block text. Once a
+  block is in edit mode, Up/Down MUST move the caret within the text area instead of changing
+  items. The Marker menu's Up/Down keys choose an option. Up/Down on a block's right drag handle
+  MUST move that block one sequence position earlier or later while keeping focus on the handle.
+  Up/Down on the composer title control or text input
   MUST select the adjacent sequence item, wrapping at the ends, while leaving the composer open.
   Up/Down on the composer's right drag handle MUST move the composer one slot earlier or later
-  and keep focus on that handle. Arrow and Tab navigation MUST be ignored while typing in a block
-  editor.
+  and keep focus on that handle. Tab from a block editor MUST continue to the current block's
+  title/Marker control.
 - **FR-050**: Open documents MUST be represented as tabs above the editor. Each tab MUST show
   the document title/file name and a close control. File > New and opening a file or saved
   document MUST open or activate a tab while preserving other open tabs and their unsaved state.

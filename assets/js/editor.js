@@ -814,9 +814,13 @@
       if (input) {
         input.focus();
         var caret = editDraft && editDraft.id === state.editingBlockId ? editDraft.caret : null;
+        var caretEnd = editDraft && editDraft.id === state.editingBlockId
+          ? editDraft.caretEnd
+          : null;
         var position = caret === null || caret === undefined ? input.value.length : caret;
+        var selectionEnd = caretEnd === null || caretEnd === undefined ? position : caretEnd;
         try {
-          input.setSelectionRange(position, position);
+          input.setSelectionRange(position, selectionEnd);
         } catch (error) {
           // Some browsers disallow selection changes on unfocused inputs.
         }
@@ -1693,6 +1697,8 @@
     if (isComposerItem(item)) {
       clearSelection();
       focusComposerZone(zone);
+    } else if (zone === 'content' && item.type === 'text') {
+      beginEditing(item.id);
     } else if (zone) {
       selectBlock(item.id, { focus: false });
       focusZoneInBlock(item.id, zone);
@@ -1708,14 +1714,18 @@
     if (!block || block.type !== 'text' || !state) {
       return;
     }
-    var caret = options && options.caret !== undefined ? options.caret : block.text.length;
+    var caret = options && options.caret !== undefined ? options.caret : 0;
+    var caretEnd = options && options.caretEnd !== undefined
+      ? options.caretEnd
+      : (options && options.caret !== undefined ? caret : block.text.length);
     editDraft = {
       id: block.id,
       text: block.text,
       draftText: block.text,
       marker: block.marker,
       originalMarker: block.marker,
-      caret: caret
+      caret: caret,
+      caretEnd: caretEnd
     };
     state.editingBlockId = block.id;
     state.selectedBlockIds = [block.id];

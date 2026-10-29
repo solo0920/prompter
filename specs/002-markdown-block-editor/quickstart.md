@@ -92,7 +92,7 @@ Additional automated evidence:
   display math, common AMS environments, fenced-code exclusion, currency/escaped-dollar
   literals, and untrusted commands or surrounding raw HTML.
 - Input checks cover multi-line composer and block editing, Shift+Enter line breaks, Enter
-  commit, and auto-growing width and height.
+  commit, auto-growing width and height, and full-text selection when editing starts.
 - Preview checks cover live composer and block-editor drafts, draft Marker changes, and
   reverting drafts on dismiss or cancel.
 - Storage checks cover IndexedDB-blocked localStorage fallback, both-blocked memory mode, quota
@@ -198,23 +198,27 @@ opens the Marker flyout without showing a grab cursor.
 6. Drag the composer by its handle to another slot; confirm blocks shift to make room and the
    Markdown order remains unchanged. Then drag a block across the composer and confirm the
    composer shifts one position.
-7. With a block or canvas focused, press Up/Down repeatedly. Confirm the previous/next sequence
-   item is selected, including the composer at its own slot, and that Up on the first item wraps
-   to the last while Down on the last wraps to the first.
+7. With a block root or the canvas focused, press Up/Down repeatedly. Confirm the previous/next
+   sequence item is selected, including the composer at its own slot, and that Up on the first
+   item wraps to the last while Down on the last wraps to the first. Pressing Up/Down from a text
+   area into another text block starts editing that block with all text selected; further
+   Up/Down move the caret instead of changing items.
 8. Focus a block and press Tab repeatedly. Confirm Tab into the text area starts edit mode
-   directly, the next Tab reaches the title/Marker and opens its menu, the next reaches the drag
-   handle, then the remaining controls and block root, wrapping inside the block without moving
-   to another block, composer, header, or left rail. Confirm Enter/F2 also starts edit mode when
-   the text area already has focus. Focus the composer input and confirm Tab cycles only its
-   marker, input, and handle. Shift+Tab must wrap in the opposite direction. With focus on the
-   canvas, confirm Tab uses the selected block if one exists.
+   directly with all text selected, the next Tab reaches the title/Marker and opens its menu, the
+   next reaches the drag handle, then the remaining controls and block root, wrapping inside the
+   block without moving to another block, composer, header, or left rail. Confirm Enter/F2 also
+   starts edit mode with all text selected when the text area already has focus. Focus the
+   composer input and confirm Tab cycles only its marker, input, and handle. Shift+Tab must wrap
+   in the opposite direction. With focus on the canvas, confirm Tab uses the selected block if
+   one exists.
 9. Tab to a block's title area and confirm the Marker menu opens automatically. Press Down to
    enter the options, use Up/Down to move through them, and Enter/Space to apply the focused
    option. Confirm Space/Enter on the title area still opens and focuses the current option.
 10. Tab to a block's right drag handle and press Up/Down. Confirm the block moves one position
-    earlier/later, focus stays on the handle, and the move is announced. From the text area or
-    title area, press Up/Down to change items and confirm focus stays in the same zone on the new
-    item.
+    earlier/later, focus stays on the handle, and the move is announced. From the title area,
+    action controls, or block root, press Up/Down to change items and confirm focus stays in the
+    same zone on the new item. From a text area, confirm Up/Down enter the adjacent text block in
+    edit mode with all text selected.
 11. Focus the composer input, type some text, and press Up/Down. Confirm the item before/after
     the composer slot is selected, wrapping at the ends, while the composer and its text remain.
     Repeat with the composer title control focused. Then focus the composer drag handle and press

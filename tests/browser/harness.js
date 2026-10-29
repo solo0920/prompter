@@ -97,6 +97,16 @@
     return win.document.querySelector('#canvas .block[data-block-id="' + id + '"]');
   }
 
+  function assertEditingSelection(win, input, message) {
+    assert(input, message);
+    equal(win.document.activeElement, input,
+      message + ' The block editor must receive focus.');
+    equal(input.selectionStart, 0,
+      message + ' The selection must start at the beginning.');
+    equal(input.selectionEnd, input.value.length,
+      message + ' The entire block text must be selected.');
+  }
+
   function lastBlock(win) {
     var list = blocks(win);
     return list.length ? list[list.length - 1] : null;
@@ -1077,6 +1087,8 @@
       var input = win.document.querySelector('#canvas .block-edit-input');
       assert(input, 'Double-click did not enter edit mode.');
       equal(input.value, 'Hello');
+      assertEditingSelection(win, input,
+        'Double-click must start editing with all text selected.');
       setValue(win, input, 'Changed');
       press(win, input, 'Enter');
       equal(state.document.blocks[0].text, 'Changed');
@@ -1282,9 +1294,16 @@
       press(win, composerInput(win), 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), cId,
         'Up from the composer must select the previous block.');
-      equal(win.document.activeElement,
-        blockById(win, cId).querySelector('.block-content'),
-        'Up from the composer must focus the previous block text area.');
+      var cInput = blockById(win, cId).querySelector('.block-edit-input');
+      assertEditingSelection(win, cInput,
+        'Up from the composer must start editing the previous block text area.');
+
+      press(win, cInput, 'ArrowDown');
+      equal(win.Prompter.editor.getSelectedBlockId(), cId,
+        'Arrow keys inside the editor must move the caret instead of changing items.');
+      equal(state.editingBlockId, cId,
+        'Arrow keys inside the editor must keep the block in edit mode.');
+      press(win, cInput, 'Escape');
 
       press(win, blockById(win, cId), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), null,
@@ -1294,9 +1313,10 @@
       press(win, composerInput(win), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), aId,
         'Down from the end composer must wrap to the first item.');
-      equal(win.document.activeElement,
-        blockById(win, aId).querySelector('.block-content'),
-        'Down from the composer must focus the first block text area.');
+      var aInput = blockById(win, aId).querySelector('.block-edit-input');
+      assertEditingSelection(win, aInput,
+        'Down from the composer must start editing the first block text area.');
+      press(win, aInput, 'Escape');
 
       press(win, blockById(win, aId), 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), bId,
@@ -1319,9 +1339,10 @@
       aContent.focus();
       press(win, aContent, 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), bId);
-      equal(win.document.activeElement,
-        blockById(win, bId).querySelector('.block-content'),
-        'Down from the text area must keep focus in the next text area.');
+      var bInput = blockById(win, bId).querySelector('.block-edit-input');
+      assertEditingSelection(win, bInput,
+        'Down from the text area must start editing the next text area.');
+      press(win, bInput, 'Escape');
 
       var bMarker = blockById(win, bId).querySelector('.block-marker');
       bMarker.focus();
@@ -1350,11 +1371,12 @@
       composer.focus();
       press(win, composer, 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), cId);
-      equal(win.document.activeElement,
-        blockById(win, cId).querySelector('.block-content'),
-        'Up from the composer must enter the previous block text area.');
+      var cInput = blockById(win, cId).querySelector('.block-edit-input');
+      assertEditingSelection(win, cInput,
+        'Up from the composer must start editing the previous block text area.');
 
-      press(win, win.document.activeElement, 'ArrowDown');
+      press(win, cInput, 'Escape');
+      press(win, blockById(win, cId), 'ArrowDown');
       equal(win.document.activeElement, composerInput(win),
         'Down from the block text area must return to the composer input.');
       equal(state.dirty, false, 'Zone-preserving navigation must not mark the document dirty.');
@@ -1371,8 +1393,7 @@
       aElement.focus();
       press(win, aElement, 'Tab');
       var editInput = blockById(win, ids[0]).querySelector('.block-edit-input');
-      assert(editInput, 'Tab into the block text area must start editing.');
-      equal(win.document.activeElement, editInput,
+      assertEditingSelection(win, editInput,
         'The first Tab stop must start editing the block text area.');
 
       press(win, editInput, 'Tab');
@@ -1456,9 +1477,8 @@
       element.focus();
       press(win, element, 'Tab');
       var input = blockById(win, block.id).querySelector('.block-edit-input');
-      assert(input, 'Tab into the text area must start editing directly.');
-      equal(win.document.activeElement, input,
-        'The block editor must receive focus directly from Tab.');
+      assertEditingSelection(win, input,
+        'Tab into the text area must start editing with all text selected.');
       press(win, input, 'Escape');
       assert(blockById(win, block.id), 'Escape must keep the block.');
 
@@ -1466,9 +1486,17 @@
       content.focus();
       press(win, content, 'Enter');
       input = blockById(win, block.id).querySelector('.block-edit-input');
-      assert(input, 'Enter in the focused text area must still start editing.');
-      equal(win.document.activeElement, input,
-        'The block editor must receive focus from Enter.');
+      assertEditingSelection(win, input,
+        'Enter in the focused text area must start editing with all text selected.');
+      press(win, input, 'Escape');
+      assert(blockById(win, block.id), 'Escape must keep the block.');
+
+      content = blockById(win, block.id).querySelector('.block-content');
+      content.focus();
+      press(win, content, 'F2');
+      input = blockById(win, block.id).querySelector('.block-edit-input');
+      assertEditingSelection(win, input,
+        'F2 in the focused text area must start editing with all text selected.');
       press(win, input, 'Escape');
       assert(blockById(win, block.id), 'Escape must keep the block.');
     });
@@ -1489,16 +1517,21 @@
       press(win, composer, 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), cId,
         'Up from the end composer must select the block before it.');
-      equal(win.document.activeElement,
-        blockById(win, cId).querySelector('.block-content'),
-        'Up from the composer must keep the text-area zone.');
+      var cInput = blockById(win, cId).querySelector('.block-edit-input');
+      assertEditingSelection(win, cInput,
+        'Up from the composer must start editing the block text area.');
       assert(state.composer, 'Moving from the composer must keep it open.');
+      press(win, cInput, 'Escape');
 
       composer = composerInput(win);
       composer.focus();
       press(win, composer, 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), aId,
         'Down from the end composer must wrap to the first block.');
+      var aInput = blockById(win, aId).querySelector('.block-edit-input');
+      assertEditingSelection(win, aInput,
+        'Down from the composer must start editing the first block text area.');
+      press(win, aInput, 'Escape');
 
       blockById(win, aId).querySelector('.block-plus').click();
       composer = composerInput(win);
@@ -1506,12 +1539,20 @@
       press(win, composer, 'ArrowUp');
       equal(win.Prompter.editor.getSelectedBlockId(), aId,
         'Up from a composer between A and B must select A.');
+      aInput = blockById(win, aId).querySelector('.block-edit-input');
+      assertEditingSelection(win, aInput,
+        'Up from a composer between A and B must start editing A.');
+      press(win, aInput, 'Escape');
 
       composer = composerInput(win);
       composer.focus();
       press(win, composer, 'ArrowDown');
       equal(win.Prompter.editor.getSelectedBlockId(), bId,
         'Down from a composer between A and B must select B.');
+      var bInput = blockById(win, bId).querySelector('.block-edit-input');
+      assertEditingSelection(win, bInput,
+        'Down from a composer between A and B must start editing B.');
+      press(win, bInput, 'Escape');
 
       var composerMarker = win.document.querySelector('#canvas .composer-marker');
       composerMarker.focus();
@@ -1574,9 +1615,9 @@
       bElement.focus();
       press(win, bElement, 'Tab');
       var editInput = blockById(win, bId).querySelector('.block-edit-input');
-      assert(editInput, 'Tab into the selected block text area must start editing.');
-      equal(win.document.activeElement, editInput,
+      assertEditingSelection(win, editInput,
         'The first Tab stop must edit the selected block text area.');
+
       press(win, editInput, 'Tab');
       bElement = blockById(win, bId);
       var marker = bElement.querySelector('.block-marker');
@@ -1601,7 +1642,7 @@
       byId(win, 'canvas').focus();
       press(win, byId(win, 'canvas'), 'Tab');
       editInput = blockById(win, bId).querySelector('.block-edit-input');
-      equal(win.document.activeElement, editInput,
+      assertEditingSelection(win, editInput,
         'Tab from the canvas must edit the selected block text area.');
     });
   });
@@ -1643,9 +1684,8 @@
       equal(win.document.querySelector('.marker-menu'), null,
         'Tab from the Marker menu must close the menu.');
       var menuTabTarget = blockById(win, aId).querySelector('.block-edit-input');
-      assert(menuTabTarget, 'Tab from the Marker menu must start editing the text area.');
-      equal(win.document.activeElement, menuTabTarget,
-        'Tab from the Marker menu must enter the block editor.');
+      assertEditingSelection(win, menuTabTarget,
+        'Tab from the Marker menu must start editing the text area.');
 
       var handle = blockById(win, bId).querySelector('.drag-handle');
       handle.focus();
