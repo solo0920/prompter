@@ -892,15 +892,15 @@
         'The flyout must show the requested two-row Marker order.');
       assert(menu.textContent.indexOf('標題') === -1,
         'The flyout must not show descriptive Marker labels.');
-      var titleRect = element.querySelector('.block-text').getBoundingClientRect();
+      var blockRect = element.getBoundingClientRect();
       var menuRect = menu.getBoundingClientRect();
       equal(menu.dataset.placement, 'above',
         'The flyout must open above the title when there is room.');
-      assert(menuRect.bottom <= titleRect.top + 0.5,
-        'The flyout must sit above the title row.');
+      assert(menuRect.bottom <= blockRect.top + 0.5,
+        'The flyout must sit above the active title block.');
       assert(Math.abs((menuRect.left + menuRect.width / 2) -
-        (titleRect.left + titleRect.width / 2)) <= 1,
-      'The flyout must be horizontally centered on the title row.');
+        (blockRect.left + blockRect.width / 2)) <= 1,
+      'The flyout must be horizontally centered on the active title block.');
       var firstRowTop = menu.querySelector('[data-marker="none"]')
         .getBoundingClientRect().top;
       var secondRowTop = menu.querySelector('[data-marker="-"]')
@@ -937,21 +937,17 @@
       enter(composerMarker);
       var composerMenu = win.document.querySelector('.marker-menu');
       assert(composerMenu, 'Hovering the composer Marker must open the flyout.');
-      var composerMarkerRect = composerMarker.getBoundingClientRect();
       var composerRect = composerMarker.closest('.composer').getBoundingClientRect();
       var composerMenuRect = composerMenu.getBoundingClientRect();
       equal(composerMenu.dataset.placement, 'above',
         'The composer flyout must open above the composer.');
       assert(composerMenuRect.bottom <= composerRect.top + 0.5,
         'The composer flyout must sit above the composer title row.');
-      if (composerMenu.dataset.alignment === 'title-start') {
-        assert(Math.abs(composerMenuRect.left - composerMarkerRect.left) <= 1,
-          'A wide composer flyout must start at its Marker.');
-      } else {
-        assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
-          (composerRect.left + composerRect.width / 2)) <= 1,
-        'A short composer flyout must be horizontally centered on the composer.');
-      }
+      equal(composerMenu.dataset.alignment, 'center',
+        'The composer flyout must use centered alignment.');
+      assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
+        (composerRect.left + composerRect.width / 2)) <= 1,
+      'The composer flyout must be horizontally centered on the composer.');
       leave(composerMarker);
       var menuCenter = {
         x: composerMenuRect.left + composerMenuRect.width / 2,
@@ -981,7 +977,7 @@
     });
   });
 
-  test('US1 a wide block anchors the Marker menu at its title start', function () {
+  test('US1 a wide block centers the Marker menu on its title card', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       var element = commitComposer(win, '- ' + '很長的項目文字'.repeat(20));
@@ -994,14 +990,12 @@
       var menu = win.document.querySelector('.marker-menu');
       assert(menu, 'Hovering the wide block Marker must open the menu.');
       var menuRect = menu.getBoundingClientRect();
-      var markerRect = marker.getBoundingClientRect();
-      var rowRect = element.querySelector('.block-text').getBoundingClientRect();
-      equal(menu.dataset.alignment, 'title-start',
-        'A block wider than the menu must align to its title start.');
-      assert(Math.abs(menuRect.left - markerRect.left) <= 1,
-        'The wide-block menu must start at the Marker instead of the block center.');
-      assert(menuRect.left < rowRect.left + rowRect.width / 2,
-        'The wide-block menu must not drift to the middle of a long block.');
+      var blockRect = element.getBoundingClientRect();
+      equal(menu.dataset.alignment, 'center',
+        'A wide block must use the same centered alignment as a short block.');
+      assert(Math.abs((menuRect.left + menuRect.width / 2) -
+        (blockRect.left + blockRect.width / 2)) <= 1,
+      'The wide-block menu must be centered on the active title card.');
       assert(menuRect.right <= win.innerWidth + 1,
         'The wide-block menu must stay inside the viewport.');
       win.Prompter.editor.closeMarkerMenu();
@@ -2880,14 +2874,13 @@
         'The left side must not show a grab cursor.');
       var menu = win.document.querySelector('.marker-menu');
       assert(menu, 'Hovering the left border must open the Marker flyout.');
-      var titleRect = element.querySelector('.block-text').getBoundingClientRect();
       var menuRect = menu.getBoundingClientRect();
       equal(menu.dataset.placement, 'above');
-      assert(menuRect.bottom <= titleRect.top + 0.5,
-        'The flyout must sit above the title row.');
+      assert(menuRect.bottom <= rect.top + 0.5,
+        'The flyout must sit above the active title block.');
       assert(Math.abs((menuRect.left + menuRect.width / 2) -
-        (titleRect.left + titleRect.width / 2)) <= 1,
-      'The flyout must be horizontally centered on the title row.');
+        (rect.left + rect.width / 2)) <= 1,
+      'The flyout must be horizontally centered on the active title block.');
 
       move(rect.right - 6, rect.top + rect.height / 2);
       equal(element.classList.contains('hover-right'), true,
