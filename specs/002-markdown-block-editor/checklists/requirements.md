@@ -64,11 +64,12 @@
   Save, Preview, or Copy; expanding preserves nested states; hidden blocks are skipped by
   keyboard navigation; the composer moves after a collapsed section; and dragging or moving a
   collapsed section with the keyboard carries its hidden descendants.
-- Outline indentation: `#` stays at the base column; `##` and `###` use their own heading levels
-  even without an explicit parent heading; nested list, ordered, quote, and dot markers step
-  right one level per rank, so quotes and dot items indent more than a preceding bullet. New
-  same/higher ranks restore shallower columns; composers align with their section; Markdown
-  order and text stay unchanged; indented blocks remain inside the canvas at 360 px.
+- Outline indentation: `#` stays at the base column; `##` and `###` nest under open higher-ranked
+  ancestors; nested list, ordered, quote, and dot markers step right one level per rank, so
+  quotes and dot items indent more than a preceding bullet. A higher-ranked heading after a
+  deeper item closes that nesting and returns to the shallower column. New same/higher ranks
+  restore shallower columns; composers align with their section; Markdown order and text stay
+  unchanged; indented blocks remain inside the canvas at 360 px.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and

@@ -1604,32 +1604,32 @@
     });
   });
 
-  test('US1 a heading keeps its own level even without its parent heading', function () {
+  test('US1 a higher-level heading outdents after a nested item', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var Model = win.Prompter.model;
       app.setDocument(Model.createPromptDocument({
-        id: 'absolute-heading-document',
-        title: '標題層級',
+        id: 'outdent-heading-document',
+        title: '標題回退',
         blocks: [
-          Model.createTextBlock({ id: 'level-h1', marker: '#', text: '第一章', seq: 1 }),
-          Model.createTextBlock({ id: 'level-b1', marker: '-', text: '項目', seq: 2 }),
-          Model.createTextBlock({ id: 'level-h3', marker: '###', text: '子標題', seq: 3 }),
-          Model.createTextBlock({ id: 'level-h2', marker: '##', text: '後續標題', seq: 4 }),
-          Model.createTextBlock({ id: 'level-b2', marker: '-', text: '後續項目', seq: 5 })
+          Model.createTextBlock({ id: 'outdent-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'outdent-b1', marker: '-', text: '項目', seq: 2 }),
+          Model.createTextBlock({ id: 'outdent-q1', marker: '>', text: '引言', seq: 3 }),
+          Model.createTextBlock({ id: 'outdent-h3', marker: '###', text: '子標題', seq: 4 }),
+          Model.createTextBlock({ id: 'outdent-b2', marker: '-', text: '後續項目', seq: 5 })
         ]
       }), [], { persisted: false });
       var base = win.Prompter.files.COLUMN_X;
-      equal(blockById(win, 'level-b1').style.left, (base + 20) + 'px',
+      equal(blockById(win, 'outdent-b1').style.left, (base + 20) + 'px',
         'A bullet under # must indent one level.');
-      equal(blockById(win, 'level-h3').style.left, (base + 40) + 'px',
-        '### must use its own heading level even without an explicit ## ancestor.');
-      equal(blockById(win, 'level-h2').style.left, (base + 20) + 'px',
-        'A following ## must outdent to its own level.');
-      equal(blockById(win, 'level-b2').style.left, (base + 40) + 'px',
-        'Content under the following ## must indent from that heading level.');
+      equal(blockById(win, 'outdent-q1').style.left, (base + 40) + 'px',
+        'A quote under the bullet must indent one more level.');
+      equal(blockById(win, 'outdent-h3').style.left, (base + 20) + 'px',
+        'A higher-level heading after the quote must return to its outline level.');
+      equal(blockById(win, 'outdent-b2').style.left, (base + 40) + 'px',
+        'Content after the heading must indent from that heading level.');
       equal(win.Prompter.markdown.serializeDocument(app.state.document),
-        '# 第一章\n- 項目\n### 子標題\n## 後續標題\n- 後續項目\n');
+        '# 第一章\n- 項目\n> 引言\n### 子標題\n- 後續項目\n');
     });
   });
 

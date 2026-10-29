@@ -194,48 +194,23 @@
     return Markdown.markerRank(block.marker);
   }
 
-  function headingLevel(block) {
-    if (!block || block.type !== 'text') {
-      return 0;
-    }
-    if (block.marker === '#') {
-      return 1;
-    }
-    if (block.marker === '##') {
-      return 2;
-    }
-    if (block.marker === '###') {
-      return 3;
-    }
-    return 0;
-  }
-
   function outlineIndentation(ordered) {
     var levels = {};
     var after = [];
     var stack = [];
-    var base = 0;
     var contentRank = Markdown.markerRank('none');
     (ordered || []).forEach(function (block, index) {
-      var heading = headingLevel(block);
-      if (heading > 0) {
-        base = heading;
-        stack = [];
-        levels[block.id] = heading - 1;
-        after[index] = base;
-        return;
-      }
       var rank = blockRank(block);
       if (rank < contentRank) {
         while (stack.length && stack[stack.length - 1] >= rank) {
           stack.pop();
         }
-        levels[block.id] = base + stack.length;
+        levels[block.id] = stack.length;
         stack.push(rank);
       } else {
-        levels[block.id] = base + stack.length;
+        levels[block.id] = stack.length;
       }
-      after[index] = base + stack.length;
+      after[index] = stack.length;
     });
     return { levels: levels, after: after };
   }
