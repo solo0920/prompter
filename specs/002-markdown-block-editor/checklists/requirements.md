@@ -133,3 +133,18 @@
 
 Final status: implementation and automated verification are complete; the remaining items are
 manual environment checks with documented fallbacks.
+
+### Open Manual Verification (2026-10-30)
+
+- [ ] SC-007: paste text and images into two real rich-text destinations.
+- [ ] Verify physical touch drag, add, delete, collapse, and layer-focus controls.
+- [ ] Run screen-reader spot checks for the editor, toolbar, tabs, and dialogs.
+- [ ] Exercise the real OS file and directory pickers in the release browsers.
+- [ ] Record human timing for SC-001 and complete the manual quickstart in Chrome and Firefox.
+
+### Accepted Limitations (2026-10-30)
+
+- [x] Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
+- [x] Firefox multi-file Save/Save As uses separate downloads.
+- [x] Some rich-text destinations strip data-URL images; exact Markdown remains available.
+- [x] Safari remains outside the automated and manual acceptance scope.

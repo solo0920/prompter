@@ -4,7 +4,13 @@
 
 **Created**: 2026-10-28
 
-**Status**: Draft
+**Status**: Superseded by `002-markdown-block-editor`
+
+**Superseded on**: 2026-10-30
+
+**Superseded by**: [Markdown Block Editor](../002-markdown-block-editor/spec.md). This document is
+retained for historical context; where the two conflict, feature 002 governs current behavior.
+No separate plan or task list was produced for this superseded draft.
 
 **Input**: User description: "首頁header具備主要功能 右側有風格選項及light dark 按鈕
 body 左方有目錄系統可以查詢之前使用的提示詞文件系統"

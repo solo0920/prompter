@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-28
 
-**Status**: Draft
+**Status**: Implemented — automated verification complete; manual acceptance checks pending
 
 **Input**: User description: "首頁header具備主要功能 最左方有file按鈕，可以作開啟檔案儲存及另存新檔等功能，中間有preview及複製按鈕可將md及相關檔案放到剪貼簿，剪貼簿支援文字和圖片混合複製，右側有風格選項及light dark 按鈕及齒輪設定按鈕
 body 左方有目錄系統可以查詢之前使用的提示詞文件系統
@@ -710,3 +710,20 @@ settings panel and clear the local library after confirming the warning.
   Traditional Chinese and English.
 - Preview uses standard Markdown rendering plus KaTeX math; other custom Markdown extensions are
   out of scope.
+
+## Completion Status (2026-10-30)
+
+- Implementation: complete; all 96 tasks in `tasks.md` are checked.
+- Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156 and
+  Firefox 159, online and offline, from `file://`.
+- Manual acceptance still pending:
+  - SC-007: paste rich text and images into two real rich-text destinations.
+  - Physical touch-device checks.
+  - Screen-reader spot checks.
+  - Real OS file and directory pickers.
+  - Human timing for SC-001 and the manual walkthrough in both release browsers.
+- Accepted limitations:
+  - Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
+  - Firefox falls back to separate downloads for multi-file Save/Save As.
+  - Some rich-text destinations strip data-URL images; exact Markdown remains available.
+  - Safari is outside the automated and manual acceptance scope.

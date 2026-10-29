@@ -112,5 +112,9 @@
 - No open clarifications remain; the sequential-shift interpretation is recorded in the spec's
   Assumptions section.
 - Reviewed against Prompter Constitution version 1.0.0 (2026-10-28).
-- Implemented and verified.
+- Implemented and verified as an increment to feature 002; no separate `plan.md` or `tasks.md`
+  was produced, and the verification record is this checklist.
+- Manual exceptions inherited from feature 002 remain outstanding: SC-007 rich-text destination
+  paste, physical touch-device checks, screen-reader spot checks, real OS pickers, and human
+  timing. Accepted limitations are recorded in the feature 002 checklist.
 - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`.

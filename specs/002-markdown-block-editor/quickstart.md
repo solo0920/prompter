@@ -108,6 +108,10 @@ Microsoft Word), a physical touch device, a screen-reader spot check, and real O
 file/directory pickers still require a human tester. Their automated equivalents (payload
 construction, iframe viewport layout, ARIA structure, and picker mocks) pass.
 
+**Manual status (2026-10-30)**: automated verification is complete, but the manual exceptions
+above, SC-007, human timing for SC-001, and the full two-browser walkthrough remain outstanding.
+Do not mark the specification fully accepted until those checks are recorded.
+
 ## Manual Acceptance Scenarios
 
 Run these in Chrome first as the required acceptance browser. Optionally repeat the core

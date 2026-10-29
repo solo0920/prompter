@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-28
 
-**Status**: Draft
+**Status**: Implemented — verified as an increment to `002-markdown-block-editor`
 
 **Input**: User descriptions:
 
@@ -498,3 +498,15 @@ font, or remote asset is bundled.
 - A custom theme editor, color picker, or user-uploaded style files.
 - Brand logos, brand font files, proprietary artwork, or official brand assets.
 - Per-document styles or synchronization between devices.
+
+## Completion Status (2026-10-30)
+
+- Implementation: complete. This feature was delivered as an increment to feature 002, so no
+  separate `plan.md` or `tasks.md` was produced; the verification record lives in the checklist.
+- Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156 and Firefox
+  159, online and offline.
+- Manual exceptions from feature 002 remain outstanding: SC-007 rich-text destination paste,
+  physical touch-device checks, screen-reader spot checks, real OS pickers, and human timing.
+- Accepted limitations from feature 002 remain in force: native tab-close prompt, Firefox
+  multi-file download fallback, rich-text destinations that strip data-URL images, and Safari
+  outside the test matrix.

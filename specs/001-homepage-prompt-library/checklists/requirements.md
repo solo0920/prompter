@@ -3,6 +3,8 @@
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-10-28
 **Feature**: [spec.md](../spec.md)
+**Status**: Superseded by [002-markdown-block-editor](../../002-markdown-block-editor/spec.md)
+on 2026-10-30; retained for historical context.
 
 ## Content Quality
 
@@ -33,4 +35,6 @@
 
 - Validation passed on 2026-10-28.
 - No `[NEEDS CLARIFICATION]` markers remain.
-- The specification is ready for `/speckit.plan`.
+- This draft was superseded by feature 002 on 2026-10-30; it was not planned or implemented as a
+  separate feature. Current behavior is governed by
+  [002-markdown-block-editor](../002-markdown-block-editor/spec.md).
