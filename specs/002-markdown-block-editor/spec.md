@@ -570,14 +570,17 @@ settings panel and clear the local library after confirming the warning.
   opened after a block MUST align with that block's level, and indented blocks MUST stay within
   the available canvas width.
 - **FR-054**: The left directory rail MUST provide a second button below `文件目錄` that opens a
-  vertical layer-focus toolbar listing `#`, `##`, `###`, `-`, `1.`, `>`, `.`. Activating one layer
-  MUST mark every text block with that Marker as the active layer, begin editing the first one,
-  and make blocks of all other layers visually de-emphasized, inert, and unselectable; image
-  blocks are also de-emphasized. Up/Down MUST then move only among blocks of the selected layer,
-  entering edit mode and selecting the full text on each step, with first/last wrap. Opening the
-  same layer again, closing the toolbar, or switching documents MUST exit layer focus and restore
-  normal block interaction. The composer MUST stay hidden during layer focus, and layer focus
-  MUST NOT change Markdown content, Save, Preview, or Copy output.
+  vertical layer-focus toolbar listing `#`, `##`, `###`, `-`, `1.`, `>`, `.`, followed by
+  `全部收合` and `全部展開` actions. Activating one layer MUST mark every text block with that
+  Marker as the active layer, begin editing the first one, and make blocks of all other layers
+  visually de-emphasized, inert, and unselectable; image blocks are also de-emphasized. Up/Down
+  MUST then move only among blocks of the selected layer, entering edit mode and selecting the
+  full text on each step, with first/last wrap. Collapse All MUST collapse every collapsible
+  block of the selected layer while keeping its own header blocks visible, and Expand All MUST
+  restore them; with no layer selected, the actions apply to every collapsible section in the
+  document. Opening the same layer again, closing the toolbar, or switching documents MUST exit
+  layer focus and restore normal block interaction. The composer MUST stay hidden during layer
+  focus, and layer focus MUST NOT change Markdown content, Save, Preview, or Copy output.
 
 
 ### Key Entities *(include if feature involves data)*

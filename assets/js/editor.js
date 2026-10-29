@@ -217,7 +217,13 @@
     var order = ordered || (document ? Model.normalizeSequence(document) : []);
     var collapsed = collapseSetFor(document);
     if (layerFilter) {
-      collapsed = {};
+      var filtered = {};
+      order.forEach(function (entry) {
+        if (blockMatchesLayer(entry) && collapsed[entry.id]) {
+          filtered[entry.id] = true;
+        }
+      });
+      collapsed = filtered;
     }
     var model = {
       ordered: order,
@@ -384,6 +390,47 @@
     updateLayerToolbar();
   }
 
+  function setAllLayersCollapsed(collapsed) {
+    var state = getState();
+    var document = state && state.document;
+    if (!document) {
+      return;
+    }
+    if (state.editingBlockId) {
+      commitEditing();
+      state = getState();
+      document = state && state.document;
+      if (!document) {
+        return;
+      }
+    }
+    var ordered = Model.normalizeSequence(document);
+    var model = collapseModelForDocument(document, ordered);
+    var targets = ordered.filter(function (block) {
+      return model.hasChildren[block.id] && (!layerFilter || blockMatchesLayer(block));
+    });
+    if (!targets.length) {
+      announce('目前沒有可' + (collapsed ? '收合' : '展開') + '的項目。');
+      return;
+    }
+    var set = collapseSetFor(document);
+    if (!layerFilter && !collapsed) {
+      Object.keys(set).forEach(function (id) {
+        delete set[id];
+      });
+    } else {
+      targets.forEach(function (block) {
+        if (collapsed) {
+          set[block.id] = true;
+        } else {
+          delete set[block.id];
+        }
+      });
+    }
+    render();
+    announce('已' + (collapsed ? '收合' : '展開') + ' ' + targets.length + ' 個區塊。');
+  }
+
   function setLayerFilter(marker) {
     var state = getState();
     if (!state || !state.document) {
@@ -443,6 +490,19 @@
       return;
     }
     var buttons = Array.prototype.slice.call(toolbar.querySelectorAll('.layer-button'));
+    var navButtons = Array.prototype.slice.call(toolbar.querySelectorAll('button'));
+    var collapseAll = global.document.getElementById('layer-collapse-all');
+    var expandAll = global.document.getElementById('layer-expand-all');
+    if (collapseAll) {
+      collapseAll.addEventListener('click', function () {
+        setAllLayersCollapsed(true);
+      });
+    }
+    if (expandAll) {
+      expandAll.addEventListener('click', function () {
+        setAllLayersCollapsed(false);
+      });
+    }
     toggle.addEventListener('click', function () {
       setLayerToolbarOpen(!layerToolbarOpen);
     });
@@ -463,19 +523,19 @@
       });
     });
     toolbar.addEventListener('keydown', function (event) {
-      var index = buttons.indexOf(global.document.activeElement);
+      var index = navButtons.indexOf(global.document.activeElement);
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        buttons[(index + 1 + buttons.length) % buttons.length].focus();
+        navButtons[(index + 1 + navButtons.length) % navButtons.length].focus();
       } else if (event.key === 'ArrowUp') {
         event.preventDefault();
-        buttons[(index - 1 + buttons.length) % buttons.length].focus();
+        navButtons[(index - 1 + navButtons.length) % navButtons.length].focus();
       } else if (event.key === 'Home') {
         event.preventDefault();
-        buttons[0].focus();
+        navButtons[0].focus();
       } else if (event.key === 'End') {
         event.preventDefault();
-        buttons[buttons.length - 1].focus();
+        navButtons[navButtons.length - 1].focus();
       } else if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();

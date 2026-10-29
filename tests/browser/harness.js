@@ -1677,8 +1677,13 @@
       var buttons = Array.prototype.slice.call(toolbar.querySelectorAll('.layer-button'));
       equal(buttons.map(function (button) { return button.dataset.layer; }).join(','),
         '#,##,###,-,1.,>,.', 'The layer toolbar must list the seven Marker levels.');
+      var collapseAll = byId(win, 'layer-collapse-all');
+      var expandAll = byId(win, 'layer-expand-all');
+      equal(collapseAll.getAttribute('aria-label'), '全部收合');
+      equal(expandAll.getAttribute('aria-label'), '全部展開');
 
       var quoteButton = toolbar.querySelector('[data-layer=">"]');
+      var hashButton = toolbar.querySelector('[data-layer="#"]');
       quoteButton.click();
       equal(quoteButton.getAttribute('aria-pressed'), 'true');
       equal(state.editingBlockId, 'layer-q1',
@@ -1722,8 +1727,22 @@
       equal(state.editingBlockId, 'layer-q1',
         'Up must return to the previous block in the selected layer.');
 
-      quoteButton.click();
-      equal(quoteButton.getAttribute('aria-pressed'), 'false');
+      hashButton.click();
+      equal(hashButton.getAttribute('aria-pressed'), 'true');
+      equal(state.editingBlockId, 'layer-h1',
+        'Switching layers must edit the first # heading.');
+      collapseAll.click();
+      assert(blockById(win, 'layer-h1'), 'The focused heading itself must stay visible.');
+      ['layer-b1', 'layer-q1', 'layer-b2', 'layer-q2', 'layer-o1'].forEach(function (id) {
+        equal(blockById(win, id), null, id + ' must be hidden by collapse all.');
+      });
+      expandAll.click();
+      ['layer-b1', 'layer-q1', 'layer-b2', 'layer-q2', 'layer-o1'].forEach(function (id) {
+        assert(blockById(win, id), id + ' must return after expand all.');
+      });
+
+      hashButton.click();
+      equal(hashButton.getAttribute('aria-pressed'), 'false');
       ['layer-h1', 'layer-b1', 'layer-q1', 'layer-q2', 'layer-o1'].forEach(function (id) {
         assert(!blockById(win, id).classList.contains('layer-dimmed'));
         equal(blockById(win, id).querySelector('.block-marker').disabled, false);
