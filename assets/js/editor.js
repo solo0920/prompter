@@ -194,34 +194,19 @@
     return Markdown.markerRank(block.marker);
   }
 
-  function headingLevel(block) {
-    if (!block || block.type !== 'text') {
-      return 0;
-    }
-    if (block.marker === '#') {
-      return 1;
-    }
-    if (block.marker === '##') {
-      return 2;
-    }
-    if (block.marker === '###') {
-      return 3;
-    }
-    return 0;
-  }
-
-  function headingIndentation(ordered) {
+  function outlineIndentation(ordered) {
     var levels = {};
     var after = [];
     var stack = [];
+    var contentRank = Markdown.markerRank('none');
     (ordered || []).forEach(function (block, index) {
-      var level = headingLevel(block);
-      if (level > 0) {
-        while (stack.length && stack[stack.length - 1] >= level) {
+      var rank = blockRank(block);
+      if (rank < contentRank) {
+        while (stack.length && stack[stack.length - 1] >= rank) {
           stack.pop();
         }
         levels[block.id] = stack.length;
-        stack.push(level);
+        stack.push(rank);
       } else {
         levels[block.id] = stack.length;
       }
@@ -337,7 +322,7 @@
   function computeSequenceLayout(ordered, composer, heights, collapse, indentInfo) {
     var positions = {};
     var hidden = collapse && collapse.hidden ? collapse.hidden : {};
-    var indentation = indentInfo || headingIndentation(ordered);
+    var indentation = indentInfo || outlineIndentation(ordered);
     var y = Files.COLUMN_START_Y;
     var composerTop = null;
     var composerX = Files.COLUMN_X;
@@ -376,16 +361,25 @@
     };
   }
 
-  function applyIndentedWidth(element, x, basePadding) {
+  function applyIndentedWidth(element, x, basePadding, minimumWidth) {
     if (!element) {
       return;
     }
     var offset = Math.max(0, Number(x) - Files.COLUMN_X);
     if (offset > 0) {
+      var canvas = getCanvas();
+      var available = canvas ? canvas.clientWidth : global.innerWidth;
+      var maximum = Math.min(560, available - basePadding - offset);
       element.style.maxWidth = 'min(560px, calc(100% - ' +
         (basePadding + offset) + 'px))';
+      if (maximum < (minimumWidth || 0)) {
+        element.style.minWidth = '0';
+      } else {
+        element.style.removeProperty('min-width');
+      }
     } else {
       element.style.removeProperty('max-width');
+      element.style.removeProperty('min-width');
     }
   }
 
@@ -399,13 +393,13 @@
     var ordered = Model.normalizeSequence(state.document);
     activeCollapse = collapseModelForDocument(state.document, ordered);
     sanitizeCollapsedView(state, activeCollapse);
-    var indentInfo = headingIndentation(ordered);
+    var indentInfo = outlineIndentation(ordered);
     ordered.forEach(function (block) {
       if (activeCollapse.hidden[block.id]) {
         return;
       }
       applyIndentedWidth(blockElement(block.id), Files.COLUMN_X +
-        ((indentInfo.levels[block.id] || 0) * INDENT_STEP), 48);
+        ((indentInfo.levels[block.id] || 0) * INDENT_STEP), 48, 140);
     });
     Array.prototype.forEach.call(
       canvas.querySelectorAll('.composer-input, .block-edit-input'),
@@ -433,7 +427,7 @@
       state.composer.y = layout.composerTop;
       composerElement.style.left = layout.composerX + 'px';
       composerElement.style.top = layout.composerTop + 'px';
-      applyIndentedWidth(composerElement, layout.composerX, 32);
+      applyIndentedWidth(composerElement, layout.composerX, 32, 220);
     }
     updateCanvasSize();
   }
@@ -1406,7 +1400,7 @@
       var point = layout.positions[block.id];
       var element = blockElement(block.id);
       if (element) {
-        applyIndentedWidth(element, point.x, 48);
+        applyIndentedWidth(element, point.x, 48, 140);
         element.style.left = point.x + 'px';
         element.style.top = point.y + 'px';
       }
@@ -1414,7 +1408,7 @@
     if (composer && composerElement && layout.composerTop !== null) {
       composerElement.style.left = layout.composerX + 'px';
       composerElement.style.top = layout.composerTop + 'px';
-      applyIndentedWidth(composerElement, layout.composerX, 32);
+      applyIndentedWidth(composerElement, layout.composerX, 32, 220);
     }
     drag.layout = layout;
   }

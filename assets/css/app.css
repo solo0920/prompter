@@ -602,7 +602,7 @@ body {
   overflow-wrap: anywhere;
   line-height: inherit;
 }
-.composer-detection { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+.composer-detection { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: normal; }
 .composer-handle {
   flex: 0 0 auto;
   align-self: center;

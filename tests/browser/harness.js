@@ -942,18 +942,22 @@
       enter(composerMarker);
       var composerMenu = win.document.querySelector('.marker-menu');
       assert(composerMenu, 'Hovering the composer Marker must open the flyout.');
+      var composerMarkerRect = composerMarker.getBoundingClientRect();
       var composerRect = composerMarker.closest('.composer').getBoundingClientRect();
       var composerMenuRect = composerMenu.getBoundingClientRect();
       equal(composerMenu.dataset.placement, 'above',
         'The composer flyout must open above the composer.');
       assert(composerMenuRect.bottom <= composerRect.top + 0.5,
         'The composer flyout must sit above the composer title row.');
-      equal(composerMenu.dataset.alignment, 'page-left',
-        'A composer Marker near the left edge must clamp the flyout to the page edge.');
-      assert(Math.abs(composerMenuRect.left - 8) <= 1,
-        'The composer flyout must start at the page edge when clamped.');
-      var composerMarkerCenter = composerMarker.getBoundingClientRect().left +
-        composerMarker.getBoundingClientRect().width / 2;
+      if (composerMenu.dataset.alignment === 'page-left') {
+        assert(Math.abs(composerMenuRect.left - 8) <= 1,
+          'A left-clamped composer flyout must start at the page edge.');
+      } else {
+        assert(Math.abs((composerMenuRect.left + composerMenuRect.width / 2) -
+          (composerMarkerRect.left + composerMarkerRect.width / 2)) <= 1,
+        'A fitting composer flyout must be centered on its Marker.');
+      }
+      var composerMarkerCenter = composerMarkerRect.left + composerMarkerRect.width / 2;
       assert(composerMarkerCenter >= composerMenuRect.left &&
         composerMarkerCenter <= composerMenuRect.right,
       'The composer Marker must remain inside the visible menu.');
@@ -1537,7 +1541,7 @@
     });
   });
 
-  test('US1 subordinate headings and their content indent by heading depth', function () {
+  test('US1 outline markers indent by hierarchy depth', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = freshDocument(win);
@@ -1547,10 +1551,12 @@
         Model.createTextBlock({ id: 'indent-p1', marker: 'none', text: '章內容', seq: 2 }),
         Model.createTextBlock({ id: 'indent-h2', marker: '##', text: '第一節', seq: 3 }),
         Model.createTextBlock({ id: 'indent-b1', marker: '-', text: '節內容', seq: 4 }),
-        Model.createTextBlock({ id: 'indent-h3', marker: '###', text: '細項', seq: 5 }),
-        Model.createTextBlock({ id: 'indent-p2', marker: 'none', text: '細項內容', seq: 6 }),
-        Model.createTextBlock({ id: 'indent-h1b', marker: '#', text: '第二章', seq: 7 }),
-        Model.createTextBlock({ id: 'indent-p3', marker: 'none', text: '第二章內容', seq: 8 })
+        Model.createTextBlock({ id: 'indent-q1', marker: '>', text: '引言', seq: 5 }),
+        Model.createTextBlock({ id: 'indent-d1', marker: '.', text: '點項目', seq: 6 }),
+        Model.createTextBlock({ id: 'indent-h3', marker: '###', text: '細項', seq: 7 }),
+        Model.createTextBlock({ id: 'indent-p2', marker: 'none', text: '細項內容', seq: 8 }),
+        Model.createTextBlock({ id: 'indent-h1b', marker: '#', text: '第二章', seq: 9 }),
+        Model.createTextBlock({ id: 'indent-p3', marker: 'none', text: '第二章內容', seq: 10 })
       ];
       app.setDocument(Model.createPromptDocument({
         id: 'indent-document',
@@ -1563,6 +1569,8 @@
         'indent-p1': base + 20,
         'indent-h2': base + 20,
         'indent-b1': base + 40,
+        'indent-q1': base + 60,
+        'indent-d1': base + 80,
         'indent-h3': base + 40,
         'indent-p2': base + 60,
         'indent-h1b': base,
@@ -1570,13 +1578,14 @@
       };
       state.document.blocks.forEach(function (block) {
         equal(block.x, expected[block.id],
-          block.id + ' must use its heading depth for horizontal placement.');
+          block.id + ' must use its outline depth for horizontal placement.');
         equal(blockById(win, block.id).style.left, block.x + 'px',
           block.id + ' must render at its computed indentation.');
       });
       var before = win.Prompter.markdown.serializeDocument(state.document);
       equal(before,
-        '# 第一章\n章內容\n## 第一節\n- 節內容\n### 細項\n細項內容\n# 第二章\n第二章內容\n',
+        '# 第一章\n章內容\n## 第一節\n- 節內容\n> 引言\n. 點項目\n### 細項\n' +
+        '細項內容\n# 第二章\n第二章內容\n',
         'Indentation must not change Markdown order or text.');
 
       blockById(win, 'indent-h3').querySelector('.block-plus').click();

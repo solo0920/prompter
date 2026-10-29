@@ -194,14 +194,14 @@ Each image block shows:
 - Changing a Marker recomputes which blocks are collapsible. A block with no lower-ranked
   following block shows no collapse control.
 
-## Heading Indentation
+## Outline Indentation
 
-- The editor shows the heading outline as horizontal indentation. `#` stays at the base column,
-  `##` under an open `#` moves one 20 px step right, and `###` under two open ancestors moves two
-  steps right.
-- Content beneath a heading aligns with the next nesting step: content under a `#` heading aligns
-  with `##`, content under `##` aligns with `###`, and content under `###` moves one step deeper.
-- A new heading of the same or higher level closes the earlier nested sections, so its following
+- The editor shows the Marker outline as horizontal indentation using the rank order `#`, `##`,
+  `###`, `-`, `1.`, `>`, `.`, then unmarked content and images. A top-level block stays at the
+  base column and each lower-ranked nested block moves one 20 px step right.
+- Content beneath a Marker aligns with the next nesting step, so it remains visually inside the
+  current parent.
+- A new block of the same or higher rank closes the earlier nesting, so it and its following
   blocks return to the matching shallower column.
 - Indentation is layout-only. It never changes Markdown order, text, Markers, Preview, Copy, or
   Save output. Indented blocks and composers shrink their maximum width so they remain inside the
