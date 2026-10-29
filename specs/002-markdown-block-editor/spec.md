@@ -549,16 +549,17 @@ settings panel and clear the local library after confirming the warning.
   user closes it until another document is created or opened, and MUST show the empty state when
   the active document has no previewable content.
 - **FR-052**: A text block with at least one following block of lower rank MUST show a collapse
-  control before its Marker. Rank order from highest to lowest MUST be `#`, `##`, `###`, `-`,
-  `1.`, `>`, `.`, then unmarked text and image content. Activating the control MUST hide every
-  following lower-ranked block until the next block of the same or higher rank; activating it
-  again MUST restore them while preserving nested collapse states. Collapse MUST be view-only:
-  hidden blocks MUST remain in the document model and in Save, Preview, and Copy output. Hidden
-  blocks MUST be skipped by layout and keyboard navigation, an open composer MUST move after the
-  collapsed section, and dragging or moving a collapsed section with the keyboard MUST move its
-  hidden descendants as one unit. The control MUST expose its expanded state and an accessible
-  label, focus MUST remain on it after toggling, and collapse state MUST NOT be written into
-  Markdown.
+  control outside its card, immediately to the left of the block and aligned with its top title
+  row. The control MUST follow the block's outline indentation rather than consuming title-row
+  width. Rank order from highest to lowest MUST be `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then
+  unmarked text and image content. Activating the control MUST hide every following lower-ranked
+  block until the next block of the same or higher rank; activating it again MUST restore them
+  while preserving nested collapse states. Collapse MUST be view-only: hidden blocks MUST remain
+  in the document model and in Save, Preview, and Copy output. Hidden blocks MUST be skipped by
+  layout and keyboard navigation, an open composer MUST move after the collapsed section, and
+  dragging or moving a collapsed section with the keyboard MUST move its hidden descendants as
+  one unit. The control MUST expose its expanded state and an accessible label, focus MUST remain
+  on it after toggling, and collapse state MUST NOT be written into Markdown.
 - **FR-053**: The editor canvas MUST show the Marker outline as horizontal indentation using the
   rank order `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then unmarked content and images. Heading
   markers MUST use their own heading level regardless of whether an intermediate parent heading

@@ -846,11 +846,11 @@
     if (block.type === 'image') {
       element.appendChild(createImageContent(block));
     } else {
+      if (collapse && collapse.hasChildren[block.id]) {
+        element.appendChild(createCollapseToggle(block, collapse));
+      }
       var row = global.document.createElement('div');
       row.className = 'block-text';
-      if (collapse && collapse.hasChildren[block.id]) {
-        row.appendChild(createCollapseToggle(block, collapse));
-      }
       row.appendChild(createMarkerButton(block, state && state.editingBlockId === block.id));
       row.appendChild(createTextContent(block));
       element.appendChild(row);

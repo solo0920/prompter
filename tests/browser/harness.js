@@ -1366,6 +1366,15 @@
       assert(chevron, 'The collapse control must render a chevron icon.');
       assert(chevron.getBoundingClientRect().width >= 16,
         'The chevron icon must match the surrounding text size.');
+      var collapsedBlockRect = blockById(win, 'collapse-h2').getBoundingClientRect();
+      var collapsedToggleRect = collapsedToggle.getBoundingClientRect();
+      assert(collapsedToggleRect.right <= collapsedBlockRect.left,
+        'The collapse arrow must sit outside the block card.');
+      assert(collapsedBlockRect.left - collapsedToggleRect.right <= 8,
+        'The collapse arrow must sit immediately beside the block card.');
+      assert(collapsedToggleRect.top >= collapsedBlockRect.top &&
+        collapsedToggleRect.top < collapsedBlockRect.top + 10,
+      'The collapse arrow must align with the top title row.');
       equal(state.document.blocks.length, 7,
         'Collapsing must not remove blocks from the document.');
       equal(win.Prompter.markdown.serializeDocument(state.document), before,

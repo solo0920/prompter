@@ -58,12 +58,12 @@
   block per obvious marker line in source order, keeps contiguous unmarked prose grouped,
   preserves blank-line separation, leaves plain multi-line text and fenced code intact, and
   focuses the next composer after the last block.
-- Collapsible sections: blocks with lower-ranked content show a text-sized chevron icon before
-  the Marker; `#` > `##` > `###` > `-` > `1.` > `>` > `.` > unmarked content. Collapsing hides
-  the section from the canvas but not from Save, Preview, or Copy; expanding preserves nested
-  states; hidden blocks are skipped by keyboard navigation; the composer moves after a collapsed
-  section; and dragging or moving a collapsed section with the keyboard carries its hidden
-  descendants.
+- Collapsible sections: blocks with lower-ranked content show a text-sized chevron icon outside
+  the card, immediately to its left and aligned with the title row; `#` > `##` > `###` > `-` >
+  `1.` > `>` > `.` > unmarked content. Collapsing hides the section from the canvas but not from
+  Save, Preview, or Copy; expanding preserves nested states; hidden blocks are skipped by
+  keyboard navigation; the composer moves after a collapsed section; and dragging or moving a
+  collapsed section with the keyboard carries its hidden descendants.
 - Outline indentation: `#` stays at the base column; `##` and `###` use their own heading levels
   even without an explicit parent heading; nested list, ordered, quote, and dot markers step
   right one level per rank, so quotes and dot items indent more than a preceding bullet. New

@@ -176,10 +176,11 @@ Each image block shows:
 
 ## Collapsible Sections
 
-- A text block with at least one following lower-ranked block shows a chevron icon immediately
-  left of its Marker. The icon points down when expanded and right when collapsed, is sized with
-  the surrounding text, exposes `aria-expanded`, and has an accessible label naming the block
-  and hidden item count.
+- A text block with at least one following lower-ranked block shows a chevron icon outside its
+  card, immediately to its left and aligned with the top title row. The icon follows the block's
+  outline indentation and does not consume title-row width. It points down when expanded and
+  right when collapsed, is sized with the surrounding text, exposes `aria-expanded`, and has an
+  accessible label naming the block and hidden item count.
 - Rank order from highest to lowest is `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then unmarked text
   and image content. A section ends at the next block of the same or higher rank.
 - Activating the control hides every following block in that section, including images and

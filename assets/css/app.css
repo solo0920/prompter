@@ -408,7 +408,9 @@ body {
 .block.editing { cursor: default; }
 .block-text { display: flex; align-items: flex-start; gap: 7px; min-height: 24px; }
 .block-collapse {
-  flex: 0 0 auto;
+  position: absolute;
+  top: 4px;
+  left: -30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

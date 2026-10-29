@@ -181,7 +181,8 @@ opens the Marker flyout without showing a grab cursor.
 
 1. Create `# 第一章`, `## 第一節`, `### 細項`, `- 項目`, `> 引言`, plain content, and `# 第二章`
    in that order. Confirm chevrons appear only on blocks that have lower-ranked content below
-   them, and that `# 第二章` has no chevron.
+   them, that each chevron sits outside its card immediately to the left, and that `# 第二章`
+   has no chevron. Confirm the chevrons follow each block's indentation column.
 2. Activate the chevron on `## 第一節`. Confirm its chevron points right, the `###`, `-`, `>`, and
    plain blocks disappear from the canvas, and `# 第一章` and `# 第二章` stay visible.
 3. Confirm Preview, Copy, and Save still contain the hidden blocks, and Markdown never includes a
