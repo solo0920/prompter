@@ -407,6 +407,24 @@ body {
 .canvas.reordering .block.group-dragging { transition: none; }
 .block.editing { cursor: default; }
 .block-text { display: flex; align-items: flex-start; gap: 7px; min-height: 24px; }
+.block-collapse {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius-control) - 2px);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+}
+.block-collapse:hover,
+.block-collapse:focus-visible {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.block-collapse.collapsed { color: var(--accent-strong); }
 .block-marker {
   flex: 0 0 auto;
   border: 0;

@@ -24,6 +24,9 @@
   var editDraft = null;
   var lastTap = { blockId: null, time: 0 };
   var hoveredBlock = null;
+  var activeCollapse = null;
+  var collapsedByDocument = typeof global.WeakMap === 'function' ? new global.WeakMap() : null;
+  var collapsedFallback = {};
 
   function getApp() {
     return global.Prompter.app;
@@ -164,6 +167,119 @@
     return label;
   }
 
+  function collapseSetFor(document) {
+    if (!document) {
+      return {};
+    }
+    if (collapsedByDocument) {
+      var set = collapsedByDocument.get(document);
+      if (!set) {
+        set = {};
+        collapsedByDocument.set(document, set);
+      }
+      return set;
+    }
+    var key = document.id || 'document';
+    if (!collapsedFallback[key]) {
+      collapsedFallback[key] = {};
+    }
+    return collapsedFallback[key];
+  }
+
+  function blockRank(block) {
+    if (!block || block.type !== 'text') {
+      return Markdown.markerRank('none');
+    }
+    return Markdown.markerRank(block.marker);
+  }
+
+  function collapseModelForDocument(document, ordered) {
+    var order = ordered || (document ? Model.normalizeSequence(document) : []);
+    var collapsed = collapseSetFor(document);
+    var model = {
+      ordered: order,
+      hasChildren: {},
+      childEnd: {},
+      childCount: {},
+      collapsed: {},
+      hidden: {},
+      hiddenAncestor: {},
+      ranges: []
+    };
+    var i;
+    for (i = 0; i < order.length; i += 1) {
+      var block = order[i];
+      var rank = blockRank(block);
+      if (rank >= Markdown.markerRank('none')) {
+        continue;
+      }
+      var end = i + 1;
+      while (end < order.length && blockRank(order[end]) > rank) {
+        end += 1;
+      }
+      if (end > i + 1) {
+        model.hasChildren[block.id] = true;
+        model.childEnd[block.id] = end;
+        model.childCount[block.id] = end - i - 1;
+      }
+    }
+    var active = null;
+    for (i = 0; i < order.length; i += 1) {
+      var current = order[i];
+      if (active && i >= active.end) {
+        active = null;
+      }
+      if (active) {
+        model.hidden[current.id] = true;
+        model.hiddenAncestor[current.id] = active.parentId;
+        continue;
+      }
+      if (model.hasChildren[current.id] && collapsed[current.id]) {
+        model.collapsed[current.id] = true;
+        active = {
+          parentId: current.id,
+          end: model.childEnd[current.id]
+        };
+        model.ranges.push({
+          parentId: current.id,
+          start: i,
+          end: active.end
+        });
+      }
+    }
+    return model;
+  }
+
+  function blockIsHidden(blockId) {
+    return !!(activeCollapse && activeCollapse.hidden[blockId]);
+  }
+
+  function sanitizeCollapsedView(state, collapse) {
+    if (!state || !collapse) {
+      return;
+    }
+    var ids = selectedBlockIds(state).filter(function (id) {
+      return !collapse.hidden[id];
+    });
+    state.selectedBlockIds = ids;
+    if (state.selectedBlockId && collapse.hidden[state.selectedBlockId]) {
+      state.selectedBlockId = ids.length ? ids[ids.length - 1] : null;
+    }
+    if (state.editingBlockId && collapse.hidden[state.editingBlockId]) {
+      state.editingBlockId = null;
+      editDraft = null;
+    }
+    if (state.composer) {
+      var insertIndex = Number(state.composer.insertIndex);
+      collapse.ranges.forEach(function (range) {
+        if (insertIndex > range.start && insertIndex < range.end) {
+          state.composer.insertIndex = range.end;
+          state.composer.anchorBlockId = range.parentId;
+        }
+      });
+    }
+  }
+
   function updateCanvasSize() {
     var canvas = getCanvas();
     var workspace = getWorkspace();
@@ -181,8 +297,9 @@
     canvas.style.height = height + 'px';
   }
 
-  function computeSequenceLayout(ordered, composer, heights) {
+  function computeSequenceLayout(ordered, composer, heights, collapse) {
     var positions = {};
+    var hidden = collapse && collapse.hidden ? collapse.hidden : {};
     var y = Files.COLUMN_START_Y;
     var composerTop = null;
     var composerIndex = composer && composer.insertIndex !== undefined
@@ -192,6 +309,10 @@
       if (composer && composerIndex === index) {
         composerTop = y;
         y += (composer.height || 0) + GAP;
+      }
+      if (hidden[block.id]) {
+        positions[block.id] = { x: Files.COLUMN_X, y: y };
+        return;
       }
       var height = heights && heights[block.id] !== undefined
         ? heights[block.id]
@@ -217,12 +338,14 @@
       autoResizeTextarea
     );
     var ordered = Model.normalizeSequence(state.document);
+    activeCollapse = collapseModelForDocument(state.document, ordered);
+    sanitizeCollapsedView(state, activeCollapse);
     var composerElement = canvas.querySelector('.composer');
     var composer = state.composer ? {
       insertIndex: state.composer.insertIndex,
       height: composerElement ? composerElement.offsetHeight : 0
     } : null;
-    var layout = computeSequenceLayout(ordered, composer);
+    var layout = computeSequenceLayout(ordered, composer, null, activeCollapse);
     ordered.forEach(function (block, index) {
       var point = layout.positions[block.id];
       block.x = point.x;
@@ -324,7 +447,7 @@
     }
     var markerButton = block.querySelector('.block-marker');
     var markerZone = false;
-    if (markerButton) {
+    if (markerButton && !target.closest('.block-collapse')) {
       var markerRect = markerButton.getBoundingClientRect();
       markerZone = event.clientX >= rect.left && event.clientX <= markerRect.right + 6;
     }
@@ -571,7 +694,27 @@
     return wrapper;
   }
 
-  function createBlockElement(block) {
+  function createCollapseToggle(block, collapse) {
+    var collapsed = !!(collapse && collapse.collapsed[block.id]);
+    var count = collapse && collapse.childCount ? (collapse.childCount[block.id] || 0) : 0;
+    var preview = String(block.text || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    var label = (collapsed ? '展開' : '收合') + '「' + preview + '」下的 ' + count + ' 個區塊';
+    var button = createButton(
+      'block-collapse' + (collapsed ? ' collapsed' : ''),
+      label,
+      collapsed ? '▸' : '▾'
+    );
+    button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    button.title = label;
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleBlockCollapse(block.id);
+    });
+    return button;
+  }
+
+  function createBlockElement(block, collapse) {
     var state = getState();
     var element = global.document.createElement('div');
     element.className = 'block' + (block.type === 'image' ? ' block-image-block' : '');
@@ -596,6 +739,9 @@
     } else {
       var row = global.document.createElement('div');
       row.className = 'block-text';
+      if (collapse && collapse.hasChildren[block.id]) {
+        row.appendChild(createCollapseToggle(block, collapse));
+      }
       row.appendChild(createMarkerButton(block, state && state.editingBlockId === block.id));
       row.appendChild(createTextContent(block));
       element.appendChild(row);
@@ -625,6 +771,84 @@
     element.appendChild(handle);
 
     return element;
+  }
+
+  function toggleBlockCollapse(blockId) {
+    var state = getState();
+    var document = state && state.document;
+    if (!document) {
+      return;
+    }
+    var ordered = Model.normalizeSequence(document);
+    var before = collapseModelForDocument(document, ordered);
+    if (!before.hasChildren[blockId]) {
+      return;
+    }
+    var set = collapseSetFor(document);
+    var collapsing = !set[blockId];
+    if (state.editingBlockId) {
+      commitEditing();
+      state = getState();
+      document = state && state.document;
+      if (!document || !findBlock(blockId)) {
+        return;
+      }
+      ordered = Model.normalizeSequence(document);
+      before = collapseModelForDocument(document, ordered);
+      if (!before.hasChildren[blockId]) {
+        return;
+      }
+      set = collapseSetFor(document);
+    }
+    var index = -1;
+    var end = -1;
+    for (var i = 0; i < ordered.length; i += 1) {
+      if (ordered[i].id === blockId) {
+        index = i;
+        break;
+      }
+    }
+    if (collapsing) {
+      end = before.childEnd[blockId];
+      set[blockId] = true;
+    } else {
+      delete set[blockId];
+    }
+    var after = collapseModelForDocument(document, ordered);
+    activeCollapse = after;
+    var ids = selectedBlockIds(state).filter(function (id) {
+      return !after.hidden[id];
+    });
+    var activeId = state.selectedBlockId;
+    if (activeId && after.hidden[activeId]) {
+      ids = index === -1 ? ids : [blockId];
+      activeId = index === -1 ? (ids.length ? ids[ids.length - 1] : null) : blockId;
+    }
+    state.selectedBlockIds = ids;
+    state.selectedBlockId = activeId;
+    if (collapsing && state.composer && index !== -1) {
+      var composerIndex = Number(state.composer.insertIndex);
+      if (composerIndex > index && composerIndex < end) {
+        state.composer.insertIndex = end;
+        state.composer.anchorBlockId = blockId;
+      }
+    }
+    if (state.editingBlockId && after.hidden[state.editingBlockId]) {
+      state.editingBlockId = null;
+      editDraft = null;
+    }
+    render();
+    var element = blockElement(blockId);
+    var toggle = element ? element.querySelector('.block-collapse') : null;
+    if (toggle) {
+      toggle.focus();
+    } else {
+      selectBlock(blockId, { focus: true });
+    }
+    var preview = String((findBlock(blockId) || {}).text || '').replace(/\s+/g, ' ').trim()
+      .slice(0, 40);
+    announce((collapsing ? '已收合' : '已展開') + '「' + preview + '」下的 ' +
+      (before.childCount[blockId] || 0) + ' 個區塊。');
   }
 
   function renderComposer(state) {
@@ -799,8 +1023,13 @@
     }
     ensureInitialComposer(state);
     var blocks = Model.normalizeSequence(state.document);
+    activeCollapse = collapseModelForDocument(state.document, blocks);
+    sanitizeCollapsedView(state, activeCollapse);
     blocks.forEach(function (block) {
-      canvas.appendChild(createBlockElement(block));
+      if (activeCollapse.hidden[block.id]) {
+        return;
+      }
+      canvas.appendChild(createBlockElement(block, activeCollapse));
     });
     var composerElement = renderComposer(state);
     if (composerElement) {
@@ -952,6 +1181,12 @@
     return items;
   }
 
+  function navigationItemsFor(state) {
+    return dragItemsFor(state).filter(function (item) {
+      return isComposerItem(item) || !blockIsHidden(item.id);
+    });
+  }
+
   function blocksFromItems(items) {
     return items.filter(function (item) {
       return !isComposerItem(item);
@@ -1014,6 +1249,20 @@
     return top === Infinity ? null : { top: top, bottom: bottom };
   }
 
+  function snapCollapsedDropIndex(items, target) {
+    var result = target;
+    items.forEach(function (item, index) {
+      if (isComposerItem(item) || !activeCollapse || !activeCollapse.collapsed[item.id]) {
+        return;
+      }
+      var count = activeCollapse.childCount[item.id] || 0;
+      if (count > 0 && result > index && result <= index + count) {
+        result = index + count;
+      }
+    });
+    return result;
+  }
+
   function targetIndexForDrag(drag, clientY) {
     var pointerCenter = clientY - drag.grabOffsetY + drag.element.offsetHeight / 2;
     var movingUp = pointerCenter < drag.startCenter;
@@ -1037,7 +1286,8 @@
         target += 1;
       }
     });
-    return Utils.clamp(target, 0, drag.remainingItems.length);
+    return Utils.clamp(snapCollapsedDropIndex(drag.remainingItems, target),
+      0, drag.remainingItems.length);
   }
 
   function previewItemsForTarget(drag, targetIndex) {
@@ -1059,7 +1309,7 @@
       insertIndex: composerIndex,
       height: drag.composerHeight
     } : null;
-    var layout = computeSequenceLayout(blockOrder, composer, drag.heights);
+    var layout = computeSequenceLayout(blockOrder, composer, drag.heights, activeCollapse);
     drag.previewBlockOrder = blockOrder;
     drag.previewComposerIndex = composerIndex;
     blockOrder.forEach(function (block) {
@@ -1181,6 +1431,27 @@
       });
       if (groupIds.indexOf(config.itemId) === -1) {
         groupIds = [config.itemId];
+      }
+      if (activeCollapse) {
+        var extraIds = [];
+        groupIds.forEach(function (id) {
+          if (!activeCollapse.collapsed[id]) {
+            return;
+          }
+          var end = activeCollapse.childEnd[id];
+          for (var index = 0; index < activeCollapse.ordered.length; index += 1) {
+            if (activeCollapse.ordered[index].id === id) {
+              for (var child = index + 1; child < end; child += 1) {
+                var childId = activeCollapse.ordered[child].id;
+                if (groupIds.indexOf(childId) === -1 && extraIds.indexOf(childId) === -1) {
+                  extraIds.push(childId);
+                }
+              }
+              break;
+            }
+          }
+        });
+        groupIds = groupIds.concat(extraIds);
       }
       groupIds.forEach(function (id) {
         groupIdSet[id] = true;
@@ -1478,8 +1749,14 @@
   }
 
   function selectAfterBlockDrag(drag, focus) {
-    if (drag.groupIds && drag.groupIds.length > 1) {
-      setBlockSelection(drag.groupIds, drag.blockId, { focus: !!focus });
+    var ids = (drag.groupIds || []).filter(function (id) {
+      return !blockIsHidden(id);
+    });
+    if (ids.length > 1) {
+      setBlockSelection(ids, ids.indexOf(drag.blockId) !== -1 ? drag.blockId : ids[0],
+        { focus: !!focus });
+    } else if (ids.length === 1) {
+      selectBlock(ids[0], { focus: !!focus });
     } else {
       selectBlock(drag.blockId, { focus: !!focus });
     }
@@ -1538,11 +1815,57 @@
     }
     var ordered = Model.normalizeSequence(document);
     var index = ordered.indexOf(block);
-    var target = index + delta;
-    if (index === -1 || target < 0 || target >= ordered.length) {
+    if (index === -1) {
       return false;
     }
-    if (!Model.moveBlockToIndex(document, block.id, target)) {
+    var collapse = collapseModelForDocument(document, ordered);
+    if (collapse.collapsed[block.id]) {
+      var end = collapse.childEnd[block.id];
+      var group = ordered.slice(index, end);
+      var remaining = ordered.slice(0, index).concat(ordered.slice(end));
+      var target = -1;
+      if (delta < 0) {
+        for (var previous = index - 1; previous >= 0; previous -= 1) {
+          if (!collapse.hidden[ordered[previous].id]) {
+            target = previous;
+            break;
+          }
+        }
+      } else {
+        for (var next = end; next < ordered.length; next += 1) {
+          if (!collapse.hidden[ordered[next].id]) {
+            target = next - group.length + 1;
+            break;
+          }
+        }
+      }
+      if (target < 0) {
+        return false;
+      }
+      var moved = remaining.slice(0, target).concat(group, remaining.slice(target));
+      document.blocks = moved;
+      moved.forEach(function (entry, position) {
+        entry.seq = position + 1;
+      });
+      document.layoutVersion = 2;
+      markDirty();
+      render();
+      selectBlock(block.id, { focus: true });
+      if (opts.focusHandle) {
+        var groupElement = blockElement(block.id);
+        var groupHandle = groupElement ? groupElement.querySelector('.drag-handle') : null;
+        if (groupHandle) {
+          groupHandle.focus();
+        }
+      }
+      announceSequencePosition(block.id);
+      return true;
+    }
+    var targetIndex = index + delta;
+    if (targetIndex < 0 || targetIndex >= ordered.length) {
+      return false;
+    }
+    if (!Model.moveBlockToIndex(document, block.id, targetIndex)) {
       return false;
     }
     markDirty();
@@ -1595,6 +1918,9 @@
         element.classList.contains('block-edit-input')) {
       return 'content';
     }
+    if (element.classList.contains('block-collapse')) {
+      return 'collapse';
+    }
     if (element.classList.contains('block-marker')) {
       return 'marker';
     }
@@ -1630,6 +1956,8 @@
     var selector = '';
     if (zone === 'content') {
       selector = '.block-content, .block-edit-input';
+    } else if (zone === 'collapse') {
+      selector = '.block-collapse';
     } else if (zone === 'marker') {
       selector = '.block-marker';
     } else if (zone === 'handle') {
@@ -1669,7 +1997,7 @@
     if (!state || !state.document) {
       return false;
     }
-    var items = dragItemsFor(state);
+    var items = navigationItemsFor(state);
     if (!items.length) {
       return false;
     }
@@ -1714,7 +2042,7 @@
       return false;
     }
     var editingId = state.editingBlockId;
-    var before = dragItemsFor(state);
+    var before = navigationItemsFor(state);
     var indexBefore = -1;
     for (var i = 0; i < before.length; i += 1) {
       if (before[i].id === editingId) {
@@ -1729,7 +2057,7 @@
     if (!nextState || !nextState.document) {
       return false;
     }
-    var items = dragItemsFor(nextState);
+    var items = navigationItemsFor(nextState);
     if (!items.length) {
       return true;
     }
@@ -1983,6 +2311,9 @@
   }
 
   function elementHeightFor(block) {
+    if (block && blockIsHidden(block.id)) {
+      return 0;
+    }
     var element = block ? blockElement(block.id) : null;
     return element ? element.offsetHeight : DEFAULT_BLOCK_HEIGHT;
   }
@@ -2838,19 +3169,22 @@
         node.classList.contains('block-edit-input')) {
       return 1;
     }
-    if (node.classList.contains('block-marker')) {
+    if (node.classList.contains('block-collapse')) {
       return 2;
     }
-    if (node.classList.contains('drag-handle')) {
+    if (node.classList.contains('block-marker')) {
       return 3;
     }
-    if (node.classList.contains('block-remove')) {
+    if (node.classList.contains('drag-handle')) {
       return 4;
     }
-    if (node.classList.contains('block-plus')) {
+    if (node.classList.contains('block-remove')) {
       return 5;
     }
-    return 6;
+    if (node.classList.contains('block-plus')) {
+      return 6;
+    }
+    return 7;
   }
 
   function focusablesForItem(item) {

@@ -1245,6 +1245,226 @@
     });
   });
 
+  test('US1 marker hierarchy collapses descendants without changing content', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      var blocks = [
+        Model.createTextBlock({ id: 'collapse-h1', marker: '#', text: '第一章' }),
+        Model.createTextBlock({ id: 'collapse-h2', marker: '##', text: '第一節' }),
+        Model.createTextBlock({ id: 'collapse-h3', marker: '###', text: '細項' }),
+        Model.createTextBlock({ id: 'collapse-b1', marker: '-', text: '項目一' }),
+        Model.createTextBlock({ id: 'collapse-q1', marker: '>', text: '引言' }),
+        Model.createTextBlock({ id: 'collapse-p1', marker: 'none', text: '內容' }),
+        Model.createTextBlock({ id: 'collapse-h1b', marker: '#', text: '第二章' })
+      ];
+      blocks.forEach(function (block, index) {
+        block.seq = index + 1;
+        block.y = index * 24;
+      });
+      app.setDocument(Model.createPromptDocument({
+        id: 'collapse-document',
+        title: '收合測試',
+        blocks: blocks
+      }), [], { persisted: false });
+      var before = win.Prompter.markdown.serializeDocument(state.document);
+      var h2Toggle = blockById(win, 'collapse-h2').querySelector('.block-collapse');
+      assert(h2Toggle, 'A heading with lower-ranked blocks must show a collapse control.');
+      equal(h2Toggle.getAttribute('aria-expanded'), 'true');
+      equal(blockById(win, 'collapse-p1').querySelector('.block-collapse'), null,
+        'Plain text must not show a collapse control.');
+      equal(blockById(win, 'collapse-h1b').querySelector('.block-collapse'), null,
+        'A heading without descendants must not show a collapse control.');
+
+      h2Toggle.click();
+      assert(blockById(win, 'collapse-h2'), 'The collapsed heading itself must stay visible.');
+      equal(blockById(win, 'collapse-h3'), null,
+        'A subheading under the collapsed section must be hidden.');
+      equal(blockById(win, 'collapse-b1'), null,
+        'A bullet under the collapsed section must be hidden.');
+      equal(blockById(win, 'collapse-p1'), null,
+        'Plain content under the collapsed section must be hidden.');
+      assert(blockById(win, 'collapse-h1'), 'The parent heading must stay visible.');
+      assert(blockById(win, 'collapse-h1b'), 'The next top-level heading must stay visible.');
+      var collapsedToggle = blockById(win, 'collapse-h2').querySelector('.block-collapse');
+      equal(collapsedToggle.getAttribute('aria-expanded'), 'false');
+      equal(collapsedToggle.textContent, '▸');
+      equal(state.document.blocks.length, 7,
+        'Collapsing must not remove blocks from the document.');
+      equal(win.Prompter.markdown.serializeDocument(state.document), before,
+        'Collapsing must not change the Markdown content or reading order.');
+
+      blockById(win, 'collapse-h1').querySelector('.block-collapse').click();
+      equal(blockById(win, 'collapse-h2'), null,
+        'Collapsing the higher heading must also hide an already collapsed subheading.');
+      blockById(win, 'collapse-h1').querySelector('.block-collapse').click();
+      assert(blockById(win, 'collapse-h2'), 'Expanding the higher heading must restore it.');
+      equal(blockById(win, 'collapse-h3'), null,
+        'The inner section must keep its own collapsed state.');
+      blockById(win, 'collapse-h2').querySelector('.block-collapse').click();
+      assert(blockById(win, 'collapse-h3'), 'Expanding the inner heading must restore its content.');
+      assert(blockById(win, 'collapse-p1'), 'All descendants must be restored on expansion.');
+      equal(win.Prompter.markdown.serializeDocument(state.document), before);
+    });
+  });
+
+  test('US1 arrow navigation skips blocks hidden by a collapsed section', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'collapse-navigation-document',
+        title: '收合導覽',
+        blocks: [
+          Model.createTextBlock({ id: 'nav-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'nav-h2', marker: '##', text: '第一節', seq: 2 }),
+          Model.createTextBlock({ id: 'nav-b1', marker: '-', text: '隱藏項目', seq: 3 }),
+          Model.createTextBlock({ id: 'nav-h1b', marker: '#', text: '第二章', seq: 4 })
+        ]
+      }), [], { persisted: false });
+      var toggle = blockById(win, 'nav-h2').querySelector('.block-collapse');
+      toggle.click();
+      toggle = blockById(win, 'nav-h2').querySelector('.block-collapse');
+      toggle.focus();
+      press(win, toggle, 'ArrowDown');
+      equal(state.selectedBlockId, 'nav-h1b',
+        'Down from a collapsed heading must skip its hidden children.');
+      equal(win.document.activeElement,
+        blockById(win, 'nav-h1b').querySelector('.block-content'),
+        'The next visible text block must receive focus.');
+      press(win, win.document.activeElement, 'ArrowUp');
+      equal(state.selectedBlockId, 'nav-h2',
+        'Up must return to the collapsed heading, not a hidden child.');
+    });
+  });
+
+  test('US1 collapsing a section keeps the composer visible after the section', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'collapse-composer-document',
+        title: '收合輸入框',
+        blocks: [
+          Model.createTextBlock({ id: 'composer-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'composer-h2', marker: '##', text: '第一節', seq: 2 }),
+          Model.createTextBlock({ id: 'composer-b1', marker: '-', text: '項目', seq: 3 }),
+          Model.createTextBlock({ id: 'composer-h1b', marker: '#', text: '第二章', seq: 4 })
+        ]
+      }), [], { persisted: false });
+      blockById(win, 'composer-h2').querySelector('.block-plus').click();
+      var input = composerInput(win);
+      assert(input, 'The plus control must open a composer under the child block.');
+      setValue(win, input, '草稿');
+      blockById(win, 'composer-h2').querySelector('.block-collapse').click();
+      var composer = win.document.querySelector('#canvas .composer');
+      assert(composer, 'The composer must stay visible when its section collapses.');
+      equal(state.composer.insertIndex, 3,
+        'The composer must move after the hidden section.');
+      assert(composer.getBoundingClientRect().top <
+        blockById(win, 'composer-h1b').getBoundingClientRect().top,
+        'The composer must appear between the collapsed section and the next heading.');
+      equal(composerInput(win).value, '草稿', 'The composer draft must be preserved.');
+    });
+  });
+
+  test('US1 dragging a collapsed heading moves its hidden descendants together', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'collapse-drag-document',
+        title: '收合拖曳',
+        blocks: [
+          Model.createTextBlock({ id: 'drag-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'drag-b1', marker: '-', text: '子項目', seq: 2 }),
+          Model.createTextBlock({ id: 'drag-h2', marker: '#', text: '第二章', seq: 3 })
+        ]
+      }), [], { persisted: false });
+      blockById(win, 'drag-h1').querySelector('.block-collapse').click();
+      equal(blockById(win, 'drag-b1'), null, 'The child must start collapsed.');
+
+      function pointer(target, type, x, y) {
+        target.dispatchEvent(new win.PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 8,
+          pointerType: 'mouse',
+          button: 0,
+          clientX: x,
+          clientY: y
+        }));
+      }
+      var canvasRect = byId(win, 'canvas').getBoundingClientRect();
+      var first = state.document.blocks.filter(function (block) {
+        return block.id === 'drag-h1';
+      })[0];
+      var second = state.document.blocks.filter(function (block) {
+        return block.id === 'drag-h2';
+      })[0];
+      var firstElement = blockById(win, 'drag-h1');
+      var secondElement = blockById(win, 'drag-h2');
+      var x = canvasRect.left + first.x + 10;
+      var y = canvasRect.top + first.y + 10;
+      var targetY = canvasRect.top + second.y + secondElement.offsetHeight / 2 + 10 -
+        firstElement.offsetHeight / 2;
+      pointer(firstElement.querySelector('.block-content'), 'pointerdown', x, y);
+      pointer(win, 'pointermove', x, targetY);
+      win.dispatchEvent(new win.PointerEvent('pointerup', {
+        bubbles: true, cancelable: true, pointerId: 8, pointerType: 'mouse', button: 0,
+        clientX: x, clientY: targetY
+      }));
+
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        'drag-h2,drag-h1,drag-b1',
+        'The collapsed heading must move together with its hidden child.');
+      equal(blockById(win, 'drag-b1'), null,
+        'The child must stay hidden after the move.');
+      equal(blockById(win, 'drag-h1').querySelector('.block-collapse')
+        .getAttribute('aria-expanded'), 'false',
+      'The moved heading must keep its collapsed state.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '# 第二章\n# 第一章\n- 子項目\n');
+    });
+  });
+
+  test('US1 drag-handle navigation moves a collapsed section as one unit', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'collapse-handle-document',
+        title: '收合鍵盤移動',
+        blocks: [
+          Model.createTextBlock({ id: 'handle-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'handle-h2', marker: '##', text: '第一節', seq: 2 }),
+          Model.createTextBlock({ id: 'handle-b1', marker: '-', text: '子項目', seq: 3 }),
+          Model.createTextBlock({ id: 'handle-h1b', marker: '#', text: '第二章', seq: 4 })
+        ]
+      }), [], { persisted: false });
+      blockById(win, 'handle-h2').querySelector('.block-collapse').click();
+      var handle = blockById(win, 'handle-h2').querySelector('.drag-handle');
+      handle.focus();
+      press(win, handle, 'ArrowDown');
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        'handle-h1,handle-h1b,handle-h2,handle-b1',
+        'Down must move the collapsed heading and its hidden child after the next section.');
+      equal(blockById(win, 'handle-b1'), null, 'The child must remain hidden.');
+      equal(win.document.activeElement,
+        blockById(win, 'handle-h2').querySelector('.drag-handle'),
+        'Focus must stay on the moved section handle.');
+      press(win, win.document.activeElement, 'ArrowUp');
+      equal(readingOrder(win).map(function (block) { return block.id; }).join(','),
+        'handle-h1,handle-h2,handle-b1,handle-h1b',
+        'Up must move the whole collapsed section back.');
+    });
+  });
+
   test('US1 empty editing removes only the edited block', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

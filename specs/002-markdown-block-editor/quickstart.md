@@ -37,29 +37,29 @@ There is no install, build, or dev-server command.
 node --test tests/unit/*.test.js
 ```
 
-Expected: all tests pass. These tests cover the pure model, Marker detection, canonical
-Markdown serializer, reading order, blank-line/newline preservation, search matching, image
-reference matching, the HTML renderer, preferences, storage degradation, and security guards.
-They do not require npm packages.
+Expected: all tests pass. These tests cover the pure model, Marker detection and rank ordering,
+canonical Markdown serializer, reading order, blank-line/newline preservation, search matching,
+image reference matching, the HTML renderer, preferences, storage degradation, composer
+Markdown splitting, and security guards. They do not require npm packages.
 
-Current result (2026-10-29): **104 passing, 0 failing**.
+Current result (2026-10-29): **105 passing, 0 failing**.
 
 ### Browser harness
 
 1. Open `tests/browser/harness.html` from `file://`.
 2. Confirm every check is green and the page reports `PASS` with a count.
-3. The harness checks DOM wiring, Marker composer behavior, block commit/edit/remove, reading
-   order, localStorage/IndexedDB capability probes, settings persistence, performance budgets,
-   accessibility structure, responsive layouts, KaTeX math rendering, and the renderer in the
-   actual `file://` environment.
+3. The harness checks DOM wiring, Marker composer behavior, collapsible sections, block
+   commit/edit/remove, reading order, localStorage/IndexedDB capability probes, settings
+   persistence, performance budgets, accessibility structure, responsive layouts, KaTeX math
+   rendering, and the renderer in the actual `file://` environment.
 4. Open `tests/browser/paste-target.html` in a second tab; use it as one rich-text destination
    for the Copy checks.
 
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-29): Chrome **96 passing, 0 failing** (required gate). Firefox also
-reports 96 passing, 0 failing as the supplementary check.
+Current result (2026-10-29): Chrome **101 passing, 0 failing** (required gate). Firefox also
+reports 101 passing, 0 failing as the supplementary check.
 
 ## Verified Results (2026-10-29)
 
@@ -69,8 +69,8 @@ unreachable proxy profile in Firefox) so any runtime network request would fail.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 96/96 | PASS 96/96 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 96/96 | PASS 96/96 | Supplementary check; WebDriver run; download save fallback |
+| Chrome (macOS) | 156.0.8078.49 | PASS 101/101 | PASS 101/101 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 101/101 | PASS 101/101 | Supplementary check; WebDriver run; download save fallback |
 
 Chrome is the required release gate. Firefox is the supplementary compatibility check; Safari
 is not part of the test matrix.
@@ -173,6 +173,23 @@ opens the Marker flyout without showing a grab cursor.
    `- 項目二` on separate lines, then press Enter. Confirm each marked line becomes its own block
    in source order, the prose stays grouped, blank lines between groups survive in the saved
    Markdown, the next composer opens below the last block, and a fenced code sample is not split.
+
+### 2b. Collapse sections by Marker rank (FR-052)
+
+1. Create `# 第一章`, `## 第一節`, `### 細項`, `- 項目`, `> 引言`, plain content, and `# 第二章`
+   in that order. Confirm chevrons appear only on blocks that have lower-ranked content below
+   them, and that `# 第二章` has no chevron.
+2. Activate the chevron on `## 第一節`. Confirm its chevron points right, the `###`, `-`, `>`, and
+   plain blocks disappear from the canvas, and `# 第一章` and `# 第二章` stay visible.
+3. Confirm Preview, Copy, and Save still contain the hidden blocks, and Markdown never includes a
+   collapse marker.
+4. Collapse `# 第一章`; confirm the already collapsed `## 第一節` also hides. Expand `# 第一章`
+   and confirm `## 第一節` returns still collapsed; expand it and confirm all its content returns.
+5. With `## 第一節` collapsed, press Down from its chevron and confirm focus skips the hidden
+   blocks. Open a composer inside the section and confirm it moves below the section when the
+   section collapses.
+6. Drag the collapsed `## 第一節`, or use its drag handle's Up/Down keys, and confirm its hidden
+   descendants move with it and remain collapsed.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 

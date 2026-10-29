@@ -171,6 +171,25 @@ Each image block shows:
 - The same `+`, drag, select, and focus behavior as text blocks.
 - A missing-image placeholder with the alt text when the asset cannot be loaded.
 
+## Collapsible Sections
+
+- A text block with at least one following lower-ranked block shows a chevron control immediately
+  left of its Marker. The control uses `▾` when expanded and `▸` when collapsed, exposes
+  `aria-expanded`, and has an accessible label naming the block and hidden item count.
+- Rank order from highest to lowest is `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then unmarked text
+  and image content. A section ends at the next block of the same or higher rank.
+- Activating the control hides every following block in that section, including images and
+  unmarked text, and removes those blocks from the visible layout. Activating it again restores
+  them; nested sections keep their own collapse state.
+- Collapse is a view-only aid. Hidden blocks remain in the document and in Save, Preview, and
+  Copy output. Markdown never records collapse state.
+- Hidden blocks are skipped by Up/Down navigation and cannot receive focus. An open composer
+  inside a section moves after that section when it collapses.
+- Dragging a collapsed heading, or moving it with the drag handle's Up/Down keys, moves its hidden
+  descendants with it as one contiguous unit. The section stays collapsed after the move.
+- Changing a Marker recomputes which blocks are collapsible. A block with no lower-ranked
+  following block shows no collapse control.
+
 ## Selection
 
 - Cmd-click (Ctrl-click on Windows) toggles a block in the current selection without clearing

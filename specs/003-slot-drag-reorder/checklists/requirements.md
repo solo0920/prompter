@@ -103,7 +103,7 @@
   commits and navigation continues with the destination text block in edit mode and all text
   selected. Tab cycles within the current block or composer item; and Up/Down on a drag handle
   reorders the block while retaining focus.
-- Verification: **104 unit tests** and **96 browser tests** pass in Chrome and Firefox,
+- Verification: **105 unit tests** and **101 browser tests** pass in Chrome and Firefox,
   online and offline.
 
 ## Notes

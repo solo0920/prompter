@@ -81,6 +81,20 @@ test('detectMarker requires exactly one space and a non-empty remainder', functi
   assert.deepEqual(Markdown.detectMarker('#   '), { marker: 'none', text: '#   ' });
 });
 
+test('markerRank orders headings, lists, quotes and plain content', function () {
+  var markers = ['#', '##', '###', '-', '1.', '>', '.'];
+  assert.deepEqual(
+    markers.concat(['none', 'unknown']).map(Markdown.markerRank),
+    [0, 1, 2, 3, 4, 5, 6, 7, 7]
+  );
+  for (var i = 1; i < markers.length; i += 1) {
+    assert.ok(Markdown.markerRank(markers[i - 1]) < Markdown.markerRank(markers[i]),
+      markers[i - 1] + ' must rank above ' + markers[i]);
+  }
+  assert.equal(Markdown.markerRank('none'), 7);
+  assert.equal(Markdown.markerRank('unknown'), 7);
+});
+
 test('splitComposerItems separates obvious Markdown lines and keeps prose grouped', function () {
   const items = Markdown.splitComposerItems(
     '# 標題\n' +

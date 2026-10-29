@@ -252,6 +252,7 @@ across all stories.
 - [x] T086 Give plain Up/Down top priority while editing: commit the current block, continue to the adjacent item, and reopen a text destination in edit mode with all text selected.
 - [x] T087 Open the live preview pane by default for new, opened, and restored documents, keep it closed after an explicit close, and preserve the state across tab switches.
 - [x] T088 Split obvious Markdown lines into separate blocks when Enter commits a multi-line composer value: detect `#`, `##`, `###`, `-`, `1.`, `>`, and `.` at line starts, keep unmarked prose grouped, preserve blank-line separators, leave fenced code and plain multi-line text intact, and focus the next composer after the last block.
+- [x] T089 Add collapsible sections ranked `#` > `##` > `###` > `-` > `1.` > `>` > `.` > unmarked content: show a chevron before the Marker for blocks with lower-ranked descendants, hide the section from the canvas without changing Save, Preview, Copy, or Markdown, restore nested states on expansion, skip hidden blocks in keyboard navigation, move the composer after a collapsed section, and move hidden descendants with the section when dragging or using the drag handle's Up/Down keys.
 
 ---
 

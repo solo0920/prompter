@@ -6,6 +6,16 @@
     : global.Prompter.utils;
 
   var PREFIXED_MARKERS = ['###', '##', '#', '-', '1.', '>', '.'];
+  var MARKER_RANKS = {
+    '#': 0,
+    '##': 1,
+    '###': 2,
+    '-': 3,
+    '1.': 4,
+    '>': 5,
+    '.': 6
+  };
+  var CONTENT_RANK = 7;
   var ROW_HEIGHT = 24;
 
   function normalizeText(value) {
@@ -38,6 +48,12 @@
 
   function markerPrefix(marker) {
     return marker && marker !== 'none' ? marker + ' ' : '';
+  }
+
+  function markerRank(marker) {
+    return Object.prototype.hasOwnProperty.call(MARKER_RANKS, marker)
+      ? MARKER_RANKS[marker]
+      : CONTENT_RANK;
   }
 
   function escapeAltText(alt) {
@@ -358,6 +374,7 @@
     isBlankLine: isBlankLine,
     detectMarker: detectMarker,
     markerPrefix: markerPrefix,
+    markerRank: markerRank,
     escapeAltText: escapeAltText,
     unescapeAltText: unescapeAltText,
     matchImageLine: matchImageLine,

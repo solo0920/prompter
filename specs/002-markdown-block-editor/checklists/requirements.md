@@ -39,11 +39,12 @@
 
 ## Post-Implementation Verification (2026-10-29)
 
-- Unit and contract tests: **104 passing, 0 failing** (`node --test tests/unit/*.test.js`).
-  Coverage includes model defaults, Marker detection, blank-line/newline round-trips, reading
-  order, search, renderer escaping, clipboard payloads, preferences, storage degradation,
-  file-name/path safety, composer Markdown splitting, and static no-network guards.
-- Browser harness: **96 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Unit and contract tests: **105 passing, 0 failing** (`node --test tests/unit/*.test.js`).
+  Coverage includes model defaults, Marker detection and rank ordering, blank-line/newline
+  round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
+  storage degradation, file-name/path safety, composer Markdown splitting, and static
+  no-network guards.
+- Browser harness: **101 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0 also passes as the supplementary check. Chrome and Firefox pass with
   browser networking disabled.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
@@ -57,6 +58,11 @@
   block per obvious marker line in source order, keeps contiguous unmarked prose grouped,
   preserves blank-line separation, leaves plain multi-line text and fenced code intact, and
   focuses the next composer after the last block.
+- Collapsible sections: blocks with lower-ranked content show a chevron before the Marker; `#` >
+  `##` > `###` > `-` > `1.` > `>` > `.` > unmarked content. Collapsing hides the section from the
+  canvas but not from Save, Preview, or Copy; expanding preserves nested states; hidden blocks
+  are skipped by keyboard navigation; the composer moves after a collapsed section; and dragging
+  or moving a collapsed section with the keyboard carries its hidden descendants.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and

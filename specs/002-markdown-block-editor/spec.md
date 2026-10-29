@@ -114,6 +114,18 @@ and confirm the unsaved draft is not restored.
     **Then** each such line becomes its own block in source order with its Marker stored once,
     contiguous unmarked lines stay grouped as prose, blank lines remain separators, fenced code
     is never split, and a multi-line input without any such Marker remains one block.
+17. **Given** a text block followed by blocks of lower rank, **When** the user activates its
+    collapse control, **Then** the chevron points right and every following lower-ranked block
+    is hidden until the next block of the same or higher rank, while the document content,
+    Preview, Save, Copy, and Markdown output remain unchanged.
+18. **Given** a collapsed section, **When** the user activates its control again, **Then** its
+    descendants reappear and any nested section keeps its own collapsed state.
+19. **Given** a collapsed section, **When** the user navigates with Up/Down or moves the
+    composer, **Then** hidden blocks are skipped and an open composer is placed after the
+    collapsed section rather than inside it.
+20. **Given** a collapsed section, **When** the user drags its heading or moves it with the drag
+    handle's Up/Down keys, **Then** the hidden descendants move with it as one unit and remain
+    hidden until the section is expanded.
 
 ---
 
@@ -529,6 +541,17 @@ settings panel and clear the local library after confirming the warning.
   restored, and MUST remain open across tab switches and updates. It MUST stay closed after the
   user closes it until another document is created or opened, and MUST show the empty state when
   the active document has no previewable content.
+- **FR-052**: A text block with at least one following block of lower rank MUST show a collapse
+  control before its Marker. Rank order from highest to lowest MUST be `#`, `##`, `###`, `-`,
+  `1.`, `>`, `.`, then unmarked text and image content. Activating the control MUST hide every
+  following lower-ranked block until the next block of the same or higher rank; activating it
+  again MUST restore them while preserving nested collapse states. Collapse MUST be view-only:
+  hidden blocks MUST remain in the document model and in Save, Preview, and Copy output. Hidden
+  blocks MUST be skipped by layout and keyboard navigation, an open composer MUST move after the
+  collapsed section, and dragging or moving a collapsed section with the keyboard MUST move its
+  hidden descendants as one unit. The control MUST expose its expanded state and an accessible
+  label, focus MUST remain on it after toggling, and collapse state MUST NOT be written into
+  Markdown.
 
 
 ### Key Entities *(include if feature involves data)*
