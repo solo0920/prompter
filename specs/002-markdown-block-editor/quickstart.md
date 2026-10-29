@@ -202,12 +202,9 @@ opens the Marker flyout without showing a grab cursor.
 
 1. Create `# 第一章`, its paragraph, `## 第一節`, its bullet, a quote, a dot item,
    `### 細項`, its paragraph, and `# 第二章`. Confirm the columns step right as
-   `0, 1, 1, 2, 3, 4, 2, 3, 0` 20 px units, so the quote and dot item are indented more than
-   the bullet.
-2. Create `# 第一章`, its bullet, a quote, `### 子標題`, and another bullet. Confirm the heading
-   returns to the second indentation step and the following content indents from that heading.
-   Then add `## 後續標題` and confirm it returns to the first heading step rather than staying
-   level with `###`.
+   `0, 1, 1, 3, 5, 6, 2, 3, 0, 1` 20 px units, using the fixed Marker levels.
+2. Create `# first`, `- snd`, `### sed`, `## thrd`, `>`, and `1.`. Confirm the columns are
+   `0, 3, 2, 1, 5, 4`; each Marker always uses its own fixed level regardless of order.
 3. Confirm Save, Preview, and Copy still output the same Markdown order and text, with no
    indentation characters added.
 4. Open the composer under `### 細項` and confirm it aligns with that section's content column.

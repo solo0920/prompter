@@ -197,21 +197,15 @@ Each image block shows:
 
 ## Outline Indentation
 
-- The editor shows the Marker outline as horizontal indentation using the rank order `#`, `##`,
-  `###`, `-`, `1.`, `>`, `.`, then unmarked content and images. Headings use their fixed levels:
-  `#` at the base column, `##` one 20 px step right, and `###` two steps right even without an
-  explicit `##` parent. List, ordered, quote, and dot markers nest below the current heading
-  level, one step per rank.
-- A heading after a deeper list, quote, or dot item returns to its fixed heading column instead
-  of staying at the deeper item's indentation.
-- Content beneath a Marker aligns with the next nesting step, so it remains visually inside the
-  current parent.
-- A new block of the same or higher rank closes the earlier nesting, so it and its following
-  blocks return to the matching shallower column.
+- The editor assigns fixed horizontal levels to Markers: `#` = 0, `##` = 1, `###` = 2, `-` = 3,
+  `1.` = 4, `>` = 5, `.` = 6, each 20 px apart. Unmarked content and images sit one level below
+  the last Marker; a plain text document starts at 0.
+- The level never depends on preceding blocks, so `###` is always two steps from the base and
+  `##` is always one step; switching between them changes the column immediately.
+- A composer opened after a block aligns with that block's level.
 - Indentation is layout-only. It never changes Markdown order, text, Markers, Preview, Copy, or
   Save output. Indented blocks and composers shrink their maximum width so they remain inside the
   canvas at narrow viewports.
-- A composer inserted inside a section aligns with that section's content column.
 
 ## Selection
 

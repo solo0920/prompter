@@ -993,7 +993,7 @@
   test('US1 a wide block keeps the Marker menu inside the left page edge', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
-      var element = commitComposer(win, '- ' + '很長的項目文字'.repeat(20));
+      var element = commitComposer(win, '# ' + '很長的項目文字'.repeat(20));
       var marker = element.querySelector('.block-marker');
       marker.dispatchEvent(new win.PointerEvent('pointerenter', {
         pointerId: 13,
@@ -1577,9 +1577,9 @@
         'indent-h1': base,
         'indent-p1': base + 20,
         'indent-h2': base + 20,
-        'indent-b1': base + 40,
-        'indent-q1': base + 60,
-        'indent-d1': base + 80,
+        'indent-b1': base + 60,
+        'indent-q1': base + 100,
+        'indent-d1': base + 120,
         'indent-h3': base + 40,
         'indent-p2': base + 60,
         'indent-h1b': base,
@@ -1599,8 +1599,8 @@
 
       blockById(win, 'indent-h3').querySelector('.block-plus').click();
       var composer = win.document.querySelector('#canvas .composer');
-      equal(parseFloat(composer.style.left), base + 60,
-        'A composer under a third-level heading must align with its content.');
+      equal(parseFloat(composer.style.left), base + 40,
+        'A composer under a third-level heading must align with that heading level.');
     });
   });
 
@@ -1626,26 +1626,25 @@
       var base = win.Prompter.files.COLUMN_X;
       var expected = {
         'outdent-h1': base,
-        'outdent-b1': base + 20,
-        'outdent-q1': base + 40,
+        'outdent-b1': base + 60,
+        'outdent-q1': base + 100,
         'outdent-h3': base + 40,
         'outdent-b2': base + 60,
         'outdent-h1b': base,
-        'outdent-b3': base + 20,
+        'outdent-b3': base + 60,
         'outdent-h3b': base + 40,
         'outdent-h2b': base + 20
       };
       Object.keys(expected).forEach(function (id) {
         equal(blockById(win, id).style.left, expected[id] + 'px',
-          id + ' must render at its outline level.');
+          id + ' must render at its fixed Marker level.');
       });
-      equal(blockById(win, 'outdent-h3').style.left,
-        blockById(win, 'outdent-q1').style.left,
-        'A ### after a quote must return to its own level, not indent deeper.');
       equal(blockById(win, 'outdent-h3b').style.left, (base + 40) + 'px',
         '### must use the third-level column even without an explicit ## parent.');
       equal(blockById(win, 'outdent-h2b').style.left, (base + 20) + 'px',
-        'A following ## must outdent to the second-level column.');
+        '## must use the second-level column.');
+      equal(blockById(win, 'outdent-q1').style.left, (base + 100) + 'px',
+        '> must use the sixth Marker column.');
       equal(win.Prompter.markdown.serializeDocument(app.state.document),
         '# 第一章\n- 項目\n> 引言\n### 子標題\n- 後續項目\n' +
         '# 第二章\n- 第二項目\n### 第三層\n## 第二層\n');

@@ -126,10 +126,9 @@ and confirm the unsaved draft is not restored.
 20. **Given** a collapsed section, **When** the user drags its heading or moves it with the drag
     handle's Up/Down keys, **Then** the hidden descendants move with it as one unit and remain
     hidden until the section is expanded.
-21. **Given** a Marker with lower-ranked items beneath it, **Then** each heading uses its fixed
-    `#` level even without an intermediate parent heading, list/quote/dot markers and content
-    nest one step deeper per rank, a heading after a deeper item returns to its fixed heading
-    column, and the Markdown order and text remain unchanged.
+21. **Given** any Marker, **Then** it uses its fixed indentation level: `#`=0, `##`=1,
+    `###`=2, `-`=3, `1.`=4, `>`=5, `.`=6, with content one level below the last Marker; the
+    Markdown order and text remain unchanged.
 
 ---
 
@@ -560,17 +559,14 @@ settings panel and clear the local library after confirming the warning.
   dragging or moving a collapsed section with the keyboard MUST move its hidden descendants as
   one unit. The control MUST expose its expanded state and an accessible label, focus MUST remain
   on it after toggling, and collapse state MUST NOT be written into Markdown.
-- **FR-053**: The editor canvas MUST show the Marker outline as horizontal indentation using the
-  rank order `#`, `##`, `###`, `-`, `1.`, `>`, `.`, then unmarked content and images. Heading
-  markers MUST use their own heading level regardless of whether an intermediate parent heading
-  appears: `#` stays at the base column, `##` is one 20 px step right, and `###` is two steps
-  right even when it follows a list without a preceding `##`. List, ordered, quote, and dot
-  markers MUST nest below the current heading level, so `-` under `#`, `1.` under `-`, `>`
-  under `1.`, and `.` under `>` each move one step deeper. A heading after a deeper item MUST
-  return to its own fixed heading level instead of staying inside that item. Content beneath a
-  Marker MUST align with the next nesting step. Indentation MUST be layout-only: it MUST NOT
-  change block text, Markers, Save, Preview, Copy, or Markdown reading order. A composer opened
-  inside a section MUST align with that section's content, and indented blocks MUST stay within
+- **FR-053**: The editor canvas MUST assign a fixed indentation level to each Marker:
+  `#` = 0, `##` = 1, `###` = 2, `-` = 3, `1.` = 4, `>` = 5, `.` = 6, with
+  unmarked content and images one level below the last Marker and plain text documents starting
+  at 0. The level MUST NOT depend on which other Markers happen to precede the block, so `###`
+  is always two steps right, `-` always three, `1.` always four, `>` always five, and `.` always
+  six. Content beneath a Marker MUST use the next depth. Indentation MUST be layout-only: it MUST
+  NOT change block text, Markers, Save, Preview, Copy, or Markdown reading order. A composer
+  opened after a block MUST align with that block's level, and indented blocks MUST stay within
   the available canvas width.
 
 
