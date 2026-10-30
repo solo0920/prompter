@@ -36,11 +36,12 @@ behavior so tests can be written against it.
 
 ## Brand Icon
 
-- Primary favicon: `assets/images/prompter-icon.svg`, a graphite rounded square with a
-  white Markdown document and a blue `M↓` mark.
+- Primary favicon: `assets/images/prompter-icon.svg`, a white speech bubble with a graphite
+  outline and a graphite `M` plus blue down arrow. The space around the bubble is transparent.
 - PNG fallbacks: 32 px and 16 px `favicon-*.png`; Apple touch icon: 180 px
-  `apple-touch-icon.png`. A multi-size `favicon.ico` is included for legacy browsers.
-- The page declares `theme-color` as `#1c1c1e` so browser chrome matches the icon.
+  `apple-touch-icon.png`. A multi-size `favicon.ico` is included for legacy browsers. All
+  raster icons preserve alpha outside the speech bubble.
+- The page declares `theme-color` as `#1c1c1e` so browser chrome keeps a consistent frame.
 
 ## Header Controls
 

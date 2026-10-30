@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Prompter Markdown icon">
-  <rect width="512" height="512" rx="112" fill="#1c1c1e"/>
-  <rect x="4" y="4" width="504" height="504" rx="108" fill="none" stroke="#38383a" stroke-width="8"/>
-  <path d="M160 104h150l58 58v246a28 28 0 0 1-28 28H160a28 28 0 0 1-28-28V132a28 28 0 0 1 28-28Z" fill="#f5f5f7"/>
-  <path d="M310 104v58h58Z" fill="#a1a1a6"/>
-  <path d="M176 300V198l55 55 55-55v102" fill="none" stroke="#1c1c1e" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M328 198v102m0 0-27-27m27 27 27-27" fill="none" stroke="#2997ff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Prompter Markdown speech bubble icon">
+  <path d="M148 72h216c49 0 88 39 88 88v132c0 49-39 88-88 88H236l-90 58c6-24 8-42 6-58h-4c-49 0-88-39-88-88V160c0-49 39-88 88-88Z"
+        fill="#ffffff" stroke="#1c1c1e" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M156 280V168l64 64 64-64v112" fill="none" stroke="#1c1c1e"
+        stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M334 168v112m0 0-28-28m28 28 28-28" fill="none" stroke="#0071e3"
+        stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
