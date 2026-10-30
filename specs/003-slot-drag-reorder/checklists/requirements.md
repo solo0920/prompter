@@ -104,8 +104,9 @@
   selected. Tab cycles within the current block or composer item; and Up/Down on a drag handle
   reorders the block while retaining focus.
 - Verification: **105 unit tests** and **108 browser tests** pass in Chrome and Firefox,
-  online and offline. Edge 156 passes 108/108 headless; Safari 27.2 also passes 108/108 through
-  the HTTP harness and a direct `file://` startup smoke test.
+  online and offline. Edge 156 passes 108/108 headless. Safari 27.2 historically passed 108/108
+  through the HTTP harness and a direct `file://` startup smoke test; Safari testing is paused
+  at the user's request.
 
 ## Notes
 

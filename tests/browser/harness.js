@@ -5909,6 +5909,17 @@
           equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
           equal(byId(win, 'preview-label').hidden, false,
             'The full-page preview must show the active document name.');
+          var tabItems = byId(win, 'document-tab-items');
+          var tabArea = byId(win, 'preview-tab-area');
+          var tabAreaRect = tabArea.getBoundingClientRect();
+          equal(win.getComputedStyle(tabItems).display, 'none',
+            'The mobile preview must hide the document tabs.');
+          assert(!win.document.querySelector('#document-tab-items .document-tab.active') ||
+            win.document.querySelector('#document-tab-items .document-tab.active').offsetParent === null,
+          'The active editor tab must not remain visible during mobile preview.');
+          assert(tabAreaRect.left >= workspaceRect.left - 1 &&
+            tabAreaRect.right <= workspaceRect.right + 1,
+            'The preview tab must occupy the mobile tab bar.');
           assert(previewRect.left >= workspaceRect.left - 1 &&
             previewRect.right <= workspaceRect.right + 1,
             'The mobile preview must fill the workspace width.');
@@ -5929,6 +5940,8 @@
           equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
           equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
           equal(byId(win, 'preview-label').hidden, true);
+          assert(win.getComputedStyle(byId(win, 'document-tab-items')).display !== 'none',
+            'Closing the mobile preview must restore the document tabs.');
           equal(win.document.activeElement, byId(win, 'preview-button'),
             'Closing the mobile preview must return focus to the preview toggle.');
 

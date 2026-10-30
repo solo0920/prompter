@@ -7,10 +7,9 @@ package installation, or network. It is also the manual acceptance script for th
 
 ## Prerequisites
 
-- Chrome is the required acceptance browser (latest two major versions). Firefox, Safari 27.2,
-  and Edge 156 are supplementary compatibility checks. Safari's full `file://` harness requires
-  enabling Develop → Disable Local File Restrictions; its HTTP harness and direct `file://` smoke
-  checks are recorded below.
+- Chrome is the required acceptance browser (latest two major versions). Firefox 159 and Edge
+  156 are supplementary headless checks. **Safari testing is paused at the user's request; do
+  not launch Safari during routine verification.** Historical Safari results remain below.
 - For direct multi-file saving: Chrome. Firefox and Safari use the download fallback.
 - The repository checked out locally; no dependencies to install.
 - A plain-text destination and at least two rich-text destinations for Copy verification. For
@@ -64,34 +63,33 @@ are marked manual and covered below.
 
 Current result (2026-10-30): Chrome **108 passing, 0 failing** (required gate). Firefox also
 reports 108 passing, 0 failing as the supplementary check. Edge 156 passes 108/108 in headless
-Chromium runs. Safari 27.2 reports **108 passing, 0 failing** through the same harness served
-from a local HTTP origin, because Safari blocks the harness iframe under `file://` unless
-local-file restrictions are disabled.
+Chromium runs. Safari 27.2 previously reported 108/108 through a local HTTP origin; Safari
+testing is now paused and is not part of the current test loop.
 
 ## Verified Results (2026-10-30)
 
 All Chrome and Firefox automated checks were run against the committed `file://` entry page; no
 server or build step was used. Offline runs disabled browser networking (CDP network emulation in
 Chrome and an unreachable proxy profile in Firefox) so any runtime network request would fail.
-Safari automated checks used the same harness over `127.0.0.1`; a direct `file://` smoke test
-covered app startup, numbered blocks, KaTeX, IndexedDB, and zero remote resource requests.
+Historical Safari automated checks used the same harness over `127.0.0.1`; a direct `file://`
+smoke test covered app startup, numbered blocks, KaTeX, IndexedDB, and zero remote resource
+requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
 | Chrome (macOS) | 156.0.8078.49 | PASS 108/108 | PASS 108/108 | Required gate; full editor, storage, settings, clipboard fallbacks |
 | Firefox (macOS) | 159.0 | PASS 108/108 | PASS 108/108 | Supplementary check; WebDriver run; download save fallback |
 | Edge (macOS) | 156.0.4314.50 | PASS 108/108 | PASS 108/108 | Supplementary Chromium check; headless CDP run |
-| Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Supplementary check; direct file:// startup/KaTeX/IndexedDB pass; harness iframe blocked by Safari local-file setting |
+| Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
 
-Mobile preview behavior was additionally verified at 360×800: preview starts closed, the preview
-toggle replaces the editor with a full-workspace page, and closing it restores the editor and
-focus in Chrome, Firefox, Edge, and Safari.
+Mobile preview behavior was additionally verified at 360×800 in Chrome, Firefox, and Edge:
+preview starts closed; opening it hides the document tabs and editor canvas, shows only the
+preview tab, and fills the workspace with the preview; closing restores the editor and focus.
 
-Chrome is the required release gate. Firefox, Edge, and Safari are supplementary compatibility
-checks. Safari's full `file://` harness still requires enabling
-Develop → Disable Local File Restrictions and completing the manual file/download/clipboard
-checks. Safari has no supported headless mode; a hidden/background tab is throttled by Safari and
-leaves the harness stalled, so Safari runs require a visible GUI session or a separate macOS VM.
+Chrome is the required release gate. Firefox and Edge are supplementary compatibility checks.
+Safari is not part of the current test loop; its historical results are retained above. If Safari
+verification is explicitly requested later, it requires a visible GUI session or a separate
+macOS VM because Safari has no supported headless mode.
 
 Additional automated evidence:
 
@@ -124,15 +122,15 @@ file/directory pickers still require a human tester. Their automated equivalents
 construction, iframe viewport layout, ARIA structure, and picker mocks) pass.
 
 **Manual status (2026-10-30)**: automated verification is complete, but the manual exceptions
-above, SC-007, human timing for SC-001, and the full Chrome/Firefox walkthrough plus Safari
-file/download/clipboard checks remain outstanding. Do not mark the specification fully accepted
-until those checks are recorded.
+above, SC-007, human timing for SC-001, and the full Chrome/Firefox walkthrough remain
+outstanding. Safari is not part of the current test loop. Do not mark the specification fully
+accepted until those checks are recorded.
 
 ## Manual Acceptance Scenarios
 
 Run these in Chrome first as the required acceptance browser. Optionally repeat the core
-authoring, preview, copy, and download paths in Firefox, Edge, and Safari. Safari's full `file://`
-harness requires enabling local-file restrictions and its OS pickers/downloads remain manual.
+authoring, preview, copy, and download paths in Firefox and Edge. Do not launch Safari unless
+the user explicitly asks for a Safari verification session.
 
 ### 1. First run and blank document (US1, FR-017)
 
@@ -326,9 +324,9 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
    preview icon, with an `×` that closes preview. Confirm images render, the code block and table
    render, math renders with the bundled KaTeX fonts, and raw HTML-looking text is not executed.
    Close and reopen preview with the icon; confirm the closed state shows only the preview icon.
-   At 360×800, confirm preview starts closed; activate the icon and confirm the editor is replaced
-   by the full-page preview below the tab bar; activate it again and confirm the editor returns
-   with focus on the icon.
+   At 360×800, confirm preview starts closed; activate the icon and confirm the document tabs and
+   editor canvas disappear, only the preview tab remains, and the full-page preview starts below
+   the tab bar; activate it again and confirm the editor, its tabs, and focus return.
 3. With the composer focused, type text but do not press Enter. Confirm the preview shows that
    draft at the composer slot; clear the text and confirm the draft disappears.
 4. Double-click a block and change its text without committing. Confirm the preview follows the
@@ -468,9 +466,10 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
    the directory as a left column.
 2. Resize to 360×800. Confirm the directory remains collapsed in the far-left body rail, all
    header actions are reachable, blocks stay within the sequence column, and there is no
-   horizontal page scrolling. Confirm preview starts closed; activate preview and confirm it
-   fills the workspace below the tab bar without horizontal scrolling; activate it again and
-   confirm the editor returns.
+   horizontal page scrolling. Confirm preview starts closed; activate preview and confirm the
+   document tabs and editor canvas disappear, only the preview tab remains, and the preview fills
+   the workspace below the tab bar without horizontal scrolling; activate it again and confirm
+   the editor and its tabs return.
 3. On touch, confirm dragging uses the handle and vertical scrolling still works.
 4. Complete create, edit, add, move, preview, copy, and save using only the keyboard. Confirm a
    visible focus indicator on every control.
@@ -498,8 +497,10 @@ release-blocking. **Expected** means the flow should work when the browser expos
 but the documented fallback is acceptable. **Fallback** means the documented alternative path
 is the required behavior.
 
-| Flow | Chrome (required) | Firefox (supplementary) | Safari (supplementary) |
-|------|-------------------|-------------------------|------------------------|
+> Safari is not part of the current test loop; the Safari column below is historical.
+
+| Flow | Chrome (required) | Firefox (supplementary) | Safari (historical) |
+|------|-------------------|-------------------------|---------------------|
 | Open from `file://` | Required | Verified | Verified (direct smoke) |
 | Create/edit/drag/keyboard | Required | Verified | Verified (HTTP harness) |
 | Preview and search | Required | Verified | Verified (HTTP harness) |
@@ -517,8 +518,8 @@ Record the exact Chrome version and pass/fail notes in the test log.
 **Verified 2026-10-30**: Chrome 156 passes the full automated harness from `file://`,
 including offline runs and is the required release gate. Firefox 159 also passes as the
 supplementary check. Edge 156 matches Chrome's Chromium matrix and passes 108/108 in headless
-runs, online and offline. Safari 27.2 passes the HTTP harness 108/108 and a direct `file://`
-startup smoke; its full `file://` harness, downloads, and OS pickers remain manual.
+runs, online and offline. Safari 27.2 historically passed the HTTP harness 108/108 and a direct
+`file://` startup smoke; Safari testing is paused and is not part of the current loop.
 
 ## Acceptance Checklist
 

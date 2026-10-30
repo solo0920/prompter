@@ -45,11 +45,10 @@
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
 - Browser harness: **108 passing, 0 failing** in Chrome 156.0.8078.49, the required release
-  gate. Firefox 159.0, Edge 156.0.4314.50, and Safari 27.2 also pass 108/108 as supplementary
-  checks; Safari used a local HTTP origin because its `file://` iframe requires disabling
-  local-file restrictions. Chrome, Firefox, and Edge pass online and offline. Safari's mobile
-  preview was also manually verified at 360×800: it starts closed, opens full-workspace, and
-  returns focus to the toggle.
+  gate. Firefox 159.0 and Edge 156.0.4314.50 also pass 108/108 as supplementary checks. Chrome,
+  Firefox, and Edge pass online and offline. Safari testing is paused at the user's request;
+  historical Safari results remain in `quickstart.md` and Safari must not be launched during
+  routine verification.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
   headings, lists, quotes, tables, and paragraphs, including multi-line display math and AMS
   environments; fenced code stays literal and unsafe commands are not trusted. Rich HTML copy
@@ -115,12 +114,13 @@
 - Workspace checks: on viewports wider than 768 px, the right-side live preview opens by default
   for new, opened, and restored documents, refreshes after edits and tab switches without hiding
   the canvas, and stays closed after the user closes it; on 768 px and narrower, preview starts
-  closed and the preview icon replaces the editor with a full-workspace preview below the tab bar,
-  returning focus to the icon when closed. Document tabs open, switch, keep their active title
-  editable, close with an `×`, prompt on dirty close, and restore the empty workspace after the
-  last tab. While preview is open on desktop, the active filename and file icon appear as a
-  tab-styled label aligned with the preview pane boundary, with its own `×` next to the preview
-  toggle; closing preview by either control leaves only the preview icon.
+  closed; opening it hides the document tabs and editor canvas, leaves only the preview tab, and
+  fills the workspace below the tab bar; closing restores the editor, its tabs, and focus. Document
+  tabs open, switch, keep their active title editable, close with an `×`, prompt on dirty close,
+  and restore the empty workspace after the last tab. While preview is open on desktop, the active
+  filename and file icon appear as a tab-styled label aligned with the preview pane boundary, with
+  its own `×` next to the preview toggle; closing preview by either control leaves only the
+  preview icon.
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.
@@ -132,9 +132,8 @@
   Enter/F2 editing, composer-handle Up/Down slot movement, Space-opened Marker menu with arrow
   selection, and drag-handle Up/Down reordering with retained handle focus.
 - Recorded exceptions: real rich-text destination paste, a physical touch device, screen-reader
-  spot checks, and real OS pickers remain manual. Safari 27.2 passes the HTTP harness and a
-  direct `file://` startup smoke test; its full `file://` harness and OS download/picker checks
-  remain manual.
+  spot checks, and real OS pickers remain manual. Safari testing is paused at the user's request;
+  historical Safari results remain in `quickstart.md`.
 - The native tab-close Stay/Leave limitation remains accepted as documented in `plan.md`.
 
 Final status: implementation and automated verification are complete; the remaining items are
@@ -153,5 +152,5 @@ manual environment checks with documented fallbacks.
 - [x] Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
 - [x] Firefox multi-file Save/Save As uses separate downloads.
 - [x] Some rich-text destinations strip data-URL images; exact Markdown remains available.
-- [x] Safari 27.2 passes the HTTP harness 108/108 and direct `file://` startup smoke; full
-  `file://` harness and OS download/picker checks still require manual confirmation.
+- [x] Safari 27.2 historically passed the HTTP harness 108/108 and direct `file://` startup
+  smoke. Safari testing is paused at the user's request; do not launch it during routine checks.

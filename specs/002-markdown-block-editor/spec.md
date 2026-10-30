@@ -203,8 +203,9 @@ content.
    canvas remains visible, without requiring the user to activate the preview icon first.
 2. **Given** a new or restored document on a viewport 768 px wide or narrower, **When** the
    workspace opens, **Then** the editor is shown and the preview is closed by default. **When**
-   the user activates the preview icon, **Then** the editor is replaced by a full-workspace
-   preview; activating the icon again returns to the editor.
+   the user activates the preview icon, **Then** the editor tabs and canvas are hidden, a
+   full-workspace preview replaces them, and only the preview tab remains in the tab bar;
+   activating the icon again restores the editor and its tabs.
 3. **Given** the preview pane is open, **When** the user edits the document or switches tabs,
    **Then** the preview updates to the active document without hiding the editor.
 4. **Given** the preview pane is open, **When** the user activates the preview icon, **Then** the
@@ -351,8 +352,8 @@ settings panel and clear the local library after confirming the warning.
   preview pane is open on a viewport wider than 768 px, the active document name and a file icon
   MUST appear immediately to its left as a tab-styled label matching the active document tab,
   with its left edge aligned to the preview pane boundary and an `×` that closes preview; when
-  preview is closed, only the preview icon remains. On narrower viewports, the label remains in
-  the tab bar while the preview replaces the editor.
+  preview is closed, only the preview icon remains. On narrower viewports, the document tabs are
+  hidden while preview is open and only the preview tab remains in the tab bar.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
@@ -564,8 +565,9 @@ settings panel and clear the local library after confirming the warning.
 - **FR-051**: On viewports wider than 768 px, the preview pane MUST open by default when a
   document is created, opened, or restored, and MUST remain open across tab switches and updates.
   On viewports 768 px wide or narrower, it MUST start closed and MUST NOT open automatically;
-  activating the preview toggle MUST replace the editor with a full-workspace preview below the
-  tab bar, and activating it again MUST restore the editor and focus to the toggle. It MUST stay
+  activating the preview toggle MUST hide the document tabs and editor canvas, replace the
+  editor with a full-workspace preview below the tab bar, and leave only the preview tab visible.
+  Activating it again MUST restore the editor, its tabs, and focus to the toggle. It MUST stay
   closed after the user closes it until another document is created or opened on desktop, and
   MUST show the empty state when the active document has no previewable content.
 - **FR-052**: A text block with at least one following block of lower rank MUST show a collapse
@@ -662,7 +664,8 @@ settings panel and clear the local library after confirming the warning.
   and save workflows, with a visible focus indicator on every control.
 - **SC-012**: The homepage remains usable without horizontal page scrolling at both 1280×720
   and 360×800, and the directory is reachable through its toggle at 360px. On a 360px viewport,
-  preview starts closed and its full-page mode fills the workspace without horizontal scrolling.
+  preview starts closed; its full-page mode hides the document tabs and fills the workspace
+  without horizontal scrolling while only the preview tab remains visible.
 - **SC-013**: The directory search returns correct results for a test corpus containing
   Traditional Chinese, English, mixed-language, punctuation, and space-containing content.
 - **SC-014**: A user can insert a supported image from a file or paste one from the clipboard
@@ -727,10 +730,12 @@ settings panel and clear the local library after confirming the warning.
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
 - Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156 and
   Firefox 159, online and offline, from `file://`; Edge 156 passes 108/108 in headless runs.
-  Safari 27.2 passes 108/108 through the HTTP harness and a direct `file://` startup smoke.
-- Mobile preview verification (2026-10-30): Chrome, Firefox, and Edge pass 108/108; Safari 27.2
-  manually verified at 360×800 that preview starts closed, opens as a full-workspace page below
-  the tab bar without horizontal scrolling, and returns focus to the toggle when closed.
+  Safari historically passed 108/108 through the HTTP harness and a direct `file://` startup
+  smoke; Safari testing is paused at the user's request.
+- Mobile preview verification (2026-10-30): Chrome, Firefox, and Edge pass 108/108. At 360×800,
+  preview starts closed; opening it hides the document tabs and editor canvas, leaves only the
+  preview tab, fills the workspace below the tab bar without horizontal scrolling, and returns
+  focus to the toggle when closed.
 - Manual acceptance still pending:
   - SC-007: paste rich text and images into two real rich-text destinations.
   - Physical touch-device checks.
@@ -741,7 +746,7 @@ settings panel and clear the local library after confirming the warning.
   - Browser tab close/reload uses the native Stay/Leave prompt instead of a custom dialog.
   - Firefox and Safari fall back to separate downloads for multi-file Save/Save As.
   - Some rich-text destinations strip data-URL images; exact Markdown remains available.
-  - Safari 27.2 is supplementary: HTTP harness 108/108 and direct `file://` startup smoke pass;
-    full `file://` harness, downloads, and OS pickers remain manual.
-  - Safari has no supported headless mode; hidden/background tabs are throttled and stall the
-    harness, so Safari runs need a visible GUI session or a separate macOS VM.
+  - Safari testing is paused at the user's request because launching Safari disrupts the active
+    desktop session. Historical Safari results remain in `quickstart.md`; do not launch Safari
+    during routine verification. If requested later, it needs a visible GUI session or a separate
+    macOS VM because Safari has no supported headless mode.

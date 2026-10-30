@@ -897,7 +897,19 @@ body {
   }
   .workspace.preview-open { grid-template-columns: minmax(0, 1fr); }
   .workspace.preview-open .document-tabs {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace.preview-open .document-tab-items {
+    display: none;
+  }
+  .workspace.preview-open .preview-tab-area {
+    grid-column: 1;
+  }
+  .workspace.preview-open .preview-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    border-left: 0;
   }
   .workspace.preview-open .editor-pane {
     display: none;
