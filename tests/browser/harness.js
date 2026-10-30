@@ -1970,6 +1970,20 @@
       equal(win.Prompter.markdown.serializeDocument(state.document), before,
         'Undo must restore the exact Markdown content.');
 
+      var redoEvent = new win.KeyboardEvent('keydown', {
+        key: 'z', code: 'KeyZ', metaKey: true, shiftKey: true,
+        bubbles: true, cancelable: true
+      });
+      byId(win, 'canvas').dispatchEvent(redoEvent);
+      equal(redoEvent.defaultPrevented, true,
+        'Cmd+Shift+Z outside an input must be handled by the editor.');
+      equal(state.document.blocks.length, 2,
+        'Redo must remove the block again.');
+      equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
+        'Alpha,Gamma');
+      assert(win.Prompter.markdown.serializeDocument(state.document) !== before,
+        'Redo must restore the post-delete Markdown content.');
+
       var content = blockById(win, ids[0]).querySelector('.block-content');
       content.dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true, cancelable: true }));
       var editInput = blockById(win, ids[0]).querySelector('.block-edit-input');
@@ -1980,6 +1994,13 @@
       editInput.dispatchEvent(nativeUndo);
       equal(nativeUndo.defaultPrevented, false,
         'Cmd+Z inside a text input must remain available for native text undo.');
+      var nativeRedo = new win.KeyboardEvent('keydown', {
+        key: 'z', code: 'KeyZ', metaKey: true, shiftKey: true,
+        bubbles: true, cancelable: true
+      });
+      editInput.dispatchEvent(nativeRedo);
+      equal(nativeRedo.defaultPrevented, false,
+        'Cmd+Shift+Z inside a text input must remain available for native text redo.');
     });
   });
 

@@ -28,6 +28,7 @@
   var layerFilter = null;
   var layerToolbarOpen = false;
   var historyStack = [];
+  var redoStack = [];
   var lastHistory = null;
   var restoringHistory = false;
   var HISTORY_LIMIT = 50;
@@ -138,7 +139,18 @@
 
   function resetHistory() {
     historyStack = [];
+    redoStack = [];
     lastHistory = null;
+  }
+
+  function rememberHistorySnapshot(stack, snapshot) {
+    if (!snapshot) {
+      return;
+    }
+    stack.push(snapshot);
+    if (stack.length > HISTORY_LIMIT) {
+      stack.shift();
+    }
   }
 
   function noteHistory(state) {
@@ -149,15 +161,14 @@
     var key = historyKey(state.document);
     if (!lastHistory || lastHistory.documentId !== state.document.id) {
       historyStack = [];
+      redoStack = [];
       lastHistory = captureHistoryState(state, key);
       return;
     }
     if (key !== lastHistory.key) {
       if (!restoringHistory) {
-        historyStack.push(lastHistory);
-        if (historyStack.length > HISTORY_LIMIT) {
-          historyStack.shift();
-        }
+        rememberHistorySnapshot(historyStack, lastHistory);
+        redoStack = [];
       }
       lastHistory = captureHistoryState(state, key);
       return;
@@ -169,17 +180,8 @@
     lastHistory.dirty = state.dirty === true;
   }
 
-  function undoLastAction() {
+  function restoreHistorySnapshot(snapshot) {
     var state = getState();
-    if (!state || !state.document || !historyStack.length || state.fileBusy) {
-      return false;
-    }
-    var snapshot = historyStack[historyStack.length - 1];
-    if (snapshot.documentId !== state.document.id) {
-      resetHistory();
-      return false;
-    }
-    historyStack.pop();
     var document = state.document;
     restoringHistory = true;
     try {
@@ -215,7 +217,45 @@
         canvas.focus();
       }
     }
+  }
+
+  function undoLastAction() {
+    var state = getState();
+    if (!state || !state.document || !historyStack.length || state.fileBusy) {
+      return false;
+    }
+    var snapshot = historyStack[historyStack.length - 1];
+    if (snapshot.documentId !== state.document.id) {
+      resetHistory();
+      return false;
+    }
+    var current = lastHistory;
+    historyStack.pop();
+    if (current && current.documentId === state.document.id) {
+      rememberHistorySnapshot(redoStack, current);
+    }
+    restoreHistorySnapshot(snapshot);
     announce('已復原上一步動作。');
+    return true;
+  }
+
+  function redoLastAction() {
+    var state = getState();
+    if (!state || !state.document || !redoStack.length || state.fileBusy) {
+      return false;
+    }
+    var snapshot = redoStack[redoStack.length - 1];
+    if (snapshot.documentId !== state.document.id) {
+      redoStack = [];
+      return false;
+    }
+    var current = lastHistory;
+    redoStack.pop();
+    if (current && current.documentId === state.document.id) {
+      rememberHistorySnapshot(historyStack, current);
+    }
+    restoreHistorySnapshot(snapshot);
+    announce('已重做下一步動作。');
     return true;
   }
 
@@ -4060,8 +4100,8 @@
     return true;
   }
 
-  function handleUndoKeydown(event) {
-    if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey) {
+  function handleHistoryKeydown(event) {
+    if (event.defaultPrevented || event.isComposing || event.altKey) {
       return;
     }
     if (!(event.metaKey || event.ctrlKey) || String(event.key).toLowerCase() !== 'z') {
@@ -4079,7 +4119,11 @@
     }
     event.preventDefault();
     event.stopPropagation();
-    undoLastAction();
+    if (event.shiftKey) {
+      redoLastAction();
+    } else {
+      undoLastAction();
+    }
   }
 
   function handleCanvasClick(event) {    if (consumeCanvasClickSuppression()) {
@@ -4166,7 +4210,7 @@
       return;
     }
     wireLayerToolbar();
-    global.document.addEventListener('keydown', handleUndoKeydown);
+    global.document.addEventListener('keydown', handleHistoryKeydown);
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('dblclick', handleCanvasDoubleClick);
     canvas.addEventListener('pointerdown', handleCanvasPointerDown);

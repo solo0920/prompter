@@ -321,8 +321,10 @@ Each image block shows:
   text selected. Tab continues to the current block's title/Marker control.
 - Cmd+Z (macOS) or Ctrl+Z (Windows) outside a text input undoes the most recent document-changing
   action, up to 50 steps for the active document. It restores the previous blocks, markers,
-  ordering, image assets, selection, and dirty state. Inside the composer or block editor,
-  Cmd/Ctrl+Z remains native text undo.
+  ordering, image assets, selection, and dirty state. Cmd+Shift+Z (macOS) or Ctrl+Shift+Z
+  (Windows) redoes the most recently undone action. A new document-changing action clears the
+  redo history. Inside the composer or block editor, Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z remain
+  native text undo and redo.
 - Space/Enter on the title/Marker control opens the symbol-only flyout; Down/Up on the focused
   title/Marker also enters an already-open flyout. Once inside, Up/Down moves between the two
   rows, Left/Right moves within a row, and Enter/Space applies the focused option.

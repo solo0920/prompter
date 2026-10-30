@@ -265,9 +265,10 @@ opens the Marker flyout without showing a grab cursor.
    removing the block. Repeat in the composer.
 8. Hover the right side of a single block and activate the delete control above `+`. Confirm only
    that block is removed. Press Cmd+Z outside the input and confirm the block returns in its
-   original position; repeat undo to walk back further document changes.
-9. With focus inside the composer or block editor, press Cmd+Z and confirm text undo remains
-   native instead of removing blocks or changing the document structure.
+   original position; repeat undo to walk back further document changes. Press Cmd+Shift+Z and
+   confirm the deletion is redone; make a new edit and confirm redo is no longer available.
+9. With focus inside the composer or block editor, press Cmd+Z and Cmd+Shift+Z and confirm text
+   undo and redo remain native instead of removing blocks or changing document structure.
 
 ### 4. Drag and keyboard movement (US1, FR-023..FR-026, FR-049, SC-011)
 

@@ -612,8 +612,10 @@ settings panel and clear the local library after confirming the warning.
   lines, image assets, selection, and dirty state from the previous content state. Undo MUST cover
   at least insertion, deletion, text edits, Marker changes, and drag/keyboard reordering, retain
   up to 50 steps for the active document, and reset when another document is opened or activated.
-  Cmd/Ctrl+Z inside the composer or a block editor MUST remain native text undo. View-only changes
-  such as selection, collapse, or layer focus MUST NOT consume an undo step.
+  Cmd/Ctrl+Shift+Z outside text inputs MUST redo the most recently undone action, and a new
+  document-changing action MUST clear the redo history. Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z inside
+  the composer or a block editor MUST remain native text undo and redo. View-only changes such
+  as selection, collapse, or layer focus MUST NOT consume an undo step.
 
 
 ### Key Entities *(include if feature involves data)*

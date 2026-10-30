@@ -78,10 +78,11 @@
   selection. `全部收合`/`全部展開` collapse or restore the active layer's sections, or the whole
   document when no layer is active. Repeating the layer, closing the toolbar, or switching
   documents restores normal interaction without changing Markdown, Preview, or Copy.
-- Delete and undo: every block reveals a delete control above `+` on right-side hover, and image
-  deletion releases its asset. Cmd/Ctrl+Z outside text inputs restores up to 50 prior
+- Delete, undo, and redo: every block reveals a delete control above `+` on right-side hover,
+  and image deletion releases its asset. Cmd/Ctrl+Z outside text inputs restores up to 50 prior
   document-changing states, including blocks, markers, order, selection, dirty state, and image
-  assets; text inputs keep native undo and view-only changes do not consume history.
+  assets; Cmd/Ctrl+Shift+Z redoes an undone action, a new edit clears redo, text inputs keep
+  native undo/redo, and view-only changes do not consume history.
 - Preview drafts: composer and block-editor drafts appear in Preview while typing, update on
   Marker changes, and revert when the composer is dismissed or the edit is canceled.
 - Tab focus: tabbing into a text block starts editing directly with all text selected, and
