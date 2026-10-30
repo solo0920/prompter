@@ -47,7 +47,9 @@
 - Browser harness: **108 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate. Firefox 159.0, Edge 156.0.4314.50, and Safari 27.2 also pass 108/108 as supplementary
   checks; Safari used a local HTTP origin because its `file://` iframe requires disabling
-  local-file restrictions. Chrome, Firefox, and Edge pass online and offline.
+  local-file restrictions. Chrome, Firefox, and Edge pass online and offline. Safari's mobile
+  preview was also manually verified at 360×800: it starts closed, opens full-workspace, and
+  returns focus to the toggle.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
   headings, lists, quotes, tables, and paragraphs, including multi-line display math and AMS
   environments; fenced code stays literal and unsafe commands are not trusted. Rich HTML copy
@@ -110,13 +112,15 @@
   the whole two-row `× 1. > .` / `- # ## ###` panel stays visible; hover flyouts stay open while
   the pointer is over the Marker, panel, or connecting corridor, then close immediately with no
   timer after leaving it, selecting, Escape/Tab, or an outside click.
-- Workspace checks: the right-side live preview opens by default for new, opened, and restored
-  documents, refreshes after edits and tab switches without hiding the canvas, and stays closed
-  after the user closes it; document tabs open, switch, keep their active title editable, close
-  with an `×`, prompt on dirty close, and restore the empty workspace after the last tab. While
-  preview is open, the active filename and file icon appear as a tab-styled label aligned with the
-  preview pane boundary, with its own `×` next to the preview toggle; closing preview by either
-  control leaves only the preview icon.
+- Workspace checks: on viewports wider than 768 px, the right-side live preview opens by default
+  for new, opened, and restored documents, refreshes after edits and tab switches without hiding
+  the canvas, and stays closed after the user closes it; on 768 px and narrower, preview starts
+  closed and the preview icon replaces the editor with a full-workspace preview below the tab bar,
+  returning focus to the icon when closed. Document tabs open, switch, keep their active title
+  editable, close with an `×`, prompt on dirty close, and restore the empty workspace after the
+  last tab. While preview is open on desktop, the active filename and file icon appear as a
+  tab-styled label aligned with the preview pane boundary, with its own `×` next to the preview
+  toggle; closing preview by either control leaves only the preview icon.
 - Deletion checks: Delete/Backspace removes multi-selected text and image blocks, closes gaps,
   clears selection, adjusts the composer, focuses the canvas or composer, and is ignored while
   typing in the composer or block editor.

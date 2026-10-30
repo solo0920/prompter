@@ -5716,6 +5716,8 @@
         var directory = byId(win, 'directory');
         var overlay = byId(win, 'directory-overlay');
         freshDocument(win);
+        equal(byId(win, 'preview-view').hidden, true,
+          'The 768 px layout must start with the preview closed.');
         if (directory.classList.contains('open')) {
           overlay.click();
           return waitFor(function () {
@@ -5873,19 +5875,72 @@
         assert(railIcon && railIcon.getBoundingClientRect().width >= 36,
           'The directory rail icon must fill the rail button.');
         equal(byId(win, 'file-menu-button').getAttribute('aria-haspopup'), 'menu');
-        equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
+        equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
+        equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
         equal(byId(win, 'preview-button').textContent.trim(), '');
+        equal(byId(win, 'preview-view').hidden, true,
+          'The mobile layout must start with the preview closed.');
+        equal(byId(win, 'preview-label').hidden, true,
+          'The mobile layout must not show the preview filename by default.');
         equal(byId(win, 'copy-button').textContent.trim(), '複製');
         equal(byId(win, 'settings-button').textContent.trim(), '設定');
 
-        byId(win, 'file-menu-button').click();
-        var menu = byId(win, 'file-menu');
-        assert(!menu.hidden, 'The File menu must open in the compact header.');
-        var menuRect = menu.getBoundingClientRect();
-        assert(menuRect.left >= 0 && menuRect.right <= win.innerWidth + 1,
-          'The File menu must stay inside the 360 px viewport.');
-        press(win, win.document, 'Escape');
-        restoreWidth();
+        freshDocument(win);
+        equal(byId(win, 'preview-view').hidden, true,
+          'Creating a document on mobile must not open the preview automatically.');
+        commitComposer(win, '手機預覽內容');
+
+        byId(win, 'preview-button').click();
+        return waitFor(function () {
+          return !byId(win, 'preview-view').hidden &&
+            byId(win, 'workspace').classList.contains('preview-open') &&
+            byId(win, 'preview-content').textContent.length > 0 ? true : null;
+        }, 5000).then(function () {
+          var editorPane = byId(win, 'editor-pane');
+          var previewView = byId(win, 'preview-view');
+          var workspace = byId(win, 'workspace');
+          var tabs = byId(win, 'document-tabs');
+          var previewRect = previewView.getBoundingClientRect();
+          var workspaceRect = workspace.getBoundingClientRect();
+          var tabsRect = tabs.getBoundingClientRect();
+          equal(win.getComputedStyle(editorPane).display, 'none',
+            'Opening preview on mobile must hide the editor pane.');
+          equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'true');
+          equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
+          equal(byId(win, 'preview-label').hidden, false,
+            'The full-page preview must show the active document name.');
+          assert(previewRect.left >= workspaceRect.left - 1 &&
+            previewRect.right <= workspaceRect.right + 1,
+            'The mobile preview must fill the workspace width.');
+          assert(previewRect.top >= tabsRect.bottom - 1,
+            'The mobile preview must start below the tab bar.');
+          assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
+            'The full-page mobile preview must not scroll horizontally.');
+          equal(win.document.activeElement, previewView,
+            'Opening preview on mobile must move focus to the preview page.');
+
+          byId(win, 'preview-button').click();
+          return waitFor(function () {
+            return byId(win, 'preview-view').hidden &&
+              win.getComputedStyle(editorPane).display !== 'none' &&
+              !byId(win, 'workspace').classList.contains('preview-open') ? true : null;
+          }, 5000);
+        }).then(function () {
+          equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
+          equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
+          equal(byId(win, 'preview-label').hidden, true);
+          equal(win.document.activeElement, byId(win, 'preview-button'),
+            'Closing the mobile preview must return focus to the preview toggle.');
+
+          byId(win, 'file-menu-button').click();
+          var menu = byId(win, 'file-menu');
+          assert(!menu.hidden, 'The File menu must open in the compact header.');
+          var menuRect = menu.getBoundingClientRect();
+          assert(menuRect.left >= 0 && menuRect.right <= win.innerWidth + 1,
+            'The File menu must stay inside the 360 px viewport.');
+          press(win, win.document, 'Escape');
+          restoreWidth();
+        });
       }, function (error) {
         restoreWidth();
         throw error;

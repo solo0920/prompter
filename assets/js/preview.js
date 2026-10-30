@@ -16,6 +16,16 @@
   var renderToken = 0;
   var active = false;
   var refreshTimer = null;
+  var compactQuery = global.matchMedia
+    ? global.matchMedia('(max-width: 768px)')
+    : null;
+
+  function isCompactLayout() {
+    if (compactQuery) {
+      return compactQuery.matches;
+    }
+    return typeof global.innerWidth === 'number' && global.innerWidth <= 768;
+  }
 
   function getApp() {
     return global.Prompter && global.Prompter.app ? global.Prompter.app : null;
@@ -719,6 +729,13 @@
     lastTrigger = trigger || app.elements['preview-button'] ||
       (global.document ? global.document.activeElement : null);
     setPreviewMode(true);
+    if (isCompactLayout() && typeof view.focus === 'function') {
+      try {
+        view.focus({ preventScroll: true });
+      } catch (error) {
+        view.focus();
+      }
+    }
     return renderCurrent();
   }
 
@@ -726,6 +743,12 @@
     var app = getApp();
     if (!app || !app.state || !app.state.document) {
       return Promise.resolve({ ok: false, empty: true });
+    }
+    if (isCompactLayout()) {
+      if (active) {
+        close();
+      }
+      return Promise.resolve({ ok: true, skipped: true, compact: true });
     }
     if (active) {
       return Promise.resolve({ ok: true, alreadyOpen: true });
@@ -788,12 +811,25 @@
     return active;
   }
 
+  function handleCompactChange(event) {
+    if (event.matches && active) {
+      close();
+    }
+  }
+
   function init() {
     if (initialized) {
       return;
     }
     initialized = true;
     setPreviewMode(false);
+    if (compactQuery) {
+      if (typeof compactQuery.addEventListener === 'function') {
+        compactQuery.addEventListener('change', handleCompactChange);
+      } else if (typeof compactQuery.addListener === 'function') {
+        compactQuery.addListener(handleCompactChange);
+      }
+    }
   }
 
   var api = {

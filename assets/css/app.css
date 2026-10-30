@@ -899,13 +899,18 @@ body {
   .workspace.preview-open .document-tabs {
     grid-template-columns: minmax(0, 1fr) auto;
   }
+  .workspace.preview-open .editor-pane {
+    display: none;
+  }
   .workspace.preview-open .preview-view:not([hidden]) {
-    position: absolute;
-    inset: 0 0 0 auto;
-    z-index: 30;
-    width: min(430px, 100%);
-    border-left: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    position: static;
+    inset: auto;
+    z-index: auto;
+    grid-row: 2;
+    grid-column: 1;
+    width: auto;
+    border-left: 0;
+    box-shadow: none;
   }
   .block-image-wrap { max-width: min(520px, calc(100vw - 50px)); }
 }

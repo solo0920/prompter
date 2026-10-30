@@ -83,6 +83,10 @@ covered app startup, numbered blocks, KaTeX, IndexedDB, and zero remote resource
 | Edge (macOS) | 156.0.4314.50 | PASS 108/108 | PASS 108/108 | Supplementary Chromium check; headless CDP run |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Supplementary check; direct file:// startup/KaTeX/IndexedDB pass; harness iframe blocked by Safari local-file setting |
 
+Mobile preview behavior was additionally verified at 360×800: preview starts closed, the preview
+toggle replaces the editor with a full-workspace page, and closing it restores the editor and
+focus in Chrome, Firefox, Edge, and Safari.
+
 Chrome is the required release gate. Firefox, Edge, and Safari are supplementary compatibility
 checks. Safari's full `file://` harness still requires enabling
 Develop → Disable Local File Restrictions and completing the manual file/download/clipboard
@@ -316,12 +320,15 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 1. Add headings, bullets, an ordered `1.` item, a quote, an image, a fenced code block, a basic
    pipe table, a long wrapped line, inline math such as `$a^2+b^2=c^2$`, and display math such
    as `$$\int_0^1 x^2 dx$$`.
-2. Confirm the live preview pane is already open on the right by default while the editor canvas
-   remains visible on the left; the active document name and file icon appear as a tab-styled
-   label aligned with the preview pane's left boundary and immediately left of the preview icon,
-   with an `×` that closes preview. Confirm images render, the code block and table render, math
-   renders with the bundled KaTeX fonts, and raw HTML-looking text is not executed. Close and
-   reopen preview with the icon; confirm the closed state shows only the preview icon.
+2. At 1280×720, confirm the live preview pane is already open on the right by default while the
+   editor canvas remains visible on the left; the active document name and file icon appear as a
+   tab-styled label aligned with the preview pane's left boundary and immediately left of the
+   preview icon, with an `×` that closes preview. Confirm images render, the code block and table
+   render, math renders with the bundled KaTeX fonts, and raw HTML-looking text is not executed.
+   Close and reopen preview with the icon; confirm the closed state shows only the preview icon.
+   At 360×800, confirm preview starts closed; activate the icon and confirm the editor is replaced
+   by the full-page preview below the tab bar; activate it again and confirm the editor returns
+   with focus on the icon.
 3. With the composer focused, type text but do not press Enter. Confirm the preview shows that
    draft at the composer slot; clear the text and confirm the draft disappears.
 4. Double-click a block and change its text without committing. Confirm the preview follows the
@@ -461,7 +468,9 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
    the directory as a left column.
 2. Resize to 360×800. Confirm the directory remains collapsed in the far-left body rail, all
    header actions are reachable, blocks stay within the sequence column, and there is no
-   horizontal page scrolling.
+   horizontal page scrolling. Confirm preview starts closed; activate preview and confirm it
+   fills the workspace below the tab bar without horizontal scrolling; activate it again and
+   confirm the editor returns.
 3. On touch, confirm dragging uses the handle and vertical scrolling still works.
 4. Complete create, edit, add, move, preview, copy, and save using only the keyboard. Confirm a
    visible focus indicator on every control.

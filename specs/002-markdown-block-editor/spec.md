@@ -191,23 +191,28 @@ so that I can verify the result and paste it directly into an AI tool or rich-te
 They deliver value after the core authoring and file workflows exist.
 
 **Independent Test**: Create a document with headings, bullets, and an image, confirm Preview
-opens by default, then copy the document and paste it into a rich-text destination and a
-plain-text destination. The story is complete when the preview matches the Markdown and both
-destinations receive the expected content.
+opens by default on a desktop viewport and starts closed on a mobile viewport, then copy the
+document and paste it into a rich-text destination and a plain-text destination. The story is
+complete when the preview matches the Markdown and both destinations receive the expected
+content.
 
 **Acceptance Scenarios**:
 
-1. **Given** a new or restored document, **When** the workspace opens, **Then** a live rendered
-   preview opens on the right side by default while the editor canvas remains visible, without
-   requiring the user to activate the preview icon first.
-2. **Given** the preview pane is open, **When** the user edits the document or switches tabs,
+1. **Given** a new or restored document on a viewport wider than 768 px, **When** the workspace
+   opens, **Then** a live rendered preview opens on the right side by default while the editor
+   canvas remains visible, without requiring the user to activate the preview icon first.
+2. **Given** a new or restored document on a viewport 768 px wide or narrower, **When** the
+   workspace opens, **Then** the editor is shown and the preview is closed by default. **When**
+   the user activates the preview icon, **Then** the editor is replaced by a full-workspace
+   preview; activating the icon again returns to the editor.
+3. **Given** the preview pane is open, **When** the user edits the document or switches tabs,
    **Then** the preview updates to the active document without hiding the editor.
-3. **Given** the preview pane is open, **When** the user activates the preview icon, **Then** the
+4. **Given** the preview pane is open, **When** the user activates the preview icon, **Then** the
    pane closes, the editor is unchanged, and focus remains on the toggle.
-4. **Given** an open document with content, **When** the user activates Copy, **Then** the
+5. **Given** an open document with content, **When** the user activates Copy, **Then** the
    Markdown source is placed on the clipboard exactly as it would be saved, preserving line
    order, Markers, and line breaks.
-5. **Given** a document with opened, inserted, or pasted images, **When** the user copies it,
+6. **Given** a document with opened, inserted, or pasted images, **When** the user copies it,
    **Then** a single paste into a rich-text destination includes both the Markdown text and
    the images.
 6. **Given** the destination cannot accept images, **When** the user pastes, **Then** the
@@ -281,8 +286,8 @@ settings panel and clear the local library after confirming the warning.
    local documents and layouts are removed, workspace preferences remain, and files already
    saved on disk are not deleted.
 7. **Given** a 360px-wide viewport, **When** the homepage is displayed, **Then** the sidebar
-   is hidden in the far-left body rail, all header actions remain reachable, and the page does
-   not require horizontal scrolling.
+   is hidden in the far-left body rail, all header actions remain reachable, the preview starts
+   closed, and the page does not require horizontal scrolling.
 
 ---
 
@@ -343,10 +348,11 @@ settings panel and clear the local library after confirming the warning.
   center, and Copy, style selector, light/dark toggle, and settings on the right in that order.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
   the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
-  preview pane is open, the active document name and a file icon MUST appear immediately to its
-  left as a tab-styled label matching the active document tab, with its left edge aligned to the
-  preview pane boundary and an `×` that closes preview; when preview is closed, only the preview
-  icon remains.
+  preview pane is open on a viewport wider than 768 px, the active document name and a file icon
+  MUST appear immediately to its left as a tab-styled label matching the active document tab,
+  with its left edge aligned to the preview pane boundary and an `×` that closes preview; when
+  preview is closed, only the preview icon remains. On narrower viewports, the label remains in
+  the tab bar while the preview replaces the editor.
 - **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
@@ -555,10 +561,13 @@ settings panel and clear the local library after confirming the warning.
   and file target. Closing a dirty tab MUST offer Save, Discard, or Cancel; closing a clean tab
   MUST remove it and activate a neighboring tab, and closing the last tab MUST return to the
   empty workspace. The active tab's title MUST remain editable.
-- **FR-051**: The preview pane MUST open by default when a document is created, opened, or
-  restored, and MUST remain open across tab switches and updates. It MUST stay closed after the
-  user closes it until another document is created or opened, and MUST show the empty state when
-  the active document has no previewable content.
+- **FR-051**: On viewports wider than 768 px, the preview pane MUST open by default when a
+  document is created, opened, or restored, and MUST remain open across tab switches and updates.
+  On viewports 768 px wide or narrower, it MUST start closed and MUST NOT open automatically;
+  activating the preview toggle MUST replace the editor with a full-workspace preview below the
+  tab bar, and activating it again MUST restore the editor and focus to the toggle. It MUST stay
+  closed after the user closes it until another document is created or opened on desktop, and
+  MUST show the empty state when the active document has no previewable content.
 - **FR-052**: A text block with at least one following block of lower rank MUST show a collapse
   control outside its card, immediately to the left of the block and aligned with its top title
   row. The control MUST follow the block's outline indentation rather than consuming title-row
@@ -652,7 +661,8 @@ settings panel and clear the local library after confirming the warning.
 - **SC-011**: A keyboard-only user can complete the create, edit, add, move, preview, copy,
   and save workflows, with a visible focus indicator on every control.
 - **SC-012**: The homepage remains usable without horizontal page scrolling at both 1280×720
-  and 360×800, and the directory is reachable through its toggle at 360px.
+  and 360×800, and the directory is reachable through its toggle at 360px. On a 360px viewport,
+  preview starts closed and its full-page mode fills the workspace without horizontal scrolling.
 - **SC-013**: The directory search returns correct results for a test corpus containing
   Traditional Chinese, English, mixed-language, punctuation, and space-containing content.
 - **SC-014**: A user can insert a supported image from a file or paste one from the clipboard
@@ -704,7 +714,8 @@ settings panel and clear the local library after confirming the warning.
 - The default light/dark mode follows the device; an explicit choice overrides it until changed.
 - Documents, layouts, and preferences are stored locally per browser and device. Clearing
   browser data removes them, and they are not available on another device.
-- The interface is desktop-first. At narrow widths the directory collapses behind a toggle so
+- The interface is desktop-first. At narrow widths the directory collapses behind a toggle, the
+  preview starts closed, and the preview toggle switches the workspace to a full-page preview so
   the editor remains usable.
 - The primary interface language is Traditional Chinese, while prompt content may mix
   Traditional Chinese and English.
@@ -717,6 +728,9 @@ settings panel and clear the local library after confirming the warning.
 - Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156 and
   Firefox 159, online and offline, from `file://`; Edge 156 passes 108/108 in headless runs.
   Safari 27.2 passes 108/108 through the HTTP harness and a direct `file://` startup smoke.
+- Mobile preview verification (2026-10-30): Chrome, Firefox, and Edge pass 108/108; Safari 27.2
+  manually verified at 360×800 that preview starts closed, opens as a full-workspace page below
+  the tab bar without horizontal scrolling, and returns focus to the toggle when closed.
 - Manual acceptance still pending:
   - SC-007: paste rich text and images into two real rich-text destinations.
   - Physical touch-device checks.
