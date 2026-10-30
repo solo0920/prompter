@@ -34,6 +34,14 @@ behavior so tests can be written against it.
 - The directory toggle sits in the body rail at every width: it pushes the sidebar open on wide
   screens and opens an off-canvas drawer below 768 px.
 
+## Brand Icon
+
+- Primary favicon: `assets/images/prompter-icon.svg`, a graphite rounded square with a
+  white Markdown document and a blue `M↓` mark.
+- PNG fallbacks: 32 px and 16 px `favicon-*.png`; Apple touch icon: 180 px
+  `apple-touch-icon.png`. A multi-size `favicon.ico` is included for legacy browsers.
+- The page declares `theme-color` as `#1c1c1e` so browser chrome matches the icon.
+
 ## Header Controls
 
 | Control | Accessible name | Behavior |

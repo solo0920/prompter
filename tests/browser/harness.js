@@ -627,6 +627,18 @@
       assert(byId(win, 'file-menu-button'), 'File menu button is missing.');
       assert(byId(win, 'settings-button'), 'Settings button is missing.');
       assert(typeof win.Prompter.app.toast === 'function', 'Toast helper is missing.');
+      var iconLinks = win.document.querySelectorAll('link[rel="icon"]');
+      equal(iconLinks.length, 4, 'The page must declare SVG, PNG, and ICO favicon fallbacks.');
+      assert(/prompter-icon\.svg/.test(
+        win.document.querySelector('link[rel="icon"][type="image/svg+xml"]')
+          .getAttribute('href')), 'The primary Markdown favicon is missing.');
+      assert(/favicon\.ico/.test(
+        win.document.querySelector('link[rel="icon"][href*="favicon.ico"]')
+          .getAttribute('href')), 'The ICO favicon fallback is missing.');
+      assert(/apple-touch-icon\.png/.test(
+        win.document.querySelector('link[rel="apple-touch-icon"]').getAttribute('href')),
+      'The Apple touch icon is missing.');
+      equal(win.document.querySelector('meta[name="theme-color"]').content, '#1c1c1e');
       equal(byId(win, 'start-view').hidden, false,
         'The start screen must be visible without an open document.');
       equal(win.getComputedStyle(byId(win, 'editor-pane')).display, 'none',
