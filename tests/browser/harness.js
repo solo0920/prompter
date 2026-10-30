@@ -5980,8 +5980,9 @@
         assert(styleRect.height >= 44 && styleRect.right <= win.innerWidth + 1,
           'The style selector must be compact and remain inside the viewport.');
         var railIcon = toggle.querySelector('.button-icon');
-        assert(railIcon && railIcon.getBoundingClientRect().width >= 36,
-          'The directory rail icon must fill the rail button.');
+        var railIconRect = railIcon && railIcon.getBoundingClientRect();
+        assert(railIconRect && railIconRect.width >= 20 && railIconRect.width <= 28,
+          'The directory rail icon must keep a compact 24 px size.');
         equal(byId(win, 'file-menu-button').getAttribute('aria-haspopup'), 'menu');
         equal(byId(win, 'preview-button').getAttribute('aria-label'), '即時預覽');
         equal(byId(win, 'preview-button').getAttribute('aria-pressed'), 'false');
