@@ -346,8 +346,9 @@ settings panel and clear the local library after confirming the warning.
   with a far-left body rail toggle, a document tab bar, a central editor area, and an optional
   live preview pane on the right side.
 - **FR-002**: The header MUST use English control labels and place the File and Edit menus at the
-  far left, the document status in the center, and Copy, style selector, light/dark toggle, and
-  settings on the right in that order.
+  far left, the document status in the center, and icon-only Copy, style selector, light/dark
+  toggle, and settings controls on the right in that order. The icon-only controls MUST expose
+  the hover tooltips `Copy`, `Theme`, `Light/dark`, and `Settings` respectively.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
   the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
   preview pane is open on a viewport wider than 768 px, the active document name and a file icon

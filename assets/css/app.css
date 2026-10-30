@@ -50,7 +50,48 @@ body {
 .button-quiet { border-color: transparent; background: transparent; }
 .button-quiet:hover:not(:disabled) { background: var(--surface-2); }
 .button-with-icon { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.button-icon-only {
+  width: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+}
 .button-icon { width: 18px; height: 18px; flex: 0 0 auto; display: block; }
+
+.icon-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  transition: background .15s ease, border-color .15s ease;
+}
+.icon-select:hover { background: var(--surface-2); }
+.icon-select:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.select-icon {
+  width: 19px;
+  height: 19px;
+  pointer-events: none;
+}
+.style-select {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.style-select option {
+  background: var(--surface);
+  color: var(--text);
+}
 .button-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .button-primary:hover:not(:disabled) { background: var(--accent-strong); }
 .button-danger { color: var(--danger); border-color: var(--danger); }
@@ -1116,6 +1157,7 @@ body {
     font-size: 13px;
   }
   .app-header .button-with-icon { width: 44px; padding: 0; }
+  .app-header .icon-select { width: 44px; height: 44px; }
   .app-header .button-label {
     position: absolute !important;
     width: 1px; height: 1px;

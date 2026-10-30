@@ -37,10 +37,10 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261030-08">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261030-09">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-08">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261030-08">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-09">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261030-09">
 </head>
 <body>
   <a class="skip-link" href="#workspace">跳至主要內容</a>
@@ -94,37 +94,48 @@
     </div>
 
     <div class="header-group header-right">
-      <button id="copy-button" class="button button-with-icon" type="button" disabled>
+      <button id="copy-button" class="button button-quiet button-with-icon button-icon-only"
+              type="button" aria-label="Copy" title="Copy" disabled>
         <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <rect x="8" y="8" width="11" height="11" rx="2" fill="none"
                 stroke="currentColor" stroke-width="1.8"/>
           <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
                 fill="none" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span class="button-label">Copy</span>
       </button>
-      <label class="visually-hidden" for="style-select">Visual style</label>
-      <select id="style-select" class="select" aria-label="Visual style">
-        <option value="apple">Minimal</option>
-        <option value="nvidia">Green Tech</option>
-        <option value="meta">Geometric Blue</option>
-        <option value="ibm">Corporate</option>
-        <option value="stripe">Soft Violet</option>
-        <option value="vercel">Monochrome</option>
-        <option value="notion">Warm Editorial</option>
-        <option value="figma">Colorful Geometry</option>
-        <option value="spacex">Cosmic</option>
-        <option value="spotify">Immersive Green</option>
-      </select>
-      <button id="theme-toggle" class="button button-quiet button-with-icon" type="button"
-              aria-label="Toggle theme">
+      <div id="style-picker" class="icon-select" title="Theme">
+        <svg class="select-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 3.8a8.2 8.2 0 1 0 8.2 8.2c0-1.4-1.1-2.4-2.5-2.4h-1a1.8 1.8 0 0 1-1.5-2.8l.3-.5c.7-1.1 0-2.5-1.3-2.6A8.7 8.7 0 0 0 12 3.8Z"
+                fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+          <circle cx="8.1" cy="10" r="1" fill="currentColor"/>
+          <circle cx="11" cy="7.4" r="1" fill="currentColor"/>
+          <circle cx="15.1" cy="8" r="1" fill="currentColor"/>
+          <circle cx="7.2" cy="14" r="1" fill="currentColor"/>
+          <circle cx="10.2" cy="17" r="1" fill="currentColor"/>
+        </svg>
+        <label class="visually-hidden" for="style-select">Theme</label>
+        <select id="style-select" class="style-select" aria-label="Theme" title="Theme">
+          <option value="apple">Minimal</option>
+          <option value="nvidia">Green Tech</option>
+          <option value="meta">Geometric Blue</option>
+          <option value="ibm">Corporate</option>
+          <option value="stripe">Soft Violet</option>
+          <option value="vercel">Monochrome</option>
+          <option value="notion">Warm Editorial</option>
+          <option value="figma">Colorful Geometry</option>
+          <option value="spacex">Cosmic</option>
+          <option value="spotify">Immersive Green</option>
+        </select>
+      </div>
+      <button id="theme-toggle" class="button button-quiet button-with-icon button-icon-only"
+              type="button" aria-label="Toggle theme" title="Light/dark">
         <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <circle cx="12" cy="12" r="7.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
           <path d="M12 4.8a7.2 7.2 0 0 0 0 14.4Z" fill="currentColor"/>
         </svg>
-        <span class="button-label">Theme</span>
       </button>
-      <button id="settings-button" class="button button-quiet button-with-icon" type="button">
+      <button id="settings-button" class="button button-quiet button-with-icon button-icon-only"
+              type="button" aria-label="Settings" title="Settings">
         <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path d="M4 7h9M17 7h3M4 17h3M11 17h9M4 12h2M10 12h10"
                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -132,7 +143,6 @@
           <circle cx="9" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
           <circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span class="button-label">Settings</span>
       </button>
     </div>
   </header>
@@ -451,16 +461,16 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261030-08"></script>
-  <script defer src="assets/js/markdown.js?v=20261030-08"></script>
-  <script defer src="assets/js/model.js?v=20261030-08"></script>
-  <script defer src="assets/js/storage.js?v=20261030-08"></script>
-  <script defer src="assets/js/search.js?v=20261030-08"></script>
-  <script defer src="assets/js/files.js?v=20261030-08"></script>
-  <script defer src="assets/js/preview.js?v=20261030-08"></script>
-  <script defer src="assets/js/clipboard.js?v=20261030-08"></script>
-  <script defer src="assets/js/editor.js?v=20261030-08"></script>
-  <script defer src="assets/js/settings.js?v=20261030-08"></script>
-  <script defer src="assets/js/app.js?v=20261030-08"></script>
+  <script defer src="assets/js/utils.js?v=20261030-09"></script>
+  <script defer src="assets/js/markdown.js?v=20261030-09"></script>
+  <script defer src="assets/js/model.js?v=20261030-09"></script>
+  <script defer src="assets/js/storage.js?v=20261030-09"></script>
+  <script defer src="assets/js/search.js?v=20261030-09"></script>
+  <script defer src="assets/js/files.js?v=20261030-09"></script>
+  <script defer src="assets/js/preview.js?v=20261030-09"></script>
+  <script defer src="assets/js/clipboard.js?v=20261030-09"></script>
+  <script defer src="assets/js/editor.js?v=20261030-09"></script>
+  <script defer src="assets/js/settings.js?v=20261030-09"></script>
+  <script defer src="assets/js/app.js?v=20261030-09"></script>
 </body>
 </html>

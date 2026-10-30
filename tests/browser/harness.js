@@ -4192,11 +4192,17 @@
       equal(byId(win, 'document-status').textContent, 'No document open');
       equal(byId(win, 'file-menu-button').textContent.trim(), 'File');
       equal(byId(win, 'edit-menu-button').textContent.trim(), 'Edit');
-      equal(byId(win, 'copy-button').textContent.trim(), 'Copy');
-      equal(byId(win, 'theme-toggle').textContent.trim(), 'Theme');
-      equal(byId(win, 'settings-button').textContent.trim(), 'Settings');
+      equal(byId(win, 'copy-button').textContent.trim(), '');
+      equal(byId(win, 'copy-button').getAttribute('aria-label'), 'Copy');
+      equal(byId(win, 'copy-button').getAttribute('title'), 'Copy');
+      equal(byId(win, 'theme-toggle').textContent.trim(), '');
       equal(byId(win, 'theme-toggle').getAttribute('aria-label'), 'Switch to light');
-      equal(byId(win, 'style-select').getAttribute('aria-label'), 'Visual style');
+      equal(byId(win, 'theme-toggle').getAttribute('title'), 'Light/dark');
+      equal(byId(win, 'settings-button').textContent.trim(), '');
+      equal(byId(win, 'settings-button').getAttribute('aria-label'), 'Settings');
+      equal(byId(win, 'settings-button').getAttribute('title'), 'Settings');
+      equal(byId(win, 'style-select').getAttribute('aria-label'), 'Theme');
+      equal(byId(win, 'style-select').getAttribute('title'), 'Theme');
       equal(byId(win, 'style-select').options[0].textContent, 'Minimal');
       equal(byId(win, 'style-select').options[3].textContent, 'Corporate');
       equal(byId(win, 'style-select').options[9].textContent, 'Immersive Green');
@@ -6009,8 +6015,8 @@
           function (element) { return element.id; }
         ).filter(Boolean);
         equal(rightOrder.join(','),
-          'copy-button,style-select,theme-toggle,settings-button',
-          'Copy and Style must stay in the header.');
+          'copy-button,style-picker,theme-toggle,settings-button',
+          'Copy and Theme must stay in the header.');
         assert(byId(win, 'document-tabs').contains(byId(win, 'preview-button')),
           'The preview icon must sit at the right edge of the tab bar.');
         assert(byId(win, 'app-main').contains(toggle),
@@ -6083,8 +6089,8 @@
           'The mobile layout must start with the preview closed.');
         equal(byId(win, 'preview-label').hidden, true,
           'The mobile layout must not show the preview filename by default.');
-        equal(byId(win, 'copy-button').textContent.trim(), 'Copy');
-        equal(byId(win, 'settings-button').textContent.trim(), 'Settings');
+        equal(byId(win, 'copy-button').getAttribute('aria-label'), 'Copy');
+        equal(byId(win, 'settings-button').getAttribute('aria-label'), 'Settings');
 
         freshDocument(win);
         equal(byId(win, 'preview-view').hidden, true,

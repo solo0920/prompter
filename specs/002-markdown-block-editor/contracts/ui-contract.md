@@ -23,8 +23,8 @@ behavior so tests can be written against it.
 ```
 
 - Header: English File and Edit menus at the far left; document status in the center; icon-only
-  live-preview toggle, Copy, style selector, light/dark toggle, and settings on the right in
-  that order.
+  Copy, Theme (style selector), light/dark toggle, and Settings controls on the right in that
+  order. Their hover tooltips are `Copy`, `Theme`, `Light/dark`, and `Settings`.
 - Document names are shown as tabs above the editor; the active tab's title is editable.
 - Each tab has a small `×` close control. Tabs can be opened, switched, and closed independently.
 - Left body rail: a narrow, always-visible `文件目錄` button at the far left of the workspace.
@@ -48,10 +48,10 @@ behavior so tests can be written against it.
 | Edit > Undo | `Undo` | Undoes the latest document-changing action. Disabled when no undo step is available; displays the platform shortcut (`⌘Z` or `Ctrl+Z`). |
 | Edit > Redo | `Redo` | Redoes the most recently undone action. Disabled when no redo step is available; displays the platform shortcut (`⇧⌘Z` or `Ctrl+Shift+Z`). |
 | Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane. While preview is open, the active document name with a file icon appears as a tab-styled label immediately to its left, with an `×` that closes preview. The editor canvas stays visible. Disabled when no document. |
-| Copy | `Copy` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images, with math included as self-contained MathML. |
-| Style | `Visual style` | Selects one of ten styles; `Minimal` (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
-| Theme | `Switch to light` / `Switch to dark` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
-| Settings | `Settings` | Opens the settings dialog. |
+| Copy | `Copy` | Icon-only control. Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images, with math included as self-contained MathML. |
+| Theme | `Theme` | Icon-only palette control backed by the style selector. Selects one of ten styles; `Minimal` (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
+| Light/dark | `Switch to light` / `Switch to dark` | Icon-only toggle that changes light/dark immediately and stores an explicit choice. Hover tooltip is `Light/dark`. |
+| Settings | `Settings` | Icon-only control that opens the settings dialog. |
 | Directory toggle | `文件目錄` | Located in the far-left body rail. Shows/hides the document directory at every width. Collapsed by default; `aria-expanded` reflects state. |
 
 ### Menu keyboard behavior
