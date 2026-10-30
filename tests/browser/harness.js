@@ -194,9 +194,9 @@
     );
   }
 
-  function directoryTitles(win) {
+  function directoryFileNames(win) {
     return directoryItems(win).map(function (item) {
-      return item.querySelector('.document-item-title').textContent;
+      return item.querySelector('.document-item-file').textContent;
     });
   }
 
@@ -4898,12 +4898,21 @@
             }, 8000);
           })
           .then(function () {
-            assert(directoryTitles(win).join('|') === '最新提示詞|Middle 文件|Old 提示詞',
-              'Directory order must be newest-first: ' + directoryTitles(win).join('|'));
+            assert(directoryFileNames(win).join('|') === 'newest.md|middle.md|oldest.md',
+              'Directory order must be newest-first: ' + directoryFileNames(win).join('|'));
+            var firstDirectoryItem = directoryItems(win)[0];
+            equal(firstDirectoryItem.querySelector('.document-item-title'), null,
+              'Directory entries must not show the document title.');
+            equal(firstDirectoryItem.querySelector('.document-item-file').textContent,
+              'newest.md');
+            assert(firstDirectoryItem.getAttribute('aria-label').indexOf('newest.md') !== -1,
+              'Directory entries must expose the file name in their accessible label.');
+            assert(firstDirectoryItem.getBoundingClientRect().height <= 44,
+              'Directory entries must stay compact with a single line.');
             equal(byId(win, 'result-count').textContent, '3 個文件');
             equal(byId(win, 'directory-empty').hidden, true);
             return waitFor(function () {
-              var titles = directoryTitles(win);
+              var titles = directoryFileNames(win);
               return titles.length === 3 &&
                 byId(win, 'result-count').textContent === '3 個文件';
             }, 3000);
@@ -4915,35 +4924,35 @@
               return directoryItems(win).length === 1 &&
                 byId(win, 'result-count').textContent === '1 個結果';
             }, 5000).then(function () {
-              equal(directoryTitles(win)[0], '最新提示詞');
+              equal(directoryFileNames(win)[0], 'newest.md');
               equal(byId(win, 'clear-search').hidden, false);
             });
           })
           .then(function () {
             setValue(win, byId(win, 'search-input'), 'MIDDLE');
             return waitFor(function () {
-              var titles = directoryTitles(win);
-              return titles.length === 1 && titles[0] === 'Middle 文件';
+              var titles = directoryFileNames(win);
+              return titles.length === 1 && titles[0] === 'middle.md';
             }, 5000).then(function () {
-              equal(directoryTitles(win)[0], 'Middle 文件');
+              equal(directoryFileNames(win)[0], 'middle.md');
             });
           })
           .then(function () {
             setValue(win, byId(win, 'search-input'), 'gamma');
             return waitFor(function () {
-              var titles = directoryTitles(win);
-              return titles.length === 1 && titles[0] === 'Old 提示詞';
+              var titles = directoryFileNames(win);
+              return titles.length === 1 && titles[0] === 'oldest.md';
             }, 5000).then(function () {
-              equal(directoryTitles(win)[0], 'Old 提示詞');
+              equal(directoryFileNames(win)[0], 'oldest.md');
             });
           })
           .then(function () {
             setValue(win, byId(win, 'search-input'), 'receipt-scan');
             return waitFor(function () {
-              var titles = directoryTitles(win);
-              return titles.length === 1 && titles[0] === 'Old 提示詞';
+              var titles = directoryFileNames(win);
+              return titles.length === 1 && titles[0] === 'oldest.md';
             }, 5000).then(function () {
-              equal(directoryTitles(win)[0], 'Old 提示詞');
+              equal(directoryFileNames(win)[0], 'oldest.md');
             });
           })
           .then(function () {
@@ -5302,8 +5311,8 @@
             }, 5000);
           })
           .then(function () {
-            equal(directoryTitles(win).join('|'),
-              '最新 Alpha 提示詞|行銷文案|C++? 範例|第四份|第五份');
+            equal(directoryFileNames(win).join('|'),
+              'five-newest.md|five-marketing.md|five-punctuation.md|five-fourth.md|five-fifth.md');
             assert(directoryItems(win).every(function (item) {
               return item.querySelector('.document-item-time').textContent.length > 0;
             }), 'Every directory entry must show a last-modified time.');
@@ -5311,22 +5320,22 @@
           .then(function () {
             setValue(win, byId(win, 'search-input'), '  alpha  ');
             return waitFor(function () {
-              var titles = directoryTitles(win);
-              return titles.length === 1 && titles[0] === '最新 Alpha 提示詞';
+              var titles = directoryFileNames(win);
+              return titles.length === 1 && titles[0] === 'five-newest.md';
             }, 5000);
           })
           .then(function () {
             setValue(win, byId(win, 'search-input'), 'english 語氣');
             return waitFor(function () {
-              var titles = directoryTitles(win);
-              return titles.length === 1 && titles[0] === '行銷文案';
+              var titles = directoryFileNames(win);
+              return titles.length === 1 && titles[0] === 'five-marketing.md';
             }, 5000);
           })
           .then(function () {
             setValue(win, byId(win, 'search-input'), 'C++?');
             return waitFor(function () {
-              var titles = directoryTitles(win);
-              return titles.length === 1 && titles[0] === 'C++? 範例';
+              var titles = directoryFileNames(win);
+              return titles.length === 1 && titles[0] === 'five-punctuation.md';
             }, 5000);
           })
           .then(function () {
@@ -5361,8 +5370,8 @@
               var started = Date.now();
               setValue(win, byId(win, 'search-input'), '文件 47');
               return waitFor(function () {
-                var titles = directoryTitles(win);
-                return titles.length === 1 && titles[0] === '文件 47';
+                var titles = directoryFileNames(win);
+                return titles.length === 1 && titles[0] === 'fifty-47.md';
               }, 5000).then(function () {
                 var elapsed = Date.now() - started;
                 assert(elapsed < 1000,
@@ -5422,12 +5431,12 @@
               var renderElapsed = Date.now() - started;
               assert(renderElapsed < 1000,
                 'Rendering 500 documents took ' + renderElapsed + ' ms.');
-              equal(directoryTitles(win)[0], '文件 499');
+              equal(directoryFileNames(win)[0], 'bulk-499.md');
               var searchStarted = Date.now();
               setValue(win, byId(win, 'search-input'), 'needle');
               return waitFor(function () {
-                var titles = directoryTitles(win);
-                return titles.length === 1 && titles[0] === '文件 250';
+                var titles = directoryFileNames(win);
+                return titles.length === 1 && titles[0] === 'bulk-250.md';
               }, 10000).then(function () {
                 var searchElapsed = Date.now() - searchStarted;
                 assert(searchElapsed < 300,

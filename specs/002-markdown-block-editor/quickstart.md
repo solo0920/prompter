@@ -436,8 +436,8 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 ### 10. Library and search (US4, FR-004..FR-008, SC-003, SC-005, SC-006, SC-013)
 
 1. Save five documents with distinct Traditional Chinese and English titles/content.
-2. Open `文件目錄` in the body rail; confirm the directory is newest-first with title and
-   last-modified time.
+2. Open `文件目錄` in the body rail; confirm the directory is newest-first with one compact row
+   per file showing its file name and last-modified time.
 3. Search by a title term, a content term, a mixed-language term, punctuation, and a term with
    leading/trailing spaces. Confirm literal case-insensitive matches and a match count.
 4. Search for gibberish; confirm the no-results message and clear-search action.

@@ -271,6 +271,7 @@ body {
   display: none;
   min-height: 0;
   overflow: auto;
+  overflow-x: hidden;
   padding: 14px;
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -285,21 +286,36 @@ body {
 
 .document-list { display: grid; gap: 6px; margin-top: 8px; }
 .document-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text);
   border-radius: calc(var(--radius-control) + 1px);
-  padding: 9px 10px;
+  padding: 7px 8px;
 }
 .document-item:hover { background: var(--surface-2); }
 .document-item[aria-current="true"] {
   background: var(--accent-soft);
   border-color: var(--accent);
 }
-.document-item-title { display: block; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.document-item-time { display: block; color: var(--muted); font-size: 12px; }
+.document-item-file {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.document-item-time {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
 
 .directory-empty {
   margin-top: 12px;

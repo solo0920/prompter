@@ -45,6 +45,7 @@
   var directoryRequestId = 0;
   var searchTimer = null;
   var directoryDateFormatter = null;
+  var directoryCompactDateFormatter = null;
 
   function cacheElements() {
     [
@@ -708,6 +709,31 @@
     return date.toLocaleString();
   }
 
+  function formatDirectoryUpdatedAt(value) {
+    var date = new Date(value);
+    if (!value || isNaN(date.getTime())) {
+      return '更新時間未知';
+    }
+    if (directoryCompactDateFormatter === null) {
+      try {
+        directoryCompactDateFormatter = new Intl.DateTimeFormat('zh-Hant', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+      } catch (error) {
+        directoryCompactDateFormatter = false;
+      }
+    }
+    if (directoryCompactDateFormatter) {
+      return directoryCompactDateFormatter.format(date);
+    }
+    return date.toLocaleString();
+  }
+
   function renderRecentDocuments() {
     var list = elements['recent-list'];
     if (!list) {
@@ -809,15 +835,19 @@
       if (document.id === currentId) {
         button.setAttribute('aria-current', 'true');
       }
-      var modified = formatUpdatedAt(document.updatedAt);
-      button.setAttribute('aria-label', (document.title || 'Untitled') + '，' + modified);
-      var title = global.document.createElement('span');
-      title.className = 'document-item-title';
-      title.textContent = document.title || 'Untitled';
-      var time = global.document.createElement('span');
+      var fileText = document.fileName || 'untitled.md';
+      var modified = formatDirectoryUpdatedAt(document.updatedAt);
+      button.setAttribute('aria-label', '開啟文件：' + fileText + '，' + modified);
+      var file = global.document.createElement('span');
+      file.className = 'document-item-file';
+      file.textContent = fileText;
+      var time = global.document.createElement('time');
       time.className = 'document-item-time';
+      if (document.updatedAt) {
+        time.setAttribute('datetime', document.updatedAt);
+      }
       time.textContent = modified;
-      button.appendChild(title);
+      button.appendChild(file);
       button.appendChild(time);
       entry.appendChild(button);
       fragment.appendChild(entry);

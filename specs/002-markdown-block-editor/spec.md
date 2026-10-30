@@ -239,7 +239,8 @@ block positions and Markdown reading order are restored.
 **Acceptance Scenarios**:
 
 1. **Given** saved documents, **When** the homepage loads, **Then** the directory lists them
-   newest first with title and last-modified date/time.
+   newest first with a single compact row per file showing its file name and last-modified
+   date/time.
 2. **Given** a search query, **When** the user types, **Then** the directory filters by title
    and content without a page reload, shows the match count, and supports Traditional Chinese
    and English text.
@@ -361,7 +362,7 @@ settings panel and clear the local library after confirming the warning.
   shortcuts beside them, and disable an action when no history step is available.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
-  title and last-modified date/time.
+  one compact row per file showing its file name and last-modified date/time.
 - **FR-005**: The directory MUST provide a search field that matches titles and content using
   case-insensitive partial matching, ignores leading and trailing whitespace, and supports
   Traditional Chinese and English.

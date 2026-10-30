@@ -85,7 +85,8 @@ behavior so tests can be written against it.
 - Clear search button label: `清除搜尋`.
 - No results: message `找不到符合的文件。` plus a clear-search action.
 - Empty library: message `尚未儲存任何文件。` plus a `新增文件` action.
-- Each item shows the title and localized last-modified date/time; the selected item has
+- Each item is one compact row showing the file name and localized last-modified date/time;
+  the document title is not displayed in the directory. The selected item has
   `aria-current="true"` and a visible selected style.
 - Selecting an item keeps the sidebar open on wide screens and closes the narrow drawer after
   the document loads.
