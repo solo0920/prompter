@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Prompter Markdown speech bubble icon">
-  <path d="M148 72h216c49 0 88 39 88 88v132c0 49-39 88-88 88H236l-90 58c6-24 8-42 6-58h-4c-49 0-88-39-88-88V160c0-49 39-88 88-88Z"
-        fill="#ffffff" stroke="#1c1c1e" stroke-width="28" stroke-linejoin="round"/>
-  <path d="M156 280V168l64 64 64-64v112" fill="none" stroke="#1c1c1e"
-        stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M334 168v112m0 0-28-28m28 28 28-28" fill="none" stroke="#0071e3"
-        stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Prompter speech bubble icon">
+  <path d="M132 40h248c50 0 90 40 90 90v170c0 50-40 90-90 90H250l-118 84c10-32 14-60 12-84h-12c-50 0-90-40-90-90V130c0-50 40-90 90-90Z"
+        fill="#ffffff" stroke="#1c1c1e" stroke-width="30" stroke-linejoin="round"/>
+  <circle cx="190" cy="215" r="30" fill="#1c1c1e"/>
+  <circle cx="256" cy="215" r="30" fill="#1c1c1e"/>
+  <circle cx="322" cy="215" r="30" fill="#1c1c1e"/>
 </svg>

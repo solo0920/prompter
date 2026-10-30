@@ -36,8 +36,9 @@ behavior so tests can be written against it.
 
 ## Brand Icon
 
-- Primary favicon: `assets/images/prompter-icon.svg`, a white speech bubble with a graphite
-  outline and a graphite `M` plus blue down arrow. The space around the bubble is transparent.
+- Primary favicon: `assets/images/prompter-icon.svg`, a large white speech bubble with a
+  graphite outline and three graphite message dots. The bubble fills most of the frame, and the
+  space around it is transparent.
 - PNG fallbacks: 32 px and 16 px `favicon-*.png`; Apple touch icon: 180 px
   `apple-touch-icon.png`. A multi-size `favicon.ico` is included for legacy browsers. All
   raster icons preserve alpha outside the speech bubble.
