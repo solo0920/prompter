@@ -1948,6 +1948,9 @@
       });
       assert(removeRect.bottom <= plusRect.top + 1,
         'The delete control must sit above the add control.');
+      assert(Math.abs((removeRect.top - rect.top) -
+        (rect.bottom - plusRect.bottom)) <= 1,
+      'The delete and add controls must sit symmetrically at the top-right and bottom-right.');
 
       remove.click();
       equal(state.document.blocks.length, 2);
@@ -3232,12 +3235,16 @@
         return opacity(plus) === '1' ? true : null;
       }, 1000).then(function () {
         var plusRect = plus.getBoundingClientRect();
+        var removeRect = element.querySelector('.block-delete').getBoundingClientRect();
         var blockRect = element.getBoundingClientRect();
         var cornerOffset = plusRect.width / 2 - 1;
         assert(Math.abs(plusRect.right - (blockRect.right + cornerOffset)) <= 2,
           'The add control must sit at the lower-right corner.');
-        assert(Math.abs(plusRect.bottom - (blockRect.bottom + cornerOffset)) <= 2,
-          'The add control must sit at the lower-right corner.');
+        var topOverhang = removeRect.top - blockRect.top;
+        var bottomOverhang = blockRect.bottom - plusRect.bottom;
+        assert(topOverhang < 0 && bottomOverhang < 0 &&
+          Math.abs(topOverhang - bottomOverhang) <= 1,
+        'The controls must sit symmetrically above the top edge and below the bottom edge.');
         move(byId(win, 'document-title'), 10, 10);
         equal(element.classList.contains('hover-left'), false);
         equal(element.classList.contains('hover-right'), false);

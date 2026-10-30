@@ -743,7 +743,7 @@ body {
   position: absolute;
   right: -9px;
   left: auto;
-  bottom: -9px;
+  bottom: -6px;
   color: var(--accent-strong);
   transition: opacity .12s ease;
 }
@@ -763,7 +763,8 @@ body {
 .block-delete {
   position: absolute;
   right: -9px;
-  bottom: 16px;
+  top: -6px;
+  bottom: auto;
   color: var(--danger);
 }
 .block-delete:hover { background: var(--danger-soft); }
