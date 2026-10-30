@@ -9,7 +9,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 2px 16px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: relative;
@@ -1145,7 +1145,7 @@ body {
 }
 
 @media (max-width: 560px) {
-  .app-header { flex-wrap: wrap; gap: 6px; padding: 7px 8px; }
+  .app-header { flex-wrap: wrap; gap: 6px; padding: 0 8px; }
   .header-left, .header-right { gap: 6px; }
   .header-center { flex: 0 0 auto; width: auto; }
   .header-right { margin-left: auto; }
