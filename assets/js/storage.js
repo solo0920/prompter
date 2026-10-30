@@ -116,7 +116,7 @@
       mode: 'memory',
       reason: 'not-initialized',
       detail: '',
-      modeLabel: '僅限本次工作階段（記憶體）',
+      modeLabel: 'Memory (this session)',
       lastReadWarning: '',
       _db: null,
       _memory: { documents: {}, assets: {}, fileTargets: {}, preferences: null },
@@ -270,7 +270,7 @@
             storage.mode = 'memory';
             storage.reason = 'schema-version-mismatch';
             storage.detail = '本機資料結構版本不符，請先備份後清除本機資料庫。';
-            storage.modeLabel = '僅限本次工作階段（記憶體）';
+            storage.modeLabel = 'Memory (this session)';
             return storage.info();
           }
           return storage._setMeta('schemaVersion', Model.SCHEMA_VERSION).then(function () {
@@ -289,12 +289,12 @@
             storage.mode = 'local';
             storage.reason = 'indexeddb-unavailable';
             storage.detail = 'IndexedDB 無法使用，已改用 localStorage。';
-            storage.modeLabel = '瀏覽器儲存空間（localStorage）';
+            storage.modeLabel = 'Browser storage (localStorage)';
           } else {
             storage.mode = 'memory';
             storage.reason = error.code === 'IDB_UNAVAILABLE' ? 'indexeddb-unavailable' : 'storage-unavailable';
             storage.detail = '本機持久儲存無法使用，關閉或重新載入頁面後未儲存的內容會遺失。';
-            storage.modeLabel = '僅限本次工作階段（記憶體）';
+            storage.modeLabel = 'Memory (this session)';
           }
           return storage.info();
         });
@@ -303,12 +303,12 @@
         storage.mode = 'local';
         storage.reason = 'indexeddb-unavailable';
         storage.detail = '此瀏覽器不支援 IndexedDB，已改用 localStorage。';
-        storage.modeLabel = '瀏覽器儲存空間（localStorage）';
+        storage.modeLabel = 'Browser storage (localStorage)';
       } else {
         storage.mode = 'memory';
         storage.reason = 'localstorage-unavailable';
         storage.detail = '此瀏覽器不允許本機儲存，重新載入後未儲存的內容會遺失。';
-        storage.modeLabel = '僅限本次工作階段（記憶體）';
+        storage.modeLabel = 'Memory (this session)';
       }
       return Promise.resolve(storage.info());
     };

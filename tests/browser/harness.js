@@ -571,7 +571,7 @@
           mode: 'memory',
           reason: 'localstorage-unavailable',
           detail: '測試原因：本機持久儲存不可用。',
-          modeLabel: '僅限本次工作階段（記憶體）'
+          modeLabel: 'Memory (this session)'
         };
       };
       state.storageWarningDismissed = false;
@@ -583,7 +583,7 @@
       assert(text.textContent.indexOf('測試原因') !== -1,
         'The warning must explain why persistence is degraded.');
       equal(byId(win, 'storage-mode-label').textContent,
-        '僅限本次工作階段（記憶體）');
+        'Memory (this session)');
 
       byId(win, 'storage-warning-dismiss').click();
       equal(warning.hidden, true);
@@ -5469,6 +5469,17 @@
           settingsButton.focus();
           settingsButton.click();
           assert(dialog.open, 'The settings dialog must open.');
+          equal(byId(win, 'settings-title').textContent, 'Settings');
+          equal(byId(win, 'settings-close').textContent, 'Close');
+          assert(!/[\u4e00-\u9fff]/.test(dialog.textContent),
+            'The Settings dialog must contain English text only.');
+          equal(win.document.querySelector('label[for="default-marker"]').textContent,
+            'Default marker');
+          equal(byId(win, 'default-marker').options[0].textContent, 'None');
+          equal(win.document.querySelector('#settings-dialog .check-row span').textContent,
+            'Show alignment grid');
+          equal(byId(win, 'follow-system-button').textContent, 'Follow system theme');
+          equal(byId(win, 'clear-library-button').textContent, 'Clear local library');
           equal(byId(win, 'app-version').textContent, '1.0.0');
           equal(byId(win, 'schema-version').textContent, '1');
           assert(byId(win, 'storage-mode-label').textContent.length > 0 &&
@@ -5697,9 +5708,14 @@
             })
             .then(function () {
               var confirmation = byId(win, 'clear-dialog').textContent;
-              assert(confirmation.indexOf('磁碟') !== -1,
+              equal(byId(win, 'clear-title').textContent, 'Clear local library?');
+              equal(byId(win, 'clear-cancel').textContent, 'Cancel');
+              equal(byId(win, 'clear-confirm').textContent, 'Clear');
+              assert(!/[\u4e00-\u9fff]/.test(byId(win, 'clear-dialog').textContent),
+                'The clear-library confirmation must contain English text only.');
+              assert(confirmation.indexOf('disk') !== -1,
                 'Clear confirmation must state that disk files are untouched.');
-              assert(confirmation.indexOf('偏好設定') !== -1,
+              assert(confirmation.indexOf('preferences') !== -1,
                 'Clear confirmation must state that preferences are kept.');
               byId(win, 'clear-library-button').click();
               return waitFor(function () {
@@ -5743,7 +5759,7 @@
               equal(preferences.showGrid, true);
               equal(win.document.documentElement.getAttribute('data-style'), 'spotify');
               assert(byId(win, 'toast-region').textContent
-                .indexOf('本機資料庫已清除，磁碟上的檔案不受影響。') !== -1,
+                .indexOf('Local library cleared. Files on disk are unchanged.') !== -1,
               'Clear library must confirm that disk files were untouched.');
               return state.storage.getDocuments();
             })

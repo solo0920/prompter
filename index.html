@@ -47,10 +47,10 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261030-16">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261030-17">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-16">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261030-16">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-17">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261030-17">
 </head>
 <body>
   <a class="skip-link" href="#workspace">跳至主要內容</a>
@@ -367,13 +367,13 @@
 
   <dialog id="settings-dialog" class="dialog" aria-labelledby="settings-title">
     <div class="dialog-header">
-      <h2 id="settings-title">設定</h2>
-      <button id="settings-close" class="button button-small" type="button" aria-label="關閉設定">關閉設定</button>
+      <h2 id="settings-title">Settings</h2>
+      <button id="settings-close" class="button button-small" type="button" aria-label="Close settings">Close</button>
     </div>
     <div class="settings-body">
-      <label class="field-label" for="default-marker">預設標記</label>
+      <label class="field-label" for="default-marker">Default marker</label>
       <select id="default-marker" class="select">
-        <option value="none">無</option>
+        <option value="none">None</option>
         <option value="#">#</option>
         <option value="##">##</option>
         <option value="###">###</option>
@@ -385,28 +385,28 @@
 
       <label class="check-row">
         <input id="show-grid" type="checkbox">
-        <span>顯示對齊格線</span>
+        <span>Show alignment grid</span>
       </label>
 
-      <button id="follow-system-button" class="button" type="button">跟隨系統明暗</button>
-      <button id="clear-library-button" class="button button-danger" type="button">清除本機資料庫</button>
+      <button id="follow-system-button" class="button" type="button">Follow system theme</button>
+      <button id="clear-library-button" class="button button-danger" type="button">Clear local library</button>
 
       <dl class="version-info">
-        <dt>應用程式版本</dt><dd id="app-version">1.0.0</dd>
-        <dt>儲存結構版本</dt><dd id="schema-version">1</dd>
-        <dt>目前儲存模式</dt><dd id="storage-mode-label">—</dd>
+        <dt>App version</dt><dd id="app-version">1.0.0</dd>
+        <dt>Storage schema version</dt><dd id="schema-version">1</dd>
+        <dt>Current storage mode</dt><dd id="storage-mode-label">—</dd>
       </dl>
     </div>
   </dialog>
 
   <dialog id="clear-dialog" class="dialog" aria-labelledby="clear-title">
     <div class="dialog-header">
-      <h2 id="clear-title">清除本機資料庫？</h2>
+      <h2 id="clear-title">Clear local library?</h2>
     </div>
-    <p>這會移除本機儲存的文件、版面與圖片，但不會刪除任何已儲存在磁碟上的 Markdown 或圖片檔案。工作區偏好設定會保留。</p>
+    <p>This removes locally stored documents, layouts, and images. Files already saved to disk are not deleted. Workspace preferences are kept.</p>
     <div class="dialog-actions">
-      <button id="clear-cancel" class="button" type="button">取消</button>
-      <button id="clear-confirm" class="button button-danger" type="button">清除</button>
+      <button id="clear-cancel" class="button" type="button">Cancel</button>
+      <button id="clear-confirm" class="button button-danger" type="button">Clear</button>
     </div>
   </dialog>
 
@@ -471,16 +471,16 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261030-16"></script>
-  <script defer src="assets/js/markdown.js?v=20261030-16"></script>
-  <script defer src="assets/js/model.js?v=20261030-16"></script>
-  <script defer src="assets/js/storage.js?v=20261030-16"></script>
-  <script defer src="assets/js/search.js?v=20261030-16"></script>
-  <script defer src="assets/js/files.js?v=20261030-16"></script>
-  <script defer src="assets/js/preview.js?v=20261030-16"></script>
-  <script defer src="assets/js/clipboard.js?v=20261030-16"></script>
-  <script defer src="assets/js/editor.js?v=20261030-16"></script>
-  <script defer src="assets/js/settings.js?v=20261030-16"></script>
-  <script defer src="assets/js/app.js?v=20261030-16"></script>
+  <script defer src="assets/js/utils.js?v=20261030-17"></script>
+  <script defer src="assets/js/markdown.js?v=20261030-17"></script>
+  <script defer src="assets/js/model.js?v=20261030-17"></script>
+  <script defer src="assets/js/storage.js?v=20261030-17"></script>
+  <script defer src="assets/js/search.js?v=20261030-17"></script>
+  <script defer src="assets/js/files.js?v=20261030-17"></script>
+  <script defer src="assets/js/preview.js?v=20261030-17"></script>
+  <script defer src="assets/js/clipboard.js?v=20261030-17"></script>
+  <script defer src="assets/js/editor.js?v=20261030-17"></script>
+  <script defer src="assets/js/settings.js?v=20261030-17"></script>
+  <script defer src="assets/js/app.js?v=20261030-17"></script>
 </body>
 </html>

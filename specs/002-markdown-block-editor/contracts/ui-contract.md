@@ -405,22 +405,24 @@ Each image block shows:
 
 ## Settings Dialog
 
-Label: `設定`. Contains at minimum:
+Label: `Settings`. Contains at minimum:
 
-- `預設標記` select with all Marker options.
-- `顯示對齊格線` checkbox/toggle.
-- `跟隨系統明暗` reset action (sets theme to system).
-- `清除本機資料庫` button with confirmation.
-- Version information: app version and storage schema version.
-- Close control labeled `關閉設定`.
+- `Default marker` select with all Marker options; the unmarked option is `None`.
+- `Show alignment grid` checkbox/toggle.
+- `Follow system theme` reset action (sets theme to system).
+- `Clear local library` button with confirmation.
+- Version information: `App version`, `Storage schema version`, and `Current storage mode`.
+- Close control labeled `Close`.
 
 Clear-library confirmation:
 
+- Title: `Clear local library?`.
 - Explains that local documents, layouts, and images will be removed.
 - States that Markdown and image files already saved on disk are not deleted.
-- Offers `取消` and `清除` (destructive style).
-- On confirm, closes the current document, clears records, keeps preferences, and shows the
-  empty state.
+- States that workspace preferences are kept.
+- Offers `Cancel` and `Clear` (destructive style).
+- On confirm, closes the current document, clears records, keeps preferences, shows the
+  empty state, and confirms that files on disk are unchanged.
 - If clearing partially fails, reports the storage error and keeps the session usable.
 
 Settings changes apply immediately and persist; there is no Apply button.

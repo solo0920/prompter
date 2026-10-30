@@ -149,14 +149,14 @@
     var originalLabel = confirmButton ? confirmButton.textContent : '';
     if (confirmButton) {
       confirmButton.disabled = true;
-      confirmButton.textContent = '清除中…';
+      confirmButton.textContent = 'Clearing…';
     }
 
     function finish(value) {
       clearBusy = false;
       if (confirmButton) {
         confirmButton.disabled = false;
-        confirmButton.textContent = originalLabel || '清除';
+        confirmButton.textContent = originalLabel || 'Clear';
       }
       return value;
     }
@@ -175,7 +175,7 @@
       app.clearDocument();
       return app.refreshDirectory();
     }).then(function () {
-      app.toast('本機資料庫已清除，磁碟上的檔案不受影響。');
+      app.toast('Local library cleared. Files on disk are unchanged.');
       return true;
     }).catch(function (error) {
       app.showError(error);
@@ -227,7 +227,7 @@
     if (elements['follow-system-button']) {
       elements['follow-system-button'].addEventListener('click', function () {
         updatePreferences({ theme: 'system' });
-        app.toast('已改為跟隨系統明暗。');
+        app.toast('Theme now follows the system.');
       });
     }
     if (elements['settings-button']) {

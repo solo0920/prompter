@@ -135,7 +135,7 @@ test('storage degrades to session memory when both IndexedDB and localStorage fa
     assert.equal(info.mode, 'memory');
     assert.equal(info.reason, 'localstorage-unavailable');
     assert.ok(info.detail.indexOf('重新載入') !== -1);
-    assert.ok(info.modeLabel.indexOf('記憶體') !== -1);
+    assert.ok(info.modeLabel.indexOf('Memory') !== -1);
 
     await storage.saveDocument(sampleDocument('memory-document'), []);
     assert.equal((await storage.getDocuments()).length, 1);
