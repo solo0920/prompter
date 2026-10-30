@@ -627,6 +627,114 @@
       assert(byId(win, 'file-menu-button'), 'File menu button is missing.');
       assert(byId(win, 'settings-button'), 'Settings button is missing.');
       assert(typeof win.Prompter.app.toast === 'function', 'Toast helper is missing.');
+      equal(byId(win, 'start-view').hidden, false,
+        'The start screen must be visible without an open document.');
+      equal(win.getComputedStyle(byId(win, 'editor-pane')).display, 'none',
+        'The editor must be hidden while the start screen is visible.');
+    });
+  });
+
+  test('start screen lists the ten most recent files and opens one', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var Model = win.Prompter.model;
+      return withCleanLibrary(win, function () {
+        var saves = [];
+        for (var index = 0; index < 12; index += 1) {
+          saves.push(saveStoredDocument(win, Model.createPromptDocument({
+            id: 'recent-' + index,
+            title: '近期文件 ' + (index + 1),
+            fileName: 'recent-' + (index + 1) + '.md',
+            updatedAt: new Date(Date.UTC(2026, 9, 30, 12 - index)).toISOString(),
+            blocks: [Model.createTextBlock({
+              id: 'recent-block-' + index,
+              text: '內容 ' + (index + 1),
+              seq: 1
+            })]
+          })));
+        }
+        return Promise.all(saves)
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            app.clearDocument();
+            return waitFor(function () {
+              return win.document.querySelectorAll('#recent-list .recent-item').length === 10;
+            }, 5000);
+          })
+          .then(function () {
+            var items = Array.prototype.slice.call(
+              win.document.querySelectorAll('#recent-list .recent-item'));
+            equal(items.length, 10, 'The start screen must cap recent files at ten.');
+            equal(items[0].getAttribute('data-document-id'), 'recent-0',
+              'The most recently edited file must be first.');
+            equal(items[9].getAttribute('data-document-id'), 'recent-9',
+              'The tenth most recently edited file must be last.');
+            equal(items[0].querySelector('.recent-item-title').textContent, '近期文件 1');
+            equal(items[0].querySelector('.recent-item-file').textContent, 'recent-1.md');
+            assert(items[0].getAttribute('aria-label').indexOf('開啟文件') === 0,
+              'Recent files must have an accessible open label.');
+            equal(byId(win, 'start-view').hidden, false);
+            equal(byId(win, 'recent-empty').hidden, true);
+            equal(byId(win, 'start-subtitle').textContent, '最近更新的 10 份文件');
+            equal(win.getComputedStyle(byId(win, 'editor-pane')).display, 'none');
+            items[0].click();
+            return waitFor(function () {
+              return app.state.document && app.state.document.id === 'recent-0';
+            }, 5000);
+          })
+          .then(function () {
+            equal(byId(win, 'start-view').hidden, true,
+              'Opening a recent file must hide the start screen.');
+            equal(win.getComputedStyle(byId(win, 'editor-pane')).display, 'block',
+              'Opening a recent file must restore the editor.');
+            equal(byId(win, 'document-tabs').hidden, false);
+            equal(app.state.document.title, '近期文件 1');
+          });
+      });
+    });
+  });
+
+  test('start screen actions create a document and open the directory', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      return withCleanLibrary(win, function () {
+        app.clearDocument();
+        return waitFor(function () {
+          return byId(win, 'start-view').hidden === false;
+        }, 5000).then(function () {
+          equal(byId(win, 'recent-list').hidden, true,
+            'The recent list must be hidden when the library is empty.');
+          equal(byId(win, 'recent-empty').hidden, false,
+            'The start screen must explain that there are no recent files.');
+          byId(win, 'start-new-button').click();
+          return waitFor(function () {
+            return app.state.document && !app.state.documentPersisted ? true : null;
+          }, 5000);
+        }).then(function () {
+          equal(app.state.document.title, 'Untitled');
+          equal(byId(win, 'start-view').hidden, true);
+          equal(win.document.activeElement, composerInput(win),
+            'The start-screen new-document action must focus the composer.');
+          app.clearDocument();
+          return waitFor(function () {
+            return byId(win, 'start-view').hidden === false;
+          }, 5000);
+        }).then(function () {
+          byId(win, 'start-directory-button').click();
+          return waitFor(function () {
+            return byId(win, 'directory').classList.contains('open') &&
+              win.document.activeElement === byId(win, 'search-input');
+          }, 5000).then(function () {
+            equal(byId(win, 'workspace').classList.contains('start-open'), true,
+              'Opening the directory must not dismiss the start screen.');
+            equal(byId(win, 'start-open-button').disabled, false,
+              'The open-file action must be available from the start screen.');
+            byId(win, 'directory-toggle').click();
+          });
+        });
+      });
     });
   });
 
@@ -5670,8 +5778,8 @@
       });
 
       var skip = document.querySelector('.skip-link');
-      equal(skip.getAttribute('href'), '#canvas');
-      assert(document.getElementById('canvas'), 'The skip link target must exist.');
+      equal(skip.getAttribute('href'), '#workspace');
+      assert(document.getElementById('workspace'), 'The skip link target must exist.');
       assert(document.getElementById('toast-region').getAttribute('aria-live') === 'polite',
         'Toasts must use a polite live region.');
       assert(document.getElementById('alert-region').getAttribute('role') === 'alert',

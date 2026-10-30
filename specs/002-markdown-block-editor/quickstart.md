@@ -61,10 +61,11 @@ Current result (2026-10-30): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-30): Chrome **108 passing, 0 failing** (required gate). Firefox also
-reports 108 passing, 0 failing as the supplementary check. Edge 156 passes 108/108 in headless
+Current result (2026-10-30): Chrome **110 passing, 0 failing** (required gate). Firefox also
+reports 110 passing, 0 failing as the supplementary check. Edge 156 passes 110/110 in headless
 Chromium runs. Safari 27.2 previously reported 108/108 through a local HTTP origin; Safari
-testing is now paused and is not part of the current test loop.
+testing is now paused and is not part of the current test loop. The suite includes the start
+screen and ten-file recent list added in feature 004.
 
 ## Verified Results (2026-10-30)
 
@@ -77,14 +78,18 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 108/108 | PASS 108/108 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 108/108 | PASS 108/108 | Supplementary check; WebDriver run; download save fallback |
-| Edge (macOS) | 156.0.4314.50 | PASS 108/108 | PASS 108/108 | Supplementary Chromium check; headless CDP run |
+| Chrome (macOS) | 156.0.8078.49 | PASS 110/110 | PASS 110/110 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 110/110 | PASS 110/110 | Supplementary check; WebDriver run; download save fallback |
+| Edge (macOS) | 156.0.4314.50 | PASS 110/110 | PASS 110/110 | Supplementary Chromium check; headless CDP run |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
 
 Mobile preview behavior was additionally verified at 360×800 in Chrome, Firefox, and Edge:
 preview starts closed; opening it hides the document tabs and editor canvas, shows only the
 preview tab, and fills the workspace with the preview; closing restores the editor and focus.
+
+The start screen from feature 004 was verified separately: after a refresh it shows up to ten
+recent files on the left, New document/Open directory/Open file actions on the right, and no
+auto-opened document. On narrow viewports the actions stack above the recent list.
 
 Chrome is the required release gate. Firefox and Edge are supplementary compatibility checks.
 Safari is not part of the current test loop; its historical results are retained above. If Safari
@@ -517,7 +522,7 @@ Record the exact Chrome version and pass/fail notes in the test log.
 
 **Verified 2026-10-30**: Chrome 156 passes the full automated harness from `file://`,
 including offline runs and is the required release gate. Firefox 159 also passes as the
-supplementary check. Edge 156 matches Chrome's Chromium matrix and passes 108/108 in headless
+supplementary check. Edge 156 matches Chrome's Chromium matrix and passes 110/110 in headless
 runs, online and offline. Safari 27.2 historically passed the HTTP harness 108/108 and a direct
 `file://` startup smoke; Safari testing is paused and is not part of the current loop.
 

@@ -503,8 +503,8 @@ font, or remote asset is bundled.
 
 - Implementation: complete. This feature was delivered as an increment to feature 002, so no
   separate `plan.md` or `tasks.md` was produced; the verification record lives in the checklist.
-- Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156, Firefox
-  159, online and offline. Edge 156 passes 108/108 headless. Safari 27.2 historically passed
+- Automated verification: 105 unit tests and 110 browser tests pass in Chrome 156, Firefox
+  159, online and offline. Edge 156 passes 110/110 headless. Safari 27.2 historically passed
   the HTTP harness 108/108 plus a direct `file://` startup smoke; Safari testing is paused at
   the user's request.
 - Manual exceptions from feature 002 remain outstanding: SC-007 rich-text destination paste,

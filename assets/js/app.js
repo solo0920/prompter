@@ -54,7 +54,9 @@
       'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
-      'no-results-clear', 'workspace', 'editor-pane', 'document-tabs', 'document-tab-items',
+      'no-results-clear', 'workspace', 'start-view', 'start-title', 'start-subtitle',
+      'recent-list', 'recent-empty', 'start-new-button', 'start-directory-button',
+      'start-open-button', 'editor-pane', 'document-tabs', 'document-tab-items',
       'preview-label', 'preview-file-name', 'preview-close', 'canvas', 'canvas-empty',
       'canvas-new-button',
       'toast-region', 'alert-region', 'move-announcer', 'preview-view', 'preview-content',
@@ -486,6 +488,7 @@
     var opts = options || {};
     updateTitleInput();
     updateStatus();
+    updateStartView();
     if (global.Prompter.editor && typeof global.Prompter.editor.render === 'function') {
       global.Prompter.editor.render();
     }
@@ -632,6 +635,7 @@
       state.tabs.splice(index, 1);
       if (!state.tabs.length) {
         clearAllTabs(true);
+        updateStartView({ focus: true });
         return true;
       }
       if (temporaryActivation && previousActiveId && findTab(previousActiveId)) {
@@ -685,6 +689,88 @@
       return directoryDateFormatter.format(date);
     }
     return date.toLocaleString();
+  }
+
+  function renderRecentDocuments() {
+    var list = elements['recent-list'];
+    if (!list) {
+      return;
+    }
+    var documents = sortedDocuments(directoryDocuments).slice(0, 10);
+    var fragment = global.document.createDocumentFragment();
+    documents.forEach(function (document) {
+      var entry = global.document.createElement('div');
+      entry.setAttribute('role', 'listitem');
+      var button = global.document.createElement('button');
+      button.type = 'button';
+      button.className = 'recent-item';
+      button.setAttribute('data-document-id', document.id);
+      var titleText = document.title || 'Untitled';
+      var fileText = document.fileName || 'untitled.md';
+      var modified = formatUpdatedAt(document.updatedAt);
+      button.setAttribute('aria-label',
+        '開啟文件：' + titleText + '，' + fileText + '，' + modified);
+      var title = global.document.createElement('span');
+      title.className = 'recent-item-title';
+      title.textContent = titleText;
+      var meta = global.document.createElement('span');
+      meta.className = 'recent-item-meta';
+      var file = global.document.createElement('span');
+      file.className = 'recent-item-file';
+      file.textContent = fileText;
+      meta.appendChild(file);
+      var text = global.document.createElement('span');
+      text.className = 'recent-item-copy';
+      text.appendChild(title);
+      text.appendChild(meta);
+      var time = global.document.createElement('span');
+      time.className = 'recent-item-time';
+      time.textContent = modified;
+      button.appendChild(text);
+      button.appendChild(time);
+      entry.appendChild(button);
+      fragment.appendChild(entry);
+    });
+    list.textContent = '';
+    list.appendChild(fragment);
+    list.hidden = documents.length === 0;
+    if (elements['recent-empty']) {
+      elements['recent-empty'].hidden = documents.length > 0;
+    }
+    if (elements['start-subtitle']) {
+      elements['start-subtitle'].textContent = documents.length === 0
+        ? '最近編輯的文件'
+        : '最近更新的 ' + documents.length + ' 份文件';
+    }
+  }
+
+  function updateStartView(options) {
+    var view = elements['start-view'];
+    if (!view) {
+      return;
+    }
+    var visible = !state.document;
+    view.hidden = !visible;
+    if (elements.workspace) {
+      elements.workspace.classList.toggle('start-open', visible);
+    }
+    if (!visible) {
+      return;
+    }
+    renderRecentDocuments();
+    if (options && options.focus) {
+      var target = listFirstRecent() || elements['start-new-button'] || view;
+      if (target && typeof target.focus === 'function') {
+        target.focus();
+      }
+    }
+  }
+
+  function listFirstRecent() {
+    if (!elements['recent-list']) {
+      return null;
+    }
+    return elements['recent-list'].querySelector('.recent-item');
   }
 
   function updateSearchControls() {
@@ -745,6 +831,9 @@
         : matches.length + ' 個文件';
     }
     updateSearchControls();
+    if (!state.document) {
+      updateStartView();
+    }
   }
 
   function refreshDirectory() {
@@ -1319,6 +1408,38 @@
     }
   }
 
+  function wireStartView() {
+    if (elements['recent-list']) {
+      elements['recent-list'].addEventListener('click', function (event) {
+        var item = event.target.closest
+          ? event.target.closest('[data-document-id]')
+          : null;
+        if (!item) {
+          return;
+        }
+        openDirectoryDocument(item.getAttribute('data-document-id'));
+      });
+    }
+    if (elements['start-new-button']) {
+      elements['start-new-button'].addEventListener('click', function () {
+        requestNewDocument();
+      });
+    }
+    if (elements['start-directory-button']) {
+      elements['start-directory-button'].addEventListener('click', function () {
+        setDirectoryOpen(true);
+        if (elements['search-input']) {
+          elements['search-input'].focus();
+        }
+      });
+    }
+    if (elements['start-open-button']) {
+      elements['start-open-button'].addEventListener('click', function () {
+        requestOpenPicker();
+      });
+    }
+  }
+
   function wireTitle() {
     if (!elements['document-title']) {
       return;
@@ -1390,6 +1511,7 @@
       global.Prompter.settings.init();
     }
     wireDirectory();
+    wireStartView();
     setDirectoryOpen(false);
     wireTitle();
     wireImagePicker();
@@ -1417,9 +1539,7 @@
         global.Prompter.search.init();
       }
       return refreshDirectory().then(function () {
-        return restoreLastDocument();
-      }).then(function () {
-        renderDirectory();
+        updateStartView();
         state.initialized = true;
         return state;
       });

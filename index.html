@@ -37,13 +37,13 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261030-02">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261030-03">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-02">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261030-02">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-03">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261030-03">
 </head>
 <body>
-  <a class="skip-link" href="#canvas">跳至編輯畫布</a>
+  <a class="skip-link" href="#workspace">跳至主要內容</a>
 
   <header class="app-header" aria-label="主要工具列">
     <div class="header-group header-left">
@@ -198,7 +198,73 @@
     </aside>
     <div id="directory-overlay" class="directory-overlay" hidden></div>
 
-    <main id="workspace" class="workspace" aria-label="提示詞編輯區">
+    <main id="workspace" class="workspace" aria-label="提示詞編輯區" tabindex="-1">
+      <section id="start-view" class="start-view" aria-labelledby="start-title">
+        <div class="start-recent">
+          <p class="start-kicker">Prompter</p>
+          <h1 id="start-title" class="start-title">近期編輯</h1>
+          <p id="start-subtitle" class="start-subtitle">最近更新的 10 份文件</p>
+          <div id="recent-list" class="recent-list" role="list"></div>
+          <div id="recent-empty" class="recent-empty" hidden>
+            <p class="recent-empty-title">還沒有近期文件</p>
+            <p>建立新文件，或從磁碟開啟既有的 Markdown 檔。</p>
+          </div>
+        </div>
+        <aside class="start-side" aria-labelledby="start-actions-title">
+          <h2 id="start-actions-title" class="start-side-title">開始使用</h2>
+          <p class="start-side-subtitle">選擇一個動作繼續。</p>
+          <div class="start-actions">
+            <button id="start-new-button" class="start-action start-action-primary" type="button">
+              <span class="start-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor"
+                          stroke-width="1.7"/>
+                  <path d="M12 8.4v7.2M8.4 12h7.2" fill="none" stroke="currentColor"
+                        stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="start-action-copy">
+                <span class="start-action-title">新增文件</span>
+                <span class="start-action-desc">建立空白 Markdown 文件</span>
+              </span>
+              <span class="start-action-arrow" aria-hidden="true">→</span>
+            </button>
+            <button id="start-directory-button" class="start-action" type="button">
+              <span class="start-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M3.8 7.2h6l1.6 2h8.8v8.9a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7z"
+                        fill="none" stroke="currentColor" stroke-width="1.7"
+                        stroke-linejoin="round"/>
+                  <path d="M3.8 9.2h16.4" fill="none" stroke="currentColor"
+                        stroke-width="1.7"/>
+                </svg>
+              </span>
+              <span class="start-action-copy">
+                <span class="start-action-title">開啟目錄</span>
+                <span class="start-action-desc">瀏覽所有已儲存文件</span>
+              </span>
+              <span class="start-action-arrow" aria-hidden="true">→</span>
+            </button>
+            <button id="start-open-button" class="start-action" type="button">
+              <span class="start-action-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M6 3.8h7l4.6 4.6v11.8H6z" fill="none" stroke="currentColor"
+                        stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="M13 3.8v4.6h4.6M9 13.4h6M12 10.4v6" fill="none"
+                        stroke="currentColor" stroke-width="1.7"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="start-action-copy">
+                <span class="start-action-title">開啟檔案</span>
+                <span class="start-action-desc">從磁碟匯入 Markdown</span>
+              </span>
+              <span class="start-action-arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
+          <p class="start-storage-note">文件會儲存在此瀏覽器；重新整理後可從左側快速開啟。</p>
+        </aside>
+      </section>
       <nav id="document-tabs" class="document-tabs" aria-label="文件頁籤" hidden>
         <div id="document-tab-items" class="document-tab-items" role="tablist"></div>
         <div id="preview-tab-area" class="preview-tab-area">
@@ -362,16 +428,16 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261030-02"></script>
-  <script defer src="assets/js/markdown.js?v=20261030-02"></script>
-  <script defer src="assets/js/model.js?v=20261030-02"></script>
-  <script defer src="assets/js/storage.js?v=20261030-02"></script>
-  <script defer src="assets/js/search.js?v=20261030-02"></script>
-  <script defer src="assets/js/files.js?v=20261030-02"></script>
-  <script defer src="assets/js/preview.js?v=20261030-02"></script>
-  <script defer src="assets/js/clipboard.js?v=20261030-02"></script>
-  <script defer src="assets/js/editor.js?v=20261030-02"></script>
-  <script defer src="assets/js/settings.js?v=20261030-02"></script>
-  <script defer src="assets/js/app.js?v=20261030-02"></script>
+  <script defer src="assets/js/utils.js?v=20261030-03"></script>
+  <script defer src="assets/js/markdown.js?v=20261030-03"></script>
+  <script defer src="assets/js/model.js?v=20261030-03"></script>
+  <script defer src="assets/js/storage.js?v=20261030-03"></script>
+  <script defer src="assets/js/search.js?v=20261030-03"></script>
+  <script defer src="assets/js/files.js?v=20261030-03"></script>
+  <script defer src="assets/js/preview.js?v=20261030-03"></script>
+  <script defer src="assets/js/clipboard.js?v=20261030-03"></script>
+  <script defer src="assets/js/editor.js?v=20261030-03"></script>
+  <script defer src="assets/js/settings.js?v=20261030-03"></script>
+  <script defer src="assets/js/app.js?v=20261030-03"></script>
 </body>
 </html>

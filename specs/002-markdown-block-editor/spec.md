@@ -728,11 +728,14 @@ settings panel and clear the local library after confirming the warning.
 ## Completion Status (2026-10-30)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 105 unit tests and 108 browser tests pass in Chrome 156 and
-  Firefox 159, online and offline, from `file://`; Edge 156 passes 108/108 in headless runs.
+- Automated verification: 105 unit tests and 110 browser tests pass in Chrome 156 and
+  Firefox 159, online and offline, from `file://`; Edge 156 passes 110/110 in headless runs.
   Safari historically passed 108/108 through the HTTP harness and a direct `file://` startup
   smoke; Safari testing is paused at the user's request.
-- Mobile preview verification (2026-10-30): Chrome, Firefox, and Edge pass 108/108. At 360×800,
+- Start screen verification (2026-10-30): feature 004 opens on a start screen after refresh,
+  lists up to ten recent files sorted by update time, and exposes New document, Open directory,
+  and Open file actions. Chrome, Firefox, and Edge pass the 110-check suite.
+- Mobile preview verification (2026-10-30): Chrome, Firefox, and Edge pass 110/110. At 360×800,
   preview starts closed; opening it hides the document tabs and editor canvas, leaves only the
   preview tab, fills the workspace below the tab bar without horizontal scrolling, and returns
   focus to the toggle when closed.
