@@ -973,6 +973,23 @@
     return svg;
   }
 
+  function createBlockControlIcon(kind) {
+    var namespace = 'http://www.w3.org/2000/svg';
+    var svg = global.document.createElementNS(namespace, 'svg');
+    svg.setAttribute('class', 'block-control-icon');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    var path = global.document.createElementNS(namespace, 'path');
+    path.setAttribute('d', kind === 'plus' ? 'M12 6v12M6 12h12' : 'M7 7l10 10M17 7L7 17');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'currentColor');
+    path.setAttribute('stroke-width', '2.4');
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+    return svg;
+  }
+
   function wireMarkerMenu(anchor, getMarker, onSelect, onToggle) {
     anchor.setAttribute('aria-haspopup', 'menu');
     anchor.setAttribute('aria-expanded', 'false');
@@ -1220,7 +1237,8 @@
       element.appendChild(row);
     }
 
-    var plus = createButton('block-plus', '在此區塊下方新增', '+');
+    var plus = createButton('block-plus', '在此區塊下方新增');
+    plus.appendChild(createBlockControlIcon('plus'));
     plus.addEventListener('click', function (event) {
       event.stopPropagation();
       openComposer(block.id);
@@ -1229,9 +1247,9 @@
 
     var remove = createButton(
       'block-delete' + (block.type === 'image' ? ' block-remove' : ''),
-      block.type === 'image' ? '移除圖片' : '刪除區塊',
-      '×'
+      block.type === 'image' ? '移除圖片' : '刪除區塊'
     );
+    remove.appendChild(createBlockControlIcon('close'));
     remove.addEventListener('click', function (event) {
       event.stopPropagation();
       removeSingleBlock(block.id);

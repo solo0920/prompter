@@ -717,22 +717,34 @@ body {
   text-align: center;
   font-size: 13px;
 }
-.block-plus {
-  position: absolute;
-  right: -12px;
-  left: auto;
-  bottom: -12px;
-  width: 26px;
-  height: 26px;
+.block-plus,
+.block-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
   border-radius: 50%;
   border: 1px solid var(--border-strong);
   background: var(--surface);
-  color: var(--accent-strong);
-  font-weight: 800;
   line-height: 1;
   box-shadow: var(--shadow-small);
   z-index: 5;
   opacity: 1;
+}
+.block-control-icon {
+  display: block;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+.block-plus {
+  position: absolute;
+  right: -9px;
+  left: auto;
+  bottom: -9px;
+  color: var(--accent-strong);
   transition: opacity .12s ease;
 }
 
@@ -751,18 +763,8 @@ body {
 .block-delete {
   position: absolute;
   right: -9px;
-  bottom: 14px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
+  bottom: 16px;
   color: var(--danger);
-  font-size: 14px;
-  line-height: 1;
-  box-shadow: var(--shadow-small);
-  z-index: 5;
-  opacity: 1;
 }
 .block-delete:hover { background: var(--danger-soft); }
 

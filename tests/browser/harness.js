@@ -1930,9 +1930,24 @@
       equal(remove.getAttribute('aria-label'), '刪除區塊');
       equal(win.getComputedStyle(remove).opacity, '1',
         'The delete control must appear on right-side hover.');
-      assert(remove.getBoundingClientRect().bottom <=
-        plus.getBoundingClientRect().top + 1,
-      'The delete control must sit above the add control.');
+      var plusRect = plus.getBoundingClientRect();
+      var removeRect = remove.getBoundingClientRect();
+      equal(plusRect.width, removeRect.width,
+        'The add and delete controls must use the same width.');
+      equal(plusRect.height, removeRect.height,
+        'The add and delete controls must use the same height.');
+      [plus, remove].forEach(function (control) {
+        var controlRect = control.getBoundingClientRect();
+        var iconRect = control.querySelector('.block-control-icon').getBoundingClientRect();
+        assert(Math.abs((controlRect.left + controlRect.right) / 2 -
+          (iconRect.left + iconRect.right) / 2) < 0.5,
+        'The control icon must be horizontally centered.');
+        assert(Math.abs((controlRect.top + controlRect.bottom) / 2 -
+          (iconRect.top + iconRect.bottom) / 2) < 0.5,
+        'The control icon must be vertically centered.');
+      });
+      assert(removeRect.bottom <= plusRect.top + 1,
+        'The delete control must sit above the add control.');
 
       remove.click();
       equal(state.document.blocks.length, 2);
@@ -3218,9 +3233,10 @@
       }, 1000).then(function () {
         var plusRect = plus.getBoundingClientRect();
         var blockRect = element.getBoundingClientRect();
-        assert(Math.abs(plusRect.right - (blockRect.right + 12)) <= 2,
+        var cornerOffset = plusRect.width / 2 - 1;
+        assert(Math.abs(plusRect.right - (blockRect.right + cornerOffset)) <= 2,
           'The add control must sit at the lower-right corner.');
-        assert(Math.abs(plusRect.bottom - (blockRect.bottom + 12)) <= 2,
+        assert(Math.abs(plusRect.bottom - (blockRect.bottom + cornerOffset)) <= 2,
           'The add control must sit at the lower-right corner.');
         move(byId(win, 'document-title'), 10, 10);
         equal(element.classList.contains('hover-left'), false);
