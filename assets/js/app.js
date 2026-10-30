@@ -48,7 +48,8 @@
 
   function cacheElements() {
     [
-      'file-menu-button', 'file-menu', 'directory-toggle', 'directory', 'directory-overlay',
+      'file-menu-button', 'file-menu', 'edit-menu-button', 'edit-menu',
+      'directory-toggle', 'directory', 'directory-overlay',
       'layer-toggle', 'layer-toolbar', 'layer-collapse-all', 'layer-expand-all',
       'app-main', 'preview-button', 'copy-button', 'style-select', 'theme-toggle', 'settings-button',
       'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
@@ -103,16 +104,16 @@
     if (!elements['document-status']) {
       return;
     }
-    var text = '尚未開啟文件';
+    var text = 'No document open';
     if (state.fileBusy) {
-      text = state.fileBusyLabel || '處理中…';
+      text = state.fileBusyLabel || 'Working…';
     } else if (state.document) {
       if (state.dirty) {
-        text = '尚未儲存的變更';
+        text = 'Unsaved changes';
       } else if (state.documentPersisted) {
-        text = '已儲存';
+        text = 'Saved';
       } else {
-        text = '新文件';
+        text = 'New document';
       }
     }
     elements['document-status'].textContent = text;
@@ -125,32 +126,48 @@
     if (elements['preview-button']) {
       elements['preview-button'].disabled = !state.document;
     }
-    updateFileMenuState();
+    updateMenuState();
   }
 
-  function updateFileMenuState() {
-    var menu = elements['file-menu'];
-    if (!menu) {
-      return;
-    }
+  function updateMenuState() {
     var hasDocument = !!state.document;
     var busy = !!state.fileBusy;
-    Array.prototype.forEach.call(menu.querySelectorAll('[role="menuitem"]'), function (item) {
-      var action = item.getAttribute('data-action');
-      if (action === 'new' || action === 'open') {
-        item.disabled = busy;
-      } else {
-        item.disabled = busy || !hasDocument;
+    var fileMenu = elements['file-menu'];
+    if (fileMenu) {
+      Array.prototype.forEach.call(fileMenu.querySelectorAll('[role="menuitem"]'), function (item) {
+        var action = item.getAttribute('data-action');
+        if (action === 'new' || action === 'open') {
+          item.disabled = busy;
+        } else {
+          item.disabled = busy || !hasDocument;
+        }
+      });
+    }
+    var editMenu = elements['edit-menu'];
+    if (editMenu) {
+      var editor = global.Prompter && global.Prompter.editor;
+      var canUndo = !!(editor && typeof editor.canUndo === 'function' && editor.canUndo());
+      var canRedo = !!(editor && typeof editor.canRedo === 'function' && editor.canRedo());
+      var undoItem = editMenu.querySelector('[data-action="undo"]');
+      var redoItem = editMenu.querySelector('[data-action="redo"]');
+      if (undoItem) {
+        undoItem.disabled = busy || !hasDocument || !canUndo;
       }
-    });
+      if (redoItem) {
+        redoItem.disabled = busy || !hasDocument || !canRedo;
+      }
+    }
     if (elements['file-menu-button']) {
       elements['file-menu-button'].setAttribute('aria-busy', busy ? 'true' : 'false');
+    }
+    if (elements['edit-menu-button']) {
+      elements['edit-menu-button'].setAttribute('aria-busy', busy ? 'true' : 'false');
     }
   }
 
   function setFileBusy(busy, label) {
     state.fileBusy = !!busy;
-    state.fileBusyLabel = busy ? (label || '處理中…') : '';
+    state.fileBusyLabel = busy ? (label || 'Working…') : '';
     updateStatus();
   }
 
@@ -1007,26 +1024,58 @@
     openPreviewByDefault();
   }
 
-  function toggleFileMenu(open) {
-    var button = elements['file-menu-button'];
-    var menu = elements['file-menu'];
+  function menuPairs() {
+    return [
+      {
+        button: elements['file-menu-button'],
+        menu: elements['file-menu']
+      },
+      {
+        button: elements['edit-menu-button'],
+        menu: elements['edit-menu']
+      }
+    ].filter(function (pair) {
+      return !!(pair.button && pair.menu);
+    });
+  }
+
+  function toggleMenu(button, menu, open) {
     if (!button || !menu) {
       return;
     }
     var shouldOpen = open === undefined ? menu.hidden : !!open;
+    if (shouldOpen) {
+      menuPairs().forEach(function (pair) {
+        if (pair.menu !== menu) {
+          toggleMenu(pair.button, pair.menu, false);
+        }
+      });
+      updateMenuState();
+    }
     menu.hidden = !shouldOpen;
     button.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
     if (shouldOpen) {
-      var first = menuItems()[0];
+      var first = menuItems(menu)[0];
       if (first) {
         first.focus();
       }
     }
   }
 
-  function menuItems() {
+  function toggleFileMenu(open) {
+    toggleMenu(elements['file-menu-button'], elements['file-menu'], open);
+  }
+
+  function toggleEditMenu(open) {
+    toggleMenu(elements['edit-menu-button'], elements['edit-menu'], open);
+  }
+
+  function menuItems(menu) {
+    if (!menu) {
+      return [];
+    }
     return Array.prototype.slice.call(
-      elements['file-menu'].querySelectorAll('[role="menuitem"]')
+      menu.querySelectorAll('[role="menuitem"]')
     ).filter(function (item) {
       return !item.disabled;
     });
@@ -1247,62 +1296,114 @@
     toast('此功能將在後續版本提供。');
   }
 
-  function wireFileMenu() {
-    var button = elements['file-menu-button'];
-    var menu = elements['file-menu'];
-    if (!button || !menu) {
+  function handleEditAction(action) {
+    toggleEditMenu(false);
+    if (action === 'undo' || action === 'redo') {
+      var editor = global.Prompter && global.Prompter.editor;
+      var method = action === 'undo' ? 'undo' : 'redo';
+      if (!editor || typeof editor[method] !== 'function') {
+        toast('History is not available yet.');
+        return;
+      }
+      var changed = !!editor[method]();
+      if (!changed) {
+        toast(action === 'undo' ? 'Nothing to undo.' : 'Nothing to redo.');
+      }
       return;
     }
-    button.addEventListener('click', function () {
-      toggleFileMenu(menu.hidden);
+    toast('This action is not available yet.');
+  }
+
+  function setShortcutLabels() {
+    var menu = elements['edit-menu'];
+    if (!menu) {
+      return;
+    }
+    var platform = String(
+      (global.navigator && (global.navigator.platform ||
+        (global.navigator.userAgentData && global.navigator.userAgentData.platform))) || ''
+    );
+    var isMac = /Mac|iPhone|iPad|iPod/.test(platform);
+    var labels = isMac
+      ? { undo: '⌘Z', redo: '⇧⌘Z' }
+      : { undo: 'Ctrl+Z', redo: 'Ctrl+Shift+Z' };
+    Array.prototype.forEach.call(menu.querySelectorAll('[data-shortcut]'), function (item) {
+      var key = item.getAttribute('data-shortcut');
+      item.textContent = labels[key] || '';
     });
-    button.addEventListener('keydown', function (event) {
-      if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        toggleFileMenu(true);
-      }
-    });
-    menu.addEventListener('click', function (event) {
-      var item = event.target.closest('[role="menuitem"]');
-      if (!item) {
-        return;
-      }
-      handleFileAction(item.getAttribute('data-action'));
-    });
-    menu.addEventListener('keydown', function (event) {
-      var items = menuItems();
-      var index = items.indexOf(global.document.activeElement);
-      if (event.key === 'Tab') {
-        toggleFileMenu(false);
-        return;
-      }
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        toggleFileMenu(false);
-        button.focus();
-        return;
-      }
-      if (items.length === 0) {
-        return;
-      }
-      if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        items[(index + 1) % items.length].focus();
-      } else if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        items[(index - 1 + items.length) % items.length].focus();
-      } else if (event.key === 'Home') {
-        event.preventDefault();
-        items[0].focus();
-      } else if (event.key === 'End') {
-        event.preventDefault();
-        items[items.length - 1].focus();
-      }
+  }
+
+  function wireMenus() {
+    setShortcutLabels();
+    menuPairs().forEach(function (pair) {
+      var button = pair.button;
+      var menu = pair.menu;
+      var isFileMenu = menu === elements['file-menu'];
+      button.addEventListener('click', function () {
+        toggleMenu(button, menu, menu.hidden);
+      });
+      button.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          toggleMenu(button, menu, true);
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          toggleMenu(button, menu, true);
+          var items = menuItems(menu);
+          if (items.length) {
+            items[items.length - 1].focus();
+          }
+        }
+      });
+      menu.addEventListener('click', function (event) {
+        var item = event.target.closest('[role="menuitem"]');
+        if (!item) {
+          return;
+        }
+        if (isFileMenu) {
+          handleFileAction(item.getAttribute('data-action'));
+        } else {
+          handleEditAction(item.getAttribute('data-action'));
+        }
+      });
+      menu.addEventListener('keydown', function (event) {
+        var items = menuItems(menu);
+        var index = items.indexOf(global.document.activeElement);
+        if (event.key === 'Tab') {
+          toggleMenu(button, menu, false);
+          return;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          toggleMenu(button, menu, false);
+          button.focus();
+          return;
+        }
+        if (items.length === 0) {
+          return;
+        }
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          items[(index + 1) % items.length].focus();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          items[(index - 1 + items.length) % items.length].focus();
+        } else if (event.key === 'Home') {
+          event.preventDefault();
+          items[0].focus();
+        } else if (event.key === 'End') {
+          event.preventDefault();
+          items[items.length - 1].focus();
+        }
+      });
     });
     global.document.addEventListener('click', function (event) {
-      if (!menu.hidden && !menu.contains(event.target) && !button.contains(event.target)) {
-        toggleFileMenu(false);
-      }
+      menuPairs().forEach(function (pair) {
+        if (!pair.menu.hidden && !pair.menu.contains(event.target) &&
+            !pair.button.contains(event.target)) {
+          toggleMenu(pair.button, pair.menu, false);
+        }
+      });
     });
   }
 
@@ -1491,10 +1592,12 @@
     });
     global.document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape') {
-        if (!elements['file-menu'].hidden) {
-          toggleFileMenu(false);
-          elements['file-menu-button'].focus();
-        }
+        menuPairs().forEach(function (pair) {
+          if (!pair.menu.hidden) {
+            toggleMenu(pair.button, pair.menu, false);
+            pair.button.focus();
+          }
+        });
         if (elements.directory.classList.contains('open')) {
           closeDirectoryDrawer();
         }
@@ -1505,7 +1608,7 @@
   function init() {
     cacheElements();
     state.storage = Storage.createStorage();
-    wireFileMenu();
+    wireMenus();
     wireHeader();
     if (global.Prompter.settings && typeof global.Prompter.settings.init === 'function') {
       global.Prompter.settings.init();
@@ -1577,7 +1680,9 @@
     announce: announce,
     showError: showError,
     toggleFileMenu: toggleFileMenu,
+    toggleEditMenu: toggleEditMenu,
     handleFileAction: handleFileAction,
+    handleEditAction: handleEditAction,
     requestNewDocument: requestNewDocument,
     requestOpenPicker: requestOpenPicker,
     requestOpenSavedDocument: requestOpenSavedDocument,

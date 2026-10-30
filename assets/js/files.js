@@ -1213,7 +1213,7 @@
       return Promise.resolve({ ok: false, busy: true });
     }
     var opts = options || {};
-    setBusy(true, '儲存中…');
+    setBusy(true, 'Saving…');
     return currentFileTarget(app, document).then(function (existingTarget) {
       var promptName = opts.saveAs === true || state.documentPersisted !== true;
       var forceDirectory = opts.saveAs === true || promptName ||
@@ -1372,7 +1372,7 @@
     if (app.state.fileBusy) {
       return Promise.resolve({ ok: false, busy: true });
     }
-    setBusy(true, '開啟中…');
+    setBusy(true, 'Opening…');
     return openSelection(files).then(function (result) {
       var storageError = null;
       return app.state.storage.saveDocument(result.document, result.assets).catch(function (error) {
@@ -1434,7 +1434,7 @@
     if (!app || !app.state) {
       return Promise.resolve({ ok: false });
     }
-    setBusy(true, '開啟中…');
+    setBusy(true, 'Opening…');
     return app.state.storage.getDocument(documentId).then(function (loaded) {
       if (!loaded || !loaded.document) {
         var missing = new Error('找不到這份本機文件。');

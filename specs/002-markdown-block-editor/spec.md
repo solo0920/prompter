@@ -345,8 +345,9 @@ settings panel and clear the local library after confirming the warning.
 - **FR-001**: The homepage MUST provide a top header, a collapsible left document directory
   with a far-left body rail toggle, a document tab bar, a central editor area, and an optional
   live preview pane on the right side.
-- **FR-002**: The header MUST place the File menu at the far left, the document status in the
-  center, and Copy, style selector, light/dark toggle, and settings on the right in that order.
+- **FR-002**: The header MUST use English control labels and place the File and Edit menus at the
+  far left, the document status in the center, and Copy, style selector, light/dark toggle, and
+  settings on the right in that order.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
   the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
   preview pane is open on a viewport wider than 768 px, the active document name and a file icon
@@ -354,7 +355,9 @@ settings panel and clear the local library after confirming the warning.
   with its left edge aligned to the preview pane boundary and an `×` that closes preview; when
   preview is closed, only the preview icon remains. On narrower viewports, the document tabs are
   hidden while preview is open and only the preview tab remains in the tab bar.
-- **FR-003**: The File menu MUST provide New, Open, Save, Save As, and Insert Image.
+- **FR-003**: The File menu MUST provide New Document, Open File, Save, Save As, and Insert
+  Image. The Edit menu MUST provide Undo and Redo, display the active platform's keyboard
+  shortcuts beside them, and disable an action when no history step is available.
 - **FR-004**: The directory MUST start collapsed, be revealed by a labeled toggle at the far
   left of the body at every width, and list saved documents in reverse last-modified order with
   title and last-modified date/time.

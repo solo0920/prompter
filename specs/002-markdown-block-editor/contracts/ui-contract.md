@@ -10,7 +10,7 @@ behavior so tests can be written against it.
 
 ```text
 +-----------------------------------------------------------------------------------+
-| File |                        [status]                        | Copy Style Theme Settings |
+| File Edit |                   [status]                        | Copy Style Theme Settings |
 +------+------------------------------------------------------------------------------------+
 | Dir  | [ Document A × ][ Document B × ]                       [ File icon Document B ] [ Preview ] |
 | rail +---------------------------------------------+------------------------------------+
@@ -22,8 +22,9 @@ behavior so tests can be written against it.
 +------+---------------------------------------------+------------------------------------+
 ```
 
-- Header: File menu far left; document status in the center; icon-only live-preview toggle,
-  Copy, style selector, light/dark toggle, and settings on the right in that order.
+- Header: English File and Edit menus at the far left; document status in the center; icon-only
+  live-preview toggle, Copy, style selector, light/dark toggle, and settings on the right in
+  that order.
 - Document names are shown as tabs above the editor; the active tab's title is editable.
 - Each tab has a small `×` close control. Tabs can be opened, switched, and closed independently.
 - Left body rail: a narrow, always-visible `文件目錄` button at the far left of the workspace.
@@ -37,25 +38,28 @@ behavior so tests can be written against it.
 
 | Control | Accessible name | Behavior |
 |---------|-----------------|----------|
-| File | `檔案` | Opens the File menu. |
-| File > New | `新增文件` | Opens a new tab with a blank document titled `Untitled` and one composer; existing tabs stay open. |
-| File > Open | `開啟檔案` | Opens the multi-file picker; opened Markdown files appear in new tabs. |
-| File > Save | `儲存` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
-| File > Save As | `另存新檔` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
-| File > Insert Image | `插入圖片` | Opens the image picker; disabled when no document. |
+| File | `File` | Opens the File menu. |
+| File > New Document | `New Document` | Opens a new tab with a blank document titled `Untitled` and one composer; existing tabs stay open. |
+| File > Open File | `Open File` | Opens the multi-file picker; opened Markdown files appear in new tabs. |
+| File > Save | `Save` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
+| File > Save As | `Save As` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
+| File > Insert Image | `Insert Image` | Opens the image picker; disabled when no document. |
+| Edit | `Edit` | Opens the Edit menu immediately to the right of File. |
+| Edit > Undo | `Undo` | Undoes the latest document-changing action. Disabled when no undo step is available; displays the platform shortcut (`⌘Z` or `Ctrl+Z`). |
+| Edit > Redo | `Redo` | Redoes the most recently undone action. Disabled when no redo step is available; displays the platform shortcut (`⇧⌘Z` or `Ctrl+Shift+Z`). |
 | Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane. While preview is open, the active document name with a file icon appears as a tab-styled label immediately to its left, with an `×` that closes preview. The editor canvas stays visible. Disabled when no document. |
-| Copy | `複製` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images, with math included as self-contained MathML. |
-| Style | `視覺風格` | Selects one of ten styles; 簡約留白 (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
-| Theme | `切換明暗` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
-| Settings | `設定` | Opens the settings dialog. |
+| Copy | `Copy` | Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images, with math included as self-contained MathML. |
+| Style | `Visual style` | Selects one of ten styles; `Minimal` (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
+| Theme | `Switch to light` / `Switch to dark` | Toggles light/dark and stores an explicit choice. Tooltip reflects the next state. |
+| Settings | `Settings` | Opens the settings dialog. |
 | Directory toggle | `文件目錄` | Located in the far-left body rail. Shows/hides the document directory at every width. Collapsed by default; `aria-expanded` reflects state. |
 
-### File menu keyboard behavior
+### Menu keyboard behavior
 
-- Enter/Space on File opens the menu and focuses the first enabled item.
+- Enter/Space on File or Edit opens that menu and focuses the first enabled item.
 - Arrow Down/Up moves through items; Home/End jump to first/last; Escape closes and returns
-  focus to File; Tab closes the menu.
-- Clicking outside closes it.
+  focus to the menu button; Tab closes the menu.
+- Opening one menu closes the other. Clicking outside closes both.
 - Disabled items remain in the menu with `disabled` and are skipped by focus.
 
 ## Directory
@@ -449,7 +453,7 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
   the tab bar.
 - 768 px and below: directory becomes a labeled off-canvas drawer beside the rail; header
   actions remain reachable, and the preview pane overlays the editor when opened.
-- 360×800: compact icon buttons for File, Preview, Copy, Style, Theme, Settings and the body
+- 360×800: compact icon buttons for File, Edit, Preview, Copy, Style, Theme, Settings and the body
   rail toggle; product name and non-essential labels hidden; 44 px touch targets where possible;
   no horizontal page scrolling; tab bar scrolls horizontally; canvas width fits the viewport.
 - Blocks clamp to the current canvas width; long text wraps; images scale down.
@@ -461,7 +465,9 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | Context | Keys | Action |
 |---------|------|--------|
 | Global | Tab / Shift+Tab | Move focus through controls in visual order; while focus is in the editor, cycle only within the current block or composer's controls and wrap. |
-| File menu | Enter/Space, Arrow Up/Down, Home/End, Escape | Open/navigate/close. |
+| File/Edit menu | Enter/Space, Arrow Up/Down, Home/End, Escape | Open/navigate/close. |
+| Global | Cmd/Ctrl+Z | Undo the latest document-changing action outside text inputs. |
+| Global | Cmd/Ctrl+Shift+Z | Redo the most recently undone action outside text inputs. |
 | Directory | Tab, Enter/Space | Focus/open a document. |
 | Preview | Enter/Space | Toggle the live right-side preview pane. |
 | Block | Tab | Focus block in reading order. |

@@ -142,7 +142,7 @@ the user explicitly asks for a Safari verification session.
 1. Clear the site's local data or use a fresh browser profile.
 2. Open `index.html`. The directory starts collapsed; use the `文件目錄` button in the far-left
    body rail to open it and see the empty state with `新增文件`.
-3. Choose `新增文件` from the File menu.
+3. Choose `New Document` from the File menu.
 4. Confirm a tab appears above the editor with the editable title `Untitled`, one composer
    appears at the top-left with the Marker control, and Copy is disabled.
 
@@ -339,7 +339,7 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
    draft. Press Escape and confirm the preview returns to the committed text.
 5. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
    editor.
-6. Choose File > New twice. Confirm each document opens in a new tab above the editor, each tab
+6. Choose File > New Document twice. Confirm each document opens in a new tab above the editor, each tab
    has a small `×`, and the active tab title is editable.
 7. Switch tabs. Confirm blocks, dirty state, composer, and selection are restored per tab, and
    the preview updates to the active document.

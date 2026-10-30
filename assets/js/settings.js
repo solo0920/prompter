@@ -70,7 +70,7 @@
       elements['default-marker'].value = preferences.defaultMarker;
     }
     if (elements['theme-toggle']) {
-      var nextLabel = theme === 'dark' ? '切換為淺色' : '切換為深色';
+      var nextLabel = theme === 'dark' ? 'Switch to light' : 'Switch to dark';
       elements['theme-toggle'].setAttribute('aria-label', nextLabel);
       elements['theme-toggle'].setAttribute('title', nextLabel);
       elements['theme-toggle'].setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');

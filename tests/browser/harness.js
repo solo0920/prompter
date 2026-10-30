@@ -1957,6 +1957,29 @@
       equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
         'Alpha,Gamma');
 
+      var editMenu = byId(win, 'edit-menu');
+      byId(win, 'edit-menu-button').click();
+      var undoItem = editMenu.querySelector('[data-action="undo"]');
+      var redoItem = editMenu.querySelector('[data-action="redo"]');
+      equal(undoItem.disabled, false, 'Undo must be enabled after a document change.');
+      equal(redoItem.disabled, true, 'Redo must be disabled before anything is undone.');
+      undoItem.click();
+      equal(state.document.blocks.length, 3,
+        'Edit > Undo must restore the deleted block.');
+      equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
+        'Alpha,Beta,Gamma');
+      equal(win.Prompter.markdown.serializeDocument(state.document), before,
+        'Undo must restore the exact Markdown content.');
+
+      byId(win, 'edit-menu-button').click();
+      redoItem = editMenu.querySelector('[data-action="redo"]');
+      equal(redoItem.disabled, false, 'Redo must be enabled after an undo.');
+      redoItem.click();
+      equal(state.document.blocks.length, 2,
+        'Edit > Redo must remove the block again.');
+      equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
+        'Alpha,Gamma');
+
       var undoEvent = new win.KeyboardEvent('keydown', {
         key: 'z', code: 'KeyZ', metaKey: true, bubbles: true, cancelable: true
       });
@@ -1964,11 +1987,7 @@
       equal(undoEvent.defaultPrevented, true,
         'Cmd+Z outside an input must be handled by the editor.');
       equal(state.document.blocks.length, 3,
-        'Undo must restore the deleted block.');
-      equal(readingOrder(win).map(function (block) { return block.text; }).join(','),
-        'Alpha,Beta,Gamma');
-      equal(win.Prompter.markdown.serializeDocument(state.document), before,
-        'Undo must restore the exact Markdown content.');
+        'Keyboard undo must restore the deleted block again.');
 
       var redoEvent = new win.KeyboardEvent('keydown', {
         key: 'z', code: 'KeyZ', metaKey: true, shiftKey: true,
@@ -3684,7 +3703,7 @@
         }
         equal(state.dirty, false);
         equal(state.documentPersisted, true);
-        equal(byId(win, 'document-status').textContent, '已儲存');
+        equal(byId(win, 'document-status').textContent, 'Saved');
         equal(byId(win, 'document-title').value, 'prompt');
         assert(byId(win, 'alert-region').textContent.indexOf('not-selected.png') !== -1,
           'Missing image warnings should be announced.');
@@ -3710,7 +3729,7 @@
         equal(state.document.id, documentId);
         equal(state.document.blocks[0].text, '保留內容');
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
         assert(!state.fileBusy, 'Open failures must clear the busy state.');
       });
     });
@@ -3731,7 +3750,7 @@
         assert(state.document.id !== originalId, 'The new tab must become active.');
         equal(state.document.blocks.length, 0);
         equal(state.dirty, false);
-        equal(byId(win, 'document-status').textContent, '新文件');
+        equal(byId(win, 'document-status').textContent, 'New document');
         equal(originalTab.dirty, true, 'The first tab must keep its unsaved state.');
         equal(originalTab.document.blocks.length, 1);
         assert(composerInput(win), 'The blank document composer is missing.');
@@ -3740,7 +3759,7 @@
         equal(state.document.id, originalId, 'The first tab must be restorable.');
         equal(state.dirty, true);
         equal(state.document.blocks[0].text, '未儲存');
-        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
       });
     });
   });
@@ -3821,7 +3840,7 @@
           equal(state.documentPersisted, true);
           equal(state.fileTarget.mode, 'download');
           equal(state.dirty, false);
-          equal(byId(win, 'document-status').textContent, '已儲存');
+          equal(byId(win, 'document-status').textContent, 'Saved');
           return downloads[1].blob.text();
         }).then(function (markdown) {
           equal(markdown, '下載測試\n![picker.png](picker.png)\n');
@@ -3928,7 +3947,7 @@
               return directory.files['direct-test.md'].text();
             }).then(function (markdown) {
               equal(markdown, '更新\n![picker.png](picker.png)\n');
-              equal(byId(win, 'document-status').textContent, '已儲存');
+              equal(byId(win, 'document-status').textContent, 'Saved');
             });
           }).then(function () {
             restore();
@@ -3976,7 +3995,7 @@
         equal(state.document.fileName, 'untitled.md');
         equal(state.documentPersisted, false);
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
 
         var retry = win.Prompter.files.saveCurrentDocument({ saveAs: true });
         return submitFilename(win, 'conflict').then(function () {
@@ -4026,7 +4045,7 @@
         equal(state.document.fileName, 'untitled.md');
         equal(state.documentPersisted, false);
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
         assert(!state.fileBusy, 'Canceling must clear the busy state.');
       });
     });
@@ -4060,7 +4079,7 @@
         equal(state.document.fileName, 'untitled.md');
         equal(state.documentPersisted, false);
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
         assert(!directory.files['fail.md'], 'No Markdown file should be recorded.');
         assert(!state.fileBusy, 'Write failures must clear the busy state.');
         restore();
@@ -4148,7 +4167,7 @@
         equal(state.document.blocks[0].text, '失敗保留');
         equal(state.dirty, true);
         equal(state.tabs.length, 1, 'A failed save must keep the tab open.');
-        equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
         byId(win, 'unsaved-cancel').click();
         return pending;
       }).then(function (proceed) {
@@ -4166,10 +4185,39 @@
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var menu = byId(win, 'file-menu');
+      var editMenu = byId(win, 'edit-menu');
       freshDocument(win);
       closeDialogs(win);
       app.clearDocument();
-      equal(byId(win, 'document-status').textContent, '尚未開啟文件');
+      equal(byId(win, 'document-status').textContent, 'No document open');
+      equal(byId(win, 'file-menu-button').textContent.trim(), 'File');
+      equal(byId(win, 'edit-menu-button').textContent.trim(), 'Edit');
+      equal(byId(win, 'copy-button').textContent.trim(), 'Copy');
+      equal(byId(win, 'theme-toggle').textContent.trim(), 'Theme');
+      equal(byId(win, 'settings-button').textContent.trim(), 'Settings');
+      equal(byId(win, 'theme-toggle').getAttribute('aria-label'), 'Switch to light');
+      equal(byId(win, 'style-select').getAttribute('aria-label'), 'Visual style');
+      equal(byId(win, 'style-select').options[0].textContent, 'Minimal');
+      equal(byId(win, 'style-select').options[3].textContent, 'Corporate');
+      equal(byId(win, 'style-select').options[9].textContent, 'Immersive Green');
+      equal(menu.querySelector('[data-action="new"]').textContent.trim(), 'New Document');
+      equal(menu.querySelector('[data-action="open"]').textContent.trim(), 'Open File');
+      equal(menu.querySelector('[data-action="save"]').textContent.trim(), 'Save');
+      equal(menu.querySelector('[data-action="save-as"]').textContent.trim(), 'Save As');
+      equal(menu.querySelector('[data-action="insert-image"]').textContent.trim(),
+        'Insert Image');
+      byId(win, 'edit-menu-button').click();
+      equal(editMenu.hidden, false, 'The Edit menu must open beside File.');
+      equal(editMenu.querySelector('[data-action="undo"] .menu-item-label').textContent,
+        'Undo');
+      equal(editMenu.querySelector('[data-action="redo"] .menu-item-label').textContent,
+        'Redo');
+      assert(editMenu.querySelector('[data-action="undo"] .menu-shortcut')
+        .textContent.trim().length > 0, 'Undo must display its keyboard shortcut.');
+      assert(editMenu.querySelector('[data-action="redo"] .menu-shortcut')
+        .textContent.trim().length > 0, 'Redo must display its keyboard shortcut.');
+      byId(win, 'edit-menu-button').click();
+      equal(editMenu.hidden, true);
       ['save', 'save-as', 'insert-image'].forEach(function (action) {
         assert(menu.querySelector('[data-action="' + action + '"]').disabled,
           action + ' must be disabled without a document.');
@@ -4181,14 +4229,14 @@
       app.newDocument();
       assert(!menu.querySelector('[data-action="save"]').disabled,
         'Save must be enabled for a blank document.');
-      app.setFileBusy(true, '儲存中…');
-      equal(byId(win, 'document-status').textContent, '儲存中…');
+      app.setFileBusy(true, 'Saving…');
+      equal(byId(win, 'document-status').textContent, 'Saving…');
       assert(menu.querySelector('[data-action="save"]').disabled,
         'Save must be disabled while saving.');
       assert(menu.querySelector('[data-action="new"]').disabled,
         'New must be disabled while a file operation is running.');
       app.setFileBusy(false);
-      equal(byId(win, 'document-status').textContent, '新文件');
+      equal(byId(win, 'document-status').textContent, 'New document');
     });
   });
 
@@ -4962,7 +5010,7 @@
           })
           .then(function (loaded) {
             equal(byId(win, 'document-title').value, '甲文件');
-            equal(byId(win, 'document-status').textContent, '已儲存');
+            equal(byId(win, 'document-status').textContent, 'Saved');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
             equal(loaded.blocks[0].x, win.Prompter.files.COLUMN_X);
             equal(loaded.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
@@ -4983,7 +5031,7 @@
               'Opening another document must not prompt; it opens a tab.');
             equal(state.tabs.length, 2, 'Both opened documents must remain in tabs.');
             equal(byId(win, 'document-title').value, '乙文件');
-            equal(byId(win, 'document-status').textContent, '已儲存');
+            equal(byId(win, 'document-status').textContent, 'Saved');
             equal(directoryButton(win, second.id).getAttribute('aria-current'), 'true');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), null);
             equal(loaded.blocks[0].x, win.Prompter.files.COLUMN_X);
@@ -5000,7 +5048,7 @@
             equal(byId(win, 'unsaved-dialog').open, false,
               'Returning to an open tab must not prompt.');
             equal(byId(win, 'document-title').value, '甲文件');
-            equal(byId(win, 'document-status').textContent, '尚未儲存的變更');
+            equal(byId(win, 'document-status').textContent, 'Unsaved changes');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
             equal(loaded.blocks[0].text, '未儲存變更',
               'The dirty tab content must be preserved.');
@@ -5121,7 +5169,7 @@
             equal(state.dirty, false);
             equal(state.documentPersisted, true);
             equal(byId(win, 'document-title').value, '上次開啟');
-            equal(byId(win, 'document-status').textContent, '已儲存');
+            equal(byId(win, 'document-status').textContent, 'Saved');
             equal(state.document.blocks[0].x, win.Prompter.files.COLUMN_X);
             equal(state.document.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
             equal(directoryButton(win, document.id).getAttribute('aria-current'), 'true');
@@ -5460,7 +5508,7 @@
         toggle.click();
         equal(root.getAttribute('data-theme'), 'dark');
         equal(toggle.getAttribute('aria-pressed'), 'true');
-        equal(toggle.getAttribute('aria-label'), '切換為淺色');
+        equal(toggle.getAttribute('aria-label'), 'Switch to light');
         equal(state.preferences.theme, 'dark');
         equal(state.storage.getPreferences().theme, 'dark');
 
@@ -5881,8 +5929,8 @@
         function afterClose() {
           assert(win.document.documentElement.scrollWidth <= win.innerWidth + 1,
             'The 768 px layout must not scroll horizontally.');
-          ['file-menu-button', 'directory-toggle', 'preview-button', 'copy-button',
-            'style-select', 'theme-toggle', 'settings-button'].forEach(function (id) {
+          ['file-menu-button', 'edit-menu-button', 'directory-toggle', 'preview-button',
+            'copy-button', 'style-select', 'theme-toggle', 'settings-button'].forEach(function (id) {
             var rect = byId(win, id).getBoundingClientRect();
             assert(rect.width > 0 && rect.height > 0, id + ' must stay visible at 768 px.');
             assert(rect.left >= 0 && rect.right <= win.innerWidth + 1,
@@ -6002,8 +6050,8 @@
           'The document title must remain visible in the compact tab bar.');
         assert(compactTitleRect.left >= 0 && compactTitleRect.right <= win.innerWidth + 1,
           'The document title must stay inside the 360 px viewport.');
-        ['file-menu-button', 'directory-toggle', 'preview-button', 'copy-button',
-          'theme-toggle', 'settings-button'].forEach(function (id) {
+        ['file-menu-button', 'edit-menu-button', 'directory-toggle', 'preview-button',
+          'copy-button', 'theme-toggle', 'settings-button'].forEach(function (id) {
           var element = byId(win, id);
           var rect = element.getBoundingClientRect();
           assert(rect.width >= 44 && rect.height >= 44,
@@ -6035,8 +6083,8 @@
           'The mobile layout must start with the preview closed.');
         equal(byId(win, 'preview-label').hidden, true,
           'The mobile layout must not show the preview filename by default.');
-        equal(byId(win, 'copy-button').textContent.trim(), '複製');
-        equal(byId(win, 'settings-button').textContent.trim(), '設定');
+        equal(byId(win, 'copy-button').textContent.trim(), 'Copy');
+        equal(byId(win, 'settings-button').textContent.trim(), 'Settings');
 
         freshDocument(win);
         equal(byId(win, 'preview-view').hidden, true,

@@ -4282,9 +4282,23 @@
     render();
   }
 
+  function canUndo() {
+    var state = getState();
+    return !!(state && state.document && !state.fileBusy && historyStack.length);
+  }
+
+  function canRedo() {
+    var state = getState();
+    return !!(state && state.document && !state.fileBusy && redoStack.length);
+  }
+
   var api = {
     init: init,
     render: render,
+    undo: undoLastAction,
+    redo: redoLastAction,
+    canUndo: canUndo,
+    canRedo: canRedo,
     focusComposer: focusComposer,
     setDefaultMarker: function (marker) {
       var state = getState();

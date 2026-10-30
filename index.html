@@ -37,15 +37,15 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261030-07">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261030-08">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-07">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261030-07">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-08">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261030-08">
 </head>
 <body>
   <a class="skip-link" href="#workspace">跳至主要內容</a>
 
-  <header class="app-header" aria-label="主要工具列">
+  <header class="app-header" aria-label="Main toolbar">
     <div class="header-group header-left">
       <div class="menu-wrap">
         <button id="file-menu-button" class="button button-quiet button-with-icon" type="button"
@@ -54,14 +54,37 @@
             <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor"
                   stroke-width="1.8" stroke-linecap="round"/>
           </svg>
-          <span class="button-label">檔案</span>
+          <span class="button-label">File</span>
         </button>
-        <div id="file-menu" class="menu" role="menu" aria-label="檔案" hidden>
-          <button class="menu-item" type="button" role="menuitem" data-action="new">新增文件</button>
-          <button class="menu-item" type="button" role="menuitem" data-action="open">開啟檔案</button>
-          <button class="menu-item" type="button" role="menuitem" data-action="save" disabled>儲存</button>
-          <button class="menu-item" type="button" role="menuitem" data-action="save-as" disabled>另存新檔</button>
-          <button class="menu-item" type="button" role="menuitem" data-action="insert-image" disabled>插入圖片</button>
+        <div id="file-menu" class="menu" role="menu" aria-label="File" hidden>
+          <button class="menu-item" type="button" role="menuitem" data-action="new">New Document</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="open">Open File</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="save" disabled>Save</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="save-as" disabled>Save As</button>
+          <button class="menu-item" type="button" role="menuitem" data-action="insert-image" disabled>Insert Image</button>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <button id="edit-menu-button" class="button button-quiet button-with-icon" type="button"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="edit-menu">
+          <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"
+                  fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linejoin="round"/>
+            <path d="M13.5 7.5l3 3" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span class="button-label">Edit</span>
+        </button>
+        <div id="edit-menu" class="menu" role="menu" aria-label="Edit" hidden>
+          <button class="menu-item" type="button" role="menuitem" data-action="undo">
+            <span class="menu-item-label">Undo</span>
+            <span class="menu-shortcut" data-shortcut="undo">⌘Z</span>
+          </button>
+          <button class="menu-item" type="button" role="menuitem" data-action="redo">
+            <span class="menu-item-label">Redo</span>
+            <span class="menu-shortcut" data-shortcut="redo">⇧⌘Z</span>
+          </button>
         </div>
       </div>
     </div>
@@ -78,28 +101,28 @@
           <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"
                 fill="none" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span class="button-label">複製</span>
+        <span class="button-label">Copy</span>
       </button>
-      <label class="visually-hidden" for="style-select">視覺風格</label>
-      <select id="style-select" class="select" aria-label="視覺風格">
-        <option value="apple">簡約留白</option>
-        <option value="nvidia">勁綠科技</option>
-        <option value="meta">幾何湛藍</option>
-        <option value="ibm">結構企業</option>
-        <option value="stripe">柔光紫韻</option>
-        <option value="vercel">極簡黑白</option>
-        <option value="notion">暖調人文</option>
-        <option value="figma">繽紛幾何</option>
-        <option value="spacex">冷冽星際</option>
-        <option value="spotify">沉浸翠綠</option>
+      <label class="visually-hidden" for="style-select">Visual style</label>
+      <select id="style-select" class="select" aria-label="Visual style">
+        <option value="apple">Minimal</option>
+        <option value="nvidia">Green Tech</option>
+        <option value="meta">Geometric Blue</option>
+        <option value="ibm">Corporate</option>
+        <option value="stripe">Soft Violet</option>
+        <option value="vercel">Monochrome</option>
+        <option value="notion">Warm Editorial</option>
+        <option value="figma">Colorful Geometry</option>
+        <option value="spacex">Cosmic</option>
+        <option value="spotify">Immersive Green</option>
       </select>
       <button id="theme-toggle" class="button button-quiet button-with-icon" type="button"
-              aria-label="切換明暗">
+              aria-label="Toggle theme">
         <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <circle cx="12" cy="12" r="7.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
           <path d="M12 4.8a7.2 7.2 0 0 0 0 14.4Z" fill="currentColor"/>
         </svg>
-        <span class="button-label">切換明暗</span>
+        <span class="button-label">Theme</span>
       </button>
       <button id="settings-button" class="button button-quiet button-with-icon" type="button">
         <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -109,7 +132,7 @@
           <circle cx="9" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
           <circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/>
         </svg>
-        <span class="button-label">設定</span>
+        <span class="button-label">Settings</span>
       </button>
     </div>
   </header>
@@ -428,16 +451,16 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261030-07"></script>
-  <script defer src="assets/js/markdown.js?v=20261030-07"></script>
-  <script defer src="assets/js/model.js?v=20261030-07"></script>
-  <script defer src="assets/js/storage.js?v=20261030-07"></script>
-  <script defer src="assets/js/search.js?v=20261030-07"></script>
-  <script defer src="assets/js/files.js?v=20261030-07"></script>
-  <script defer src="assets/js/preview.js?v=20261030-07"></script>
-  <script defer src="assets/js/clipboard.js?v=20261030-07"></script>
-  <script defer src="assets/js/editor.js?v=20261030-07"></script>
-  <script defer src="assets/js/settings.js?v=20261030-07"></script>
-  <script defer src="assets/js/app.js?v=20261030-07"></script>
+  <script defer src="assets/js/utils.js?v=20261030-08"></script>
+  <script defer src="assets/js/markdown.js?v=20261030-08"></script>
+  <script defer src="assets/js/model.js?v=20261030-08"></script>
+  <script defer src="assets/js/storage.js?v=20261030-08"></script>
+  <script defer src="assets/js/search.js?v=20261030-08"></script>
+  <script defer src="assets/js/files.js?v=20261030-08"></script>
+  <script defer src="assets/js/preview.js?v=20261030-08"></script>
+  <script defer src="assets/js/clipboard.js?v=20261030-08"></script>
+  <script defer src="assets/js/editor.js?v=20261030-08"></script>
+  <script defer src="assets/js/settings.js?v=20261030-08"></script>
+  <script defer src="assets/js/app.js?v=20261030-08"></script>
 </body>
 </html>

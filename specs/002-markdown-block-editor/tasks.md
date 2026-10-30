@@ -33,7 +33,7 @@ build output is created.
 **Purpose**: Create the static shell, local styles, and test fixture corpus. No runtime
 dependency, server, build step, or network asset is introduced.
 
-- [x] T001 Create the static page shell in `index.html` with header (File menu left; Preview and Copy centered; style, theme, and settings right), document title/status row, directory aside, canvas main, dialogs, toast region, and polite/assertive live regions.
+- [x] T001 Create the static page shell in `index.html` with header (English File and Edit menus left; Preview and Copy centered; style, theme, and settings right), document title/status row, directory aside, canvas main, dialogs, toast region, and polite/assertive live regions.
 - [x] T002 [P] Create `assets/css/base.css` with the reset, app grid, typography using system font stacks, visible focus rings, reduced-motion handling, and 360 px-safe layout rules.
 - [x] T003 [P] Create `assets/css/themes.css` with 紙張 (`paper`) and 石墨 (`graphite`) tokens for light and dark themes, including `prefers-color-scheme` defaults and WCAG AA text/control contrast.
 - [x] T004 [P] Create `assets/css/app.css` with component styles for the header, File menu, directory, canvas, text/image blocks, composer, Marker menu, dialogs, toasts, warnings, and narrow-width drawer/compact header.
@@ -219,7 +219,7 @@ empty, preferences remain, and saved files on disk are untouched.
 - [x] T063 [US5] Implement appearance controls in `assets/js/app.js` and `assets/js/settings.js`: 紙張/石墨 style selector, light/dark toggle, system-preference following via `matchMedia`, explicit-choice persistence, and independence of style and theme.
 - [x] T064 [US5] Complete preference persistence in `assets/js/storage.js` and `assets/js/utils.js`: validate unknown/invalid values to defaults, apply theme/style preflight before first paint, and keep preferences out of clear-library.
 - [x] T065 [US5] Implement Clear Library in `assets/js/settings.js`, `assets/js/storage.js`, and `assets/js/app.js`: explicit confirmation explaining local removal, destructive action styling, close the current document, clear IndexedDB/localStorage/memory records and file targets, keep preferences, never touch disk files, and report partial failures.
-- [x] T066 [US5] Add the compact header at 360 px in `assets/css/app.css` and `assets/js/app.js`: compact icon buttons for File, directory, Preview, Copy, style, theme, and settings; hide non-essential labels; keep 44 px touch targets and all actions reachable without horizontal scrolling.
+- [x] T066 [US5] Add the compact header at 360 px in `assets/css/app.css` and `assets/js/app.js`: compact icon buttons for File, Edit, directory, Preview, Copy, style, theme, and settings; hide non-essential labels; keep 44 px touch targets and all actions reachable without horizontal scrolling.
 - [x] T067 [US5] Extend `tests/browser/harness.js` with settings persistence, default-Marker application, grid visibility, theme/style preflight, and clear-library checks that do not depend on real pickers.
 - [x] T068 [US5] Run quickstart scenarios 11–12 and the settings checks in `tests/browser/harness.js`; fix persistence, preflight flash, grid, compact header, and clear-library defects in `assets/js/settings.js`.
 

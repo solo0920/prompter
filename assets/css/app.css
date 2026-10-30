@@ -81,7 +81,10 @@ body {
   z-index: 40;
 }
 .menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
   width: 100%;
   text-align: left;
   border: 0;
@@ -89,8 +92,14 @@ body {
   background: transparent;
   color: var(--text);
   padding: 9px 10px;
+  white-space: nowrap;
 }
 .menu-item:hover:not(:disabled), .menu-item:focus-visible { background: var(--surface-2); }
+.menu-shortcut {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: .02em;
+}
 
 .tab-title-input {
   flex: 1 1 auto;
