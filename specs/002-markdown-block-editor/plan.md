@@ -207,7 +207,7 @@ working margin.
 Drag uses pointer capture and a transform during the gesture; committed `x`/`y` values update
 on pointerup. Blocks stay within `0..canvasWidth-blockWidth` and
 `0..canvasHeight-blockHeight`. Overlap is allowed; the selected block gets the highest `z`.
-A light 24 px alignment grid can be shown from settings and is off by default.
+The canvas retains its light 24 px alignment grid, but grid visibility is no longer exposed in Settings.
 
 Insertion places a new composer below its source block and shifts lower overlapping blocks
 only when necessary. Image insertion from a file or paste is placed below the selected or

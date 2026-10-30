@@ -5452,7 +5452,7 @@
     });
   });
 
-  test('US5 settings apply the default Marker and grid, persist, and show version information', function () {
+  test('US5 settings apply the default Marker, persist, and show version information', function () {
     return appReady().then(function (win) {
       return withPreferences(win, {
         style: 'apple',
@@ -5477,8 +5477,12 @@
             'Default marker');
           equal(byId(win, 'default-marker').options[0].textContent, 'None');
           equal(win.document.querySelector('#settings-dialog .check-row span').textContent,
-            'Show alignment grid');
-          equal(byId(win, 'follow-system-button').textContent, 'Follow system theme');
+            'Follow system theme');
+          equal(byId(win, 'follow-system-theme').checked, false);
+          equal(byId(win, 'show-grid'), null,
+            'The Show alignment grid setting must be removed.');
+          equal(byId(win, 'follow-system-button'), null,
+            'Follow system theme must be a checkbox, not a button.');
           equal(byId(win, 'clear-library-button').textContent, 'Clear local library');
           equal(byId(win, 'app-version').textContent, '1.0.0');
           equal(byId(win, 'schema-version').textContent, '1');
@@ -5492,15 +5496,6 @@
           equal(state.preferences.defaultMarker, '##');
           equal(state.storage.getPreferences().defaultMarker, '##');
 
-          var grid = byId(win, 'show-grid');
-          equal(grid.checked, false);
-          toggleCheckbox(win, grid, true);
-          equal(state.preferences.showGrid, true);
-          equal(state.storage.getPreferences().showGrid, true);
-          equal(byId(win, 'canvas').classList.contains('grid-hidden'), false);
-          assert(win.getComputedStyle(byId(win, 'canvas')).backgroundImage !== 'none',
-            'Enabling the grid must show its background lines.');
-
           byId(win, 'settings-close').click();
           return waitFor(function () {
             return !dialog.open && win.document.activeElement === settingsButton;
@@ -5513,19 +5508,6 @@
           }).then(function (composerMarker) {
             equal(composerMarker.textContent, '##',
               'A new composer must use the saved default Marker.');
-            byId(win, 'settings-button').click();
-            return waitFor(function () {
-              return dialog.open ? true : null;
-            }, 5000);
-          }).then(function () {
-            toggleCheckbox(win, byId(win, 'show-grid'), false);
-            equal(byId(win, 'canvas').classList.contains('grid-hidden'), true);
-            equal(win.getComputedStyle(byId(win, 'canvas')).backgroundImage, 'none');
-            equal(state.storage.getPreferences().showGrid, false);
-            byId(win, 'settings-close').click();
-            return waitFor(function () {
-              return !dialog.open ? true : null;
-            }, 5000);
           });
         });
       });
@@ -5571,9 +5553,13 @@
             return byId(win, 'settings-dialog').open ? true : null;
           }, 5000);
         }).then(function () {
-          byId(win, 'follow-system-button').click();
+          var followSystem = byId(win, 'follow-system-theme');
+          equal(followSystem.checked, false,
+            'Follow system theme must start unchecked for an explicit theme.');
+          toggleCheckbox(win, followSystem, true);
           equal(state.preferences.theme, 'system');
           equal(state.storage.getPreferences().theme, 'system');
+          equal(followSystem.checked, true);
           var expected = win.matchMedia('(prefers-color-scheme: dark)').matches
             ? 'dark'
             : 'light';
@@ -5581,6 +5567,12 @@
             'Following the system must use the current media preference.');
           equal(root.getAttribute('data-style'), 'spotify',
             'The style must remain independent of the theme.');
+          toggleCheckbox(win, followSystem, false);
+          equal(followSystem.checked, false);
+          equal(state.preferences.theme, expected,
+            'Clearing the checkbox must keep the current effective theme explicit.');
+          equal(state.storage.getPreferences().theme, expected);
+          equal(root.getAttribute('data-theme'), expected);
           byId(win, 'settings-close').click();
           return waitFor(function () {
             return byId(win, 'settings-dialog').open ? null : true;

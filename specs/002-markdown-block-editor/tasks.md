@@ -200,7 +200,7 @@ content, block positions, and Markdown reading order.
 
 ## Phase 7: User Story 5 - Personalize and configure the workspace (Priority: P3)
 
-**Goal**: Style, light/dark mode, default Marker, alignment grid, clear-library, and version
+**Goal**: Style, light/dark mode, default Marker, clear-library, and version
 information work and persist without affecting document content or disk files.
 
 **Independent Test**: Change style, theme, default Marker, and grid; reload and confirm
@@ -215,7 +215,7 @@ empty, preferences remain, and saved files on disk are untouched.
 
 ### Implementation for User Story 5
 
-- [x] T062 [US5] Implement the Settings dialog in `assets/js/settings.js`: default Marker, alignment-grid toggle, follow-system reset, clear-library action, version/storage-schema information, close control, immediate application, and persistence.
+- [x] T062 [US5] Implement the Settings dialog in `assets/js/settings.js`: default Marker, follow-system checkbox, clear-library action, version/storage-schema information, close control, immediate application, and persistence.
 - [x] T063 [US5] Implement appearance controls in `assets/js/app.js` and `assets/js/settings.js`: 紙張/石墨 style selector, light/dark toggle, system-preference following via `matchMedia`, explicit-choice persistence, and independence of style and theme.
 - [x] T064 [US5] Complete preference persistence in `assets/js/storage.js` and `assets/js/utils.js`: validate unknown/invalid values to defaults, apply theme/style preflight before first paint, and keep preferences out of clear-library.
 - [x] T065 [US5] Implement Clear Library in `assets/js/settings.js`, `assets/js/storage.js`, and `assets/js/app.js`: explicit confirmation explaining local removal, destructive action styling, close the current document, clear IndexedDB/localStorage/memory records and file targets, keep preferences, never touch disk files, and report partial failures.

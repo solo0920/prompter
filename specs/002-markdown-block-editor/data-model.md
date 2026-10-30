@@ -196,7 +196,7 @@ Stored per browser/device, not per document.
 | `style` | style ID | `"apple"` | Ten styles; independent of theme. Feature 003 defines the set, and stored `paper`/`graphite` values normalize to `apple`. |
 | `theme` | `"system"` \| `"light"` \| `"dark"` | `"system"` | System follows `prefers-color-scheme` until changed. |
 | `defaultMarker` | Marker | `"none"` | Used by new composers. |
-| `showGrid` | boolean | `false` | Shows the 24 px alignment grid. |
+| `showGrid` | boolean | `false` | Legacy grid preference retained for stored data; no longer exposed in Settings. |
 | `lastDocumentId` | string \| null | `null` | Reopens the last document when it still exists; not a document save. |
 
 Unknown or invalid values fall back to defaults. Preferences are not cleared by Clear Library.

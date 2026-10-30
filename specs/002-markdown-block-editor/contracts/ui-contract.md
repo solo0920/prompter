@@ -408,8 +408,8 @@ Each image block shows:
 Label: `Settings`. Contains at minimum:
 
 - `Default marker` select with all Marker options; the unmarked option is `None`.
-- `Show alignment grid` checkbox/toggle.
-- `Follow system theme` reset action (sets theme to system).
+- `Follow system theme` checkbox. Checking it stores the system theme mode; clearing it keeps the
+  current effective theme as an explicit light or dark choice.
 - `Clear local library` button with confirmation.
 - Version information: `App version`, `Storage schema version`, and `Current storage mode`.
 - Close control labeled `Close`.

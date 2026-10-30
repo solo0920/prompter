@@ -265,8 +265,8 @@ visual preference and working style.
 the core authoring, file, or copy workflows.
 
 **Independent Test**: Change the visual style, switch light/dark mode, set a default Marker,
-toggle the alignment grid, reload the page, and confirm every setting is retained. Open the
-settings panel and clear the local library after confirming the warning.
+toggle the Follow system theme checkbox, reload the page, and confirm every setting is
+retained. Open the settings panel and clear the local library after confirming the warning.
 
 **Acceptance Scenarios**:
 
@@ -282,8 +282,8 @@ settings panel and clear the local library after confirming the warning.
    are available; selecting one applies immediately, persists, and does not change the
    light/dark mode.
 5. **Given** the settings button, **When** it is activated, **Then** a settings panel opens
-   with a default Marker choice, an alignment-grid toggle, a clear-local-library action, and
-   version information.
+   with a default Marker choice, a Follow system theme checkbox, a clear-local-library action,
+   and version information.
 6. **Given** the user clears the local library, **When** the action is confirmed, **Then**
    local documents and layouts are removed, workspace preferences remain, and files already
    saved on disk are not deleted.
@@ -487,8 +487,9 @@ settings panel and clear the local library after confirming the warning.
   preference until the user makes an explicit choice, and persist that choice. The style
   selection MUST apply immediately, persist, and remain independent of the light/dark setting.
 - **FR-034**: The settings button MUST open a panel containing at least a default Marker
-  choice, an alignment-grid visibility toggle, a clear-local-library action with confirmation,
-  and version information. Settings changes MUST persist.
+  choice, a Follow system theme checkbox, a clear-local-library action with confirmation, and
+  version information. Checking the box MUST switch to the system theme; clearing it MUST keep
+  the current effective theme as an explicit choice. Settings changes MUST persist.
 - **FR-035**: Clearing the local library MUST remove local documents, layouts, and locally
   stored image assets, MUST retain workspace preferences, and MUST NOT delete files already
   saved on disk.
@@ -636,7 +637,7 @@ settings panel and clear the local library after confirming the warning.
   an opened Markdown file. It is stored locally with the document, has a unique file name and
   default alternative text, and is used by Preview, Save, and rich Copy.
 - **Workspace Preference**: A per-device setting containing the visual style, light/dark
-  choice, default Marker, and alignment-grid visibility.
+  choice (including whether it follows the system), and default Marker.
 - **Search Query**: Transient text entered in the directory search field. It filters documents
   and is not stored with the library.
 - **Clipboard Payload**: The transient content produced by Copy, containing Markdown text and,

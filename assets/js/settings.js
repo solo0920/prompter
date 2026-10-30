@@ -63,11 +63,11 @@
     if (elements.canvas) {
       elements.canvas.classList.toggle('grid-hidden', !preferences.showGrid);
     }
-    if (elements['show-grid']) {
-      elements['show-grid'].checked = preferences.showGrid;
-    }
     if (elements['default-marker']) {
       elements['default-marker'].value = preferences.defaultMarker;
+    }
+    if (elements['follow-system-theme']) {
+      elements['follow-system-theme'].checked = preferences.theme === 'system';
     }
     if (elements['theme-toggle']) {
       var nextLabel = theme === 'dark' ? 'Switch to light' : 'Switch to dark';
@@ -219,15 +219,14 @@
         setDefaultMarker(elements['default-marker'].value);
       });
     }
-    if (elements['show-grid']) {
-      elements['show-grid'].addEventListener('change', function () {
-        updatePreferences({ showGrid: elements['show-grid'].checked });
-      });
-    }
-    if (elements['follow-system-button']) {
-      elements['follow-system-button'].addEventListener('click', function () {
-        updatePreferences({ theme: 'system' });
-        app.toast('Theme now follows the system.');
+    if (elements['follow-system-theme']) {
+      elements['follow-system-theme'].addEventListener('change', function () {
+        if (elements['follow-system-theme'].checked) {
+          updatePreferences({ theme: 'system' });
+          app.toast('Theme now follows the system.');
+        } else {
+          updatePreferences({ theme: effectiveTheme(getState().preferences) });
+        }
       });
     }
     if (elements['settings-button']) {

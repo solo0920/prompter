@@ -454,15 +454,15 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 
 1. Toggle light/dark; confirm immediate change. Reload; confirm the choice persists.
 2. With no explicit choice, change the OS light/dark preference; confirm the app follows it.
-3. Use the settings reset to follow the system again.
+3. Open Settings and check `Follow system theme`; confirm the app follows the OS theme.
+   Uncheck it and confirm the current effective theme becomes an explicit light or dark choice.
 4. With a fresh profile, confirm 簡約留白 (`apple`) is the default. Switch among all ten
    styles; confirm each works in both light and dark and persists.
 5. With a blank document, change the default Marker and confirm the initial composer uses it.
    Commit a block with `##` and confirm the next composer inherits `##`; use `+` on a
    differently marked block and confirm it inherits that block's Marker.
-6. Toggle the alignment grid; confirm it appears/disappears and persists.
-7. Open the settings dialog, confirm version information is present.
-8. Clear the local library after confirming; confirm the workspace is empty, local records are
+6. Open the settings dialog, confirm version information is present.
+7. Clear the local library after confirming; confirm the workspace is empty, local records are
    gone, preferences remain, and files already on disk are untouched.
 
 ### 12. Responsive and accessibility (FR-037, FR-038, SC-011, SC-012)
