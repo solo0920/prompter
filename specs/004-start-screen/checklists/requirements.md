@@ -7,7 +7,8 @@
 - [x] Startup and every full refresh show the start screen; no document is auto-opened from
   `lastDocumentId`.
 - [x] The left side lists at most ten documents sorted by `updatedAt` descending.
-- [x] Each recent row shows the document title, file name, and last-modified time.
+- [x] Each recent row is a single compact line showing only the file name and last-modified
+  time; the separate document title is omitted.
 - [x] Selecting a recent row opens that saved document in a tab and hides the start screen.
 - [x] New document creates an unsaved `Untitled` document and focuses the composer.
 - [x] Open directory reveals the existing directory drawer and focuses its search input.
@@ -21,7 +22,7 @@
 - [x] Desktop uses a two-column layout with recents on the left and actions on the right.
 - [x] At 900 px and narrower the actions move above the recents; the primary action spans the
   available width.
-- [x] At 560 px and narrower the actions and recent rows use a single column.
+- [x] At 560 px and narrower the actions use a single column; recent rows stay on one line.
 - [x] The editor and preview are removed from layout while the start screen is visible.
 - [x] The start screen has no horizontal overflow at 390 px, 768 px, or 1440 px.
 - [x] Recent items expose an accessible open label; action buttons use native buttons with

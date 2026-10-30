@@ -376,12 +376,11 @@ body {
   border-top: 1px solid var(--border);
 }
 .recent-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
+  display: flex;
   align-items: center;
+  gap: 16px;
   width: 100%;
-  padding: 13px 14px;
+  padding: 8px 14px;
   border: 0;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
@@ -390,27 +389,20 @@ body {
   text-align: left;
 }
 .recent-item:hover { background: var(--surface-2); }
-.recent-item-copy { min-width: 0; }
-.recent-item-title {
-  display: block;
+.recent-item-file {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.recent-item-meta {
-  display: flex;
-  gap: 8px;
-  margin-top: 2px;
+.recent-item-time {
+  flex: 0 0 auto;
   color: var(--muted);
   font-size: 12px;
-}
-.recent-item-file {
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.recent-item-time { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .recent-empty {
   margin-top: 26px;
   padding: 22px;
@@ -1182,5 +1174,4 @@ body {
   .start-side { padding-bottom: 20px; }
   .start-actions { grid-template-columns: minmax(0, 1fr); }
   .start-action-primary { grid-column: auto; }
-  .recent-item { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }

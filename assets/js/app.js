@@ -722,28 +722,20 @@
       button.type = 'button';
       button.className = 'recent-item';
       button.setAttribute('data-document-id', document.id);
-      var titleText = document.title || 'Untitled';
       var fileText = document.fileName || 'untitled.md';
       var modified = formatUpdatedAt(document.updatedAt);
       button.setAttribute('aria-label',
-        '開啟文件：' + titleText + '，' + fileText + '，' + modified);
-      var title = global.document.createElement('span');
-      title.className = 'recent-item-title';
-      title.textContent = titleText;
-      var meta = global.document.createElement('span');
-      meta.className = 'recent-item-meta';
+        '開啟文件：' + fileText + '，' + modified);
       var file = global.document.createElement('span');
       file.className = 'recent-item-file';
       file.textContent = fileText;
-      meta.appendChild(file);
-      var text = global.document.createElement('span');
-      text.className = 'recent-item-copy';
-      text.appendChild(title);
-      text.appendChild(meta);
-      var time = global.document.createElement('span');
+      var time = global.document.createElement('time');
       time.className = 'recent-item-time';
+      if (document.updatedAt) {
+        time.setAttribute('datetime', document.updatedAt);
+      }
       time.textContent = modified;
-      button.appendChild(text);
+      button.appendChild(file);
       button.appendChild(time);
       entry.appendChild(button);
       fragment.appendChild(entry);

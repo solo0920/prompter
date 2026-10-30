@@ -683,10 +683,15 @@
               'The most recently edited file must be first.');
             equal(items[9].getAttribute('data-document-id'), 'recent-9',
               'The tenth most recently edited file must be last.');
-            equal(items[0].querySelector('.recent-item-title').textContent, '近期文件 1');
+            equal(items[0].querySelector('.recent-item-title'), null,
+              'Recent files must not show a separate document title.');
             equal(items[0].querySelector('.recent-item-file').textContent, 'recent-1.md');
-            assert(items[0].getAttribute('aria-label').indexOf('開啟文件') === 0,
-              'Recent files must have an accessible open label.');
+            assert(items[0].getAttribute('aria-label').indexOf('recent-1.md') !== -1,
+              'Recent files must expose the file name in their accessible open label.');
+            assert(items[0].getAttribute('aria-label').indexOf('近期文件 1') === -1,
+              'The hidden document title must not leak into the recent row label.');
+            assert(items[0].getBoundingClientRect().height <= 44,
+              'Recent rows must stay compact with a single line.');
             equal(byId(win, 'start-view').hidden, false);
             equal(byId(win, 'recent-empty').hidden, true);
             equal(byId(win, 'start-subtitle').textContent, '最近更新的 10 份文件');

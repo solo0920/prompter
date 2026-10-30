@@ -75,7 +75,7 @@ returns with the recent list intact.
 - **FR-001**: The application MUST show the start screen after every full load or refresh,
   regardless of the stored `lastDocumentId`.
 - **FR-002**: The start screen MUST list at most ten documents, sorted by `updatedAt` descending,
-  with title, file name, and last-modified time.
+  with one compact row per document showing only the file name and last-modified time.
 - **FR-003**: Selecting a recent document MUST open it in a tab using the existing saved-document
   path, including its stored file target.
 - **FR-004**: The start screen MUST provide New document, Open directory, and Open file actions.
