@@ -47,10 +47,10 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261030-20">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261030-21">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-20">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261030-20">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261030-21">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261030-21">
 </head>
 <body>
   <a class="skip-link" href="#workspace">跳至主要內容</a>
@@ -305,6 +305,30 @@
               <span class="start-action-arrow" aria-hidden="true">→</span>
             </button>
           </div>
+          <section class="start-example" aria-labelledby="start-example-title">
+            <div class="start-example-head">
+              <h2 id="start-example-title" class="start-side-title">範例文件</h2>
+              <a id="start-example-download" class="start-example-download"
+                 href="example.md" download="example.md">下載 .md</a>
+            </div>
+            <button id="start-example-button" class="start-example-card" type="button"
+                    aria-label="在編輯器開啟範例文件 example.md">
+              <span class="start-example-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d="M6 3.8h7l4.6 4.6v11.8H6z" fill="none" stroke="currentColor"
+                        stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="M13 3.8v4.6h4.6M9 12.4h6M9 15.6h6" fill="none"
+                        stroke="currentColor" stroke-width="1.7"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="start-example-copy">
+                <span class="start-example-file">example.md</span>
+                <span class="start-example-desc">七種 Markdown 語法範例</span>
+              </span>
+              <span class="start-example-arrow" aria-hidden="true">→</span>
+            </button>
+          </section>
           <p class="start-storage-note">文件會儲存在此瀏覽器；重新整理後可從左側快速開啟。</p>
         </aside>
       </section>
@@ -470,16 +494,17 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261030-20"></script>
-  <script defer src="assets/js/markdown.js?v=20261030-20"></script>
-  <script defer src="assets/js/model.js?v=20261030-20"></script>
-  <script defer src="assets/js/storage.js?v=20261030-20"></script>
-  <script defer src="assets/js/search.js?v=20261030-20"></script>
-  <script defer src="assets/js/files.js?v=20261030-20"></script>
-  <script defer src="assets/js/preview.js?v=20261030-20"></script>
-  <script defer src="assets/js/clipboard.js?v=20261030-20"></script>
-  <script defer src="assets/js/editor.js?v=20261030-20"></script>
-  <script defer src="assets/js/settings.js?v=20261030-20"></script>
-  <script defer src="assets/js/app.js?v=20261030-20"></script>
+  <script defer src="assets/js/utils.js?v=20261030-21"></script>
+  <script defer src="assets/js/markdown.js?v=20261030-21"></script>
+  <script defer src="assets/js/example.js?v=20261030-21"></script>
+  <script defer src="assets/js/model.js?v=20261030-21"></script>
+  <script defer src="assets/js/storage.js?v=20261030-21"></script>
+  <script defer src="assets/js/search.js?v=20261030-21"></script>
+  <script defer src="assets/js/files.js?v=20261030-21"></script>
+  <script defer src="assets/js/preview.js?v=20261030-21"></script>
+  <script defer src="assets/js/clipboard.js?v=20261030-21"></script>
+  <script defer src="assets/js/editor.js?v=20261030-21"></script>
+  <script defer src="assets/js/settings.js?v=20261030-21"></script>
+  <script defer src="assets/js/app.js?v=20261030-21"></script>
 </body>
 </html>

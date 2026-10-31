@@ -58,7 +58,8 @@
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
       'no-results-clear', 'workspace', 'start-view', 'start-title', 'start-subtitle',
       'recent-list', 'recent-empty', 'start-new-button', 'start-directory-button',
-      'start-open-button', 'editor-pane', 'document-tabs', 'document-tab-items',
+      'start-open-button', 'start-example-button', 'editor-pane', 'document-tabs',
+      'document-tab-items',
       'preview-label', 'preview-file-name', 'preview-close', 'canvas', 'canvas-empty',
       'canvas-new-button',
       'toast-region', 'alert-region', 'move-announcer', 'preview-view', 'preview-content',
@@ -1536,6 +1537,31 @@
     }
   }
 
+  function openExampleDocument() {
+    var example = global.Prompter && global.Prompter.example;
+    if (!example || !example.markdown || !Files ||
+        typeof Files.parseMarkdownDocument !== 'function') {
+      showError(new Error('找不到範例文件。'));
+      return Promise.resolve({ ok: false });
+    }
+    return Files.parseMarkdownDocument(example.markdown, {
+      documentId: 'prompter-example',
+      fileName: example.fileName || 'example.md',
+      title: example.title || 'Markdown 七種語法範例'
+    }).then(function (result) {
+      setDocument(result.document, result.assets, {
+        persisted: false,
+        newTab: true,
+        focus: 'canvas'
+      });
+      toast('已開啟範例文件「' + (example.fileName || 'example.md') + '」。');
+      return { ok: true, document: result.document };
+    }).catch(function (error) {
+      showError(error);
+      return { ok: false, error: error };
+    });
+  }
+
   function wireStartView() {
     if (elements['recent-list']) {
       elements['recent-list'].addEventListener('click', function (event) {
@@ -1564,6 +1590,11 @@
     if (elements['start-open-button']) {
       elements['start-open-button'].addEventListener('click', function () {
         requestOpenPicker();
+      });
+    }
+    if (elements['start-example-button']) {
+      elements['start-example-button'].addEventListener('click', function () {
+        openExampleDocument();
       });
     }
   }
@@ -1718,6 +1749,7 @@
     renderDirectory: renderDirectory,
     restoreLastDocument: restoreLastDocument,
     openDirectoryDocument: openDirectoryDocument,
+    openExampleDocument: openExampleDocument,
     clearDirectorySearch: clearDirectorySearch
   };
 

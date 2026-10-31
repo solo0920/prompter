@@ -13,7 +13,8 @@
 A full page load now opens a start screen instead of automatically reopening the last document.
 The left side lists up to ten recently edited files from the local library, newest first. Each
 row opens that document in a new tab. The right side offers New document, Open directory, and
-Open file actions. The start screen remains the empty state after the last tab is closed.
+Open file actions, plus a bundled `example.md` that demonstrates seven Markdown syntaxes. The
+start screen remains the empty state after the last tab is closed.
 
 ## User Scenarios & Testing
 
@@ -70,6 +71,24 @@ returns with the recent list intact.
 2. **Given** the start screen is visible, **When** a recent file is saved or its title changes,
    **Then** the list order and labels update from the refreshed local library.
 
+### User Story 4 - Explore the bundled Markdown example (Priority: P3)
+
+As a new user, I want a ready-made Markdown file on the start screen so that I can see the
+editor and preview in action without preparing a file first.
+
+**Independent Test**: From the start screen, open the `example.md` card and confirm that all
+seven sample sections appear in the editor and preview, and that the file can be downloaded.
+
+**Acceptance Scenarios**:
+
+1. **Given** the start screen, **When** it is visible, **Then** the right column shows a
+   downloadable `example.md` card for the seven-syntax sample.
+2. **Given** the example card, **When** the user activates it, **Then** an unsaved document opens
+   with the sample content, the start screen hides, and the preview shows its code, table, and
+   math.
+3. **Given** the example is open, **When** the user returns to the start screen, **Then** the
+   library still contains only the user's saved documents.
+
 ## Requirements
 
 - **FR-001**: The application MUST show the start screen after every full load or refresh,
@@ -89,6 +108,12 @@ returns with the recent list intact.
   network request, consistent with the rest of the application.
 - **FR-010**: On narrow viewports the actions MUST stack above the recent list and the page MUST
   not scroll horizontally.
+- **FR-011**: The start screen right column MUST surface the bundled `example.md`, including a
+  direct download link, without fetching it over the network.
+- **FR-012**: Opening the example MUST create an unsaved document from the bundled Markdown and
+  MUST NOT add it to the local library until the user explicitly saves it.
+- **FR-013**: The bundled example MUST contain headings, unordered lists, ordered lists,
+  blockquotes, inline and fenced code, inline and display LaTeX, and a table.
 
 ## Success Criteria
 
@@ -99,13 +124,16 @@ returns with the recent list intact.
   leave the start screen in the expected state.
 - **SC-004**: The empty library, 390 px, 768 px, and 1440 px layouts have no horizontal overflow
   and keep all start actions reachable.
+- **SC-005**: The `example.md` card is visible in the right column, downloads the real file,
+  opens the same content without a network request, and leaves the stored library unchanged.
 
-## Verification (2026-10-30)
+## Verification (2026-10-31)
 
-- 106 unit tests pass.
-- 112 browser tests pass in Chrome 156, Firefox 159, and Edge 156, online and offline from
-  `file://`. The new checks cover the ten-file cap and ordering, opening a recent file, the empty
-  state, New document, and Open directory.
+- 108 unit tests pass, including confirmation that the bundled script matches `example.md`
+  byte-for-byte and that the sample parses into a valid document.
+- 113 browser tests pass in Chrome, Firefox, and Edge, online and offline from `file://`. The
+  example check covers the right-column card, the download link, opening the unsaved document,
+  every source line, and the preview's code, table, and KaTeX output.
 - Manual Chrome checks at 1440×900, 768×900, and 390×844 confirmed the two-column desktop
   layout, the stacked mobile layout, the absence of horizontal scrolling, and the refresh
   behavior with a stale `lastDocumentId`.

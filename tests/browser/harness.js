@@ -755,6 +755,69 @@
     });
   });
 
+  test('start screen example opens the bundled seven-syntax Markdown file', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      return withCleanLibrary(win, function () {
+        app.clearDocument();
+        return waitFor(function () {
+          return byId(win, 'start-view').hidden === false;
+        }, 5000).then(function () {
+          var card = byId(win, 'start-example-button');
+          assert(card, 'The start-screen example card is missing.');
+          assert(win.document.querySelector('.start-side').contains(card),
+            'The example must appear in the start screen right column.');
+          equal(card.querySelector('.start-example-file').textContent, 'example.md');
+          equal(card.querySelector('.start-example-desc').textContent,
+            '七種 Markdown 語法範例');
+          var download = byId(win, 'start-example-download');
+          equal(download.getAttribute('href'), 'example.md');
+          equal(download.getAttribute('download'), 'example.md');
+          card.click();
+          return waitFor(function () {
+            return app.state.document &&
+              app.state.document.id === 'prompter-example' ? true : null;
+          }, 5000);
+        }).then(function () {
+          equal(app.state.document.fileName, 'example.md');
+          equal(app.state.document.title, 'Markdown 七種語法範例');
+          equal(app.state.documentPersisted, false,
+            'The bundled example must open without changing the stored library.');
+          equal(byId(win, 'start-view').hidden, true);
+          equal(win.getComputedStyle(byId(win, 'editor-pane')).display, 'block');
+          assert(app.state.document.blocks.length > 30,
+            'The bundled example must retain every source line.');
+
+          var texts = app.state.document.blocks.map(function (block) {
+            return block.text;
+          });
+          assert(texts.indexOf('##### H5 第五層標題') !== -1);
+          assert(texts.indexOf('    - 子項目 C') !== -1);
+          assert(texts.indexOf('NPV = \\sum_{t=1}^{n} \\frac{CF_t}{(1+r)^t} - C_0') !== -1);
+          equal(texts[texts.length - 1], '| 報酬率 | 20% | 投資報酬／本金 |');
+
+          return waitFor(function () {
+            var content = byId(win, 'preview-content');
+            return !byId(win, 'preview-view').hidden &&
+              content.querySelector('table') &&
+              content.querySelector('pre code.language-python') &&
+              content.querySelector('.katex') ? content : null;
+          }, 5000).then(function (content) {
+            assert(content.textContent.indexOf('print("Hello World")') !== -1,
+              'The example preview must show inline code.');
+            assert(content.textContent.indexOf('初始投資') !== -1,
+              'The example preview must show the Markdown table.');
+          });
+        }).then(function () {
+          app.clearDocument();
+          return waitFor(function () {
+            return byId(win, 'start-view').hidden === false;
+          }, 5000);
+        });
+      });
+    });
+  });
+
   test('US1 File > New creates an Unsaved document with one composer', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

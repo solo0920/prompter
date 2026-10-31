@@ -472,6 +472,61 @@ body {
 .start-action-primary .start-action-desc { color: inherit; opacity: .78; }
 .start-action-arrow { color: var(--muted); }
 .start-action-primary .start-action-arrow { color: inherit; opacity: .8; }
+.start-example {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.start-example-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.start-example-download {
+  flex: 0 0 auto;
+  padding: 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.start-example-download:hover {
+  color: var(--text);
+  border-bottom-color: var(--border-strong);
+}
+.start-example-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+.start-example-card:hover {
+  background: var(--surface-2);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.start-example-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  color: var(--accent-strong);
+}
+.start-example-icon svg { display: block; width: 24px; height: 24px; }
+.start-example-copy { display: grid; gap: 1px; min-width: 0; }
+.start-example-file { font-weight: 650; }
+.start-example-desc { color: var(--muted); font-size: 12px; }
+.start-example-arrow { color: var(--muted); }
 .start-storage-note { margin-top: 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .editor-pane {
   grid-row: 2;
