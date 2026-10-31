@@ -611,9 +611,11 @@ retained. Open the settings panel and clear the local library after confirming t
   first/last wrap. Collapse All MUST collapse every collapsible block of the selected layer and
   Expand All MUST restore them; with no layer selected, the actions apply to every collapsible
   section in the document. Opening the same layer again, closing the toolbar, or switching
-  documents MUST exit layer focus and restore normal block interaction. The composer MUST stay
-  hidden during layer focus, and layer focus MUST NOT change Markdown content, Save, Preview, or
-  Copy output.
+  documents MUST exit layer focus and restore normal block interaction. The composer MUST remain
+  available during layer focus and MUST automatically use the selected layer's Marker. Activating
+  `+` on a matching block MUST open a composer at that slot with the same Marker so the user can
+  add another item of the focused kind without leaving layer focus. Layer focus itself MUST NOT
+  change committed Markdown content, Save, Preview, or Copy output.
 - **FR-055**: Every block MUST show a delete control on right-side hover/focus, positioned above
   the `+` control. Activating it MUST remove only that block, and image deletion MUST also release
   its asset when no longer referenced. Outside text inputs, Cmd+Z (macOS) or Ctrl+Z (Windows) MUST
@@ -739,10 +741,13 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-10-31)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 106 unit tests and 112 browser tests pass in Chrome 156 and
-  Firefox 159, online and offline, from `file://`; Edge 156 passes 112/112 in headless runs.
-  Safari historically passed 108/108 through the HTTP harness and a direct `file://` startup
-  smoke; Safari testing is paused at the user's request.
+- Automated verification: 108 unit tests and 114 browser tests pass in Chrome 156, online and
+  offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
+  layer-focus add check was added. Safari historically passed 108/108 through the HTTP harness
+  and a direct `file://` startup smoke; Safari testing is paused at the user's request.
+- Layer-focus add verification (2026-10-31): Chrome passes the new check confirming that layer
+  focus keeps a composer with the focused Marker, matching blocks keep `+` visible, and `+`
+  inserts a new item with that Marker without leaving layer focus.
 - Start screen verification (2026-10-31): feature 004 opens on a start screen after refresh,
   lists up to ten recent files sorted by update time, and exposes New document, Open directory,
   and Open file actions. Chrome, Firefox, and Edge pass the 112-check suite.

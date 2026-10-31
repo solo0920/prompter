@@ -1986,6 +1986,94 @@
     });
   });
 
+  test('US1 layer focus adds items with the focused Marker', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-add-document',
+        title: '層級新增',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-add-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-add-h2', marker: '##', text: '第一節', seq: 2 }),
+          Model.createTextBlock({ id: 'layer-add-p', marker: 'none', text: '內容', seq: 3 }),
+          Model.createTextBlock({ id: 'layer-add-h2b', marker: '##', text: '第二節', seq: 4 }),
+          Model.createTextBlock({ id: 'layer-add-q', marker: '>', text: '引用', seq: 5 })
+        ]
+      }), [], { persisted: false });
+
+      var toggle = byId(win, 'layer-toggle');
+      toggle.click();
+      var toolbar = byId(win, 'layer-toolbar');
+      var h2Button = toolbar.querySelector('[data-layer="##"]');
+      h2Button.click();
+
+      var composer = win.document.querySelector('#canvas .composer');
+      assert(composer, 'Layer focus must keep a composer available.');
+      equal(composer.querySelector('.composer-marker').textContent, '##',
+        'Focusing a layer must set the composer to that Marker.');
+      equal(composer.getAttribute('aria-label'), '新增 ## 標題');
+
+      var anchor = blockById(win, 'layer-add-h2');
+      var plus = anchor.querySelector('.block-plus');
+      assert(plus, 'A matching layer block must keep its "+" control.');
+      equal(plus.getAttribute('aria-label'), '在此區塊下方新增 ## 標題');
+      equal(win.getComputedStyle(plus).opacity, '1',
+        'The "+" control must stay visible on matching layer blocks.');
+      plus.click();
+
+      return waitFor(function () {
+        return composerInput(win) && win.document.activeElement === composerInput(win);
+      }, 5000).then(function () {
+        var input = composerInput(win);
+        equal(win.document.querySelector('#canvas .composer-marker').textContent, '##',
+          'A composer opened from "+" must use the focused Marker.');
+        setValue(win, input, '新增小節');
+        press(win, input, 'Enter');
+        return waitFor(function () {
+          return state.document.blocks.some(function (block) {
+            return block.marker === '##' && block.text === '新增小節';
+          });
+        }, 5000);
+      }).then(function () {
+        var ordered = Model.normalizeSequence(state.document);
+        var addedIndex = -1;
+        var anchorIndex = -1;
+        var nextHeadingIndex = -1;
+        ordered.forEach(function (block, index) {
+          if (block.marker === '##' && block.text === '新增小節') {
+            addedIndex = index;
+          }
+          if (block.id === 'layer-add-h2') {
+            anchorIndex = index;
+          }
+          if (block.id === 'layer-add-h2b') {
+            nextHeadingIndex = index;
+          }
+        });
+        assert(addedIndex > anchorIndex,
+          'The new layer item must appear below the "+" source block.');
+        assert(addedIndex < nextHeadingIndex,
+          'The new layer item must stay above the next heading of the layer.');
+        var addedElement = blockById(win, ordered[addedIndex].id);
+        assert(addedElement.classList.contains('layer-match'),
+          'The new item must belong to the focused layer.');
+        assert(!addedElement.classList.contains('layer-dimmed'));
+        equal(win.document.querySelector('#canvas .composer-marker').textContent, '##',
+          'The follow-up composer must keep the focused Marker.');
+
+        toolbar.querySelector('[data-layer=">"]').click();
+        equal(win.document.querySelector('#canvas .composer-marker').textContent, '>',
+          'Switching layers must update the composer Marker.');
+        equal(win.document.querySelector('#canvas .composer').getAttribute('aria-label'),
+          '新增 引用');
+        toggle.click();
+        assert(toolbar.hidden, 'Closing the toolbar must end layer focus.');
+      });
+    });
+  });
+
   test('US1 right-side delete removes a block and Cmd+Z restores it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

@@ -45,7 +45,7 @@ canonical Markdown serializer, reading order, blank-line/newline preservation, s
 image reference matching, the HTML renderer, preferences, storage degradation, composer
 Markdown splitting, and security guards. They do not require npm packages.
 
-Current result (2026-10-31): **106 passing, 0 failing**.
+Current result (2026-10-31): **108 passing, 0 failing**.
 
 ### Browser harness
 
@@ -61,11 +61,12 @@ Current result (2026-10-31): **106 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-31): Chrome **112 passing, 0 failing** (required gate). Firefox also
-reports 112 passing, 0 failing as the supplementary check. Edge 156 passes 112/112 in headless
-Chromium runs. Safari 27.2 previously reported 108/108 through a local HTTP origin; Safari
-testing is now paused and is not part of the current test loop. The suite includes the start
-screen and ten-file recent list added in feature 004.
+Current result (2026-10-31): Chrome **114 passing, 0 failing** (required gate), online and
+offline. The latest check covers layer-focus `+` insertion and composer Marker inheritance.
+Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
+27.2 previously reported 108/108 through a local HTTP origin; Safari testing is now paused and is
+not part of the current test loop. The suite includes the start screen and ten-file recent list
+added in feature 004.
 
 ## Verified Results (2026-10-31)
 
@@ -78,9 +79,9 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 112/112 | PASS 112/112 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; WebDriver run; download save fallback |
-| Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; headless CDP run |
+| Chrome (macOS) | 156.0.8078.49 | PASS 114/114 | PASS 114/114 | Required gate; full editor, storage, settings, clipboard fallbacks, layer-focus add |
+| Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; last run before the layer-focus add check |
+| Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; last run before the layer-focus add check |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
 
 Mobile preview behavior was additionally verified at 360×800 in Chrome, Firefox, and Edge:
@@ -526,11 +527,11 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-10-31**: Chrome 156 passes the full automated harness from `file://`, including
-offline runs, and is the required release gate. Firefox 159 also passes as the supplementary
-check. Edge 156 matches Chrome's Chromium matrix and passes 112/112 in headless runs, online and
-offline. Safari 27.2 historically passed the HTTP harness 108/108 and a direct
-`file://` startup smoke; Safari testing is paused and is not part of the current loop.
+**Verified 2026-10-31**: Chrome 156 passes the full 114-check automated harness from `file://`,
+online and offline, and is the required release gate; the latest check covers layer-focus `+`
+insertion with the focused Marker. Firefox 159 and Edge 156 last passed the prior 112-check
+suite as supplementary checks. Safari 27.2 historically passed the HTTP harness 108/108 and a
+direct `file://` startup smoke; Safari testing is paused and is not part of the current loop.
 
 ## Acceptance Checklist
 

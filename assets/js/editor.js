@@ -510,9 +510,6 @@
       state.editingBlockId = null;
       editDraft = null;
     }
-    if (state.composer) {
-      state.composer = null;
-    }
   }
 
   function updateLayerToolbar() {
@@ -616,17 +613,6 @@
     if (!state || !state.document) {
       return;
     }
-    if (state.composer) {
-      if (String(state.composer.text || '').trim() !== '') {
-        commitComposer();
-      } else {
-        state.composer = null;
-      }
-      state = getState();
-      if (!state || !state.document) {
-        return;
-      }
-    }
     var next = marker === layerFilter ? null : marker;
     var matches = [];
     if (next) {
@@ -640,6 +626,9 @@
       }
     }
     layerFilter = next;
+    if (next) {
+      ensureLayerComposer(state, next);
+    }
     var autoCollapsed = 0;
     if (next) {
       var autoOrdered = Model.normalizeSequence(state.document);
@@ -834,7 +823,7 @@
       autoResizeTextarea
     );
     var composerElement = canvas.querySelector('.composer');
-    var composer = state.composer && !layerFilter ? {
+    var composer = state.composer ? {
       insertIndex: state.composer.insertIndex,
       height: composerElement ? composerElement.offsetHeight : 0
     } : null;
@@ -1277,7 +1266,9 @@
       element.appendChild(row);
     }
 
-    var plus = createButton('block-plus', '在此區塊下方新增');
+    var plus = createButton('block-plus', layerFilter
+      ? '在此區塊下方新增 ' + layerLabel(layerFilter)
+      : '在此區塊下方新增');
     plus.appendChild(createBlockControlIcon('plus'));
     plus.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -1398,21 +1389,22 @@
   }
 
   function renderComposer(state) {
-    if (layerFilter) {
-      return null;
-    }
     var composer = state.composer;
     if (!composer) {
       return null;
     }
     var element = global.document.createElement('div');
-    element.className = 'composer';
+    element.className = 'composer' + (layerFilter ? ' layer-match' : '');
     element.style.left = composer.x + 'px';
     element.style.top = composer.y + 'px';
     element.setAttribute('role', 'group');
-    element.setAttribute('aria-label', composer.mode === 'initial'
+    var label = composer.mode === 'initial'
       ? '新增第一個區塊'
-      : (composer.mode === 'document' ? '在文件末尾新增區塊' : '新增區塊'));
+      : (composer.mode === 'document' ? '在文件末尾新增區塊' : '新增區塊');
+    if (layerFilter) {
+      label = '新增 ' + layerLabel(layerFilter);
+    }
+    element.setAttribute('aria-label', label);
 
     var markerButton = createButton(
       'composer-marker' + (composer.marker === 'none' ? ' none' : ''),
@@ -1534,6 +1526,32 @@
       x: Files.COLUMN_X,
       y: Files.COLUMN_START_Y,
       marker: preferences.defaultMarker,
+      text: ''
+    });
+  }
+
+  function ensureLayerComposer(state, marker) {
+    if (!state || !state.document || !marker) {
+      return;
+    }
+    if (state.composer) {
+      state.composer.marker = marker;
+      state.composer.markerOverride = null;
+      return;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    if (!ordered.length) {
+      return;
+    }
+    var anchor = ordered[ordered.length - 1];
+    var point = insertionPoint(anchor);
+    state.composer = Model.createComposer({
+      mode: 'document',
+      anchorBlockId: anchor.id,
+      insertIndex: ordered.length,
+      x: point.x,
+      y: point.y,
+      marker: marker,
       text: ''
     });
   }
@@ -3065,9 +3083,12 @@
     if (!state || !state.document) {
       return;
     }
-    if (layerFilter) {
-      announce('請先關閉層級聚焦再新增項目。');
-      return;
+    if (state.editingBlockId) {
+      commitEditing();
+      state = getState();
+      if (!state || !state.document) {
+        return;
+      }
     }
     if (state.composer) {
       if ((state.composer.text || '').trim() !== '') {
@@ -3093,7 +3114,7 @@
       insertIndex: insertIndex,
       x: point.x,
       y: point.y,
-      marker: inheritedComposerMarker(anchor),
+      marker: layerFilter || inheritedComposerMarker(anchor),
       text: ''
     });
     render();

@@ -246,10 +246,16 @@ Each image block shows:
   headers; `全部展開` restores them. With no layer active, the actions apply to every collapsible
   section in the document.
 - Activating the same layer again, closing the toolbar, pressing Escape in the toolbar, or
-  switching documents clears layer focus and restores all blocks. The composer is hidden while
-  layer focus is active.
-- Layer focus is a view-only aid. It does not alter Markdown, Save, Preview, or Copy output, and
-  collapse arrows are hidden while it is active.
+  switching documents clears layer focus and restores all blocks.
+- The composer remains available while layer focus is active. Activating a layer sets the open
+  composer's Marker to that layer and keeps any existing draft; if none is open, a document-end
+  composer is created with that Marker. Switching layers updates the composer Marker again.
+- Matching blocks keep their lower-right `+` visible; its accessible name includes the focused
+  kind, e.g. `在此區塊下方新增 ## 標題`. Activating it opens a composer at that slot with the
+  focused layer's Marker, so a user can add another item of the focused kind without leaving
+  layer focus. Dimmed blocks stay locked and keep `+` hidden.
+- Layer focus is a view-only aid for committed Markdown. It does not alter Save, Preview, or Copy
+  output, and collapse arrows are hidden while it is active.
 
 ## Selection
 

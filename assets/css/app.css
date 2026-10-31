@@ -720,6 +720,10 @@ body {
   outline-offset: -2px;
 }
 .block.layer-match { border-color: var(--accent); }
+.block.layer-match .block-plus {
+  opacity: 1;
+  pointer-events: auto;
+}
 .block.layer-dimmed {
   opacity: .34;
   filter: grayscale(1);
@@ -929,6 +933,7 @@ body {
   align-items: flex-start;
   gap: 7px;
 }
+.composer.layer-match { border-color: var(--accent); }
 .composer:focus-within {
   border-color: var(--accent);
 }
