@@ -6186,14 +6186,48 @@
           equal(win.document.activeElement, byId(win, 'preview-button'),
             'Closing the mobile preview must return focus to the preview toggle.');
 
-          byId(win, 'file-menu-button').click();
-          var menu = byId(win, 'file-menu');
-          assert(!menu.hidden, 'The File menu must open in the compact header.');
-          var menuRect = menu.getBoundingClientRect();
-          assert(menuRect.left >= 0 && menuRect.right <= win.innerWidth + 1,
-            'The File menu must stay inside the 360 px viewport.');
-          press(win, win.document, 'Escape');
-          restoreWidth();
+          var directoryToggle = byId(win, 'directory-toggle');
+          var directoryDrawer = byId(win, 'directory');
+          if (!directoryDrawer.classList.contains('open')) {
+            directoryToggle.click();
+          }
+          return waitFor(function () {
+            return directoryDrawer.classList.contains('open') ? true : null;
+          }, 5000).then(function () {
+            byId(win, 'file-menu-button').click();
+            var menu = byId(win, 'file-menu');
+            assert(!menu.hidden, 'The File menu must open in the compact header.');
+            var menuRect = menu.getBoundingClientRect();
+            assert(menuRect.left >= 0 && menuRect.right <= win.innerWidth + 1,
+              'The File menu must stay inside the 360 px viewport.');
+            var fileHit = win.document.elementFromPoint(
+              Math.max(60, menuRect.left + 20),
+              menuRect.top + 20
+            );
+            assert(fileHit && menu.contains(fileHit),
+              'The File menu must render above the directory drawer. Hit: ' +
+              (fileHit ? fileHit.tagName + '#' + fileHit.id + '.' + fileHit.className : 'none') +
+              ' menu.z=' + win.getComputedStyle(menu).zIndex +
+              ' header.z=' + win.getComputedStyle(win.document.querySelector('.app-header')).zIndex);
+
+            byId(win, 'edit-menu-button').click();
+            var editMenu = byId(win, 'edit-menu');
+            assert(!editMenu.hidden, 'The Edit menu must open in the compact header.');
+            var editRect = editMenu.getBoundingClientRect();
+            var editHit = win.document.elementFromPoint(
+              Math.max(60, editRect.left + 20),
+              editRect.top + 20
+            );
+            assert(editHit && editMenu.contains(editHit),
+              'The Edit menu must render above the directory drawer.');
+
+            press(win, win.document, 'Escape');
+            return waitFor(function () {
+              return !directoryDrawer.classList.contains('open') ? true : null;
+            }, 5000).then(function () {
+              restoreWidth();
+            });
+          });
         });
       }, function (error) {
         restoreWidth();

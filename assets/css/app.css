@@ -13,7 +13,7 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: relative;
-  z-index: 20;
+  z-index: 120;
 }
 .app-header::before {
   content: "";
@@ -919,7 +919,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 90;
+  z-index: 120;
   display: grid;
   grid-template-columns: repeat(4, 48px);
   gap: 4px;
@@ -1103,7 +1103,7 @@ body {
   .directory {
     display: block;
     position: fixed;
-    top: 0;
+    top: 45px;
     bottom: 0;
     left: 44px;
     width: min(320px, calc(100vw - 44px));
@@ -1116,7 +1116,7 @@ body {
   .directory-overlay:not([hidden]) {
     display: block;
     position: fixed;
-    inset: 0;
+    inset: 45px 0 0;
     z-index: 55;
     background: var(--overlay);
   }

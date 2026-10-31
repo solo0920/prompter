@@ -69,7 +69,8 @@ behavior so tests can be written against it.
 - Enter/Space on File or Edit opens that menu and focuses the first enabled item.
 - Arrow Down/Up moves through items; Home/End jump to first/last; Escape closes and returns
   focus to the menu button; Tab closes the menu.
-- Opening one menu closes the other. Clicking outside closes both.
+- Opening one menu closes the other. Open menus render above the directory drawer, overlay, and
+  page alerts. Clicking outside closes both.
 - Disabled items remain in the menu with `disabled` and are skipped by focus.
 
 ## Directory
