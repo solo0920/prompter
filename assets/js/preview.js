@@ -15,6 +15,7 @@
   var lastTrigger = null;
   var renderToken = 0;
   var active = false;
+  var expanded = false;
   var refreshTimer = null;
   var compactQuery = global.matchMedia
     ? global.matchMedia('(max-width: 768px)')
@@ -628,10 +629,38 @@
     }
   }
 
+  function updateExpansionMode() {
+    var app = getApp();
+    if (!app || !app.elements) {
+      return;
+    }
+    var compact = isCompactLayout();
+    if (!active || compact) {
+      expanded = false;
+    }
+    var workspace = app.elements.workspace;
+    if (workspace) {
+      workspace.classList.toggle('preview-expanded', active && expanded);
+    }
+    var button = app.elements['preview-expand-button'];
+    if (!button) {
+      return;
+    }
+    button.hidden = !active || compact;
+    var isExpanded = active && expanded;
+    var label = isExpanded ? '還原分割預覽' : '展開預覽至全編輯區';
+    button.setAttribute('aria-pressed', isExpanded ? 'true' : 'false');
+    button.setAttribute('aria-label', label);
+    button.title = label;
+  }
+
   function setPreviewMode(on) {
     var app = getApp();
     if (!app || !app.elements) {
       return;
+    }
+    if (!on) {
+      expanded = false;
     }
     var view = app.elements['preview-view'];
     if (view) {
@@ -647,6 +676,7 @@
       button.setAttribute('aria-label', on ? '關閉即時預覽' : '即時預覽');
       button.title = on ? '關閉即時預覽' : '即時預覽';
     }
+    updateExpansionMode();
     if (app && typeof app.updatePreviewLabel === 'function') {
       app.updatePreviewLabel();
     }
@@ -807,6 +837,16 @@
     return open(trigger);
   }
 
+  function toggleExpanded() {
+    if (!active || isCompactLayout()) {
+      return false;
+    }
+    expanded = !expanded;
+    updateExpansionMode();
+    reflowEditor();
+    return expanded;
+  }
+
   function isOpen() {
     return active;
   }
@@ -838,6 +878,7 @@
     openDefault: openDefault,
     close: close,
     toggle: toggle,
+    toggleExpanded: toggleExpanded,
     isOpen: isOpen,
     refresh: refresh,
     scheduleRefresh: scheduleRefresh,

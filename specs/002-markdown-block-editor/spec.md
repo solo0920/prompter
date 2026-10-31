@@ -576,7 +576,12 @@ retained. Open the settings panel and clear the local library after confirming t
   On viewports 768 px wide or narrower, it MUST start closed and MUST NOT open automatically;
   activating the preview toggle MUST hide the document tabs and editor canvas, replace the
   editor with a full-workspace preview below the tab bar, and leave only the preview tab visible.
-  Activating it again MUST restore the editor, its tabs, and focus to the toggle. It MUST stay
+  On wider viewports, while the preview is open, a separate expand control beside the preview
+  toggle MUST appear and MUST switch the preview to fill the entire editor area, hiding the
+  editor and document tabs and allowing preview content to use the full pane width; activating
+  it again MUST restore the split editor and preview. The expand control MUST be hidden while
+  the preview is closed. Activating the preview toggle again MUST restore the editor, its tabs,
+  and focus to the toggle. It MUST stay
   closed after the user closes it until another document is created or opened on desktop, and
   MUST show the empty state when the active document has no previewable content.
 - **FR-052**: A text block with at least one following block of lower rank MUST show a collapse
@@ -741,13 +746,17 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-10-31)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 108 unit tests and 114 browser tests pass in Chrome 156, online and
+- Automated verification: 108 unit tests and 115 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
-  layer-focus add check was added. Safari historically passed 108/108 through the HTTP harness
-  and a direct `file://` startup smoke; Safari testing is paused at the user's request.
-- Layer-focus add verification (2026-10-31): Chrome passes the new check confirming that layer
-  focus keeps a composer with the focused Marker, matching blocks keep `+` visible, and `+`
-  inserts a new item with that Marker without leaving layer focus.
+  layer-focus and full-width preview checks were added. Safari historically passed 108/108
+  through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
+  user's request.
+- Layer-focus add verification (2026-10-31): Chrome passes the check confirming that layer focus
+  keeps a composer with the focused Marker, matching blocks keep `+` visible, and `+` inserts a
+  new item with that Marker without leaving layer focus.
+- Full-width preview verification (2026-10-31): Chrome passes the check confirming that the
+  expand control is hidden while preview is closed, fills the editor area when activated, uses
+  the full content width, and restores the split view when activated again.
 - Start screen verification (2026-10-31): feature 004 opens on a start screen after refresh,
   lists up to ten recent files sorted by update time, and exposes New document, Open directory,
   and Open file actions. Chrome, Firefox, and Edge pass the 112-check suite.

@@ -4623,6 +4623,80 @@
     });
   });
 
+  test('US3 preview expands to the full editor area and restores the split', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      commitComposer(win, '# 全寬預覽');
+      var workspace = byId(win, 'workspace');
+      var expand = byId(win, 'preview-expand-button');
+      return waitFor(function () {
+        return !byId(win, 'preview-view').hidden && !expand.hidden &&
+          byId(win, 'preview-content').querySelector('h1') ? true : null;
+      }, 8000).then(function () {
+        equal(expand.getAttribute('aria-pressed'), 'false');
+        equal(expand.getAttribute('aria-label'), '展開預覽至全編輯區');
+        assert(win.getComputedStyle(byId(win, 'editor-pane')).display !== 'none',
+          'The editor must stay visible beside the split preview.');
+        expand.click();
+        return waitFor(function () {
+          return workspace.classList.contains('preview-expanded') &&
+            win.getComputedStyle(byId(win, 'editor-pane')).display === 'none' ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(expand.getAttribute('aria-pressed'), 'true');
+        equal(expand.getAttribute('aria-label'), '還原分割預覽');
+        equal(win.getComputedStyle(expand.querySelector('.preview-collapse-icon')).display,
+          'block', 'The expanded state must show the collapse icon.');
+        var workspaceRect = workspace.getBoundingClientRect();
+        var previewRect = byId(win, 'preview-view').getBoundingClientRect();
+        var tabsRect = byId(win, 'document-tabs').getBoundingClientRect();
+        assert(Math.abs(previewRect.left - workspaceRect.left) <= 1 &&
+          Math.abs(previewRect.right - workspaceRect.right) <= 1,
+        'The expanded preview must fill the editor area width.');
+        assert(previewRect.top >= tabsRect.bottom - 1,
+          'The expanded preview must start below the tab bar.');
+        equal(win.getComputedStyle(byId(win, 'document-tab-items')).display, 'none',
+          'The expanded preview must hide the document tabs.');
+        equal(byId(win, 'preview-label').hidden, false,
+          'The expanded preview must keep the preview tab label visible.');
+        var content = byId(win, 'preview-content');
+        equal(win.getComputedStyle(content).maxWidth, 'none',
+          'The expanded preview content must not stay at the split width.');
+        assert(content.getBoundingClientRect().width > 760,
+          'The expanded preview content must use the extra width.');
+
+        expand.click();
+        return waitFor(function () {
+          return !workspace.classList.contains('preview-expanded') &&
+            win.getComputedStyle(byId(win, 'editor-pane')).display !== 'none' ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(expand.getAttribute('aria-pressed'), 'false');
+        equal(expand.getAttribute('aria-label'), '展開預覽至全編輯區');
+        var editorRect = byId(win, 'editor-pane').getBoundingClientRect();
+        var paneRect = byId(win, 'preview-view').getBoundingClientRect();
+        assert(paneRect.left >= editorRect.right - 1,
+          'Restoring the split must put the preview beside the editor.');
+        assert(byId(win, 'document-tab-items').getBoundingClientRect().width > 0,
+          'Restoring the split must reveal the document tabs.');
+        byId(win, 'preview-button').click();
+        return waitFor(function () {
+          return byId(win, 'preview-view').hidden && expand.hidden ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(expand.getAttribute('aria-pressed'), 'false');
+        byId(win, 'preview-button').click();
+        return waitFor(function () {
+          return !byId(win, 'preview-view').hidden && !expand.hidden ? true : null;
+        }, 5000);
+      }).then(function () {
+        equal(workspace.classList.contains('preview-expanded'), false,
+          'Reopening the preview must start in the split view.');
+        equal(expand.getAttribute('aria-label'), '展開預覽至全編輯區');
+      });
+    });
+  });
+
   test('US3 Preview renders KaTeX math without touching code fences', function () {
     return appReady().then(function (win) {
       freshDocument(win);
@@ -6422,6 +6496,8 @@
           equal(byId(win, 'preview-button').getAttribute('aria-label'), '關閉即時預覽');
           equal(byId(win, 'preview-label').hidden, false,
             'The full-page preview must show the active document name.');
+          equal(byId(win, 'preview-expand-button').hidden, true,
+            'The compact full-page preview must not show the desktop expand control.');
           var tabItems = byId(win, 'document-tab-items');
           var tabArea = byId(win, 'preview-tab-area');
           var tabAreaRect = tabArea.getBoundingClientRect();

@@ -14,7 +14,7 @@
 | Marker 支援 | 支援 `#`、`##`、`###`、`-`、`1.`、`>`、`.`，可從選單選擇或直接輸入偵測。 |
 | 層級聚焦 | 一鍵只顯示某一種 Marker，其餘區塊變暗鎖定；輸入框會自動使用該層 Marker，`+` 可直接新增同類項目。 |
 | 多行輸入 | 在輸入框貼上多行 Markdown 會自動拆成多個區塊，並保留清單、引用與程式碼區塊。 |
-| 即時預覽 | 即時渲染 Markdown、表格、程式碼與 KaTeX 數學公式，支援桌面分割視窗與行動版全頁預覽。 |
+| 即時預覽 | 即時渲染 Markdown、表格、程式碼與 KaTeX 數學公式，支援桌面分割視窗、全編輯區全寬預覽與行動版全頁預覽。 |
 | 複製輸出 | 一鍵複製完整 Markdown，或同時提供 Rich HTML（含圖片與 MathML）。 |
 | 檔案操作 | 開啟 Markdown 與相關圖片、插入或貼上圖片、Save／Save As；支援 File System Access API，並在不可用時退回下載。 |
 | 本機文件庫 | 使用 IndexedDB 儲存，必要時退回 localStorage 或單次工作階段記憶體；首頁列出最近 10 份文件。 |
@@ -102,7 +102,7 @@ python3 -m http.server 8000
 
 開啟 <http://localhost:8000/tests/browser/harness.html>，等待頁面顯示 `PASS`。
 
-目前結果：**Chrome 114/114 passing**（線上與離線）。Firefox 與 Edge 為輔助驗證，最近一次完整結果為 112/112；Safari 測試目前暫停。
+目前結果：**Chrome 115/115 passing**（線上與離線）。Firefox 與 Edge 為輔助驗證，最近一次完整結果為 112/112；Safari 測試目前暫停。
 
 ## 開發注意事項
 

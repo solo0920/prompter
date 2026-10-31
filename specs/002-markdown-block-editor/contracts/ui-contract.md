@@ -57,7 +57,8 @@ behavior so tests can be written against it.
 | Edit | `Edit` | Opens the Edit menu immediately to the right of File. |
 | Edit > Undo | `Undo` | Undoes the latest document-changing action. Disabled when no undo step is available; displays the platform shortcut (`⌘Z` or `Ctrl+Z`). |
 | Edit > Redo | `Redo` | Redoes the most recently undone action. Disabled when no redo step is available; displays the platform shortcut (`⇧⌘Z` or `Ctrl+Shift+Z`). |
-| Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane. While preview is open, the active document name with a file icon appears as a tab-styled label immediately to its left, with an `×` that closes preview. The editor canvas stays visible. Disabled when no document. |
+| Preview | `即時預覽` | Preview-window icon at the right edge of the document tab bar toggles the live preview pane. While preview is open, the active document name with a file icon appears as a tab-styled label immediately to its left, with an `×` that closes preview. In split mode the editor canvas stays visible. Disabled when no document. |
+| Preview expand | `展開預覽至全編輯區` / `還原分割預覽` | Appears immediately beside the Preview toggle only while the preview is open on desktop. Extends the preview across the full editor area and hides the editor and document tabs; activating it again restores the split view. `aria-pressed` reflects the expanded state. |
 | Copy | `Copy` | Icon-only control. Disabled when the document is empty. Copies exact Markdown with Markers; adds rich HTML only when the document contains images, with math included as self-contained MathML. |
 | Theme | `Theme` | Icon-only palette control backed by the style selector. Selects one of ten styles; `Minimal` (`apple`) is the default. Independent of light/dark. Feature 003 defines the set and maps legacy values to Apple. |
 | Light/dark | `Switch to light` / `Switch to dark` | Icon-only toggle that changes light/dark immediately and stores an explicit choice. Hover tooltip is `Light/dark`. |
@@ -387,6 +388,12 @@ Each image block shows:
   is created, opened, or restored; the editor canvas remains visible on the left. It is not a
   dialog or a new window.
 - The preview icon at the right edge of the tab bar toggles the pane and uses `aria-pressed="true"` while open. Closing the pane keeps it closed for the current document and across tab switches until another document is created or opened.
+- While the pane is open on a viewport wider than 768 px, a second icon-only control appears
+  immediately beside the preview toggle. It expands the preview across the full editor area,
+  hides the editor pane and document tabs, and lets the preview content use the full width up to
+  the pane padding. Activating it again restores the split editor and preview; closing the
+  preview resets the next opening to split mode. The control is not shown while the preview is
+  closed or in the compact full-page preview layout.
 - Only while the preview pane is open, the active document name with a file icon appears
   immediately to the left of the preview icon as a tab-styled label matching the active document
   tab's colors and shape. Its left edge aligns with the preview pane's left boundary, so the tab
@@ -465,6 +472,7 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | Blank document | One composer at top-left; Save enabled; Copy disabled; Preview shows empty state. |
 | Document open | Blocks in reading order; tab title populated; Copy enabled when non-empty. |
 | Preview active | Editor canvas remains visible; live rendered Markdown appears in the right pane; preview toggle is pressed. |
+| Preview expanded | Preview fills the editor area; editor pane and document tabs are hidden; the preview label, expand toggle, and close controls remain in the tab bar; expand toggle is pressed. |
 | Dirty | Unsaved indicator in the header status area and on the tab; no modal until tab close/reload. |
 | Saving | Save/Save As disabled with busy label; no duplicate writes. |
 | Storage warning | Non-blocking banner in the directory with details and a dismiss action. |
@@ -497,6 +505,7 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | Global | Cmd/Ctrl+Shift+Z | Redo the most recently undone action outside text inputs. |
 | Directory | Tab, Enter/Space | Focus/open a document. |
 | Preview | Enter/Space | Toggle the live right-side preview pane. |
+| Preview expand | Enter/Space | Toggle between the split preview and the full editor-area preview. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
 | Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. Entering a text block's text zone starts editing with all text selected. Plain Up/Down also navigate while editing: the current edit commits first, and a text destination stays in edit mode. |

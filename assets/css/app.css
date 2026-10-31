@@ -604,7 +604,8 @@ body {
   font-size: 14px;
 }
 .preview-close { flex: 0 0 auto; }
-.document-tabs .preview-toggle {
+.document-tabs .preview-toggle,
+.document-tabs .preview-expand-toggle {
   flex: 0 0 auto;
   align-self: center;
   margin: 0 6px;
@@ -1004,15 +1005,20 @@ body {
   color: var(--accent-strong);
 }
 
-.preview-toggle {
+.preview-toggle,
+.preview-expand-toggle {
   width: 40px;
   min-width: 40px;
   padding: 0;
 }
-.preview-toggle[aria-pressed="true"] {
+.preview-toggle[aria-pressed="true"],
+.preview-expand-toggle[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent-strong);
 }
+.preview-expand-toggle .preview-collapse-icon { display: none; }
+.preview-expand-toggle[aria-pressed="true"] .preview-expand-icon { display: none; }
+.preview-expand-toggle[aria-pressed="true"] .preview-collapse-icon { display: block; }
 .workspace.preview-open .preview-view:not([hidden]) {
   border-left: 1px solid var(--border);
 }
@@ -1210,6 +1216,42 @@ body {
     box-shadow: none;
   }
   .block-image-wrap { max-width: min(520px, calc(100vw - 50px)); }
+  .preview-expand-toggle { display: none; }
+}
+
+@media (min-width: 769px) {
+  .workspace.preview-open.preview-expanded {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace.preview-open.preview-expanded .document-tabs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace.preview-open.preview-expanded .document-tab-items {
+    display: none;
+  }
+  .workspace.preview-open.preview-expanded .preview-tab-area {
+    grid-column: 1;
+  }
+  .workspace.preview-open.preview-expanded .preview-label {
+    flex: 0 1 auto;
+    min-width: 180px;
+    max-width: 340px;
+    border-left: 0;
+  }
+  .workspace.preview-open.preview-expanded .editor-pane {
+    display: none;
+  }
+  .workspace.preview-open.preview-expanded .preview-view:not([hidden]) {
+    grid-row: 2;
+    grid-column: 1;
+    border-left: 0;
+    box-shadow: none;
+  }
+  .workspace.preview-open.preview-expanded .preview-content {
+    width: 100%;
+    max-width: none;
+    padding: 20px clamp(24px, 5vw, 72px) 0;
+  }
 }
 
 @media (max-width: 560px) {

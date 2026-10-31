@@ -52,7 +52,8 @@
       'file-menu-button', 'file-menu', 'edit-menu-button', 'edit-menu',
       'directory-toggle', 'directory', 'directory-overlay',
       'layer-toggle', 'layer-toolbar', 'layer-collapse-all', 'layer-expand-all',
-      'app-main', 'preview-button', 'copy-button', 'style-select', 'theme-toggle', 'settings-button',
+      'app-main', 'preview-button', 'preview-expand-button', 'copy-button', 'style-select',
+      'theme-toggle', 'settings-button',
       'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
@@ -1448,6 +1449,14 @@
           preview.open(elements['preview-button']);
         } else {
           toast('預覽將在後續版本提供。');
+        }
+      });
+    }
+    if (elements['preview-expand-button']) {
+      elements['preview-expand-button'].addEventListener('click', function () {
+        var preview = global.Prompter.preview;
+        if (preview && typeof preview.toggleExpanded === 'function') {
+          preview.toggleExpanded();
         }
       });
     }

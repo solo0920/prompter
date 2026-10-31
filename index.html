@@ -47,10 +47,10 @@
       }
     }());
   </script>
-  <link rel="stylesheet" href="assets/css/base.css?v=20261031-01">
+  <link rel="stylesheet" href="assets/css/base.css?v=20261031-02">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="assets/css/themes.css?v=20261031-01">
-  <link rel="stylesheet" href="assets/css/app.css?v=20261031-01">
+  <link rel="stylesheet" href="assets/css/themes.css?v=20261031-02">
+  <link rel="stylesheet" href="assets/css/app.css?v=20261031-02">
 </head>
 <body>
   <a class="skip-link" href="#workspace">跳至主要內容</a>
@@ -346,6 +346,23 @@
             <button id="preview-close" class="document-tab-close preview-close" type="button"
                     aria-label="關閉即時預覽" title="關閉">×</button>
           </div>
+          <button id="preview-expand-button"
+                  class="button button-quiet button-with-icon button-icon-only preview-expand-toggle"
+                  type="button" aria-pressed="false" aria-controls="preview-view"
+                  aria-label="展開預覽至全編輯區" title="展開預覽至全編輯區" hidden>
+            <svg class="button-icon preview-expand-icon" viewBox="0 0 24 24"
+                 aria-hidden="true" focusable="false">
+              <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" fill="none"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round"/>
+            </svg>
+            <svg class="button-icon preview-collapse-icon" viewBox="0 0 24 24"
+                 aria-hidden="true" focusable="false">
+              <path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5" fill="none"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                    stroke-linejoin="round"/>
+            </svg>
+          </button>
           <button id="preview-button" class="button button-quiet button-with-icon preview-toggle"
                   type="button" aria-pressed="false" aria-label="即時預覽" title="即時預覽" disabled>
             <svg class="button-icon preview-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -494,17 +511,17 @@
 
   <!-- Bump the local asset version whenever these files change so file:// reloads do not keep stale scripts. -->
   <script defer src="assets/vendor/katex/katex.min.js"></script>
-  <script defer src="assets/js/utils.js?v=20261031-01"></script>
-  <script defer src="assets/js/markdown.js?v=20261031-01"></script>
-  <script defer src="assets/js/example.js?v=20261031-01"></script>
-  <script defer src="assets/js/model.js?v=20261031-01"></script>
-  <script defer src="assets/js/storage.js?v=20261031-01"></script>
-  <script defer src="assets/js/search.js?v=20261031-01"></script>
-  <script defer src="assets/js/files.js?v=20261031-01"></script>
-  <script defer src="assets/js/preview.js?v=20261031-01"></script>
-  <script defer src="assets/js/clipboard.js?v=20261031-01"></script>
-  <script defer src="assets/js/editor.js?v=20261031-01"></script>
-  <script defer src="assets/js/settings.js?v=20261031-01"></script>
-  <script defer src="assets/js/app.js?v=20261031-01"></script>
+  <script defer src="assets/js/utils.js?v=20261031-02"></script>
+  <script defer src="assets/js/markdown.js?v=20261031-02"></script>
+  <script defer src="assets/js/example.js?v=20261031-02"></script>
+  <script defer src="assets/js/model.js?v=20261031-02"></script>
+  <script defer src="assets/js/storage.js?v=20261031-02"></script>
+  <script defer src="assets/js/search.js?v=20261031-02"></script>
+  <script defer src="assets/js/files.js?v=20261031-02"></script>
+  <script defer src="assets/js/preview.js?v=20261031-02"></script>
+  <script defer src="assets/js/clipboard.js?v=20261031-02"></script>
+  <script defer src="assets/js/editor.js?v=20261031-02"></script>
+  <script defer src="assets/js/settings.js?v=20261031-02"></script>
+  <script defer src="assets/js/app.js?v=20261031-02"></script>
 </body>
 </html>

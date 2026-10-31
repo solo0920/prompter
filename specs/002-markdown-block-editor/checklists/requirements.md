@@ -44,12 +44,13 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
-- Browser harness: **114 passing, 0 failing** in Chrome 156.0.8078.49, the required release
-  gate, online and offline. The latest check covers layer-focus `+` insertion with the focused
-  Marker. Firefox 159.0 and Edge 156.0.4314.50 last passed the prior 112-check suite as
-  supplementary checks. Safari testing is paused at the user's request; historical Safari
-  results remain in `quickstart.md` and Safari must not be launched during routine verification.
-  The feature 004 start screen and ten-file recent list are covered by the same suite.
+- Browser harness: **115 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+  gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
+  Marker and the full editor-area preview expand control. Firefox 159.0 and Edge 156.0.4314.50
+  last passed the prior 112-check suite as supplementary checks. Safari testing is paused at the
+  user's request; historical Safari results remain in `quickstart.md` and Safari must not be
+  launched during routine verification. The feature 004 start screen and ten-file recent list
+  are covered by the same suite.
 - Math: local KaTeX 0.19.1 renders `$...$`, `$$...$$`, `\(...\)`, and `\[...\]` delimiters in
   headings, lists, quotes, tables, and paragraphs, including multi-line display math and AMS
   environments; fenced code stays literal and unsafe commands are not trusted. Rich HTML copy
