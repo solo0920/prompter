@@ -60,6 +60,7 @@ test('library, preferences, composer and asset factories provide defaults', func
   assert.equal(composer.anchorBlockId, null);
   assert.equal(composer.insertIndex, 0);
   assert.equal(Model.createComposer({ insertIndex: 2 }).insertIndex, 2);
+  assert.equal(Model.createComposer({ mode: 'document' }).mode, 'document');
   assert.equal(composer.marker, '#');
   assert.equal(composer.text, 'Draft');
 
@@ -318,6 +319,38 @@ test('sequence helpers migrate, insert, and move blocks in reading order', funct
     indexed.blocks.map(function (block) { return block.id; }),
     ['a', 'y', 'b', 'c']
   );
+});
+
+test('replaceBlockWithBlocks preserves position, order, and trailing blank lines', function () {
+  const document = Model.createPromptDocument({
+    blocks: [
+      Model.createTextBlock({ id: 'a', text: 'A', seq: 1 }),
+      Model.createTextBlock({ id: 'b', text: 'B', seq: 2, blankLinesAfter: 2 }),
+      Model.createTextBlock({ id: 'c', text: 'C', seq: 3 })
+    ]
+  });
+  document.layoutVersion = 2;
+  const inserted = Model.replaceBlockWithBlocks(document, 'b', [
+    Model.createTextBlock({ id: 'b1', text: 'B1', blankLinesAfter: 1 }),
+    Model.createTextBlock({ id: 'b2', text: 'B2' })
+  ]);
+  assert.deepEqual(
+    inserted.map(function (block) { return block.id; }),
+    ['b1', 'b2']
+  );
+  assert.deepEqual(
+    document.blocks.map(function (block) { return block.id; }),
+    ['a', 'b1', 'b2', 'c']
+  );
+  assert.deepEqual(
+    document.blocks.map(function (block) { return block.seq; }),
+    [1, 2, 3, 4]
+  );
+  assert.equal(document.blocks[1].blankLinesAfter, 1);
+  assert.equal(document.blocks[2].blankLinesAfter, 2,
+    'The replaced block\'s trailing blank lines must move to the last new block.');
+  assert.deepEqual(Model.replaceBlockWithBlocks(document, 'missing', []), []);
+  assert.equal(document.blocks.length, 4);
 });
 
 test('nextSeq and nextZ use the highest existing values', function () {

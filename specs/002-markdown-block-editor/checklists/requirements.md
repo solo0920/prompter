@@ -39,13 +39,13 @@
 
 ## Post-Implementation Verification (2026-10-30)
 
-- Unit and contract tests: **105 passing, 0 failing** (`node --test tests/unit/*.test.js`).
+- Unit and contract tests: **106 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection and rank ordering, blank-line/newline
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, and static
   no-network guards.
-- Browser harness: **110 passing, 0 failing** in Chrome 156.0.8078.49, the required release
-  gate. Firefox 159.0 and Edge 156.0.4314.50 also pass 110/110 as supplementary checks. Chrome,
+- Browser harness: **112 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+  gate. Firefox 159.0 and Edge 156.0.4314.50 also pass 112/112 as supplementary checks. Chrome,
   Firefox, and Edge pass online and offline. Safari testing is paused at the user's request;
   historical Safari results remain in `quickstart.md` and Safari must not be launched during
   routine verification. The feature 004 start screen and ten-file recent list are covered by

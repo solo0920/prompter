@@ -45,7 +45,7 @@ canonical Markdown serializer, reading order, blank-line/newline preservation, s
 image reference matching, the HTML renderer, preferences, storage degradation, composer
 Markdown splitting, and security guards. They do not require npm packages.
 
-Current result (2026-10-30): **105 passing, 0 failing**.
+Current result (2026-10-31): **106 passing, 0 failing**.
 
 ### Browser harness
 
@@ -61,13 +61,13 @@ Current result (2026-10-30): **105 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-10-30): Chrome **110 passing, 0 failing** (required gate). Firefox also
-reports 110 passing, 0 failing as the supplementary check. Edge 156 passes 110/110 in headless
+Current result (2026-10-31): Chrome **112 passing, 0 failing** (required gate). Firefox also
+reports 112 passing, 0 failing as the supplementary check. Edge 156 passes 112/112 in headless
 Chromium runs. Safari 27.2 previously reported 108/108 through a local HTTP origin; Safari
 testing is now paused and is not part of the current test loop. The suite includes the start
 screen and ten-file recent list added in feature 004.
 
-## Verified Results (2026-10-30)
+## Verified Results (2026-10-31)
 
 All Chrome and Firefox automated checks were run against the committed `file://` entry page; no
 server or build step was used. Offline runs disabled browser networking (CDP network emulation in
@@ -78,9 +78,9 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 110/110 | PASS 110/110 | Required gate; full editor, storage, settings, clipboard fallbacks |
-| Firefox (macOS) | 159.0 | PASS 110/110 | PASS 110/110 | Supplementary check; WebDriver run; download save fallback |
-| Edge (macOS) | 156.0.4314.50 | PASS 110/110 | PASS 110/110 | Supplementary Chromium check; headless CDP run |
+| Chrome (macOS) | 156.0.8078.49 | PASS 112/112 | PASS 112/112 | Required gate; full editor, storage, settings, clipboard fallbacks |
+| Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; WebDriver run; download save fallback |
+| Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; headless CDP run |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
 
 Mobile preview behavior was additionally verified at 360×800 in Chrome, Firefox, and Edge:
@@ -197,13 +197,18 @@ opens the Marker flyout without showing a grab cursor.
    them as consecutive Markdown lines.
 4. Double-click the block, add another line with Shift+Enter, confirm the editor grows, then
    press Enter to commit.
-5. Create a multi-line fenced code block or display formula in one composer using Shift+Enter;
+5. Paste the same multi-line Markdown sample into an existing block's editor and press Enter.
+   Confirm the edited block is replaced by the parsed sequence in place, the surrounding blank
+   lines stay correct, the last new block is selected, and the trailing composer stays below it.
+6. Create a multi-line fenced code block or display formula in one composer using Shift+Enter;
    confirm Preview renders it as one code block or formula rather than separate lines.
-6. Paste a multi-line Markdown sample such as `# 標題`, a prose paragraph, `- 項目一`,
+7. Paste a multi-line Markdown sample such as `# 標題`, a prose paragraph, `- 項目一`,
    `- 項目二`, `1. 第一項`, `2. 第二項`, and `3. 第三項` on separate lines, then press Enter.
    Confirm each marked line becomes its own block in source order, each numbered item keeps its
    original number, the prose stays grouped, blank lines between groups survive in the saved
    Markdown, the next composer opens below the last block, and a fenced code sample is not split.
+8. Open a saved document that already has blocks. Confirm a focused composer appears below the
+   last block, inherits that block's Marker, and remains available after Escape.
 
 ### 2b. Collapse sections by Marker rank (FR-052)
 
@@ -521,10 +526,10 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-10-30**: Chrome 156 passes the full automated harness from `file://`,
-including offline runs and is the required release gate. Firefox 159 also passes as the
-supplementary check. Edge 156 matches Chrome's Chromium matrix and passes 110/110 in headless
-runs, online and offline. Safari 27.2 historically passed the HTTP harness 108/108 and a direct
+**Verified 2026-10-31**: Chrome 156 passes the full automated harness from `file://`, including
+offline runs, and is the required release gate. Firefox 159 also passes as the supplementary
+check. Edge 156 matches Chrome's Chromium matrix and passes 112/112 in headless runs, online and
+offline. Safari 27.2 historically passed the HTTP harness 108/108 and a direct
 `file://` startup smoke; Safari testing is paused and is not part of the current loop.
 
 ## Acceptance Checklist

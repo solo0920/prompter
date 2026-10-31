@@ -115,9 +115,13 @@ behavior so tests can be written against it.
 
 ## Composer
 
-The composer is the only input box that creates a new block.
+The composer creates new blocks. Editing an existing block can replace it with multiple parsed
+blocks using the same Enter behavior.
 
 - A blank document opens with one composer at the top-left and the Marker control on its left.
+- Opening a saved or imported document with blocks shows one focused composer below the last
+  block; the composer inherits that block's Marker. This document composer stays open when
+  Escape is pressed.
 - The composer shows the selected or detected Marker as a prefix pill.
 - The composer occupies a fixed sequence slot. Moving its source block or reordering other
   blocks does not drag the composer along.
@@ -273,8 +277,11 @@ Each image block shows:
   text area grows wider with its content up to the block maximum and grows taller as text
   wraps.
 - Enter commits and exits edit mode; Shift+Enter inserts a line break; Escape cancels and
-  restores the original text and marker; clicking outside commits. Plain Up/Down take priority:
-  they commit the current edit and move to the adjacent item instead of moving the caret.
+  restores the original text and marker; clicking outside commits. If the submitted value has
+  multiple lines with obvious Markers, the same parser as the composer replaces the edited block
+  with the resulting sequence, preserves the original block's separator, and selects the last
+  new block. Plain Up/Down take priority: they commit the current edit and move to the adjacent
+  item instead of moving the caret.
 - After committing a text block, the next composer inherits that block's Marker.
 - Marker detection applies on commit: a recognized prefix typed at the start is extracted once.
   If the block already has a marker, a second typed marker is treated as literal text.

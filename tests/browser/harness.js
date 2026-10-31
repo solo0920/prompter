@@ -3734,6 +3734,127 @@
     });
   });
 
+  test('US2 opening a saved document with blocks restores a focused trailing composer', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var document = Model.createPromptDocument({
+        id: 'reopen-composer-document',
+        title: '舊檔輸入框',
+        fileName: 'reopen.md',
+        updatedAt: '2026-10-30T02:00:00.000Z',
+        blocks: [
+          Model.createTextBlock({ id: 'reopen-first', text: '既有內容', seq: 1 }),
+          Model.createTextBlock({ id: 'reopen-last', text: '最後項目', marker: '-', seq: 2 })
+        ]
+      });
+
+      return withCleanLibrary(win, function () {
+        return saveStoredDocument(win, document)
+          .then(function () {
+            return app.refreshDirectory();
+          })
+          .then(function () {
+            app.clearDocument();
+            return app.requestOpenSavedDocument(document.id);
+          })
+          .then(function (result) {
+            assert(result && result.ok, 'The saved document must open.');
+            equal(state.document.id, document.id);
+            equal(state.document.blocks.length, 2);
+            var input = composerInput(win);
+            assert(input, 'Opening a document with blocks must restore the composer.');
+            equal(state.composer.mode, 'document');
+            equal(state.composer.insertIndex, 2,
+              'The trailing composer must sit after the last block.');
+            equal(state.composer.anchorBlockId, 'reopen-last');
+            equal(state.composer.marker, '-',
+              'The trailing composer must inherit the last block Marker.');
+            equal(input.value, '');
+            equal(win.document.activeElement, input,
+              'The restored composer must receive focus.');
+            assert(input.getBoundingClientRect().height > 0,
+              'The restored composer must be visible.');
+            var last = blockById(win, 'reopen-last');
+            var composer = input.closest('.composer');
+            assert(parseFloat(composer.style.top) > parseFloat(last.style.top),
+              'The restored composer must render below the last block.');
+            equal(state.dirty, false);
+            equal(byId(win, 'document-status').textContent, 'Saved');
+          });
+      });
+    });
+  });
+
+  test('US1 Enter splits pasted Markdown while editing an existing block', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var document = Model.createPromptDocument({
+        id: 'edit-split-document',
+        title: '編輯拆解',
+        fileName: 'edit-split.md',
+        blocks: [
+          Model.createTextBlock({ id: 'edit-a', text: 'A', seq: 1 }),
+          Model.createTextBlock({
+            id: 'edit-b',
+            text: 'B',
+            seq: 2,
+            blankLinesAfter: 1
+          }),
+          Model.createTextBlock({ id: 'edit-c', text: 'C', seq: 3 })
+        ]
+      });
+      app.setDocument(document, [], { persisted: false });
+      var content = blockById(win, 'edit-b').querySelector('.block-content');
+      content.focus();
+      press(win, content, 'Enter');
+      var input = blockById(win, 'edit-b').querySelector('.block-edit-input');
+      assert(input, 'Enter must open the existing block editor.');
+      var source = '# 新標題\n' +
+        '第一段\n' +
+        '第二段\n' +
+        '\n' +
+        '- 項目一\n' +
+        '- 項目二\n';
+      setValue(win, input, source);
+      press(win, input, 'Enter');
+
+      equal(state.document.blocks.length, 6,
+        'The edited block must be replaced by every parsed Markdown item.');
+      var ordered = readingOrder(win);
+      equal(ordered[0].id, 'edit-a');
+      equal(ordered[5].id, 'edit-c');
+      equal(ordered.map(function (block) { return block.marker; }).join(','),
+        'none,#,none,-,-,none');
+      equal(ordered[1].text, '新標題');
+      equal(ordered[2].text, '第一段\n第二段');
+      equal(ordered[2].blankLinesAfter, 1,
+        'Blank lines inside the pasted source must survive.');
+      equal(ordered[4].blankLinesAfter, 1,
+        'The replaced block\'s trailing blank line must stay before the next block.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        'A\n# 新標題\n第一段\n第二段\n\n- 項目一\n- 項目二\n\nC\n',
+        'Splitting an edited block must preserve the surrounding Markdown.');
+      equal(state.selectedBlockId, ordered[4].id,
+        'The last split block must receive the selection.');
+      var composer = composerInput(win);
+      assert(composer, 'The existing trailing composer must stay open.');
+      equal(state.composer.insertIndex, 6,
+        'The trailing composer must move after all split blocks.');
+      equal(composer.value, '');
+
+      assert(win.Prompter.editor.undo(), 'The split must be undoable.');
+      equal(state.document.blocks.length, 3);
+      equal(state.document.blocks[1].id, 'edit-b');
+      equal(state.document.blocks[1].text, 'B');
+      assert(win.Prompter.editor.redo(), 'The split must be redoable.');
+      equal(state.document.blocks.length, 6);
+    });
+  });
+
   test('US2 Open errors leave the current document and its changes untouched', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

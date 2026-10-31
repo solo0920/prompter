@@ -1410,7 +1410,9 @@
     element.style.left = composer.x + 'px';
     element.style.top = composer.y + 'px';
     element.setAttribute('role', 'group');
-    element.setAttribute('aria-label', composer.mode === 'initial' ? '新增第一個區塊' : '新增區塊');
+    element.setAttribute('aria-label', composer.mode === 'initial'
+      ? '新增第一個區塊'
+      : (composer.mode === 'document' ? '在文件末尾新增區塊' : '新增區塊'));
 
     var markerButton = createButton(
       'composer-marker' + (composer.marker === 'none' ? ' none' : ''),
@@ -1534,6 +1536,30 @@
       marker: preferences.defaultMarker,
       text: ''
     });
+  }
+
+  function prepareTrailingComposer() {
+    var state = getState();
+    if (!state || !state.document || state.composer) {
+      return false;
+    }
+    var ordered = Model.normalizeSequence(state.document);
+    if (!ordered.length) {
+      ensureInitialComposer(state);
+      return !!state.composer;
+    }
+    var anchor = ordered[ordered.length - 1];
+    var point = insertionPoint(anchor);
+    state.composer = Model.createComposer({
+      mode: 'document',
+      anchorBlockId: anchor.id,
+      insertIndex: ordered.length,
+      x: point.x,
+      y: point.y,
+      marker: inheritedComposerMarker(anchor),
+      text: ''
+    });
+    return true;
   }
 
   function render() {
@@ -2739,6 +2765,49 @@
     }
   }
 
+  function commitEditingSplit(state, block, items) {
+    var document = state.document;
+    var ordered = Model.normalizeSequence(document);
+    var blockIndex = ordered.indexOf(block);
+    if (blockIndex === -1 || !items.length) {
+      state.editingBlockId = null;
+      editDraft = null;
+      render();
+      return;
+    }
+    var nextZ = Model.nextZ(document);
+    var newBlocks = items.map(function (item, index) {
+      return Model.createTextBlock({
+        id: Utils.randomUUID(),
+        text: item.text,
+        marker: item.marker,
+        x: Files.COLUMN_X,
+        y: Files.COLUMN_START_Y,
+        z: nextZ + index,
+        seq: 0,
+        blankLinesAfter: item.blankLinesAfter || 0
+      });
+    });
+    Model.replaceBlockWithBlocks(document, block.id, newBlocks);
+    var last = newBlocks[newBlocks.length - 1];
+    if (state.composer) {
+      var composerIndex = Number(state.composer.insertIndex);
+      if (composerIndex > blockIndex) {
+        state.composer.insertIndex = composerIndex + newBlocks.length - 1;
+      }
+      if (state.composer.anchorBlockId === block.id) {
+        state.composer.anchorBlockId = last.id;
+      }
+    }
+    state.selectedBlockIds = [];
+    state.selectedBlockId = null;
+    state.editingBlockId = null;
+    editDraft = null;
+    markDirty();
+    render();
+    selectBlock(last.id, { focus: true });
+  }
+
   function commitEditing() {
     var state = getState();
     if (!state || !state.editingBlockId) {
@@ -2756,6 +2825,13 @@
     var value = input ? input.value : (editDraft ? editDraft.draftText : block.text);
     var originalText = editDraft ? editDraft.text : block.text;
     var originalMarker = editDraft ? editDraft.originalMarker : block.marker;
+    var splitItems = Markdown.splitComposerItems(value);
+    if (splitItems && splitItems.length) {
+      state.editingBlockId = null;
+      editDraft = null;
+      commitEditingSplit(state, block, splitItems);
+      return;
+    }
     var detected = Markdown.detectMarker(value);
     var text = value;
     var marker = block.marker;
@@ -3031,7 +3107,7 @@
       return;
     }
     var composer = state.composer;
-    if (composer.mode === 'initial') {
+    if (composer.mode === 'initial' || composer.mode === 'document') {
       focusComposer();
       return;
     }
@@ -4313,6 +4389,7 @@
     cancelEditing: cancelEditing,
     selectBlock: selectBlock,
     openComposer: openComposer,
+    prepareTrailingComposer: prepareTrailingComposer,
     insertBlockWithShift: insertBlockWithShift,
     insertImageFiles: insertImageFiles,
     insertPastedContent: insertPastedContent,

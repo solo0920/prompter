@@ -1381,7 +1381,8 @@
       }).then(function () {
         app.setDocument(result.document, result.assets, {
           persisted: !storageError,
-          newTab: true
+          newTab: true,
+          focus: 'composer'
         });
         app.state.fileTarget = null;
         if (global.Prompter.search && typeof global.Prompter.search.refreshDirectory === 'function') {
@@ -1441,7 +1442,11 @@
         missing.code = 'DOCUMENT_NOT_FOUND';
         throw missing;
       }
-      app.setDocument(loaded.document, loaded.assets, { persisted: true, newTab: true });
+      app.setDocument(loaded.document, loaded.assets, {
+        persisted: true,
+        newTab: true,
+        focus: 'composer'
+      });
       return app.state.storage.getFileTarget(documentId).catch(function () {
         return null;
       }).then(function (target) {

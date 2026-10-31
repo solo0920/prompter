@@ -102,8 +102,8 @@ returns with the recent list intact.
 
 ## Verification (2026-10-30)
 
-- 105 unit tests pass.
-- 110 browser tests pass in Chrome 156, Firefox 159, and Edge 156, online and offline from
+- 106 unit tests pass.
+- 112 browser tests pass in Chrome 156, Firefox 159, and Edge 156, online and offline from
   `file://`. The new checks cover the ten-file cap and ordering, opening a recent file, the empty
   state, New document, and Open directory.
 - Manual Chrome checks at 1440×900, 768×900, and 390×844 confirmed the two-column desktop

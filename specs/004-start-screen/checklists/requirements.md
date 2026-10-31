@@ -37,8 +37,8 @@
 
 ## Verification
 
-- **105** unit tests pass.
-- **110** browser tests pass in Chrome 156, Firefox 159, and Edge 156, online and offline.
+- **106** unit tests pass.
+- **112** browser tests pass in Chrome 156, Firefox 159, and Edge 156, online and offline.
 - Manual Chrome verification covered 1440×900, 768×900, and 390×844, including a refresh with a
   stale `lastDocumentId`, opening a recent file, New document, Open directory, and the empty
   library state.

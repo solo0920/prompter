@@ -154,8 +154,11 @@
 
   function createComposer(overrides) {
     var input = overrides || {};
+    var mode = input.mode === 'inserted' || input.mode === 'document'
+      ? input.mode
+      : 'initial';
     return {
-      mode: input.mode === 'inserted' ? 'inserted' : 'initial',
+      mode: mode,
       anchorBlockId: input.anchorBlockId || null,
       insertIndex: Utils.isInteger(input.insertIndex) && input.insertIndex >= 0
         ? input.insertIndex
@@ -515,6 +518,41 @@
     return insertBlocksAtIndex(document, blocks, index);
   }
 
+  function replaceBlockWithBlocks(document, blockId, blocks) {
+    if (!document) {
+      return [];
+    }
+    var incoming = Object.prototype.toString.call(blocks) === '[object Array]'
+      ? blocks.slice()
+      : [];
+    var ordered = normalizeSequence(document);
+    var index = -1;
+    for (var i = 0; i < ordered.length; i += 1) {
+      if (ordered[i].id === blockId) {
+        index = i;
+        break;
+      }
+    }
+    if (index === -1) {
+      return [];
+    }
+    var replaced = ordered[index];
+    if (incoming.length > 0) {
+      var last = incoming[incoming.length - 1];
+      last.blankLinesAfter = (Utils.isInteger(last.blankLinesAfter) ? last.blankLinesAfter : 0) +
+        (Utils.isInteger(replaced.blankLinesAfter) ? replaced.blankLinesAfter : 0);
+      Array.prototype.splice.apply(ordered, [index, 1].concat(incoming));
+    } else {
+      ordered.splice(index, 1);
+    }
+    document.blocks = ordered;
+    ordered.forEach(function (block, position) {
+      block.seq = position + 1;
+    });
+    document.layoutVersion = 2;
+    return incoming;
+  }
+
   function moveBlockToIndex(document, blockId, targetIndex) {
     var ordered = normalizeSequence(document);
     var index = -1;
@@ -600,6 +638,7 @@
     normalizeSequence: normalizeSequence,
     insertBlocksAtIndex: insertBlocksAtIndex,
     insertBlocksAfter: insertBlocksAfter,
+    replaceBlockWithBlocks: replaceBlockWithBlocks,
     moveBlockToIndex: moveBlockToIndex,
     cloneDocumentForSaveAs: cloneDocumentForSaveAs
   };

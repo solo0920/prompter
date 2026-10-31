@@ -382,7 +382,8 @@ retained. Open the settings panel and clear the local library after confirming t
   image blocks when a matching selected image file or embedded image is available. Unmatched
   image references MUST remain text blocks and be flagged in Preview.
 - **FR-011**: Opened documents MUST be arranged in a single column in source order, added to
-  the directory, and titled from the file name without its extension.
+  the directory, and titled from the file name without its extension. A document with blocks
+  MUST open with a focused composer below its last block so more content can be appended.
 - **FR-012**: Save MUST persist the document to the directory and write its Markdown, using
   standard image references relative to the Markdown file's location, together with each
   associated image file. When direct writing is unavailable, it MUST download the Markdown
@@ -435,7 +436,9 @@ retained. Open the settings panel and clear the local library after confirming t
   block, and Escape MUST dismiss the inserted input without creating a block.
 - **FR-021**: Double-clicking a text block MUST enter edit mode; entering edit mode MUST select
   the block's full text by default. Enter MUST commit and exit edit mode, Shift+Enter MUST insert
-  a line break, Escape MUST cancel the edit, and clicking outside MUST commit the edit.
+  a line break, Escape MUST cancel the edit, and clicking outside MUST commit the edit. When the
+  submitted value contains multiple lines with obvious Markers, Enter MUST apply the same parse
+  and split rules as FR-017 and replace the edited block with the resulting blocks.
 - **FR-022**: A text block MUST hold one or more lines of text. Enter MUST commit rather than
   insert a line break; Shift+Enter MUST insert a line break. The input box MUST grow wider as
   text exceeds its current width, up to its maximum width, and MUST grow taller as content
@@ -733,17 +736,17 @@ retained. Open the settings panel and clear the local library after confirming t
 - Preview uses standard Markdown rendering plus KaTeX math; other custom Markdown extensions are
   out of scope.
 
-## Completion Status (2026-10-30)
+## Completion Status (2026-10-31)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 105 unit tests and 110 browser tests pass in Chrome 156 and
-  Firefox 159, online and offline, from `file://`; Edge 156 passes 110/110 in headless runs.
+- Automated verification: 106 unit tests and 112 browser tests pass in Chrome 156 and
+  Firefox 159, online and offline, from `file://`; Edge 156 passes 112/112 in headless runs.
   Safari historically passed 108/108 through the HTTP harness and a direct `file://` startup
   smoke; Safari testing is paused at the user's request.
-- Start screen verification (2026-10-30): feature 004 opens on a start screen after refresh,
+- Start screen verification (2026-10-31): feature 004 opens on a start screen after refresh,
   lists up to ten recent files sorted by update time, and exposes New document, Open directory,
-  and Open file actions. Chrome, Firefox, and Edge pass the 110-check suite.
-- Mobile preview verification (2026-10-30): Chrome, Firefox, and Edge pass 110/110. At 360×800,
+  and Open file actions. Chrome, Firefox, and Edge pass the 112-check suite.
+- Mobile preview verification (2026-10-31): Chrome, Firefox, and Edge pass 112/112. At 360×800,
   preview starts closed; opening it hides the document tabs and editor canvas, leaves only the
   preview tab, fills the workspace below the tab bar without horizontal scrolling, and returns
   focus to the toggle when closed.

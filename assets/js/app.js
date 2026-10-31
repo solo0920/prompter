@@ -607,6 +607,11 @@
       state.activeTabId = document.id;
       applyTab(active);
     }
+    if ((opts.newTab || !hadActiveDocument) && !state.composer &&
+        global.Prompter.editor &&
+        typeof global.Prompter.editor.prepareTrailingComposer === 'function') {
+      global.Prompter.editor.prepareTrailingComposer();
+    }
     if (state.documentPersisted) {
       rememberDocument(document.id);
     }
