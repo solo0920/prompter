@@ -2268,7 +2268,11 @@
 
       var firstInput = blockById(win, 'layer-click-b1').querySelector('.block-edit-input');
       setValue(win, firstInput, '項目一更新');
-      blockById(win, 'layer-click-b2').querySelector('.block-content').click();
+      blockById(win, 'layer-click-b2').querySelector('.block-content')
+        .dispatchEvent(new win.PointerEvent('pointerdown', {
+          bubbles: true, cancelable: true, pointerId: 81, pointerType: 'mouse',
+          button: 0, clientX: 20, clientY: 20
+        }));
       var firstBlock = state.document.blocks.filter(function (block) {
         return block.id === 'layer-click-b1';
       })[0];
@@ -2283,6 +2287,14 @@
       press(win, blockById(win, 'layer-click-b2').querySelector('.block-edit-input'),
         'Escape');
       equal(state.editingBlockId, null);
+      blockById(win, 'layer-click-b1').querySelector('.block-content').click();
+      equal(state.editingBlockId, 'layer-click-b1',
+        'A programmatic click must also enter layer edit mode.');
+      assertEditingSelection(win,
+        blockById(win, 'layer-click-b1').querySelector('.block-edit-input'),
+        'A click must select the full layer item text.');
+      press(win, blockById(win, 'layer-click-b1').querySelector('.block-edit-input'),
+        'Escape');
       toggle.click();
       assert(toolbar.hidden, 'The click-edit test must leave layer focus closed.');
     });
