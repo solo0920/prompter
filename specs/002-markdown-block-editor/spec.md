@@ -349,7 +349,10 @@ retained. Open the settings panel and clear the local library after confirming t
 - **FR-002**: The header MUST use English control labels and place the File and Edit menus at the
   far left, the document status in the center, and icon-only Copy, style selector, light/dark
   toggle, and settings controls on the right in that order. The icon-only controls MUST expose
-  the hover tooltips `Copy`, `Theme`, `Light/dark`, and `Settings` respectively.
+  the hover tooltips `Copy`, `Theme`, `Light/dark`, and `Settings` respectively. The centered
+  status area MUST stay empty while the document is idle; it MUST show file-operation labels
+  while an operation is running and MUST show `Saved` for one second after a successful save,
+  then clear again.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
   the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
   preview pane is open on a viewport wider than 768 px, the active document name and a file icon
@@ -768,6 +771,9 @@ retained. Open the settings panel and clear the local library after confirming t
 - Layer click-edit verification (2026-11-02): Chrome passes the check confirming that a single
   click on a matching layer block enters edit mode with its full text selected and commits the
   edit that was open on another matching block.
+- Header status verification (2026-11-02): Chrome passes the check confirming that new, opened,
+  and dirty documents leave the center status empty and that a successful save shows `Saved` for
+  one second before clearing.
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that
   selecting a layer from a focused composer applies the Marker, keeps the draft and caret, marks
   the layer button selected, keeps focus in the composer, and does not open a block editor; the

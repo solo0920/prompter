@@ -39,6 +39,8 @@
   var elements = {};
   var unsavedResolver = null;
   var unsavedSaving = false;
+  var savedStatusTimer = null;
+  var savedStatusVisible = false;
   var directoryDocuments = [];
   var directoryAssets = [];
   var directoryIndex = { entries: [] };
@@ -103,21 +105,34 @@
     }
   }
 
+  function clearSavedStatus() {
+    if (savedStatusTimer !== null) {
+      global.clearTimeout(savedStatusTimer);
+      savedStatusTimer = null;
+    }
+    savedStatusVisible = false;
+  }
+
+  function flashSavedStatus() {
+    clearSavedStatus();
+    savedStatusVisible = true;
+    updateStatus();
+    savedStatusTimer = global.setTimeout(function () {
+      savedStatusTimer = null;
+      savedStatusVisible = false;
+      updateStatus();
+    }, 1000);
+  }
+
   function updateStatus() {
     if (!elements['document-status']) {
       return;
     }
-    var text = 'No document open';
+    var text = '';
     if (state.fileBusy) {
       text = state.fileBusyLabel || 'Working…';
-    } else if (state.document) {
-      if (state.dirty) {
-        text = 'Unsaved changes';
-      } else if (state.documentPersisted) {
-        text = 'Saved';
-      } else {
-        text = 'New document';
-      }
+    } else if (savedStatusVisible) {
+      text = 'Saved';
     }
     elements['document-status'].textContent = text;
     elements['document-status'].classList.toggle('dirty', !!state.dirty);
@@ -169,12 +184,18 @@
   }
 
   function setFileBusy(busy, label) {
+    if (busy) {
+      clearSavedStatus();
+    }
     state.fileBusy = !!busy;
     state.fileBusyLabel = busy ? (label || 'Working…') : '';
     updateStatus();
   }
 
   function setDirty(dirty) {
+    if (dirty) {
+      clearSavedStatus();
+    }
     state.dirty = !!dirty;
     updateStatus();
     updateActiveTabDirtyClass();
@@ -506,6 +527,7 @@
 
   function renderActiveDocument(options) {
     var opts = options || {};
+    clearSavedStatus();
     updateTitleInput();
     updateStatus();
     updateStartView();
@@ -546,6 +568,7 @@
   }
 
   function clearAllTabs(forgetLast) {
+    clearSavedStatus();
     state.tabs = [];
     state.activeTabId = null;
     state.document = null;
@@ -1734,6 +1757,7 @@
     setDirty: setDirty,
     setFileBusy: setFileBusy,
     updateStatus: updateStatus,
+    flashSavedStatus: flashSavedStatus,
     updateTitleInput: updateTitleInput,
     updatePreviewLabel: updatePreviewLabel,
     applyAppearance: applyAppearance,

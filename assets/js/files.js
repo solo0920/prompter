@@ -1165,11 +1165,11 @@
         app.state.fileTarget = target;
         app.setDirty(false);
         app.updateTitleInput();
-        app.updateStatus();
       }
       if (saveAs) {
         app.state.fileTarget = target;
       }
+      app.flashSavedStatus();
       if (global.Prompter.search && typeof global.Prompter.search.refreshDirectory === 'function') {
         global.Prompter.search.refreshDirectory();
       }

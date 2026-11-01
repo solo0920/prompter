@@ -4097,7 +4097,7 @@
         }
         equal(state.dirty, false);
         equal(state.documentPersisted, true);
-        equal(byId(win, 'document-status').textContent, 'Saved');
+        equal(byId(win, 'document-status').textContent, '');
         equal(byId(win, 'document-title').value, 'prompt');
         assert(byId(win, 'alert-region').textContent.indexOf('not-selected.png') !== -1,
           'Missing image warnings should be announced.');
@@ -4158,7 +4158,7 @@
             assert(parseFloat(composer.style.top) > parseFloat(last.style.top),
               'The restored composer must render below the last block.');
             equal(state.dirty, false);
-            equal(byId(win, 'document-status').textContent, 'Saved');
+            equal(byId(win, 'document-status').textContent, '');
           });
       });
     });
@@ -4244,7 +4244,7 @@
         equal(state.document.id, documentId);
         equal(state.document.blocks[0].text, '保留內容');
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+        equal(byId(win, 'document-status').textContent, '');
         assert(!state.fileBusy, 'Open failures must clear the busy state.');
       });
     });
@@ -4265,7 +4265,7 @@
         assert(state.document.id !== originalId, 'The new tab must become active.');
         equal(state.document.blocks.length, 0);
         equal(state.dirty, false);
-        equal(byId(win, 'document-status').textContent, 'New document');
+        equal(byId(win, 'document-status').textContent, '');
         equal(originalTab.dirty, true, 'The first tab must keep its unsaved state.');
         equal(originalTab.document.blocks.length, 1);
         assert(composerInput(win), 'The blank document composer is missing.');
@@ -4274,7 +4274,7 @@
         equal(state.document.id, originalId, 'The first tab must be restorable.');
         equal(state.dirty, true);
         equal(state.document.blocks[0].text, '未儲存');
-        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+        equal(byId(win, 'document-status').textContent, '');
       });
     });
   });
@@ -4356,7 +4356,11 @@
           equal(state.fileTarget.mode, 'download');
           equal(state.dirty, false);
           equal(byId(win, 'document-status').textContent, 'Saved');
-          return downloads[1].blob.text();
+          return waitFor(function () {
+            return byId(win, 'document-status').textContent === '' ? true : null;
+          }, 3000).then(function () {
+            return downloads[1].blob.text();
+          });
         }).then(function (markdown) {
           equal(markdown, '下載測試\n![picker.png](picker.png)\n');
           state.document.blocks[0].text = '更新後';
@@ -4510,7 +4514,7 @@
         equal(state.document.fileName, 'untitled.md');
         equal(state.documentPersisted, false);
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+        equal(byId(win, 'document-status').textContent, '');
 
         var retry = win.Prompter.files.saveCurrentDocument({ saveAs: true });
         return submitFilename(win, 'conflict').then(function () {
@@ -4560,7 +4564,7 @@
         equal(state.document.fileName, 'untitled.md');
         equal(state.documentPersisted, false);
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+        equal(byId(win, 'document-status').textContent, '');
         assert(!state.fileBusy, 'Canceling must clear the busy state.');
       });
     });
@@ -4594,7 +4598,7 @@
         equal(state.document.fileName, 'untitled.md');
         equal(state.documentPersisted, false);
         equal(state.dirty, true);
-        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+        equal(byId(win, 'document-status').textContent, '');
         assert(!directory.files['fail.md'], 'No Markdown file should be recorded.');
         assert(!state.fileBusy, 'Write failures must clear the busy state.');
         restore();
@@ -4682,7 +4686,7 @@
         equal(state.document.blocks[0].text, '失敗保留');
         equal(state.dirty, true);
         equal(state.tabs.length, 1, 'A failed save must keep the tab open.');
-        equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+        equal(byId(win, 'document-status').textContent, '');
         byId(win, 'unsaved-cancel').click();
         return pending;
       }).then(function (proceed) {
@@ -4704,7 +4708,7 @@
       freshDocument(win);
       closeDialogs(win);
       app.clearDocument();
-      equal(byId(win, 'document-status').textContent, 'No document open');
+      equal(byId(win, 'document-status').textContent, '');
       equal(byId(win, 'file-menu-button').textContent.trim(), 'File');
       equal(byId(win, 'edit-menu-button').textContent.trim(), 'Edit');
       equal(byId(win, 'copy-button').textContent.trim(), '');
@@ -4757,7 +4761,7 @@
       assert(menu.querySelector('[data-action="new"]').disabled,
         'New must be disabled while a file operation is running.');
       app.setFileBusy(false);
-      equal(byId(win, 'document-status').textContent, 'New document');
+      equal(byId(win, 'document-status').textContent, '');
     });
   });
 
@@ -5614,7 +5618,7 @@
           })
           .then(function (loaded) {
             equal(byId(win, 'document-title').value, '甲文件');
-            equal(byId(win, 'document-status').textContent, 'Saved');
+            equal(byId(win, 'document-status').textContent, '');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
             equal(loaded.blocks[0].x, win.Prompter.files.COLUMN_X);
             equal(loaded.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
@@ -5635,7 +5639,7 @@
               'Opening another document must not prompt; it opens a tab.');
             equal(state.tabs.length, 2, 'Both opened documents must remain in tabs.');
             equal(byId(win, 'document-title').value, '乙文件');
-            equal(byId(win, 'document-status').textContent, 'Saved');
+            equal(byId(win, 'document-status').textContent, '');
             equal(directoryButton(win, second.id).getAttribute('aria-current'), 'true');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), null);
             equal(loaded.blocks[0].x, win.Prompter.files.COLUMN_X);
@@ -5652,7 +5656,7 @@
             equal(byId(win, 'unsaved-dialog').open, false,
               'Returning to an open tab must not prompt.');
             equal(byId(win, 'document-title').value, '甲文件');
-            equal(byId(win, 'document-status').textContent, 'Unsaved changes');
+            equal(byId(win, 'document-status').textContent, '');
             equal(directoryButton(win, first.id).getAttribute('aria-current'), 'true');
             equal(loaded.blocks[0].text, '未儲存變更',
               'The dirty tab content must be preserved.');
@@ -5773,7 +5777,7 @@
             equal(state.dirty, false);
             equal(state.documentPersisted, true);
             equal(byId(win, 'document-title').value, '上次開啟');
-            equal(byId(win, 'document-status').textContent, 'Saved');
+            equal(byId(win, 'document-status').textContent, '');
             equal(state.document.blocks[0].x, win.Prompter.files.COLUMN_X);
             equal(state.document.blocks[0].y, win.Prompter.files.COLUMN_START_Y);
             equal(directoryButton(win, document.id).getAttribute('aria-current'), 'true');

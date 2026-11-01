@@ -22,9 +22,11 @@ behavior so tests can be written against it.
 +------+---------------------------------------------+------------------------------------+
 ```
 
-- Header: English File and Edit menus at the far left; document status in the center; icon-only
-  Copy, Theme (style selector), light/dark toggle, and Settings controls on the right in that
-  order. Their hover tooltips are `Copy`, `Theme`, `Light/dark`, and `Settings`.
+- Header: English File and Edit menus at the far left; a centered status area that stays empty
+  while idle, shows operation labels while a file operation is running, and shows `Saved` for
+  one second after a successful save; icon-only Copy, Theme (style selector), light/dark toggle,
+  and Settings controls on the right in that order. Their hover tooltips are `Copy`, `Theme`,
+  `Light/dark`, and `Settings`.
 - Document names are shown as tabs above the editor; the active tab's title is editable.
 - Each tab has a small `×` close control. Tabs can be opened, switched, and closed independently.
 - Left body rail: a narrow, always-visible `文件目錄` button at the far left of the workspace.
@@ -480,12 +482,13 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | State | UI |
 |-------|----|
 | No documents | Directory empty state with `新增文件`; canvas empty state `建立第一個提示詞區塊`. |
+| Idle status | The centered header status area is empty for new, opened, and dirty documents; dirty tabs keep their tab indicator. |
 | Blank document | One composer at top-left; Save enabled; Copy disabled; Preview shows empty state. |
 | Document open | Blocks in reading order; tab title populated; Copy enabled when non-empty. |
 | Preview active | Editor canvas remains visible; live rendered Markdown appears in the right pane; preview toggle is pressed. |
 | Preview expanded | Preview fills the editor area; editor pane and document tabs are hidden; the preview label, expand toggle, and close controls remain in the tab bar; expand toggle is pressed. |
-| Dirty | Unsaved indicator in the header status area and on the tab; no modal until tab close/reload. |
-| Saving | Save/Save As disabled with busy label; no duplicate writes. |
+| Dirty | Unsaved indicator on the tab; the header status area stays empty; no modal until tab close/reload. |
+| Saving | Save/Save As disabled with a busy label in the center status area; no duplicate writes; `Saved` shows for one second after success. |
 | Storage warning | Non-blocking banner in the directory with details and a dismiss action. |
 | Missing images | Block/preview placeholder plus a warning listing the missing files. |
 | Search no results | Message and clear-search action. |
