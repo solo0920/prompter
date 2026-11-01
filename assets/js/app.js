@@ -30,7 +30,6 @@
     composer: null,
     dirty: false,
     fileBusy: false,
-    fileBusyLabel: '',
     searchQuery: '',
     initialized: false,
     storageWarningDismissed: false
@@ -39,8 +38,6 @@
   var elements = {};
   var unsavedResolver = null;
   var unsavedSaving = false;
-  var savedStatusTimer = null;
-  var savedStatusVisible = false;
   var directoryDocuments = [];
   var directoryAssets = [];
   var directoryIndex = { entries: [] };
@@ -56,7 +53,7 @@
       'layer-toggle', 'layer-toolbar', 'layer-collapse-all', 'layer-expand-all',
       'app-main', 'preview-button', 'preview-expand-button', 'copy-button', 'style-select',
       'theme-toggle', 'settings-button',
-      'document-title', 'document-status', 'storage-warning', 'storage-warning-text',
+      'document-title', 'storage-warning', 'storage-warning-text',
       'storage-warning-dismiss', 'search-input', 'clear-search', 'result-count',
       'document-list', 'directory-empty', 'directory-no-results', 'empty-new-button',
       'no-results-clear', 'workspace', 'start-view', 'start-title', 'start-subtitle',
@@ -105,38 +102,7 @@
     }
   }
 
-  function clearSavedStatus() {
-    if (savedStatusTimer !== null) {
-      global.clearTimeout(savedStatusTimer);
-      savedStatusTimer = null;
-    }
-    savedStatusVisible = false;
-  }
-
-  function flashSavedStatus() {
-    clearSavedStatus();
-    savedStatusVisible = true;
-    updateStatus();
-    savedStatusTimer = global.setTimeout(function () {
-      savedStatusTimer = null;
-      savedStatusVisible = false;
-      updateStatus();
-    }, 1000);
-  }
-
   function updateStatus() {
-    if (!elements['document-status']) {
-      return;
-    }
-    var text = '';
-    if (state.fileBusy) {
-      text = state.fileBusyLabel || 'Working…';
-    } else if (savedStatusVisible) {
-      text = 'Saved';
-    }
-    elements['document-status'].textContent = text;
-    elements['document-status'].classList.toggle('dirty', !!state.dirty);
-    elements['document-status'].classList.toggle('busy', !!state.fileBusy);
     if (elements['copy-button']) {
       elements['copy-button'].disabled = !state.document ||
         !state.document.blocks || state.document.blocks.length === 0;
@@ -184,18 +150,11 @@
   }
 
   function setFileBusy(busy, label) {
-    if (busy) {
-      clearSavedStatus();
-    }
     state.fileBusy = !!busy;
-    state.fileBusyLabel = busy ? (label || 'Working…') : '';
     updateStatus();
   }
 
   function setDirty(dirty) {
-    if (dirty) {
-      clearSavedStatus();
-    }
     state.dirty = !!dirty;
     updateStatus();
     updateActiveTabDirtyClass();
@@ -527,7 +486,6 @@
 
   function renderActiveDocument(options) {
     var opts = options || {};
-    clearSavedStatus();
     updateTitleInput();
     updateStatus();
     updateStartView();
@@ -568,7 +526,6 @@
   }
 
   function clearAllTabs(forgetLast) {
-    clearSavedStatus();
     state.tabs = [];
     state.activeTabId = null;
     state.document = null;
@@ -1757,7 +1714,6 @@
     setDirty: setDirty,
     setFileBusy: setFileBusy,
     updateStatus: updateStatus,
-    flashSavedStatus: flashSavedStatus,
     updateTitleInput: updateTitleInput,
     updatePreviewLabel: updatePreviewLabel,
     applyAppearance: applyAppearance,

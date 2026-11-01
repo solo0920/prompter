@@ -270,10 +270,11 @@ retained. Open the settings panel and clear the local library after confirming t
 
 **Acceptance Scenarios**:
 
-1. **Given** the homepage is open, **When** the header is displayed, **Then** the status is
-   centered and the right side shows Copy, a style selector, a light/dark toggle, and a settings
-   button in that order; document titles appear in the tab bar above the editor, with the
-   icon-only live-preview toggle at the tab bar's right edge.
+1. **Given** the homepage is open, **When** the header is displayed, **Then** File and Edit sit at
+   the far left and Copy, a style selector, a light/dark toggle, and a settings button sit at the
+   far right in that order, with no persistent center status message; document titles appear in
+   the tab bar above the editor, with the icon-only live-preview toggle at the tab bar's right
+   edge.
 2. **Given** the user changes the light/dark mode, **When** the toggle is activated, **Then**
    the interface changes immediately and the choice is retained after reload.
 3. **Given** no explicit appearance choice has been made, **When** the page loads, **Then**
@@ -347,12 +348,10 @@ retained. Open the settings panel and clear the local library after confirming t
   with a far-left body rail toggle, a document tab bar, a central editor area, and an optional
   live preview pane on the right side.
 - **FR-002**: The header MUST use English control labels and place the File and Edit menus at the
-  far left, the document status in the center, and icon-only Copy, style selector, light/dark
-  toggle, and settings controls on the right in that order. The icon-only controls MUST expose
-  the hover tooltips `Copy`, `Theme`, `Light/dark`, and `Settings` respectively. The centered
-  status area MUST stay empty while the document is idle; it MUST show file-operation labels
-  while an operation is running and MUST show `Saved` for one second after a successful save,
-  then clear again.
+  far left and icon-only Copy, style selector, light/dark toggle, and settings controls on the
+  right in that order. The icon-only controls MUST expose the hover tooltips `Copy`, `Theme`,
+  `Light/dark`, and `Settings` respectively. The header MUST NOT include a persistent document
+  status message.
   Open document names MUST be shown as tabs above the editor, not as a separate title field in
   the header. The icon-only preview toggle MUST sit at the right edge of that tab bar. While the
   preview pane is open on a viewport wider than 768 px, the active document name and a file icon
@@ -771,9 +770,8 @@ retained. Open the settings panel and clear the local library after confirming t
 - Layer click-edit verification (2026-11-02): Chrome passes the check confirming that a single
   click on a matching layer block enters edit mode with its full text selected and commits the
   edit that was open on another matching block.
-- Header status verification (2026-11-02): Chrome passes the check confirming that new, opened,
-  and dirty documents leave the center status empty and that a successful save shows `Saved` for
-  one second before clearing.
+- Header cleanup verification (2026-11-02): Chrome confirms that the header no longer renders a
+  document status message, while File/Edit and the right-side controls stay in order.
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that
   selecting a layer from a focused composer applies the Marker, keeps the draft and caret, marks
   the layer button selected, keeps focus in the composer, and does not open a block editor; the

@@ -28,12 +28,6 @@ body {
 
 .header-group { display: flex; align-items: center; gap: 8px; }
 .header-left { flex: 0 0 auto; }
-.header-center {
-  flex: 1 1 auto;
-  min-width: 0;
-  justify-content: center;
-  gap: 10px;
-}
 .header-right { flex: 0 0 auto; justify-content: flex-end; flex-wrap: wrap; }
 
 .button {
@@ -161,8 +155,6 @@ body {
   background: var(--surface-2);
   border-color: var(--border);
 }
-.document-status { color: var(--muted); font-size: 13px; flex: 0 0 auto; white-space: nowrap; }
-.document-status.dirty { color: var(--accent-strong); }
 
 .app-main {
   display: grid;
@@ -1134,7 +1126,6 @@ body {
 
 @media (max-width: 1100px) {
   .app-header { flex-wrap: wrap; }
-  .header-center { flex: 1 1 auto; width: auto; order: 0; }
   .header-right { margin-left: auto; }
 }
 
@@ -1257,9 +1248,7 @@ body {
 @media (max-width: 560px) {
   .app-header { flex-wrap: wrap; gap: 6px; padding: 0 8px; }
   .header-left, .header-right { gap: 6px; }
-  .header-center { flex: 0 0 auto; width: auto; }
   .header-right { margin-left: auto; }
-  .document-status { display: none; }
   .app-header .button {
     min-width: 44px;
     min-height: 44px;
