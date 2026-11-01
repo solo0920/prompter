@@ -2074,6 +2074,101 @@
     });
   });
 
+  test('US1 focused composer adopts the selected layer Marker', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-composer-document',
+        title: '輸入框層級',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-composer-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-composer-p', marker: 'none', text: '內容', seq: 2 }),
+          Model.createTextBlock({ id: 'layer-composer-b', marker: '-', text: '項目', seq: 3 })
+        ]
+      }), [], { persisted: false });
+
+      var toggle = byId(win, 'layer-toggle');
+      var toolbar = byId(win, 'layer-toolbar');
+      var bulletButton = toolbar.querySelector('[data-layer="-"]');
+      var h3Button = toolbar.querySelector('[data-layer="###"]');
+
+      win.Prompter.editor.openComposer('layer-composer-p');
+      var input = composerInput(win);
+      assert(input, 'The document must expose a composer input.');
+      equal(win.document.activeElement, input,
+        'The composer input must start focused.');
+      setValue(win, input, '輸入框草稿');
+      input.setSelectionRange(2, 4);
+
+      toggle.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 70, pointerType: 'mouse'
+      }));
+      toggle.focus();
+      toggle.click();
+      assert(!toolbar.hidden,
+        'Opening the layer toolbar from the composer must show the layer buttons.');
+      bulletButton.click();
+
+      var composer = win.document.querySelector('#canvas .composer');
+      equal(composer.querySelector('.composer-marker').textContent, '-',
+        'The focused composer must adopt the selected layer Marker.');
+      equal(bulletButton.getAttribute('aria-pressed'), 'true',
+        'The selected layer button must become pressed.');
+      equal(state.composer.marker, '-');
+      equal(state.composer.text, '輸入框草稿',
+        'The composer draft must survive the layer selection.');
+      equal(state.editingBlockId, null,
+        'Selecting a layer from the composer must not edit a block.');
+      assert(!win.document.querySelector('#canvas .block-edit-input'),
+        'No block editor may open while the composer keeps focus.');
+      input = composerInput(win);
+      equal(win.document.activeElement, input,
+        'Layer selection must return focus to the composer input.');
+      equal(input.value, '輸入框草稿');
+      equal(input.selectionStart, 2, 'The composer caret must be preserved.');
+      equal(input.selectionEnd, 4, 'The composer selection must be preserved.');
+
+      h3Button.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 72, pointerType: 'mouse'
+      }));
+      h3Button.focus();
+      h3Button.click();
+
+      composer = win.document.querySelector('#canvas .composer');
+      equal(composer.querySelector('.composer-marker').textContent, '###',
+        'A layer with no matching blocks must still apply to the composer.');
+      equal(h3Button.getAttribute('aria-pressed'), 'true',
+        'An empty layer must still show as selected.');
+      equal(bulletButton.getAttribute('aria-pressed'), 'false');
+      equal(state.composer.marker, '###');
+      equal(state.composer.text, '輸入框草稿');
+      equal(state.editingBlockId, null);
+      input = composerInput(win);
+      equal(win.document.activeElement, input,
+        'An empty layer must keep the composer usable.');
+      equal(input.selectionStart, 2);
+      equal(input.selectionEnd, 4);
+
+      press(win, input, 'Enter');
+      return waitFor(function () {
+        return state.document.blocks.some(function (block) {
+          return block.marker === '###' && block.text === '輸入框草稿';
+        });
+      }, 5000).then(function () {
+        var added = state.document.blocks.filter(function (block) {
+          return block.marker === '###' && block.text === '輸入框草稿';
+        });
+        equal(added.length, 1,
+          'The composer must still create an item with the selected Marker.');
+        equal(win.document.querySelector('#canvas .composer-marker').textContent, '###',
+          'The follow-up composer must keep the selected Marker.');
+        equal(h3Button.getAttribute('aria-pressed'), 'true');
+      });
+    });
+  });
+
   test('US1 right-side delete removes a block and Cmd+Z restores it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

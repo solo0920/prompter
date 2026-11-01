@@ -26,7 +26,11 @@
   var hoveredBlock = null;
   var activeCollapse = null;
   var layerFilter = null;
+  var layerFilterAllowsEmpty = false;
   var layerToolbarOpen = false;
+  var pendingComposerLayerSelection = null;
+  var pendingLayerToggleComposerSelection = null;
+  var layerToolbarComposerSelection = null;
   var historyStack = [];
   var redoStack = [];
   var lastHistory = null;
@@ -543,6 +547,11 @@
   }
 
   function setLayerToolbarOpen(open) {
+    if (!open) {
+      layerToolbarComposerSelection = null;
+      pendingComposerLayerSelection = null;
+      pendingLayerToggleComposerSelection = null;
+    }
     if (open === layerToolbarOpen) {
       updateLayerToolbar();
       return;
@@ -596,16 +605,30 @@
     announce('已' + (collapsed ? '收合' : '展開') + ' ' + targets.length + ' 個區塊。');
   }
 
-  function setLayerFilter(marker) {
+  function composerFocusSelection() {
+    var canvas = getCanvas();
+    if (!canvas) {
+      return null;
+    }
+    var input = canvas.querySelector('.composer-input');
+    if (!input || global.document.activeElement !== input) {
+      return null;
+    }
+    return { start: input.selectionStart, end: input.selectionEnd };
+  }
+
+  function setLayerFilter(marker, options) {
     var state = getState();
     if (!state || !state.document) {
       layerFilter = null;
+      layerFilterAllowsEmpty = false;
       updateLayerToolbar();
       return;
     }
     if (marker && ['#', '##', '###', '-', '1.', '>', '.'].indexOf(marker) === -1) {
       return;
     }
+    var composerSelection = options && options.composer ? options.composer : null;
     if (state.editingBlockId) {
       commitEditing();
       state = getState();
@@ -615,17 +638,22 @@
     }
     var next = marker === layerFilter ? null : marker;
     var matches = [];
+    var emptyComposerLayer = false;
     if (next) {
       matches = Model.normalizeSequence(state.document).filter(function (block) {
         return block.type === 'text' && markerMatchesLayer(block.marker, next);
       });
       if (!matches.length) {
-        announce('文件中沒有 ' + layerLabel(next) + ' 層級的項目。');
-        updateLayerToolbar();
-        return;
+        if (!composerSelection) {
+          announce('文件中沒有 ' + layerLabel(next) + ' 層級的項目。');
+          updateLayerToolbar();
+          return;
+        }
+        emptyComposerLayer = true;
       }
     }
     layerFilter = next;
+    layerFilterAllowsEmpty = emptyComposerLayer;
     if (next) {
       ensureLayerComposer(state, next);
     }
@@ -645,6 +673,16 @@
     }
     clearSelection();
     render();
+    if (composerSelection) {
+      focusComposer(composerSelection.start, composerSelection.end);
+      if (next) {
+        announce(emptyComposerLayer
+          ? '已選取 ' + layerLabel(next) + ' 層級，輸入框已套用此標記。'
+          : '已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length +
+            ' 個項目，輸入框已套用此標記。');
+      }
+      return;
+    }
     if (next) {
       announce('已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length + ' 個項目' +
         (autoCollapsed ? '，子項目已收合。' : '。'));
@@ -675,7 +713,23 @@
         setAllLayersCollapsed(false);
       });
     }
+    toggle.addEventListener('pointerdown', function () {
+      pendingLayerToggleComposerSelection = composerFocusSelection();
+    });
+    toggle.addEventListener('mousedown', function () {
+      if (!pendingLayerToggleComposerSelection) {
+        pendingLayerToggleComposerSelection = composerFocusSelection();
+      }
+    });
     toggle.addEventListener('click', function () {
+      if (layerToolbarOpen) {
+        layerToolbarComposerSelection = null;
+      } else if (pendingLayerToggleComposerSelection) {
+        layerToolbarComposerSelection = pendingLayerToggleComposerSelection;
+      } else {
+        layerToolbarComposerSelection = null;
+      }
+      pendingLayerToggleComposerSelection = null;
       setLayerToolbarOpen(!layerToolbarOpen);
     });
     toggle.addEventListener('keydown', function (event) {
@@ -689,9 +743,21 @@
       }
     });
     buttons.forEach(function (button) {
+      button.addEventListener('pointerdown', function () {
+        pendingComposerLayerSelection = composerFocusSelection();
+      });
+      button.addEventListener('mousedown', function () {
+        if (!pendingComposerLayerSelection) {
+          pendingComposerLayerSelection = composerFocusSelection();
+        }
+      });
       button.addEventListener('click', function () {
+        var composerSelection = pendingComposerLayerSelection || layerToolbarComposerSelection;
+        pendingComposerLayerSelection = null;
+        layerToolbarComposerSelection = null;
         setLayerToolbarOpen(true);
-        setLayerFilter(button.dataset.layer);
+        setLayerFilter(button.dataset.layer,
+          composerSelection ? { composer: composerSelection } : null);
       });
     });
     toolbar.addEventListener('keydown', function (event) {
@@ -713,6 +779,19 @@
         event.stopPropagation();
         setLayerToolbarOpen(false);
         toggle.focus();
+      }
+    });
+    global.document.addEventListener('pointerdown', function (event) {
+      var target = event.target;
+      if (!target || !target.closest) {
+        return;
+      }
+      if (toggle.contains(target) || toolbar.contains(target)) {
+        return;
+      }
+      layerToolbarComposerSelection = null;
+      if (!target.closest('.layer-button')) {
+        pendingComposerLayerSelection = null;
       }
     });
     updateLayerToolbar();
@@ -1592,12 +1671,14 @@
       revokeObjectUrls();
       editDraft = null;
       layerFilter = null;
+      layerFilterAllowsEmpty = false;
       currentDocumentId = state.document.id;
     } else if (!state.document) {
       revokeObjectUrls();
       currentDocumentId = null;
       editDraft = null;
       layerFilter = null;
+      layerFilterAllowsEmpty = false;
     }
 
     Array.prototype.forEach.call(canvas.querySelectorAll('.block, .composer'), function (element) {
@@ -1619,10 +1700,18 @@
       empty.hidden = true;
     }
     var blocks = Model.normalizeSequence(state.document);
-    if (layerFilter && !blocks.some(function (block) {
-      return blockMatchesLayer(block);
-    })) {
-      layerFilter = null;
+    if (layerFilter) {
+      var hasLayerMatch = blocks.some(function (block) {
+        return blockMatchesLayer(block);
+      });
+      if (!hasLayerMatch && !layerFilterAllowsEmpty) {
+        layerFilter = null;
+      } else if (hasLayerMatch) {
+        layerFilterAllowsEmpty = false;
+      }
+    }
+    if (!layerFilter) {
+      layerFilterAllowsEmpty = false;
     }
     updateLayerToolbar();
     ensureInitialComposer(state);

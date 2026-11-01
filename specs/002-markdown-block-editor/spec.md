@@ -617,9 +617,12 @@ retained. Open the settings panel and clear the local library after confirming t
   Expand All MUST restore them; with no layer selected, the actions apply to every collapsible
   section in the document. Opening the same layer again, closing the toolbar, or switching
   documents MUST exit layer focus and restore normal block interaction. The composer MUST remain
-  available during layer focus and MUST automatically use the selected layer's Marker. Activating
-  `+` on a matching block MUST open a composer at that slot with the same Marker so the user can
-  add another item of the focused kind without leaving layer focus. Layer focus itself MUST NOT
+  available during layer focus and MUST automatically use the selected layer's Marker. When the
+  composer input is focused, activating a layer MUST apply that layer's Marker to the composer,
+  keep its draft and caret, mark the layer button selected, and MUST NOT start editing a block;
+  this MUST also work when the document has no block of the selected layer. Activating `+` on a
+  matching block MUST open a composer at that slot with the same Marker so the user can add
+  another item of the focused kind without leaving layer focus. Layer focus itself MUST NOT
   change committed Markdown content, Save, Preview, or Copy output.
 - **FR-055**: Every block MUST show a delete control on right-side hover/focus, positioned above
   the `+` control. Activating it MUST remove only that block, and image deletion MUST also release
@@ -746,7 +749,7 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-10-31)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 108 unit tests and 115 browser tests pass in Chrome 156, online and
+- Automated verification: 108 unit tests and 116 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
   layer-focus and full-width preview checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
@@ -754,6 +757,10 @@ retained. Open the settings panel and clear the local library after confirming t
 - Layer-focus add verification (2026-10-31): Chrome passes the check confirming that layer focus
   keeps a composer with the focused Marker, matching blocks keep `+` visible, and `+` inserts a
   new item with that Marker without leaving layer focus.
+- Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that
+  selecting a layer from a focused composer applies the Marker, keeps the draft and caret, marks
+  the layer button selected, keeps focus in the composer, and does not open a block editor; the
+  same holds for a layer with no matching blocks.
 - Full-width preview verification (2026-10-31): Chrome passes the check confirming that the
   expand control is hidden while preview is closed, fills the editor area when activated, uses
   the full content width, and restores the split view when activated again.

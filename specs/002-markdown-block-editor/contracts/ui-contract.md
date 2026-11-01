@@ -251,6 +251,11 @@ Each image block shows:
 - The composer remains available while layer focus is active. Activating a layer sets the open
   composer's Marker to that layer and keeps any existing draft; if none is open, a document-end
   composer is created with that Marker. Switching layers updates the composer Marker again.
+- When the composer input has focus, activating a layer applies that layer's Marker to the
+  composer, keeps the draft and caret/selection, marks the layer button `aria-pressed="true"`,
+  and keeps focus in the composer instead of editing a block. The layer is selected even when no
+  block uses its Marker. The same handoff applies when the layer toolbar is opened from the
+  focused composer and a layer button is then activated.
 - Matching blocks keep their lower-right `+` visible; its accessible name includes the focused
   kind, e.g. `在此區塊下方新增 ## 標題`. Activating it opens a composer at that slot with the
   focused layer's Marker, so a user can add another item of the focused kind without leaving
