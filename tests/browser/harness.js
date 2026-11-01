@@ -2130,6 +2130,23 @@
       equal(input.selectionStart, 2, 'The composer caret must be preserved.');
       equal(input.selectionEnd, 4, 'The composer selection must be preserved.');
 
+      press(win, input, 'ArrowDown');
+      equal(state.editingBlockId, 'layer-composer-b',
+        'Down from the composer must enter the next block of the focused layer.');
+      assertEditingSelection(win,
+        blockById(win, 'layer-composer-b').querySelector('.block-edit-input'),
+        'The next layer block must open for editing.');
+      press(win, blockById(win, 'layer-composer-b').querySelector('.block-edit-input'),
+        'ArrowDown');
+      equal(state.editingBlockId, null,
+        'Down from the last layer block must wrap back to the composer.');
+      equal(win.document.activeElement, composerInput(win),
+        'The composer must remain reachable with Up/Down in layer focus.');
+      equal(composerInput(win).value, '輸入框草稿',
+        'Arrow navigation must keep the composer draft.');
+      input = composerInput(win);
+      input.setSelectionRange(1, 3);
+
       h3Button.dispatchEvent(new win.PointerEvent('pointerdown', {
         bubbles: true, cancelable: true, pointerId: 72, pointerType: 'mouse'
       }));
@@ -2148,8 +2165,8 @@
       input = composerInput(win);
       equal(win.document.activeElement, input,
         'An empty layer must keep the composer usable.');
-      equal(input.selectionStart, 2);
-      equal(input.selectionEnd, 4);
+      equal(input.selectionStart, 1);
+      equal(input.selectionEnd, 3);
 
       press(win, input, 'Enter');
       return waitFor(function () {

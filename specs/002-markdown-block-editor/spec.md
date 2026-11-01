@@ -611,9 +611,10 @@ retained. Open the settings panel and clear the local library after confirming t
   Marker as the active layer, begin editing the first one, and automatically collapse every
   collapsible block of that layer so its child items are hidden while the layer's own headers
   remain visible. Blocks of all other layers MUST be visually de-emphasized, locked, and
-  unselectable; image blocks are also de-emphasized. Up/Down MUST then move only among blocks of
-  the selected layer, entering edit mode and selecting the full text on each step, with
-  first/last wrap. Collapse All MUST collapse every collapsible block of the selected layer and
+  unselectable; image blocks are also de-emphasized. Up/Down MUST then move among blocks of
+  the selected layer and the composer at its slot, entering edit mode and selecting the full
+  text on each step, with first/last wrap. Collapse All MUST collapse every collapsible block of
+  the selected layer and
   Expand All MUST restore them; with no layer selected, the actions apply to every collapsible
   section in the document. Opening the same layer again, closing the toolbar, or switching
   documents MUST exit layer focus and restore normal block interaction. The composer MUST remain
@@ -760,7 +761,8 @@ retained. Open the settings panel and clear the local library after confirming t
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that
   selecting a layer from a focused composer applies the Marker, keeps the draft and caret, marks
   the layer button selected, keeps focus in the composer, and does not open a block editor; the
-  same holds for a layer with no matching blocks.
+  same holds for a layer with no matching blocks. Up/Down navigation in layer focus includes the
+  composer and wraps between it and the matching blocks.
 - Full-width preview verification (2026-10-31): Chrome passes the check confirming that the
   expand control is hidden while preview is closed, fills the editor area when activated, uses
   the full content width, and restores the split view when activated again.

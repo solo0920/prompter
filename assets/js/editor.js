@@ -1879,10 +1879,13 @@
 
   function navigationItemsFor(state) {
     return dragItemsFor(state).filter(function (item) {
-      if (layerFilter) {
-        return !isComposerItem(item) && blockAllowed(item.id);
+      if (isComposerItem(item)) {
+        return true;
       }
-      return isComposerItem(item) || !blockIsHidden(item.id);
+      if (layerFilter) {
+        return blockAllowed(item.id);
+      }
+      return !blockIsHidden(item.id);
     });
   }
 

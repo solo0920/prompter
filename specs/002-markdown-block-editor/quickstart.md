@@ -63,7 +63,8 @@ are marked manual and covered below.
 
 Current result (2026-11-01): Chrome **116 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
-focused-composer layer selection, and the full editor-area preview expand control.
+focused-composer layer selection, Up/Down navigation through the composer in layer focus, and the
+full editor-area preview expand control.
 Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
 27.2 previously reported 108/108 through a local HTTP origin; Safari testing is now paused and is
 not part of the current test loop. The suite includes the start screen and ten-file recent list
@@ -531,10 +532,10 @@ Record the exact Chrome version and pass/fail notes in the test log.
 **Verified 2026-11-01**: Chrome 156 passes the full 116-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
 insertion with the focused Marker, focused-composer layer selection (including an empty layer),
-and the full editor-area preview expand control. Firefox 159 and Edge 156 last passed the prior
-112-check suite as supplementary checks. Safari 27.2 historically passed the HTTP harness 108/108
-and a direct `file://` startup smoke; Safari testing is paused and is not part of the current
-loop.
+Up/Down navigation through the composer in layer focus, and the full editor-area preview expand
+control. Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks.
+Safari 27.2 historically passed the HTTP harness 108/108 and a direct `file://` startup smoke;
+Safari testing is paused and is not part of the current loop.
 
 ## Acceptance Checklist
 

@@ -241,8 +241,9 @@ Each image block shows:
   has child items. The `1.` layer includes all numbered ordered prefixes (`1.`, `2.`, ...).
   Matching headers remain visible; blocks of other layers and image blocks are dimmed, locked,
   and cannot be selected or focused.
-- While a layer is active, Up/Down moves only through matching blocks, commits the current edit,
-  and reopens the destination in edit mode with all text selected, wrapping at the ends.
+- While a layer is active, Up/Down moves through matching blocks and the composer at its slot,
+  commits the current edit, and reopens the destination in edit mode with all text selected,
+  wrapping at the ends. Reaching the composer focuses its input without changing its draft.
 - `全部收合` collapses every collapsible block in the active layer without hiding that layer's own
   headers; `全部展開` restores them. With no layer active, the actions apply to every collapsible
   section in the document.
