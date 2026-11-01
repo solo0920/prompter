@@ -4348,6 +4348,33 @@
       toggleBlockSelection(block.dataset.blockId);
       return;
     }
+    var focusedModel = layerFilter && !target.closest('.drag-handle')
+      ? findBlock(block.dataset.blockId)
+      : null;
+    if (focusedModel && focusedModel.type === 'text' &&
+        blockMatchesLayer(focusedModel)) {
+      event.preventDefault();
+      var state = getState();
+      if (state && state.editingBlockId && state.editingBlockId !== focusedModel.id) {
+        commitEditing();
+        focusedModel = findBlock(block.dataset.blockId);
+      }
+      if (state && focusedModel && state.editingBlockId === focusedModel.id) {
+        var editingElement = blockElement(focusedModel.id);
+        var editingInput = editingElement
+          ? editingElement.querySelector('.block-edit-input')
+          : null;
+        if (editingInput) {
+          editingInput.focus();
+        }
+        return;
+      }
+      if (focusedModel && focusedModel.type === 'text' &&
+          blockMatchesLayer(focusedModel)) {
+        beginEditing(focusedModel.id);
+      }
+      return;
+    }
     selectBlock(block.dataset.blockId);
   }
 

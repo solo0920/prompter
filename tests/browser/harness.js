@@ -2243,6 +2243,51 @@
     });
   });
 
+  test('US1 clicking a focused-layer block edits and selects all text', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-click-document',
+        title: '層級點擊編輯',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-click-h1', marker: '#', text: '標題', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-click-b1', marker: '-', text: '項目一', seq: 2 }),
+          Model.createTextBlock({ id: 'layer-click-b2', marker: '-', text: '項目二', seq: 3 })
+        ]
+      }), [], { persisted: false });
+
+      var toggle = byId(win, 'layer-toggle');
+      toggle.click();
+      var toolbar = byId(win, 'layer-toolbar');
+      var bulletButton = toolbar.querySelector('[data-layer="-"]');
+      bulletButton.click();
+      equal(state.editingBlockId, 'layer-click-b1',
+        'Selecting the layer must edit its first item.');
+
+      var firstInput = blockById(win, 'layer-click-b1').querySelector('.block-edit-input');
+      setValue(win, firstInput, '項目一更新');
+      blockById(win, 'layer-click-b2').querySelector('.block-content').click();
+      var firstBlock = state.document.blocks.filter(function (block) {
+        return block.id === 'layer-click-b1';
+      })[0];
+      equal(firstBlock && firstBlock.text, '項目一更新',
+        'Clicking another layer item must commit the current edit first.');
+      equal(state.editingBlockId, 'layer-click-b2',
+        'A single click on a layer item must start editing it.');
+      assertEditingSelection(win,
+        blockById(win, 'layer-click-b2').querySelector('.block-edit-input'),
+        'A single click on a layer item must select the full text.');
+
+      press(win, blockById(win, 'layer-click-b2').querySelector('.block-edit-input'),
+        'Escape');
+      equal(state.editingBlockId, null);
+      toggle.click();
+      assert(toolbar.hidden, 'The click-edit test must leave layer focus closed.');
+    });
+  });
+
   test('US1 right-side delete removes a block and Cmd+Z restores it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

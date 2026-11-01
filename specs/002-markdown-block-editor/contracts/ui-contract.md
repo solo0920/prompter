@@ -244,6 +244,8 @@ Each image block shows:
 - A layer with no matching blocks can still be selected. Its button becomes pressed, every
   existing block stays dimmed, and focus moves to the composer with that layer's Marker so the
   first item of that kind can be created. No block editor opens and no error is announced.
+- Clicking a matching block with the primary mouse button enters edit mode immediately with the
+  block's full text selected. Clicking another matching block commits the current edit first.
 - While a layer is active, Up/Down moves through matching blocks and the composer at its slot,
   commits the current edit, and reopens the destination in edit mode with all text selected,
   wrapping at the ends. Reaching the composer focuses its input without changing its draft.

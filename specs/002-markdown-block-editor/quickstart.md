@@ -61,10 +61,11 @@ Current result (2026-10-31): **108 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-11-02): Chrome **117 passing, 0 failing** (required gate), online and
+Current result (2026-11-02): Chrome **118 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
-focused-composer layer selection, empty layers that remain selectable, Up/Down navigation through
-the composer in layer focus, and the full editor-area preview expand control.
+focused-composer layer selection, empty layers that remain selectable, single-click editing of
+matching layer blocks with full text selection, Up/Down navigation through the composer in layer
+focus, and the full editor-area preview expand control.
 Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
 27.2 previously reported 108/108 through a local HTTP origin; Safari testing is now paused and is
 not part of the current test loop. The suite includes the start screen and ten-file recent list
@@ -81,7 +82,7 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 117/117 | PASS 117/117 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, focused-composer layers, full-width preview |
+| Chrome (macOS) | 156.0.8078.49 | PASS 118/118 | PASS 118/118 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, click-to-edit, focused-composer layers, full-width preview |
 | Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; last run before the layer-focus add check |
 | Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; last run before the layer-focus add check |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
@@ -529,14 +530,14 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-11-02**: Chrome 156 passes the full 117-check automated harness from `file://`,
+**Verified 2026-11-02**: Chrome 156 passes the full 118-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
 insertion with the focused Marker, focused-composer layer selection, empty layers that remain
-selectable with the composer Marker applied, Up/Down navigation through the composer in layer
-focus, and the full editor-area preview expand control. Firefox 159 and Edge 156 last passed the
-prior 112-check suite as supplementary checks. Safari 27.2 historically passed the HTTP harness
-108/108 and a direct `file://` startup smoke; Safari testing is paused and is not part of the
-current loop.
+selectable with the composer Marker applied, single-click editing of matching layer blocks,
+Up/Down navigation through the composer in layer focus, and the full editor-area preview expand
+control. Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks.
+Safari 27.2 historically passed the HTTP harness 108/108 and a direct `file://` startup smoke;
+Safari testing is paused and is not part of the current loop.
 
 ## Acceptance Checklist
 

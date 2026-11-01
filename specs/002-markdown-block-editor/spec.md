@@ -614,6 +614,8 @@ retained. Open the settings panel and clear the local library after confirming t
   become selected and focus MUST move to the composer with that Marker; the toolbar MUST NOT
   report an error or leave the previous layer selected. Blocks of all other layers MUST be
   visually de-emphasized, locked, and unselectable; image blocks are also de-emphasized.
+  Clicking a matching block with the primary mouse button MUST enter edit mode immediately and
+  select its full text; clicking a different matching block MUST commit the current edit first.
   Up/Down MUST then move among blocks of the selected layer and the composer at its slot,
   entering edit mode and selecting the full text on each step, with first/last wrap. Collapse
   All MUST collapse every collapsible block of the selected layer and
@@ -752,7 +754,7 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-10-31)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 108 unit tests and 117 browser tests pass in Chrome 156, online and
+- Automated verification: 108 unit tests and 118 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
   layer-focus and full-width preview checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
@@ -763,6 +765,9 @@ retained. Open the settings panel and clear the local library after confirming t
 - Empty-layer verification (2026-11-02): Chrome passes the check confirming that a Marker absent
   from the document remains selectable, keeps its toolbar button pressed, focuses the composer
   with that Marker, and creates the first item without changing committed Markdown beforehand.
+- Layer click-edit verification (2026-11-02): Chrome passes the check confirming that a single
+  click on a matching layer block enters edit mode with its full text selected and commits the
+  edit that was open on another matching block.
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that
   selecting a layer from a focused composer applies the Marker, keeps the draft and caret, marks
   the layer button selected, keeps focus in the composer, and does not open a block editor; the
