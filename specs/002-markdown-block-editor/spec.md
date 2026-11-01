@@ -69,9 +69,10 @@ and confirm the unsaved draft is not restored.
 5. **Given** an existing block, **When** the user activates its "+" control, **Then** a new
    input box is inserted directly below that block, and typing text followed by Enter creates
    a new block at that position.
-6. **Given** an existing block, **When** the user double-clicks it, **Then** the block enters
-   edit mode; pressing Enter commits the edit and exits edit mode, pressing Shift+Enter inserts
-   a line break, and pressing Escape cancels the edit.
+6. **Given** an existing block, **When** the user clicks or double-clicks it, **Then** the block
+   enters edit mode with its full text selected; pressing Enter commits the edit and exits edit
+   mode, pressing Shift+Enter inserts a line break, and pressing Escape cancels the edit. A drag
+   beyond the pointer threshold moves the block instead of entering edit mode.
 7. **Given** two or more blocks, **When** the user drags a block to a new position, **Then**
    the block moves within the canvas, the position is retained with the document, and the
    Markdown reading order is updated according to the new position.
@@ -436,11 +437,13 @@ retained. Open the settings panel and clear the local library after confirming t
 - **FR-020**: Every block MUST expose a "+" control at its lower-right, revealed when the right
   half of the block is hovered; activating it MUST insert a new input box directly below that
   block, and Escape MUST dismiss the inserted input without creating a block.
-- **FR-021**: Double-clicking a text block MUST enter edit mode; entering edit mode MUST select
-  the block's full text by default. Enter MUST commit and exit edit mode, Shift+Enter MUST insert
-  a line break, Escape MUST cancel the edit, and clicking outside MUST commit the edit. When the
-  submitted value contains multiple lines with obvious Markers, Enter MUST apply the same parse
-  and split rules as FR-017 and replace the edited block with the resulting blocks.
+- **FR-021**: Clicking or double-clicking a text block MUST enter edit mode; entering edit mode
+  MUST select the block's full text by default. Dragging a block beyond the pointer threshold
+  MUST move it instead of entering edit mode. Enter MUST commit and exit edit mode, Shift+Enter
+  MUST insert a line break, Escape MUST cancel the edit, and clicking outside MUST commit the
+  edit. When the submitted value contains multiple lines with obvious Markers, Enter MUST apply
+  the same parse and split rules as FR-017 and replace the edited block with the resulting
+  blocks.
 - **FR-022**: A text block MUST hold one or more lines of text. Enter MUST commit rather than
   insert a line break; Shift+Enter MUST insert a line break. The input box MUST grow wider as
   text exceeds its current width, up to its maximum width, and MUST grow taller as content
@@ -767,9 +770,10 @@ retained. Open the settings panel and clear the local library after confirming t
 - Empty-layer verification (2026-11-02): Chrome passes the check confirming that a Marker absent
   from the document remains selectable, keeps its toolbar button pressed, focuses the composer
   with that Marker, and creates the first item without changing committed Markdown beforehand.
-- Layer click-edit verification (2026-11-02): Chrome passes the check confirming that a single
-  click on a matching layer block enters edit mode with its full text selected and commits the
-  edit that was open on another matching block.
+- Click-edit verification (2026-11-02): Chrome passes the check confirming that a single click
+  on a text block enters edit mode with its full text selected, that clicking another layer
+  block commits the open edit first, and that dragging a block beyond the pointer threshold still
+  reorders it without opening the editor.
 - Header cleanup verification (2026-11-02): Chrome confirms that the header no longer renders a
   document status message, while File/Edit and the right-side controls stay in order.
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that

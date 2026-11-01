@@ -288,9 +288,10 @@ Each image block shows:
 
 ## Editing a Block
 
-- Double-click a text block (double-tap on touch), Tab into its text area, move into it with
-  Up/Down, or focus it and press Enter/F2, to enter edit mode. Entering edit mode selects the
-  block's entire text.
+- Click a text block, double-click it (double-tap on touch), Tab into its text area, move into it
+  with Up/Down, or focus it and press Enter/F2, to enter edit mode. Entering edit mode selects the
+  block's entire text. Dragging beyond the pointer threshold moves the block instead of entering
+  edit mode.
 - Edit mode shows a multi-line text area containing the block text and the Marker button. The
   text area grows wider with its content up to the block maximum and grows taller as text
   wraps.

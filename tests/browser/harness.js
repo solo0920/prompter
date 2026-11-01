@@ -2266,13 +2266,30 @@
       equal(state.editingBlockId, 'layer-click-b1',
         'Selecting the layer must edit its first item.');
 
+      function pointer(target, type, x, y) {
+        target.dispatchEvent(new win.PointerEvent(type, {
+          bubbles: true, cancelable: true, pointerId: 81, pointerType: 'mouse',
+          button: 0, clientX: x, clientY: y
+        }));
+      }
+      function pointerUp(x, y) {
+        win.dispatchEvent(new win.PointerEvent('pointerup', {
+          bubbles: true, cancelable: true, pointerId: 81, pointerType: 'mouse',
+          button: 0, clientX: x, clientY: y
+        }));
+      }
+      function pointerDownOn(blockId) {
+        var rect = blockById(win, blockId).querySelector('.block-content')
+          .getBoundingClientRect();
+        pointer(blockById(win, blockId).querySelector('.block-content'),
+          'pointerdown', rect.left + 10, rect.top + 10);
+        return rect;
+      }
+
       var firstInput = blockById(win, 'layer-click-b1').querySelector('.block-edit-input');
       setValue(win, firstInput, '項目一更新');
-      blockById(win, 'layer-click-b2').querySelector('.block-content')
-        .dispatchEvent(new win.PointerEvent('pointerdown', {
-          bubbles: true, cancelable: true, pointerId: 81, pointerType: 'mouse',
-          button: 0, clientX: 20, clientY: 20
-        }));
+      var secondRect = pointerDownOn('layer-click-b2');
+      pointerUp(secondRect.left + 10, secondRect.top + 10);
       var firstBlock = state.document.blocks.filter(function (block) {
         return block.id === 'layer-click-b1';
       })[0];
@@ -2295,8 +2312,36 @@
         'A click must select the full layer item text.');
       press(win, blockById(win, 'layer-click-b1').querySelector('.block-edit-input'),
         'Escape');
+      equal(state.editingBlockId, null);
+
+      var b1Rect = blockById(win, 'layer-click-b1').getBoundingClientRect();
+      var b2Rect = blockById(win, 'layer-click-b2').getBoundingClientRect();
+      var moveY = b1Rect.top + b1Rect.height / 2 + 10 - b2Rect.height / 2;
+      pointerDownOn('layer-click-b2');
+      pointer(win, 'pointermove', b1Rect.left + 10, moveY);
+      pointerUp(b1Rect.left + 10, moveY);
+      var order = readingOrder(win).map(function (block) { return block.id; });
+      equal(order.slice(1).join(','), 'layer-click-b2,layer-click-b1',
+        'Matching layer items must still be draggable while layer focus is active.');
+      equal(state.editingBlockId, null,
+        'Finishing a drag must not open the layer item editor.');
+      byId(win, 'canvas').dispatchEvent(new win.MouseEvent('click', {
+        bubbles: true, cancelable: true
+      }));
+      equal(state.editingBlockId, null,
+        'The click generated after a drag must not start editing.');
+
       toggle.click();
       assert(toolbar.hidden, 'The click-edit test must leave layer focus closed.');
+      blockById(win, 'layer-click-b1').querySelector('.block-content').click();
+      equal(state.editingBlockId, 'layer-click-b1',
+        'A click outside layer focus must also start editing the item.');
+      assertEditingSelection(win,
+        blockById(win, 'layer-click-b1').querySelector('.block-edit-input'),
+        'A normal click must select the full item text.');
+      press(win, blockById(win, 'layer-click-b1').querySelector('.block-edit-input'),
+        'Escape');
+      equal(state.editingBlockId, null);
     });
   });
 
@@ -3111,6 +3156,10 @@
       pointerDownOn(aId);
       pointerUp(clientLeftOf(aId) + 10, clientTopOf(aId) + 10);
       equal(state.dirty, false, 'A click without movement must not mark the document dirty.');
+      var clickInput = blockById(win, aId).querySelector('.block-edit-input');
+      assert(clickInput, 'A click without movement must open the block editor.');
+      press(win, clickInput, 'Escape');
+      equal(state.editingBlockId, null);
 
       var bTopBefore = parseFloat(blockById(win, bId).style.top);
       var cTopBefore = parseFloat(blockById(win, cId).style.top);
@@ -3571,15 +3620,13 @@
       equal(win.document.activeElement, byId(win, 'canvas'),
         'After deletion, focus must move to the canvas.');
 
-      blockById(win, bId).querySelector('.block-content')
-        .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+      blockById(win, bId).querySelector('.drag-handle').click();
       press(win, blockById(win, bId), 'Backspace');
       equal(state.document.blocks.map(function (block) { return block.id; }).join(','),
         dId, 'The macOS Delete key (Backspace) must also remove the selection.');
       equal(byId(win, 'move-announcer').textContent, '已刪除 1 個區塊。');
 
-      blockById(win, dId).querySelector('.block-content')
-        .dispatchEvent(new win.MouseEvent('click', { bubbles: true, cancelable: true }));
+      blockById(win, dId).querySelector('.drag-handle').click();
       press(win, blockById(win, dId), 'Delete');
       equal(state.document.blocks.length, 0,
         'Deleting the last selected block must empty the document.');

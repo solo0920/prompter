@@ -2377,6 +2377,9 @@
     }
     var drag = dragState;
     dragState = null;
+    if (drag.moved && layerFilter) {
+      suppressNextCanvasClick();
+    }
     global.removeEventListener('pointermove', onDragMove, true);
     global.removeEventListener('pointerup', onDragEnd, true);
     global.removeEventListener('pointercancel', onDragCancel, true);
@@ -2396,7 +2399,9 @@
     clearGroupDragStyles(drag);
     if (!drag.moved) {
       if (drag.kind === 'block') {
-        selectBlock(drag.blockId, { focus: false });
+        if (!beginClickEditing(drag.blockId)) {
+          selectBlock(drag.blockId, { focus: false });
+        }
       } else {
         focusComposer();
       }
@@ -4322,10 +4327,10 @@
     }
   }
 
-  function beginLayerBlockEditing(blockId) {
+  function beginClickEditing(blockId) {
     var block = findBlock(blockId);
     var state = getState();
-    if (!layerFilter || !block || block.type !== 'text' || !blockMatchesLayer(block)) {
+    if (!block || block.type !== 'text' || !blockMatchesLayer(block)) {
       return false;
     }
     if (state && state.editingBlockId && state.editingBlockId !== blockId) {
@@ -4374,8 +4379,8 @@
       toggleBlockSelection(block.dataset.blockId);
       return;
     }
-    if (layerFilter && !target.closest('.drag-handle') &&
-        beginLayerBlockEditing(block.dataset.blockId)) {
+    if (!target.closest('.drag-handle') &&
+        beginClickEditing(block.dataset.blockId)) {
       event.preventDefault();
       return;
     }
@@ -4425,13 +4430,14 @@
       return;
     }
     var clickedBlock = findBlock(blockElementNode.dataset.blockId);
-    if (layerFilter && event.pointerType !== 'touch' &&
-        (event.button === undefined || event.button === 0) &&
-        clickedBlock && clickedBlock.type === 'text' &&
-        blockMatchesLayer(clickedBlock)) {
-      event.preventDefault();
-      beginLayerBlockEditing(clickedBlock.id);
-      return;
+    if (clickedBlock && clickedBlock.type === 'text' && state &&
+        state.editingBlockId && state.editingBlockId !== clickedBlock.id) {
+      commitEditing();
+      clickedBlock = findBlock(blockElementNode.dataset.blockId);
+      blockElementNode = clickedBlock ? blockElement(clickedBlock.id) : null;
+      if (!clickedBlock || !blockElementNode) {
+        return;
+      }
     }
     beginDrag(event, blockElementNode.dataset.blockId, blockElementNode, false);
   }
