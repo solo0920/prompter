@@ -608,13 +608,15 @@ retained. Open the settings panel and clear the local library after confirming t
 - **FR-054**: The left directory rail MUST provide a second button below `文件目錄` that opens a
   vertical layer-focus toolbar listing `#`, `##`, `###`, `-`, `1.`, `>`, `.`, followed by
   `全部收合` and `全部展開` actions. Activating one layer MUST mark every text block with that
-  Marker as the active layer, begin editing the first one, and automatically collapse every
-  collapsible block of that layer so its child items are hidden while the layer's own headers
-  remain visible. Blocks of all other layers MUST be visually de-emphasized, locked, and
-  unselectable; image blocks are also de-emphasized. Up/Down MUST then move among blocks of
-  the selected layer and the composer at its slot, entering edit mode and selecting the full
-  text on each step, with first/last wrap. Collapse All MUST collapse every collapsible block of
-  the selected layer and
+  Marker as the active layer, begin editing the first one when at least one exists, and
+  automatically collapse every collapsible block of that layer so its child items are hidden
+  while the layer's own headers remain visible. If no block uses the Marker, the layer MUST still
+  become selected and focus MUST move to the composer with that Marker; the toolbar MUST NOT
+  report an error or leave the previous layer selected. Blocks of all other layers MUST be
+  visually de-emphasized, locked, and unselectable; image blocks are also de-emphasized.
+  Up/Down MUST then move among blocks of the selected layer and the composer at its slot,
+  entering edit mode and selecting the full text on each step, with first/last wrap. Collapse
+  All MUST collapse every collapsible block of the selected layer and
   Expand All MUST restore them; with no layer selected, the actions apply to every collapsible
   section in the document. Opening the same layer again, closing the toolbar, or switching
   documents MUST exit layer focus and restore normal block interaction. The composer MUST remain
@@ -750,7 +752,7 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-10-31)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 108 unit tests and 116 browser tests pass in Chrome 156, online and
+- Automated verification: 108 unit tests and 117 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
   layer-focus and full-width preview checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
@@ -758,6 +760,9 @@ retained. Open the settings panel and clear the local library after confirming t
 - Layer-focus add verification (2026-10-31): Chrome passes the check confirming that layer focus
   keeps a composer with the focused Marker, matching blocks keep `+` visible, and `+` inserts a
   new item with that Marker without leaving layer focus.
+- Empty-layer verification (2026-11-02): Chrome passes the check confirming that a Marker absent
+  from the document remains selectable, keeps its toolbar button pressed, focuses the composer
+  with that Marker, and creates the first item without changing committed Markdown beforehand.
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that
   selecting a layer from a focused composer applies the Marker, keeps the draft and caret, marks
   the layer button selected, keeps focus in the composer, and does not open a block editor; the

@@ -638,22 +638,15 @@
     }
     var next = marker === layerFilter ? null : marker;
     var matches = [];
-    var emptyComposerLayer = false;
+    var emptyLayer = false;
     if (next) {
       matches = Model.normalizeSequence(state.document).filter(function (block) {
         return block.type === 'text' && markerMatchesLayer(block.marker, next);
       });
-      if (!matches.length) {
-        if (!composerSelection) {
-          announce('文件中沒有 ' + layerLabel(next) + ' 層級的項目。');
-          updateLayerToolbar();
-          return;
-        }
-        emptyComposerLayer = true;
-      }
+      emptyLayer = !matches.length;
     }
     layerFilter = next;
-    layerFilterAllowsEmpty = emptyComposerLayer;
+    layerFilterAllowsEmpty = emptyLayer;
     if (next) {
       ensureLayerComposer(state, next);
     }
@@ -676,7 +669,7 @@
     if (composerSelection) {
       focusComposer(composerSelection.start, composerSelection.end);
       if (next) {
-        announce(emptyComposerLayer
+        announce(emptyLayer
           ? '已選取 ' + layerLabel(next) + ' 層級，輸入框已套用此標記。'
           : '已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length +
             ' 個項目，輸入框已套用此標記。');
@@ -684,6 +677,11 @@
       return;
     }
     if (next) {
+      if (emptyLayer) {
+        focusComposer();
+        announce('已選取 ' + layerLabel(next) + ' 層級，輸入框已套用此標記。');
+        return;
+      }
       announce('已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length + ' 個項目' +
         (autoCollapsed ? '，子項目已收合。' : '。'));
       beginEditing(matches[0].id);
@@ -1620,6 +1618,15 @@
     }
     var ordered = Model.normalizeSequence(state.document);
     if (!ordered.length) {
+      state.composer = Model.createComposer({
+        mode: 'initial',
+        anchorBlockId: null,
+        insertIndex: 0,
+        x: Files.COLUMN_X,
+        y: Files.COLUMN_START_Y,
+        marker: marker,
+        text: ''
+      });
       return;
     }
     var anchor = ordered[ordered.length - 1];

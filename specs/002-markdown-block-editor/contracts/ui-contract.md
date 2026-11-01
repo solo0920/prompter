@@ -241,6 +241,9 @@ Each image block shows:
   has child items. The `1.` layer includes all numbered ordered prefixes (`1.`, `2.`, ...).
   Matching headers remain visible; blocks of other layers and image blocks are dimmed, locked,
   and cannot be selected or focused.
+- A layer with no matching blocks can still be selected. Its button becomes pressed, every
+  existing block stays dimmed, and focus moves to the composer with that layer's Marker so the
+  first item of that kind can be created. No block editor opens and no error is announced.
 - While a layer is active, Up/Down moves through matching blocks and the composer at its slot,
   commits the current edit, and reopens the destination in edit mode with all text selected,
   wrapping at the ends. Reaching the composer focuses its input without changing its draft.

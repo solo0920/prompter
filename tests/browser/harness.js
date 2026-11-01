@@ -2186,6 +2186,63 @@
     });
   });
 
+  test('US1 layer focus selects a Marker with no matching blocks', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-empty-document',
+        title: '空層級聚焦',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-empty-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-empty-p', marker: 'none', text: '內容', seq: 2 })
+        ]
+      }), [], { persisted: false });
+
+      var toggle = byId(win, 'layer-toggle');
+      toggle.click();
+      var toolbar = byId(win, 'layer-toolbar');
+      var h3Button = toolbar.querySelector('[data-layer="###"]');
+      var before = win.Prompter.markdown.serializeDocument(state.document);
+
+      h3Button.click();
+
+      var composer = win.document.querySelector('#canvas .composer');
+      assert(composer, 'Selecting an empty layer must open a composer.');
+      equal(h3Button.getAttribute('aria-pressed'), 'true',
+        'A layer with no matching blocks must still become selected.');
+      equal(composer.querySelector('.composer-marker').textContent, '###',
+        'The composer must adopt the empty layer Marker.');
+      equal(composer.getAttribute('aria-label'), '新增 ### 標題');
+      equal(state.composer.marker, '###');
+      equal(state.editingBlockId, null,
+        'An empty layer must not open a block editor.');
+      assert(!win.document.querySelector('#canvas .block-edit-input'));
+      equal(win.document.activeElement, composerInput(win),
+        'An empty layer must focus the composer input.');
+      equal(win.Prompter.markdown.serializeDocument(state.document), before,
+        'Selecting an empty layer must not change Markdown.');
+
+      var input = composerInput(win);
+      setValue(win, input, '新小節');
+      press(win, input, 'Enter');
+      return waitFor(function () {
+        return state.document.blocks.some(function (block) {
+          return block.marker === '###' && block.text === '新小節';
+        });
+      }, 5000).then(function () {
+        equal(state.document.blocks.length, 3);
+        equal(h3Button.getAttribute('aria-pressed'), 'true',
+          'The empty layer must stay selected after creating its first item.');
+        equal(win.document.querySelector('#canvas .composer-marker').textContent, '###',
+          'The follow-up composer must keep the empty layer Marker.');
+        toggle.click();
+        assert(toolbar.hidden, 'The test must leave layer focus closed.');
+      });
+    });
+  });
+
   test('US1 right-side delete removes a block and Cmd+Z restores it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
