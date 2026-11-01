@@ -2342,6 +2342,30 @@
       press(win, blockById(win, 'layer-click-b1').querySelector('.block-edit-input'),
         'Escape');
       equal(state.editingBlockId, null);
+
+      var composer = composerInput(win);
+      setValue(win, composer, '輸入框草稿');
+      blockById(win, 'layer-click-b1').querySelector('.block-content').click();
+      equal(state.editingBlockId, 'layer-click-b1',
+        'The block must be editing before the composer click.');
+      var activeComposer = composerInput(win);
+      activeComposer.setSelectionRange(1, 3);
+      activeComposer.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 82, pointerType: 'mouse',
+        button: 0, clientX: 20, clientY: 20
+      }));
+      activeComposer.focus();
+      return waitFor(function () {
+        var current = composerInput(win);
+        return state.editingBlockId === null &&
+          win.document.activeElement === current ? current : null;
+      }, 3000).then(function (current) {
+        equal(current.value, '輸入框草稿',
+          'Clicking the composer must keep its draft.');
+        equal(current.selectionStart, 1,
+          'Clicking the composer must keep its caret position.');
+        equal(current.selectionEnd, 3);
+      });
     });
   });
 

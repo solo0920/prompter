@@ -1238,6 +1238,31 @@
           var state = getState();
           if (state && state.editingBlockId === block.id &&
               global.document.activeElement !== input) {
+            var active = global.document.activeElement;
+            var composerInput = active && active.closest
+              ? active.closest('.composer-input')
+              : null;
+            if (composerInput) {
+              setTimeout(function () {
+                var current = getState();
+                if (!current || current.editingBlockId !== block.id) {
+                  return;
+                }
+                var focused = global.document.activeElement;
+                var target = focused && focused.closest
+                  ? focused.closest('.composer-input')
+                  : null;
+                if (!target) {
+                  commitEditing();
+                  return;
+                }
+                var start = target.selectionStart;
+                var end = target.selectionEnd;
+                commitEditing();
+                focusComposer(start, end);
+              }, 10);
+              return;
+            }
             commitEditing();
           }
         }, 0);
@@ -4515,7 +4540,8 @@
         return;
       }
       if (event.target.closest && (event.target.closest('.block.editing') ||
-          event.target.closest('.marker-menu'))) {
+          event.target.closest('.marker-menu') ||
+          event.target.closest('.composer'))) {
         return;
       }
       commitEditing();

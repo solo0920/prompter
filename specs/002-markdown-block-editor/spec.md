@@ -412,7 +412,9 @@ retained. Open the settings panel and clear the local library after confirming t
   (`1.`, `2.`, `3.`, and later numbers) MUST each become their own block and keep their original
   number. Contiguous unmarked prose lines MUST stay grouped, blank lines MUST remain separators,
   and fenced code MUST NOT be split. A multi-line value without an obvious Marker, including
-  ordinary Shift+Enter prose, MUST remain one block.
+  ordinary Shift+Enter prose, MUST remain one block. Clicking the composer input MUST focus it
+  for text editing even while a block editor is active; the block edit MUST commit first and the
+  composer draft and caret MUST be preserved.
 - **FR-018**: The Marker control MUST offer None, `#`, `##`, `###`, `-`, `1.`, `>`, and `.`
   options (None is represented by `×` in the flyout), and the selected Marker MUST be displayed
   in front of the block and included once in Markdown output. Block Markers MUST be visible
@@ -774,6 +776,9 @@ retained. Open the settings panel and clear the local library after confirming t
   on a text block enters edit mode with its full text selected, that clicking another layer
   block commits the open edit first, and that dragging a block beyond the pointer threshold still
   reorders it without opening the editor.
+- Composer-focus verification (2026-11-02): Chrome passes the check confirming that clicking the
+  composer input while a block is being edited commits that edit, focuses the composer, and keeps
+  the composer draft and caret/selection.
 - Header cleanup verification (2026-11-02): Chrome confirms that the header no longer renders a
   document status message, while File/Edit and the right-side controls stay in order.
 - Focused-composer layer verification (2026-11-01): Chrome passes the check confirming that

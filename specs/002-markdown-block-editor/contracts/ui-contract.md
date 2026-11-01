@@ -165,6 +165,8 @@ blocks using the same Enter behavior.
   choice replaces the detected marker until the text is edited again.
 - Clicking elsewhere does not silently commit composer text; it remains visible until Enter or
   Escape. Navigating away triggers the unsaved-changes check if it has text.
+- Clicking the composer input focuses it for text editing even while a block editor is active.
+  The open block edit commits first, and the composer draft, caret, and selection are preserved.
 - Only one composer exists. Activating "+" while a composer is open commits that composer if it
   has text, then opens the new one.
 
