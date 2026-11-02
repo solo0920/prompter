@@ -65,7 +65,8 @@ Current result (2026-11-02): Chrome **118 passing, 0 failing** (required gate), 
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
 focused-composer layer selection, empty layers that remain selectable, single-click editing of
 text blocks with full text selection, composer click focus, Up/Down navigation through the
-composer in layer focus, and the full editor-area preview expand control.
+composer in layer focus, non-overlapping block corner controls, and the full editor-area preview
+expand control.
 Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
 27.2 previously reported 108/108 through a local HTTP origin; Safari testing is now paused and is
 not part of the current test loop. The suite includes the start screen and ten-file recent list

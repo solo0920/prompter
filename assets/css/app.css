@@ -829,6 +829,7 @@ body {
 }
 .block-plus,
 .block-delete {
+  --corner-shift: clamp(0px, 12.5%, calc(50% - 14.5px));
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -853,7 +854,7 @@ body {
   position: absolute;
   right: -9px;
   left: auto;
-  bottom: -6px;
+  bottom: calc(-6px + var(--corner-shift));
   color: var(--accent-strong);
   transition: opacity .12s ease;
 }
@@ -873,7 +874,7 @@ body {
 .block-delete {
   position: absolute;
   right: -9px;
-  top: -6px;
+  top: calc(-6px + var(--corner-shift));
   bottom: auto;
   color: var(--danger);
 }

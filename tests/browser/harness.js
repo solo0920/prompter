@@ -2414,6 +2414,13 @@
       assert(Math.abs((removeRect.top - rect.top) -
         (rect.bottom - plusRect.bottom)) <= 1,
       'The delete and add controls must sit symmetrically at the top-right and bottom-right.');
+      var nextElement = blockById(win, ids[2]);
+      var nextRect = nextElement.getBoundingClientRect();
+      var nextRemoveRect = nextElement.querySelector('.block-delete').getBoundingClientRect();
+      equal(nextRect.width, rect.width,
+        'The overlap check requires matching block widths.');
+      assert(plusRect.bottom <= nextRemoveRect.top,
+        'Adjacent block controls must not overlap when block widths match.');
 
       remove.click();
       equal(state.document.blocks.length, 2);

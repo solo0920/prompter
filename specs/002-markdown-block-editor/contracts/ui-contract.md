@@ -187,6 +187,9 @@ Each text block is a floating box showing:
   right half of the block is hovered or keyboard-focused, and always visible on touch devices.
 - A delete control above `+`, labeled `刪除區塊`, revealed with the same right-side hover/focus
   behavior. Activating it removes only that block.
+- The delete and `+` controls sit inset from the upper-right and lower-right corners by 12.5% of
+  the block height. On short blocks the inset is capped so the controls keep a visible gap, and
+  controls on adjacent same-width blocks never overlap.
 - A selected/focus style with a visible outline. Multi-selected blocks use a bright orange
   highlight; the composer uses its own accent border only while its input or controls hold
   focus.

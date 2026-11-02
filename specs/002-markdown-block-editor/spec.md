@@ -637,8 +637,11 @@ retained. Open the settings panel and clear the local library after confirming t
   another item of the focused kind without leaving layer focus. Layer focus itself MUST NOT
   change committed Markdown content, Save, Preview, or Copy output.
 - **FR-055**: Every block MUST show a delete control on right-side hover/focus, positioned above
-  the `+` control. Activating it MUST remove only that block, and image deletion MUST also release
-  its asset when no longer referenced. Outside text inputs, Cmd+Z (macOS) or Ctrl+Z (Windows) MUST
+  the `+` control. The delete and `+` controls MUST be inset vertically toward the block center by
+  12.5% of the block height, capped on short blocks so the two controls keep a visible gap. Their
+  controls MUST NOT overlap the controls of an adjacent block with the same width. Activating the
+  delete control MUST remove only that block, and image deletion MUST also release its asset when
+  no longer referenced. Outside text inputs, Cmd+Z (macOS) or Ctrl+Z (Windows) MUST
   undo the most recent document-changing action, restoring blocks, markers, ordering, blank
   lines, image assets, selection, and dirty state from the previous content state. Undo MUST cover
   at least insertion, deletion, text edits, Marker changes, and drag/keyboard reordering, retain

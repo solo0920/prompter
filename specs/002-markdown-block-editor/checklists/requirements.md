@@ -82,7 +82,8 @@
   document when no layer is active. Repeating the layer, closing the toolbar, or switching
   documents restores normal interaction without changing Markdown, Preview, or Copy.
 - Delete, undo, and redo: every block reveals a delete control above `+` on right-side hover,
-  and image deletion releases its asset. Cmd/Ctrl+Z outside text inputs restores up to 50 prior
+  inset with the add control so adjacent same-width blocks do not overlap, and image deletion
+  releases its asset. Cmd/Ctrl+Z outside text inputs restores up to 50 prior
   document-changing states, including blocks, markers, order, selection, dirty state, and image
   assets; Cmd/Ctrl+Shift+Z redoes an undone action, a new edit clears redo, text inputs keep
   native undo/redo, and view-only changes do not consume history.
