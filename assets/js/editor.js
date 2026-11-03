@@ -31,6 +31,7 @@
   var pendingComposerLayerSelection = null;
   var pendingLayerToggleComposerSelection = null;
   var layerToolbarComposerSelection = null;
+  var pendingSplitComposerSelection = null;
   var historyStack = [];
   var redoStack = [];
   var lastHistory = null;
@@ -551,6 +552,7 @@
       layerToolbarComposerSelection = null;
       pendingComposerLayerSelection = null;
       pendingLayerToggleComposerSelection = null;
+      pendingSplitComposerSelection = null;
     }
     if (open === layerToolbarOpen) {
       updateLayerToolbar();
@@ -699,8 +701,30 @@
     }
     var buttons = Array.prototype.slice.call(toolbar.querySelectorAll('.layer-button'));
     var navButtons = Array.prototype.slice.call(toolbar.querySelectorAll('button'));
+    var split = global.document.getElementById('layer-split');
     var collapseAll = global.document.getElementById('layer-collapse-all');
     var expandAll = global.document.getElementById('layer-expand-all');
+    if (split) {
+      split.addEventListener('pointerdown', function (event) {
+        if (event.button !== undefined && event.button !== 0) {
+          return;
+        }
+        pendingSplitComposerSelection = composerFocusSelection();
+        event.preventDefault();
+      });
+      split.addEventListener('mousedown', function (event) {
+        if (event.button !== 0) {
+          return;
+        }
+        if (!pendingSplitComposerSelection) {
+          pendingSplitComposerSelection = composerFocusSelection();
+        }
+        event.preventDefault();
+      });
+      split.addEventListener('click', function () {
+        splitFromToolbar();
+      });
+    }
     if (collapseAll) {
       collapseAll.addEventListener('click', function () {
         setAllLayersCollapsed(true);
@@ -788,6 +812,7 @@
         return;
       }
       layerToolbarComposerSelection = null;
+      pendingSplitComposerSelection = null;
       if (!target.closest('.layer-button')) {
         pendingComposerLayerSelection = null;
       }
@@ -3339,6 +3364,135 @@
     openComposer(block.id);
   }
 
+  function splitBlockByLines(block, value) {
+    if (!block || block.type !== 'text') {
+      announce('請先選取含換行的文字區塊，或在輸入框輸入多行內容。');
+      return false;
+    }
+    var items = Markdown.splitTextLines(value, {
+      marker: block.marker,
+      fallbackMarker: block.marker
+    });
+    if (!items || items.length < 2) {
+      announce('目前內容沒有可分解的多行文字。');
+      return false;
+    }
+    var state = getState();
+    if (!state || !state.document) {
+      return false;
+    }
+    commitEditingSplit(state, block, items);
+    announce('已將文字分成 ' + items.length + ' 個項目。');
+    return true;
+  }
+
+  function splitComposerByLines(selection) {
+    var state = getState();
+    var composer = state && state.composer;
+    if (!state || !state.document || !composer) {
+      return false;
+    }
+    var element = getCanvas() ? getCanvas().querySelector('.composer') : null;
+    var input = element ? element.querySelector('.composer-input') : null;
+    var value = input ? input.value : composer.text;
+    var items = Markdown.splitTextLines(value, {
+      marker: layerFilter || composer.markerOverride || null,
+      fallbackMarker: composer.marker
+    });
+    if (!items || items.length < 2) {
+      focusComposer(selection ? selection.start : null, selection ? selection.end : null);
+      announce('目前輸入內容沒有可分解的多行文字。');
+      return false;
+    }
+    var document = state.document;
+    var nextZ = Model.nextZ(document);
+    var blocks = items.map(function (item, index) {
+      return Model.createTextBlock({
+        id: Utils.randomUUID(),
+        text: item.text,
+        marker: item.marker,
+        x: Files.COLUMN_X,
+        y: Files.COLUMN_START_Y,
+        z: nextZ + index,
+        seq: 0,
+        blankLinesAfter: item.blankLinesAfter || 0
+      });
+    });
+    Model.insertBlocksAtIndex(document, blocks, composer.insertIndex);
+    var last = blocks[blocks.length - 1];
+    state.composer = null;
+    markDirty();
+    clearSelection();
+    openComposer(last.id);
+    announce('已將輸入內容分成 ' + blocks.length + ' 個項目。');
+    return true;
+  }
+
+  function selectedBlockForSplit(state) {
+    var blockId = state ? state.selectedBlockId : null;
+    if (!blockId && state) {
+      var ids = selectedBlockIds(state);
+      blockId = ids.length ? ids[ids.length - 1] : null;
+    }
+    return blockId ? findBlock(blockId) : null;
+  }
+
+  function splitEditingOrSelectedBlock() {
+    var state = getState();
+    if (!state || !state.document) {
+      return false;
+    }
+    if (state.editingBlockId) {
+      var editing = findBlock(state.editingBlockId);
+      if (!editing) {
+        return false;
+      }
+      var element = blockElement(editing.id);
+      var input = element ? element.querySelector('.block-edit-input') : null;
+      var value = input
+        ? input.value
+        : (editDraft ? editDraft.draftText : editing.text);
+      return splitBlockByLines(editing, value);
+    }
+    var block = selectedBlockForSplit(state);
+    if (!block) {
+      announce('請先選取含換行的文字區塊，或在輸入框輸入多行內容。');
+      return false;
+    }
+    return splitBlockByLines(block, block.text);
+  }
+
+  function splitFromToolbar() {
+    var state = getState();
+    if (!state || !state.document) {
+      return false;
+    }
+    var composerSelection = pendingSplitComposerSelection;
+    pendingSplitComposerSelection = null;
+    var composerFocused = !!composerSelection || !!composerFocusSelection();
+    var composerText = state.composer ? String(state.composer.text || '') : '';
+    var composerHasLines = composerText.indexOf('\n') !== -1;
+    if (composerFocused && composerHasLines) {
+      return splitComposerByLines(composerSelection);
+    }
+    if (state.editingBlockId) {
+      return splitEditingOrSelectedBlock();
+    }
+    var block = selectedBlockForSplit(state);
+    if (block && block.type === 'text' &&
+        String(block.text || '').indexOf('\n') !== -1) {
+      return splitBlockByLines(block, block.text);
+    }
+    if (composerHasLines) {
+      return splitComposerByLines(composerSelection);
+    }
+    if (block) {
+      return splitBlockByLines(block, block.text);
+    }
+    announce('請先選取含換行的文字區塊，或在輸入框輸入多行內容。');
+    return false;
+  }
+
   function focusComposer(selectionStart, selectionEnd) {
     var canvas = getCanvas();
     if (!canvas) {
@@ -4541,7 +4695,8 @@
       }
       if (event.target.closest && (event.target.closest('.block.editing') ||
           event.target.closest('.marker-menu') ||
-          event.target.closest('.composer'))) {
+          event.target.closest('.composer') ||
+          event.target.closest('#layer-split'))) {
         return;
       }
       commitEditing();

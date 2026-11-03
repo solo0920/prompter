@@ -45,7 +45,7 @@ canonical Markdown serializer, reading order, blank-line/newline preservation, s
 image reference matching, the HTML renderer, preferences, storage degradation, composer
 Markdown splitting, and security guards. They do not require npm packages.
 
-Current result (2026-10-31): **108 passing, 0 failing**.
+Current result (2026-11-03): **110 passing, 0 failing**.
 
 ### Browser harness
 
@@ -61,12 +61,12 @@ Current result (2026-10-31): **108 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-11-02): Chrome **118 passing, 0 failing** (required gate), online and
+Current result (2026-11-03): Chrome **122 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
 focused-composer layer selection, empty layers that remain selectable, single-click editing of
 text blocks with full text selection, composer click focus, Up/Down navigation through the
-composer in layer focus, non-overlapping block corner controls, and the full editor-area preview
-expand control.
+composer in layer focus, non-overlapping block corner controls, `分行` for selected, editing,
+and composer text, and the full editor-area preview expand control.
 Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
 27.2 previously reported 108/108 through a local HTTP origin; Safari testing is now paused and is
 not part of the current test loop. The suite includes the start screen and ten-file recent list
@@ -83,7 +83,7 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 118/118 | PASS 118/118 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, click-to-edit, focused-composer layers, full-width preview |
+| Chrome (macOS) | 156.0.8078.49 | PASS 122/122 | PASS 122/122 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, click-to-edit, focused-composer layers, full-width preview, manual `分行` |
 | Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; last run before the layer-focus add check |
 | Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; last run before the layer-focus add check |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
@@ -246,10 +246,11 @@ opens the Marker flyout without showing a grab cursor.
 5. At 360 px width, confirm indented blocks and composers stay inside the canvas without
    horizontal page scrolling.
 
-### 2d. Layer focus toolbar (FR-054)
+### 2d. Layer focus toolbar (FR-054, FR-056)
 
 1. Confirm a second rail button with a `#` icon sits below `文件目錄`. Activate it and confirm a
-   vertical toolbar lists `#`, `##`, `###`, `-`, `1.`, `>`, `.` plus `全部收合` and `全部展開`.
+   vertical toolbar lists `#`, `##`, `###`, `-`, `1.`, `>`, `.` plus `分行`, `全部收合`, and
+   `全部展開`, with `分行` immediately above the collapse actions.
 2. With a document containing headings, bullets, and quotes, choose `>`. Confirm the first quote
    opens in edit mode with all text selected, that quote's child items are already collapsed,
    other layers turn gray and cannot be clicked or focused, and the composer is hidden.
@@ -259,6 +260,15 @@ opens the Marker flyout without showing a grab cursor.
    visible. Press `全部展開` and confirm their content returns dimmed. Choose `#` again, close
    the toolbar, or switch tabs and confirm all blocks return to normal interaction without any
    Markdown change.
+5. Select a block containing `一`, `二`, a blank line, and `三`, then press `分行`. Confirm three
+   separate items keep the source Marker, the blank line stays as separation, the last item is
+   selected, and undo/redo restore the before and after states.
+6. Put `第一行`, `## 第二行`, a blank line, and `- 第三行` into the composer and press `分行`.
+   Confirm each line becomes its own block with per-line Markers, the blank line is preserved,
+   and a fresh composer below the new blocks receives focus.
+7. With a layer active, repeat step 6 with a line carrying a different Marker and confirm the
+   layer Marker applies to every result. Then press `分行` on a single-line composer draft and
+   confirm nothing changes, including the draft, caret, and selection.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
@@ -531,14 +541,16 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-11-02**: Chrome 156 passes the full 118-check automated harness from `file://`,
+**Verified 2026-11-03**: Chrome 156 passes the full 122-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
 insertion with the focused Marker, focused-composer layer selection, empty layers that remain
 selectable with the composer Marker applied, single-click editing of text blocks, composer click
-focus, Up/Down navigation through the composer in layer focus, and the full editor-area preview
-expand control. Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary
-checks. Safari 27.2 historically passed the HTTP harness 108/108 and a direct `file://` startup
-smoke; Safari testing is paused and is not part of the current loop.
+focus, Up/Down navigation through the composer in layer focus, the full editor-area preview
+expand control, and `分行` for selected, editing, and composer text with blank-line
+preservation, layer Marker inheritance, focus handling, no-op caret retention, and undo/redo.
+Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
+27.2 historically passed the HTTP harness 108/108 and a direct `file://` startup smoke; Safari
+testing is paused and is not part of the current loop.
 
 ## Acceptance Checklist
 

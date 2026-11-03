@@ -164,6 +164,55 @@ test('splitComposerItems attaches indented continuations to the preceding item',
   ]);
 });
 
+test('splitTextLines splits every newline and preserves Markers and blank lines', function () {
+  assert.equal(Markdown.splitTextLines('single line'), null);
+  assert.equal(Markdown.splitTextLines('# 單行標題'), null);
+  assert.equal(Markdown.splitTextLines(''), null);
+  assert.equal(Markdown.splitTextLines('\n\n'), null);
+
+  assert.deepEqual(
+    Markdown.splitTextLines('一\n## 二\n\n- 三'),
+    [
+      { marker: 'none', text: '一', blankLinesAfter: 0 },
+      { marker: '##', text: '二', blankLinesAfter: 1 },
+      { marker: '-', text: '三', blankLinesAfter: 0 }
+    ]
+  );
+});
+
+test('splitTextLines can force a Marker and fall back for unmarked lines', function () {
+  assert.deepEqual(
+    Markdown.splitTextLines('A\n# B\n- C', { marker: '>' }),
+    [
+      { marker: '>', text: 'A', blankLinesAfter: 0 },
+      { marker: '>', text: 'B', blankLinesAfter: 0 },
+      { marker: '>', text: 'C', blankLinesAfter: 0 }
+    ]
+  );
+  assert.deepEqual(
+    Markdown.splitTextLines('A\n## B', { fallbackMarker: '-' }),
+    [
+      { marker: '-', text: 'A', blankLinesAfter: 0 },
+      { marker: '##', text: 'B', blankLinesAfter: 0 }
+    ]
+  );
+  assert.deepEqual(
+    Markdown.splitTextLines('A\r\n\r\nB\r\n'),
+    [
+      { marker: 'none', text: 'A', blankLinesAfter: 1 },
+      { marker: 'none', text: 'B', blankLinesAfter: 1 }
+    ]
+  );
+  assert.deepEqual(
+    Markdown.splitTextLines('A\n-\n# B'),
+    [
+      { marker: 'none', text: 'A', blankLinesAfter: 0 },
+      { marker: 'none', text: '-', blankLinesAfter: 0 },
+      { marker: '#', text: 'B', blankLinesAfter: 0 }
+    ]
+  );
+});
+
 test('marker-only source lines stay literal text blocks', function () {
   const parsed = Markdown.parseMarkdown('#\n- \n# Heading\n');
   assert.equal(parsed.lines.length, 3);

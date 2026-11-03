@@ -650,6 +650,18 @@ retained. Open the settings panel and clear the local library after confirming t
   document-changing action MUST clear the redo history. Cmd/Ctrl+Z and Cmd/Ctrl+Shift+Z inside
   the composer or a block editor MUST remain native text undo and redo. View-only changes such
   as selection, collapse, or layer focus MUST NOT consume an undo step.
+- **FR-056**: The layer-focus toolbar MUST include a `分行` action immediately above
+  `全部收合` and `全部展開`. Activating it while a text block is selected or in edit mode MUST
+  split the block's current text, including an unsaved editor draft, at every newline into
+  separate text blocks in the same position. Every result MUST keep the source block's Marker,
+  blank lines MUST become blank-line separators instead of empty blocks, and focus MUST move to
+  the last resulting block. When the composer input is focused and contains a newline, `分行`
+  MUST take precedence over any block selection and split the composer draft at every newline
+  into blocks at the composer's insertion point, detecting per-line Markers unless a focused
+  layer or an explicit composer Marker overrides them; unmarked lines MUST use the composer
+  Marker. After a composer split, a fresh composer MUST open below the inserted blocks and
+  receive focus. A split MUST be one undoable document change. If the relevant text has no
+  newline, the action MUST leave the document, composer draft, caret, and selection unchanged.
 
 
 ### Key Entities *(include if feature involves data)*
@@ -761,14 +773,20 @@ retained. Open the settings panel and clear the local library after confirming t
 - Preview uses standard Markdown rendering plus KaTeX math; other custom Markdown extensions are
   out of scope.
 
-## Completion Status (2026-10-31)
+## Completion Status (2026-11-03)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 108 unit tests and 118 browser tests pass in Chrome 156, online and
+- Automated verification: 110 unit tests and 122 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
-  layer-focus and full-width preview checks were added. Safari historically passed 108/108
+  layer-focus, full-width preview, and `分行` checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
   user's request.
+- `分行` verification (2026-11-03): Chrome passes checks confirming that a selected or editing
+  block splits from its current or unsaved text with its Marker, internal and trailing blank
+  lines preserved, the last result selected, and undo/redo restoring each state; that a focused
+  composer draft splits with per-line Markers or the focused layer Marker; that a composer split
+  opens and focuses a fresh composer below the new blocks; and that a no-op keeps the draft,
+  caret, and selection unchanged.
 - Layer-focus add verification (2026-10-31): Chrome passes the check confirming that layer focus
   keeps a composer with the focused Marker, matching blocks keep `+` visible, and `+` inserts a
   new item with that Marker without leaving layer focus.

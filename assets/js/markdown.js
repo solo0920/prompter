@@ -278,6 +278,46 @@
     return items;
   }
 
+  function splitTextLines(input, options) {
+    var settings = options || {};
+    var text = normalizeText(input);
+    if (text.indexOf('\n') === -1) {
+      return null;
+    }
+    var forcedMarker = settings.marker && settings.marker !== 'none'
+      ? settings.marker
+      : null;
+    var fallbackMarker = settings.fallbackMarker && settings.fallbackMarker !== 'none'
+      ? settings.fallbackMarker
+      : 'none';
+    var lines = text.split('\n');
+    var items = [];
+    var pendingBlankLines = 0;
+    lines.forEach(function (line) {
+      if (isBlankLine(line)) {
+        pendingBlankLines += 1;
+        return;
+      }
+      var detected = detectMarker(line);
+      var marker = forcedMarker ||
+        (detected.marker !== 'none' ? detected.marker : fallbackMarker);
+      var itemText = detected.marker !== 'none' ? detected.text : line;
+      if (items.length > 0) {
+        items[items.length - 1].blankLinesAfter = pendingBlankLines;
+      }
+      pendingBlankLines = 0;
+      items.push({
+        marker: marker,
+        text: itemText,
+        blankLinesAfter: 0
+      });
+    });
+    if (items.length > 0) {
+      items[items.length - 1].blankLinesAfter = pendingBlankLines;
+    }
+    return items.length > 0 ? items : null;
+  }
+
   function rowFor(block) {
     return Math.round(Number(block.y || 0) / ROW_HEIGHT);
   }
@@ -391,6 +431,7 @@
     parseLine: parseLine,
     parseMarkdown: parseMarkdown,
     splitComposerItems: splitComposerItems,
+    splitTextLines: splitTextLines,
     rowFor: rowFor,
     blocksInReadingOrder: blocksInReadingOrder,
     serializeBlockLine: serializeBlockLine,

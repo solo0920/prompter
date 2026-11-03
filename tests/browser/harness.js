@@ -2243,6 +2243,235 @@
     });
   });
 
+  test('US1 分行 splits a selected block and supports undo and redo', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      var before = '# 標題\n- 一\n二\n\n三\n\n結尾\n';
+      app.setDocument(Model.createPromptDocument({
+        id: 'split-selection-document',
+        title: '選取分行',
+        fileName: 'split-selection.md',
+        blocks: [
+          Model.createTextBlock({ id: 'split-heading', marker: '#', text: '標題', seq: 1 }),
+          Model.createTextBlock({
+            id: 'split-target',
+            marker: '-',
+            text: '一\n二\n\n三',
+            seq: 2,
+            blankLinesAfter: 1
+          }),
+          Model.createTextBlock({ id: 'split-tail', text: '結尾', seq: 3 })
+        ]
+      }), [], { persisted: false });
+      equal(win.Prompter.markdown.serializeDocument(state.document), before);
+
+      byId(win, 'layer-toggle').click();
+      win.Prompter.editor.selectBlock('split-target', { focus: true });
+      var splitButton = byId(win, 'layer-split');
+      assert(splitButton, 'The 分行 toolbar button must exist.');
+      equal(splitButton.getAttribute('aria-label'), '分行');
+      equal(splitButton.nextElementSibling, byId(win, 'layer-collapse-all'),
+        '分行 must sit immediately above 全部收合.');
+      equal(byId(win, 'layer-collapse-all').nextElementSibling,
+        byId(win, 'layer-expand-all'));
+      splitButton.click();
+
+      var ordered = Model.normalizeSequence(state.document);
+      equal(ordered.length, 5, 'Each physical line must become its own block.');
+      equal(ordered[1].text, '一');
+      equal(ordered[1].marker, '-', 'Split blocks must keep the source Marker.');
+      equal(ordered[2].text, '二');
+      equal(ordered[2].marker, '-');
+      equal(ordered[2].blankLinesAfter, 1,
+        'An internal blank line must stay after the preceding item.');
+      equal(ordered[3].text, '三');
+      equal(ordered[3].marker, '-');
+      equal(ordered[3].blankLinesAfter, 1,
+        'The original trailing blank line must stay after the last split block.');
+      equal(ordered[4].text, '結尾');
+      equal(state.selectedBlockId, ordered[3].id,
+        'The last split block must become the selection.');
+      equal(win.document.activeElement, blockById(win, ordered[3].id),
+        'The last split block must receive focus.');
+      equal(state.editingBlockId, null);
+      var splitMarkdown = '# 標題\n- 一\n- 二\n\n- 三\n\n結尾\n';
+      equal(win.Prompter.markdown.serializeDocument(state.document), splitMarkdown);
+      assert(win.Prompter.editor.canUndo(), 'A split must be undoable.');
+
+      equal(win.Prompter.editor.undo(), true);
+      equal(win.Prompter.markdown.serializeDocument(state.document), before,
+        'Undo must restore the single multi-line block.');
+      equal(win.Prompter.editor.redo(), true);
+      equal(win.Prompter.markdown.serializeDocument(state.document), splitMarkdown,
+        'Redo must restore the split blocks.');
+    });
+  });
+
+  test('US1 分行 splits an editing block from its unsaved draft', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'split-editing-document',
+        title: '編輯分行',
+        fileName: 'split-editing.md',
+        blocks: [
+          Model.createTextBlock({ id: 'split-editing', marker: '-', text: '舊內容', seq: 1 })
+        ]
+      }), [], { persisted: false });
+
+      byId(win, 'layer-toggle').click();
+      var content = blockById(win, 'split-editing').querySelector('.block-content');
+      content.focus();
+      press(win, content, 'Enter');
+      var input = blockById(win, 'split-editing').querySelector('.block-edit-input');
+      assert(input, 'The block editor must open.');
+      var draft = '草稿一\n草稿二\n草稿三';
+      setValue(win, input, draft);
+
+      var splitButton = byId(win, 'layer-split');
+      splitButton.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 91, pointerType: 'mouse'
+      }));
+      equal(state.editingBlockId, 'split-editing',
+        'The split button must not commit the block draft on pointerdown.');
+      equal(blockById(win, 'split-editing').querySelector('.block-edit-input').value, draft,
+        'The unsaved draft must survive the split pointerdown.');
+      splitButton.click();
+
+      var ordered = Model.normalizeSequence(state.document);
+      equal(ordered.length, 3, 'The unsaved draft must be split into three blocks.');
+      equal(ordered.map(function (block) { return block.text; }).join('|'),
+        '草稿一|草稿二|草稿三');
+      equal(ordered[0].marker, '-', 'The source Marker must apply to every split block.');
+      equal(ordered[1].marker, '-');
+      equal(ordered[2].marker, '-');
+      equal(state.editingBlockId, null, 'The block editor must close after splitting.');
+      equal(state.selectedBlockId, ordered[2].id,
+        'The last split block must become the selection.');
+      assert(!win.document.querySelector('.block-edit-input'),
+        'No block editor may remain after splitting.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '- 草稿一\n- 草稿二\n- 草稿三\n');
+    });
+  });
+
+  test('US1 分行 splits the composer draft and keeps Markers and blank lines', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'split-composer-document',
+        title: '輸入框分行',
+        fileName: 'split-composer.md',
+        blocks: [
+          Model.createTextBlock({ id: 'split-existing', text: '既有內容', seq: 1 })
+        ]
+      }), [], { persisted: false });
+
+      byId(win, 'layer-toggle').click();
+      win.Prompter.editor.openComposer('split-existing');
+      var input = composerInput(win);
+      assert(input, 'The composer input must open after the existing block.');
+      var source = '第一行\n## 第二行\n\n- 第三行';
+      setValue(win, input, source);
+      input.focus();
+      input.setSelectionRange(2, 5);
+
+      var splitButton = byId(win, 'layer-split');
+      splitButton.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 92, pointerType: 'mouse'
+      }));
+      splitButton.click();
+
+      var ordered = Model.normalizeSequence(state.document);
+      equal(ordered.length, 4, 'Every composer line must become a separate block.');
+      equal(ordered[0].text, '既有內容');
+      equal(ordered[1].text, '第一行');
+      equal(ordered[1].marker, 'none');
+      equal(ordered[2].text, '第二行');
+      equal(ordered[2].marker, '##', 'Per-line Markers must be detected.');
+      equal(ordered[2].blankLinesAfter, 1,
+        'The blank line before the next item must be preserved.');
+      equal(ordered[3].text, '第三行');
+      equal(ordered[3].marker, '-');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '既有內容\n第一行\n## 第二行\n\n- 第三行\n');
+
+      assert(state.composer, 'A fresh composer must open below the split items.');
+      equal(state.composer.text, '');
+      equal(state.composer.insertIndex, 4,
+        'The fresh composer must follow the last split block.');
+      equal(win.document.activeElement, composerInput(win),
+        'The fresh composer input must receive focus.');
+    });
+  });
+
+  test('US1 分行 inherits the focused layer and preserves a no-op composer draft', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'split-layer-document',
+        title: '層級分行',
+        fileName: 'split-layer.md',
+        blocks: [
+          Model.createTextBlock({ id: 'split-layer-p', text: '內容', seq: 1 })
+        ]
+      }), [], { persisted: false });
+
+      byId(win, 'layer-toggle').click();
+      var toolbar = byId(win, 'layer-toolbar');
+      toolbar.querySelector('[data-layer="-"]').click();
+      var input = composerInput(win);
+      equal(state.composer.marker, '-', 'The empty layer must apply to the composer.');
+      setValue(win, input, 'A\n# B');
+      input.focus();
+
+      var splitButton = byId(win, 'layer-split');
+      splitButton.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 93, pointerType: 'mouse'
+      }));
+      splitButton.click();
+
+      var added = state.document.blocks.filter(function (block) {
+        return block.text === 'A' || block.text === 'B';
+      });
+      equal(added.length, 2);
+      equal(added[0].marker, '-', 'The focused layer Marker must override per-line Markers.');
+      equal(added[1].marker, '-');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '內容\n- A\n- B\n');
+
+      input = composerInput(win);
+      setValue(win, input, 'single line');
+      input.focus();
+      input.setSelectionRange(3, 5);
+      var blockCount = state.document.blocks.length;
+      var insertIndex = state.composer.insertIndex;
+      splitButton.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 94, pointerType: 'mouse'
+      }));
+      splitButton.click();
+
+      equal(state.document.blocks.length, blockCount,
+        'A single-line composer draft must not create blocks.');
+      equal(state.composer.text, 'single line',
+        'A no-op split must keep the composer draft.');
+      equal(state.composer.insertIndex, insertIndex);
+      equal(win.document.activeElement, composerInput(win),
+        'A no-op split must return focus to the composer input.');
+      equal(composerInput(win).selectionStart, 3);
+      equal(composerInput(win).selectionEnd, 5,
+        'A no-op split must preserve the composer selection.');
+    });
+  });
+
   test('US1 clicking a focused-layer block edits and selects all text', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;

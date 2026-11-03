@@ -50,7 +50,8 @@
     [
       'file-menu-button', 'file-menu', 'edit-menu-button', 'edit-menu',
       'directory-toggle', 'directory', 'directory-overlay',
-      'layer-toggle', 'layer-toolbar', 'layer-collapse-all', 'layer-expand-all',
+      'layer-toggle', 'layer-toolbar', 'layer-split', 'layer-collapse-all',
+      'layer-expand-all',
       'app-main', 'preview-button', 'preview-expand-button', 'copy-button', 'style-select',
       'theme-toggle', 'settings-button',
       'document-title', 'storage-warning', 'storage-warning-text',

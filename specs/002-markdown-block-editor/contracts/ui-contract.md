@@ -238,9 +238,9 @@ Each image block shows:
 
 ## Layer Focus Toolbar
 
-- A second rail button below `文件目錄` opens a vertical toolbar with seven buttons in this order:
-  `#`, `##`, `###`, `-`, `1.`, `>`, `.`, followed by `全部收合` and `全部展開` actions. The toggle
-  exposes `aria-expanded`; toolbar buttons expose `aria-pressed`.
+- A second rail button below `文件目錄` opens a vertical toolbar with seven layer buttons in this
+  order: `#`, `##`, `###`, `-`, `1.`, `>`, `.`, followed by `分行`, `全部收合`, and `全部展開`
+  actions. The toggle exposes `aria-expanded`; layer buttons expose `aria-pressed`.
 - Activating a layer makes every text block with that Marker the active layer, starts editing
   the first match with all text selected, and automatically collapses each matching block that
   has child items. The `1.` layer includes all numbered ordered prefixes (`1.`, `2.`, ...).
@@ -254,6 +254,14 @@ Each image block shows:
 - While a layer is active, Up/Down moves through matching blocks and the composer at its slot,
   commits the current edit, and reopens the destination in edit mode with all text selected,
   wrapping at the ends. Reaching the composer focuses its input without changing its draft.
+- `分行` splits newline-containing text into separate blocks. With a block selected or being
+  edited, it uses the block's current text, including an unsaved draft, keeps the source Marker on
+  every result, converts blank lines to blank-line separators, selects and focuses the last result,
+  and records one undo step. With the composer focused, it takes precedence over a block selection
+  and splits the draft at the composer's insertion point, detecting per-line Markers unless a
+  focused layer or explicit composer Marker overrides them; unmarked lines use the composer
+  Marker, and a fresh composer below the inserted blocks receives focus. A no-op leaves the
+  document and any composer draft, caret, and selection unchanged.
 - `全部收合` collapses every collapsible block in the active layer without hiding that layer's own
   headers; `全部展開` restores them. With no layer active, the actions apply to every collapsible
   section in the document.
@@ -523,6 +531,7 @@ a custom unload dialog. This limitation is recorded in `../plan.md`.
 | Directory | Tab, Enter/Space | Focus/open a document. |
 | Preview | Enter/Space | Toggle the live right-side preview pane. |
 | Preview expand | Enter/Space | Toggle between the split preview and the full editor-area preview. |
+| Layer toolbar | Tab, Enter/Space | Move through the layer buttons and actions; choose a layer or activate `分行`. |
 | Block | Tab | Focus block in reading order. |
 | Block | Cmd/Ctrl + click | Toggle the block in the current multi-selection. |
 | Block/canvas | Up/Down | Select the previous/next sequence item, including the composer at its slot; wraps from first to last and last to first. Entering a text block's text zone starts editing with all text selected. Plain Up/Down also navigate while editing: the current edit commits first, and a text destination stays in edit mode. |
