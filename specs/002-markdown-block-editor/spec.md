@@ -577,7 +577,9 @@ retained. Open the settings panel and clear the local library after confirming t
   Switching tabs MUST restore each document's blocks, assets, dirty state, composer, selection,
   and file target. Closing a dirty tab MUST offer Save, Discard, or Cancel; closing a clean tab
   MUST remove it and activate a neighboring tab, and closing the last tab MUST return to the
-  empty workspace. The active tab's title MUST remain editable.
+  empty workspace. The active tab's title MUST remain editable, and pressing Enter in that title
+  input MUST commit the title, normalize an empty value to `Untitled`, and leave the editing
+  state.
 - **FR-051**: On viewports wider than 768 px, the preview pane MUST open by default when a
   document is created, opened, or restored, and MUST remain open across tab switches and updates.
   On viewports 768 px wide or narrower, it MUST start closed and MUST NOT open automatically;
@@ -773,7 +775,7 @@ retained. Open the settings panel and clear the local library after confirming t
 - Preview uses standard Markdown rendering plus KaTeX math; other custom Markdown extensions are
   out of scope.
 
-## Completion Status (2026-11-03)
+## Completion Status (2026-11-05)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
 - Automated verification: 110 unit tests and 122 browser tests pass in Chrome 156, online and
@@ -781,6 +783,8 @@ retained. Open the settings panel and clear the local library after confirming t
   layer-focus, full-width preview, and `分行` checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
   user's request.
+- Tab-title verification (2026-11-05): Chrome passes the check confirming that pressing Enter in
+  the active tab title commits the title and leaves the input's editing state.
 - `分行` verification (2026-11-03): Chrome passes checks confirming that a selected or editing
   block splits from its current or unsaved text with its Marker, internal and trailing blank
   lines preserved, the last result selected, and undo/redo restoring each state; that a focused

@@ -37,7 +37,7 @@
 - 56 functional requirements and 16 measurable outcomes are defined.
 - The specification is ready for `/speckit.plan`.
 
-## Post-Implementation Verification (2026-11-03)
+## Post-Implementation Verification (2026-11-05)
 
 - Unit and contract tests: **110 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection and rank ordering, blank-line/newline
@@ -48,8 +48,9 @@
   gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
   Marker, focused-composer layer selection, empty layers that remain selectable with the composer
   Marker applied, single-click editing of text blocks, composer click focus, Up/Down navigation
-  through the composer in layer focus, the full editor-area preview expand control, and `分行`
-  for selected, editing, and composer text with blank-line preservation, layer Marker
+  through the composer in layer focus, the full editor-area preview expand control, Enter
+  committing the active tab title, and `分行` for selected, editing, and composer text with
+  blank-line preservation, layer Marker
   inheritance, focus handling, no-op caret retention, and undo/redo. Firefox
   159.0 and Edge 156.0.4314.50 last passed the prior 112-check suite as supplementary checks. Safari
   testing is paused at the user's request; historical Safari results remain in `quickstart.md`

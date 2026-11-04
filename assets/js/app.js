@@ -1601,6 +1601,13 @@
       updatePreviewLabel();
       setDirty(true);
     });
+    elements['document-title'].addEventListener('keydown', function (event) {
+      if (event.isComposing || event.keyCode === 229 || event.key !== 'Enter') {
+        return;
+      }
+      event.preventDefault();
+      elements['document-title'].blur();
+    });
     elements['document-title'].addEventListener('blur', function () {
       if (!state.document || !elements['document-title'].isConnected) {
         return;

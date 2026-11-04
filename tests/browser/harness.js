@@ -933,7 +933,7 @@
     });
   });
 
-  test('US2 the active tab title remains editable', function () {
+  test('US2 the active tab title is editable and Enter commits it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       commitComposer(win, 'Tab title');
@@ -944,6 +944,14 @@
       equal(state.document.title, '新標題');
       equal(input.value, '新標題');
       equal(state.dirty, true, 'Editing the tab title must mark the document dirty.');
+      input.focus();
+      equal(win.document.activeElement, input);
+      press(win, input, 'Enter');
+      assert(win.document.activeElement !== input,
+        'Enter must leave the tab title editing state.');
+      equal(input.value, '新標題');
+      equal(state.document.title, '新標題',
+        'Enter must keep the committed title.');
       input.blur();
       equal(input.value, '新標題');
     });
