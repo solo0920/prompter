@@ -48,9 +48,9 @@
   gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
   Marker, focused-composer layer selection, empty layers that remain selectable with the composer
   Marker applied, single-click editing of text blocks, composer click focus, Up/Down navigation
-  through the composer in layer focus, the full editor-area preview expand control, Enter
-  committing the active tab title, and `分行` for selected, editing, and composer text with
-  blank-line preservation, layer Marker
+  through the composer in layer focus, the full editor-area preview expand control, clicking a
+  tab to select its full title and Enter committing it, and `分行` for selected, editing, and
+  composer text with blank-line preservation, layer Marker
   inheritance, focus handling, no-op caret retention, and undo/redo. Firefox
   159.0 and Edge 156.0.4314.50 last passed the prior 112-check suite as supplementary checks. Safari
   testing is paused at the user's request; historical Safari results remain in `quickstart.md`

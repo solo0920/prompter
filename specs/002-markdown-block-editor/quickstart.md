@@ -360,8 +360,9 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 5. Edit a block and commit it. Confirm the right preview updates without closing or hiding the
    editor.
 6. Choose File > New Document twice. Confirm each document opens in a new tab above the editor, each tab
-   has a small `×`, and the active tab title is editable. Type a new title and press Enter;
-   confirm the title is committed and the input leaves its editing state.
+   has a small `×`, and the active tab title is editable. Click a tab; confirm its title is
+   fully selected for replacement. Type a new title and press Enter; confirm the title is
+   committed and the input leaves its editing state.
 7. Switch tabs. Confirm blocks, dirty state, composer, and selection are restored per tab, and
    the preview updates to the active document.
 8. Close a clean tab with `×`; confirm the neighboring tab becomes active. Make a tab dirty and
@@ -547,9 +548,9 @@ online and offline, and is the required release gate; the latest checks cover la
 insertion with the focused Marker, focused-composer layer selection, empty layers that remain
 selectable with the composer Marker applied, single-click editing of text blocks, composer click
 focus, Up/Down navigation through the composer in layer focus, the full editor-area preview
-expand control, Enter committing the active tab title, and `分行` for selected, editing, and
-composer text with blank-line preservation, layer Marker inheritance, focus handling, no-op caret
-retention, and undo/redo.
+expand control, clicking a tab to select its full title, Enter committing that title, and `分行`
+for selected, editing, and composer text with blank-line preservation, layer Marker inheritance,
+focus handling, no-op caret retention, and undo/redo.
 Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
 27.2 historically passed the HTTP harness 108/108 and a direct `file://` startup smoke; Safari
 testing is paused and is not part of the current loop.

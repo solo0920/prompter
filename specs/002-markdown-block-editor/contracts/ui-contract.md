@@ -109,6 +109,7 @@ behavior so tests can be written against it.
 - File > New, File > Open, and directory selection open or activate a tab without discarding
   other open tabs.
 - Default `Untitled` for a new document; opened documents use the file name without extension.
+- Clicking a tab focuses its title input and selects the entire title.
 - Editing the title marks the active document dirty and updates its default save file name.
 - Pressing Enter in the active title input commits the title and exits the editing state.
 - Empty title falls back to `Untitled` on Enter, blur, or save.

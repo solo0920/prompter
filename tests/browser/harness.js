@@ -897,7 +897,14 @@
           return state.document && state.document.id === 'tab-first' ? true : null;
         }, 5000);
       }).then(function () {
-        equal(byId(win, 'document-title').value, '甲文件');
+        var switchedTitle = byId(win, 'document-title');
+        equal(switchedTitle.value, '甲文件');
+        equal(win.document.activeElement, switchedTitle,
+          'Clicking a tab must focus its title for editing.');
+        equal(switchedTitle.selectionStart, 0,
+          'Clicking a tab must select the whole title.');
+        equal(switchedTitle.selectionEnd, switchedTitle.value.length,
+          'Clicking a tab must select the whole title.');
         equal(byId(win, 'preview-file-name').textContent, '甲文件');
         equal(win.document.querySelector(
           '.document-tab[data-document-id="tab-first"]').classList.contains('active'), true);
@@ -933,7 +940,7 @@
     });
   });
 
-  test('US2 the active tab title is editable and Enter commits it', function () {
+  test('US2 clicking a tab selects its title and Enter commits it', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);
       commitComposer(win, 'Tab title');
@@ -952,6 +959,19 @@
       equal(input.value, '新標題');
       equal(state.document.title, '新標題',
         'Enter must keep the committed title.');
+      input.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 41, pointerType: 'mouse'
+      }));
+      input.focus();
+      input.dispatchEvent(new win.PointerEvent('pointerup', {
+        bubbles: true, cancelable: true, pointerId: 41, pointerType: 'mouse'
+      }));
+      equal(win.document.activeElement, input,
+        'Clicking the tab title must focus it for editing.');
+      equal(input.selectionStart, 0,
+        'Clicking the tab title must select the whole title.');
+      equal(input.selectionEnd, input.value.length,
+        'Clicking the tab title must select the whole title.');
       input.blur();
       equal(input.value, '新標題');
     });

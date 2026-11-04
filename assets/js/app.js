@@ -310,7 +310,7 @@
         label.title = title;
         label.textContent = title;
         label.addEventListener('click', function () {
-          activateTab(tab.document.id, { focus: 'canvas' });
+          activateTab(tab.document.id, { focus: 'title' });
         });
         wrapper.appendChild(label);
       }
@@ -504,6 +504,9 @@
       global.Prompter.editor.focusComposer();
     } else if (opts.focus === 'canvas' && elements.canvas) {
       elements.canvas.focus();
+    } else if (opts.focus === 'title' && elements['document-title']) {
+      elements['document-title'].focus();
+      elements['document-title'].select();
     }
   }
 
@@ -1593,6 +1596,19 @@
     if (!elements['document-title']) {
       return;
     }
+    var titleSelectPending = false;
+    elements['document-title'].addEventListener('pointerdown', function () {
+      titleSelectPending = global.document.activeElement !== elements['document-title'];
+    });
+    elements['document-title'].addEventListener('pointerup', function () {
+      if (titleSelectPending) {
+        titleSelectPending = false;
+        elements['document-title'].select();
+      }
+    });
+    elements['document-title'].addEventListener('focus', function () {
+      elements['document-title'].select();
+    });
     elements['document-title'].addEventListener('input', function () {
       if (!state.document) {
         return;
