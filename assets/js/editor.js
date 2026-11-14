@@ -619,6 +619,74 @@
     return { start: input.selectionStart, end: input.selectionEnd };
   }
 
+  function collapseMatchingLayerSections(state) {
+    var autoCollapsed = 0;
+    var ordered = Model.normalizeSequence(state.document);
+    var model = collapseModelForDocument(state.document, ordered);
+    var autoSet = collapseSetFor(state.document);
+    ordered.forEach(function (block) {
+      if (blockMatchesLayer(block) && model.hasChildren[block.id]) {
+        if (!autoSet[block.id]) {
+          autoCollapsed += 1;
+        }
+        autoSet[block.id] = true;
+      }
+    });
+    return autoCollapsed;
+  }
+
+  function applyMarkerAndFocusLayer(marker) {
+    var state = getState();
+    if (!state || !state.document || layerFilter) {
+      return false;
+    }
+    var ids = selectedBlockIds(state).slice();
+    if (ids.length < 2) {
+      return false;
+    }
+    var anchor = null;
+    var changed = 0;
+    ids.forEach(function (id) {
+      var block = findBlock(id);
+      if (!block || block.type !== 'text') {
+        return;
+      }
+      if (!anchor || id === state.selectedBlockId) {
+        anchor = block;
+      }
+      if (block.marker !== marker) {
+        block.marker = marker;
+        changed += 1;
+      }
+    });
+    if (!anchor) {
+      return false;
+    }
+    state.selectedBlockIds = ids;
+    state.selectedBlockId = anchor.id;
+    layerFilter = marker;
+    layerFilterAllowsEmpty = false;
+    ensureLayerComposer(state, marker);
+    var autoCollapsed = collapseMatchingLayerSections(state);
+    if (changed) {
+      markDirty();
+    }
+    render();
+    var focused = state.selectedBlockId ? blockElement(state.selectedBlockId) : null;
+    if (focused) {
+      focused.focus();
+    }
+    var matches = Model.normalizeSequence(state.document).filter(function (block) {
+      return block.type === 'text' && markerMatchesLayer(block.marker, marker);
+    });
+    announce(
+      (changed ? '已將 ' + changed + ' 個選取項目改為 ' + markerLabel(marker) + ' 標記，' : '') +
+      '已聚焦 ' + layerLabel(marker) + ' 層級，共 ' + matches.length + ' 個項目' +
+      (autoCollapsed ? '，子項目已收合。' : '。')
+    );
+    return true;
+  }
+
   function setLayerFilter(marker, options) {
     var state = getState();
     if (!state || !state.document) {
@@ -652,20 +720,7 @@
     if (next) {
       ensureLayerComposer(state, next);
     }
-    var autoCollapsed = 0;
-    if (next) {
-      var autoOrdered = Model.normalizeSequence(state.document);
-      var autoModel = collapseModelForDocument(state.document, autoOrdered);
-      var autoSet = collapseSetFor(state.document);
-      autoOrdered.forEach(function (block) {
-        if (blockMatchesLayer(block) && autoModel.hasChildren[block.id]) {
-          if (!autoSet[block.id]) {
-            autoCollapsed += 1;
-          }
-          autoSet[block.id] = true;
-        }
-      });
-    }
+    var autoCollapsed = next ? collapseMatchingLayerSections(state) : 0;
     clearSelection();
     render();
     if (composerSelection) {
@@ -778,6 +833,9 @@
         pendingComposerLayerSelection = null;
         layerToolbarComposerSelection = null;
         setLayerToolbarOpen(true);
+        if (!composerSelection && applyMarkerAndFocusLayer(button.dataset.layer)) {
+          return;
+        }
         setLayerFilter(button.dataset.layer,
           composerSelection ? { composer: composerSelection } : null);
       });

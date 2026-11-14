@@ -2500,6 +2500,78 @@
     });
   });
 
+  test('US1 a layer applies to a multi-selection and keeps other matches visible', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-selection-marker-document',
+        title: '選取套用層級',
+        fileName: 'layer-selection-marker.md',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-sel-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-sel-b1', marker: '-', text: '甲', seq: 2 }),
+          Model.createTextBlock({ id: 'layer-sel-b2', marker: '-', text: '乙', seq: 3 }),
+          Model.createTextBlock({ id: 'layer-sel-b3', marker: '-', text: '丙', seq: 4 }),
+          Model.createTextBlock({ id: 'layer-sel-other', marker: '##', text: '其他小節', seq: 5 }),
+          Model.createTextBlock({ id: 'layer-sel-tail', text: '結尾', seq: 6 })
+        ]
+      }), [], { persisted: false });
+
+      byId(win, 'layer-toggle').click();
+      function cmdClick(blockId) {
+        blockById(win, blockId).querySelector('.block-content')
+          .dispatchEvent(new win.MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            metaKey: true
+          }));
+      }
+      cmdClick('layer-sel-b1');
+      cmdClick('layer-sel-b2');
+      cmdClick('layer-sel-b3');
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        'layer-sel-b1,layer-sel-b2,layer-sel-b3');
+
+      var layerButton = byId(win, 'layer-toolbar').querySelector('[data-layer="##"]');
+      layerButton.click();
+
+      var ordered = Model.normalizeSequence(state.document);
+      ['layer-sel-b1', 'layer-sel-b2', 'layer-sel-b3'].forEach(function (id) {
+        var block = ordered.filter(function (item) { return item.id === id; })[0];
+        equal(block.marker, '##', id + ' must receive the focused layer Marker.');
+      });
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','),
+        'layer-sel-b1,layer-sel-b2,layer-sel-b3',
+        'The multi-selection must survive the Marker change.');
+      equal(state.selectedBlockId, 'layer-sel-b3');
+      equal(win.document.activeElement, blockById(win, 'layer-sel-b3'),
+        'The active selected block must keep focus.');
+      equal(layerButton.getAttribute('aria-pressed'), 'true',
+        'The applied layer must become the active layer.');
+      assert(blockById(win, 'layer-sel-other').classList.contains('layer-match'),
+        'Other blocks with the same Marker must stay active and visible.');
+      assert(!blockById(win, 'layer-sel-other').classList.contains('layer-dimmed'));
+      assert(blockById(win, 'layer-sel-h1').classList.contains('layer-dimmed'),
+        'Blocks outside the active layer must dim.');
+      ['layer-sel-b1', 'layer-sel-b2', 'layer-sel-b3'].forEach(function (id) {
+        assert(blockById(win, id).classList.contains('selected'),
+          id + ' must stay highlighted after the Marker change.');
+      });
+      equal(win.document.querySelector('#canvas .composer-marker').textContent, '##',
+        'The composer must adopt the applied layer Marker.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '# 第一章\n## 甲\n## 乙\n## 丙\n## 其他小節\n結尾\n');
+      equal(state.dirty, true);
+      assert(win.Prompter.editor.canUndo(), 'The Marker change must be undoable.');
+      equal(win.Prompter.editor.undo(), true);
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '# 第一章\n- 甲\n- 乙\n- 丙\n## 其他小節\n結尾\n',
+        'Undo must restore the original selected-block Markers.');
+    });
+  });
+
   test('US1 clicking a focused-layer block edits and selects all text', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;

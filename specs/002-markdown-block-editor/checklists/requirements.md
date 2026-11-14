@@ -37,21 +37,22 @@
 - 56 functional requirements and 16 measurable outcomes are defined.
 - The specification is ready for `/speckit.plan`.
 
-## Post-Implementation Verification (2026-11-05)
+## Post-Implementation Verification (2026-11-14)
 
 - Unit and contract tests: **110 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection and rank ordering, blank-line/newline
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, forced `分行`
   splitting, and static no-network guards.
-- Browser harness: **122 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **123 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
   Marker, focused-composer layer selection, empty layers that remain selectable with the composer
-  Marker applied, single-click editing of text blocks, composer click focus, Up/Down navigation
-  through the composer in layer focus, the full editor-area preview expand control, clicking a
-  tab to select its full title and Enter committing it, and `分行` for selected, editing, and
-  composer text with blank-line preservation, layer Marker
-  inheritance, focus handling, no-op caret retention, and undo/redo. Firefox
+  Marker applied, applying a layer to a multi-selection while keeping other same-Marker blocks
+  visible, single-click editing of text blocks, composer click focus, Up/Down navigation through
+  the composer in layer focus, the full editor-area preview expand control, clicking a tab to
+  select its full title and Enter committing it, and `分行` for selected, editing, and composer
+  text with blank-line preservation, layer Marker inheritance, focus handling, no-op caret
+  retention, and undo/redo. Firefox
   159.0 and Edge 156.0.4314.50 last passed the prior 112-check suite as supplementary checks. Safari
   testing is paused at the user's request; historical Safari results remain in `quickstart.md`
   and Safari must not be launched during routine verification. The feature 004 start screen and
@@ -81,9 +82,12 @@
 - Layer focus: the rail's second button opens a seven-layer toolbar; choosing a layer edits its
   first block, automatically collapses that layer's child items, dims and locks other layers,
   hides the composer, and lets Up/Down cycle only that layer's blocks in edit mode with full
-  selection. `分行` sits immediately above `全部收合`/`全部展開` and splits a selected, editing,
-  or composer text into one block per newline, preserving the source or focused layer Marker,
-  blank-line separation, undo/redo, and focus behavior. `全部收合`/`全部展開` collapse or restore
+  selection. With multiple blocks selected and no layer active, choosing a layer converts every
+  selected text block to that Marker, keeps the selection and active block focused, and shows
+  other matching blocks at the same layer. `分行` sits immediately above `全部收合`/`全部展開`
+  and splits a selected, editing, or composer text into one block per newline, preserving the
+  source or focused layer Marker, blank-line separation, undo/redo, and focus behavior.
+  `全部收合`/`全部展開` collapse or restore
   the active layer's sections, or the whole document when no layer is active. Repeating the
   layer, closing the toolbar, or switching documents restores normal interaction without changing
   Markdown, Preview, or Copy.

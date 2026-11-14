@@ -251,6 +251,10 @@ Each image block shows:
 - A layer with no matching blocks can still be selected. Its button becomes pressed, every
   existing block stays dimmed, and focus moves to the composer with that layer's Marker so the
   first item of that kind can be created. No block editor opens and no error is announced.
+- With two or more blocks selected and no layer active, activating a layer changes every selected
+  text block to that Marker while keeping the selection and focus on its active block. The layer
+  becomes active, so other blocks with the same Marker stay visible and are not dimmed, and the
+  composer adopts the Marker.
 - Clicking a matching block with the primary mouse button enters edit mode immediately with the
   block's full text selected. Clicking another matching block commits the current edit first.
 - While a layer is active, Up/Down moves through matching blocks and the composer at its slot,
