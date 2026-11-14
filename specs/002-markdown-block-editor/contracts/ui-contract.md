@@ -281,6 +281,9 @@ Each image block shows:
   and keeps focus in the composer instead of editing a block. The layer is selected even when no
   block uses its Marker. The same handoff applies when the layer toolbar is opened from the
   focused composer and a layer button is then activated.
+- Canceling layer focus while the composer is focused keeps focus on the control used to cancel
+  it; the composer loses focus and its blue focus border. It does not pull focus back into the
+  composer.
 - Matching blocks keep their lower-right `+` visible; its accessible name includes the focused
   kind, e.g. `在此區塊下方新增 ## 標題`. Activating it opens a composer at that slot with the
   focused layer's Marker, so a user can add another item of the focused kind without leaving

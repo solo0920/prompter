@@ -61,7 +61,7 @@ Current result (2026-11-14): **110 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-11-14): Chrome **123 passing, 0 failing** (required gate), online and
+Current result (2026-11-14): Chrome **124 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
 focused-composer layer selection, empty layers that remain selectable, applying a layer to a
 multi-selection while keeping other same-Marker blocks visible, single-click editing of text
@@ -84,7 +84,7 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 123/123 | PASS 123/123 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, multi-selection layer conversion, click-to-edit, focused-composer layers, full-width preview, manual `分行` |
+| Chrome (macOS) | 156.0.8078.49 | PASS 124/124 | PASS 124/124 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, multi-selection layer conversion, click-to-edit, focused-composer layers and focus release, full-width preview, manual `分行` |
 | Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; last run before the layer-focus add check |
 | Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; last run before the layer-focus add check |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
@@ -273,6 +273,8 @@ opens the Marker flyout without showing a grab cursor.
 8. Without a layer active, Cmd/Ctrl-click three `-` blocks and choose `##`. Confirm the three
    selected blocks become `##`, stay selected with the active block focused, and other `##`
    blocks remain visible while non-`##` blocks dim. Confirm the composer uses `##`.
+9. With the composer focused and a layer active, choose the same layer again. Confirm the layer
+   is canceled, focus stays on the layer button, and the composer's blue focus border disappears.
 
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
@@ -547,15 +549,15 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-11-14**: Chrome 156 passes the full 123-check automated harness from `file://`,
+**Verified 2026-11-14**: Chrome 156 passes the full 124-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
-insertion with the focused Marker, focused-composer layer selection, empty layers that remain
-selectable with the composer Marker applied, applying a layer to a multi-selection while keeping
-other same-Marker blocks visible, single-click editing of text blocks, composer click focus,
-Up/Down navigation through the composer in layer focus, the full editor-area preview expand
-control, clicking a tab to select its full title, Enter committing that title, and `分行` for
-selected, editing, and composer text with blank-line preservation, layer Marker inheritance,
-focus handling, no-op caret retention, and undo/redo.
+insertion with the focused Marker, focused-composer layer selection and focus release on cancel,
+empty layers that remain selectable with the composer Marker applied, applying a layer to a
+multi-selection while keeping other same-Marker blocks visible, single-click editing of text
+blocks, composer click focus, Up/Down navigation through the composer in layer focus, the full
+editor-area preview expand control, clicking a tab to select its full title, Enter committing
+that title, and `分行` for selected, editing, and composer text with blank-line preservation,
+layer Marker inheritance, focus handling, no-op caret retention, and undo/redo.
 Firefox 159 and Edge 156 last passed the prior 112-check suite as supplementary checks. Safari
 27.2 historically passed the HTTP harness 108/108 and a direct `file://` startup smoke; Safari
 testing is paused and is not part of the current loop.

@@ -104,7 +104,7 @@ python3 -m http.server 8000
 
 開啟 <http://localhost:8000/tests/browser/harness.html>，等待頁面顯示 `PASS`。
 
-目前結果：**Chrome 123/123 passing**（線上與離線）。Firefox 與 Edge 為輔助驗證，最近一次完整結果為 112/112；Safari 測試目前暫停。
+目前結果：**Chrome 124/124 passing**（線上與離線）。Firefox 與 Edge 為輔助驗證，最近一次完整結果為 112/112；Safari 測試目前暫停。
 
 ## 開發注意事項
 

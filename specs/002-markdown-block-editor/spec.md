@@ -639,7 +639,9 @@ retained. Open the settings panel and clear the local library after confirming t
   available during layer focus and MUST automatically use the selected layer's Marker. When the
   composer input is focused, activating a layer MUST apply that layer's Marker to the composer,
   keep its draft and caret, mark the layer button selected, and MUST NOT start editing a block;
-  this MUST also work when the document has no block of the selected layer. Activating `+` on a
+  this MUST also work when the document has no block of the selected layer. Canceling layer
+  focus while the composer is focused MUST keep focus on the control used to cancel it and MUST
+  NOT return focus to the composer. Activating `+` on a
   matching block MUST open a composer at that slot with the same Marker so the user can add
   another item of the focused kind without leaving layer focus. Layer focus itself MUST NOT
   change committed Markdown content, Save, Preview, or Copy output.
@@ -783,7 +785,7 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-11-14)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 110 unit tests and 123 browser tests pass in Chrome 156, online and
+- Automated verification: 110 unit tests and 124 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
   layer-focus, full-width preview, and `分行` checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
@@ -792,6 +794,9 @@ retained. Open the settings panel and clear the local library after confirming t
   layer with multiple blocks selected changes those blocks to the layer Marker, keeps them
   selected with the active block focused, shows other same-Marker blocks, dims other layers, and
   gives the composer that Marker.
+- Layer-cancel focus verification (2026-11-14): Chrome passes the check confirming that
+  canceling an active layer while the composer is focused keeps focus on the layer button and
+  removes the composer's focus border instead of pulling focus back into the composer.
 - Tab-title verification (2026-11-05): Chrome passes the check confirming that clicking a tab
   focuses its title with the whole name selected, and that pressing Enter commits the title and
   leaves the input's editing state.

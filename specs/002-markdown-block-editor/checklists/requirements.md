@@ -44,10 +44,11 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, forced `分行`
   splitting, and static no-network guards.
-- Browser harness: **123 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **124 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
-  Marker, focused-composer layer selection, empty layers that remain selectable with the composer
-  Marker applied, applying a layer to a multi-selection while keeping other same-Marker blocks
+  Marker, focused-composer layer selection and focus release on cancel, empty layers that remain
+  selectable with the composer Marker applied, applying a layer to a multi-selection while
+  keeping other same-Marker blocks
   visible, single-click editing of text blocks, composer click focus, Up/Down navigation through
   the composer in layer focus, the full editor-area preview expand control, clicking a tab to
   select its full title and Enter committing it, and `分行` for selected, editing, and composer

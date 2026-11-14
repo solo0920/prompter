@@ -2214,6 +2214,40 @@
     });
   });
 
+  test('US1 canceling layer focus releases the composer focus', function () {
+    return appReady().then(function (win) {
+      freshDocument(win);
+      byId(win, 'layer-toggle').click();
+      var button = byId(win, 'layer-toolbar').querySelector('[data-layer="##"]');
+      button.click();
+      var composer = win.document.querySelector('#canvas .composer');
+      assert(composer, 'The focused layer must keep a composer available.');
+      equal(win.document.activeElement, composerInput(win),
+        'Selecting the empty layer must focus the composer.');
+      assert(composer.classList.contains('layer-match'));
+      assert(composer.matches(':focus-within'));
+
+      button.dispatchEvent(new win.PointerEvent('pointerdown', {
+        bubbles: true, cancelable: true, pointerId: 73, pointerType: 'mouse'
+      }));
+      button.focus();
+      button.dispatchEvent(new win.PointerEvent('pointerup', {
+        bubbles: true, cancelable: true, pointerId: 73, pointerType: 'mouse'
+      }));
+      button.click();
+
+      equal(button.getAttribute('aria-pressed'), 'false',
+        'Activating the same layer again must cancel layer focus.');
+      composer = win.document.querySelector('#canvas .composer');
+      assert(composer, 'The composer must remain available after canceling layer focus.');
+      assert(!composer.classList.contains('layer-match'));
+      assert(!composer.matches(':focus-within'),
+        'Canceling layer focus must not return focus to the composer.');
+      equal(win.document.activeElement, button,
+        'Focus must stay on the layer button after canceling layer focus.');
+    });
+  });
+
   test('US1 layer focus selects a Marker with no matching blocks', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;

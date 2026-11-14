@@ -724,8 +724,8 @@
     clearSelection();
     render();
     if (composerSelection) {
-      focusComposer(composerSelection.start, composerSelection.end);
       if (next) {
+        focusComposer(composerSelection.start, composerSelection.end);
         announce(emptyLayer
           ? '已選取 ' + layerLabel(next) + ' 層級，輸入框已套用此標記。'
           : '已聚焦 ' + layerLabel(next) + ' 層級，共 ' + matches.length +
