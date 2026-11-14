@@ -641,7 +641,7 @@
       return false;
     }
     var ids = selectedBlockIds(state).slice();
-    if (ids.length < 2) {
+    if (!ids.length) {
       return false;
     }
     var anchor = null;

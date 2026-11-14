@@ -61,10 +61,10 @@ Current result (2026-11-14): **110 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-11-14): Chrome **124 passing, 0 failing** (required gate), online and
+Current result (2026-11-14): Chrome **125 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
-focused-composer layer selection, empty layers that remain selectable, applying a layer to a
-multi-selection while keeping other same-Marker blocks visible, single-click editing of text
+focused-composer layer selection, empty layers that remain selectable, applying a layer to
+selected blocks while keeping other same-Marker blocks visible, single-click editing of text
 blocks with full text selection, composer click focus, Up/Down navigation through the composer
 in layer focus, non-overlapping block corner controls, `分行` for selected, editing, and composer
 text, and the full editor-area preview expand control.
@@ -84,7 +84,7 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 124/124 | PASS 124/124 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, multi-selection layer conversion, click-to-edit, focused-composer layers and focus release, full-width preview, manual `分行` |
+| Chrome (macOS) | 156.0.8078.49 | PASS 125/125 | PASS 125/125 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, selected-block layer conversion, click-to-edit, focused-composer layers and focus release, full-width preview, manual `分行` |
 | Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; last run before the layer-focus add check |
 | Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; last run before the layer-focus add check |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
@@ -270,9 +270,9 @@ opens the Marker flyout without showing a grab cursor.
 7. With a layer active, repeat step 6 with a line carrying a different Marker and confirm the
    layer Marker applies to every result. Then press `分行` on a single-line composer draft and
    confirm nothing changes, including the draft, caret, and selection.
-8. Without a layer active, Cmd/Ctrl-click three `-` blocks and choose `##`. Confirm the three
-   selected blocks become `##`, stay selected with the active block focused, and other `##`
-   blocks remain visible while non-`##` blocks dim. Confirm the composer uses `##`.
+8. Without a layer active, select one or more `-` blocks and choose `##`. Confirm every selected
+   block becomes `##`, stays selected with the active block focused, and other `##` blocks remain
+   visible while non-`##` blocks dim. Confirm the composer uses `##`.
 9. With the composer focused and a layer active, choose the same layer again. Confirm the layer
    is canceled, focus stays on the layer button, and the composer's blue focus border disappears.
 
@@ -549,11 +549,11 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-11-14**: Chrome 156 passes the full 124-check automated harness from `file://`,
+**Verified 2026-11-14**: Chrome 156 passes the full 125-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
 insertion with the focused Marker, focused-composer layer selection and focus release on cancel,
-empty layers that remain selectable with the composer Marker applied, applying a layer to a
-multi-selection while keeping other same-Marker blocks visible, single-click editing of text
+empty layers that remain selectable with the composer Marker applied, applying a layer to
+selected blocks while keeping other same-Marker blocks visible, single-click editing of text
 blocks, composer click focus, Up/Down navigation through the composer in layer focus, the full
 editor-area preview expand control, clicking a tab to select its full title, Enter committing
 that title, and `分行` for selected, editing, and composer text with blank-line preservation,

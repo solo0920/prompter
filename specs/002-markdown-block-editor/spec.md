@@ -622,7 +622,7 @@ retained. Open the settings panel and clear the local library after confirming t
   automatically collapse every collapsible block of that layer so its child items are hidden
   while the layer's own headers remain visible. If no block uses the Marker, the layer MUST still
   become selected and focus MUST move to the composer with that Marker; the toolbar MUST NOT
-  report an error or leave the previous layer selected. If two or more text blocks are selected
+  report an error or leave the previous layer selected. If one or more text blocks are selected
   and no layer is active, activating a layer MUST change every selected text block to that
   Marker, keep those blocks selected with the active selected block focused, and activate that
   layer so every other block with the same Marker is also shown; the composer MUST adopt the
@@ -785,13 +785,13 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-11-14)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 110 unit tests and 124 browser tests pass in Chrome 156, online and
+- Automated verification: 110 unit tests and 125 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
   layer-focus, full-width preview, and `分行` checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
   user's request.
-- Layer-conversion verification (2026-11-14): Chrome passes the check confirming that choosing a
-  layer with multiple blocks selected changes those blocks to the layer Marker, keeps them
+- Layer-conversion verification (2026-11-14): Chrome passes the checks confirming that choosing a
+  layer with one or multiple blocks selected changes those blocks to the layer Marker, keeps them
   selected with the active block focused, shows other same-Marker blocks, dims other layers, and
   gives the composer that Marker.
 - Layer-cancel focus verification (2026-11-14): Chrome passes the check confirming that

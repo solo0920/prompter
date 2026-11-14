@@ -44,10 +44,10 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, forced `分行`
   splitting, and static no-network guards.
-- Browser harness: **124 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **125 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
   Marker, focused-composer layer selection and focus release on cancel, empty layers that remain
-  selectable with the composer Marker applied, applying a layer to a multi-selection while
+  selectable with the composer Marker applied, applying a layer to selected blocks while
   keeping other same-Marker blocks
   visible, single-click editing of text blocks, composer click focus, Up/Down navigation through
   the composer in layer focus, the full editor-area preview expand control, clicking a tab to
@@ -83,7 +83,7 @@
 - Layer focus: the rail's second button opens a seven-layer toolbar; choosing a layer edits its
   first block, automatically collapses that layer's child items, dims and locks other layers,
   hides the composer, and lets Up/Down cycle only that layer's blocks in edit mode with full
-  selection. With multiple blocks selected and no layer active, choosing a layer converts every
+  selection. With selected blocks and no layer active, choosing a layer converts every
   selected text block to that Marker, keeps the selection and active block focused, and shows
   other matching blocks at the same layer. `分行` sits immediately above `全部收合`/`全部展開`
   and splits a selected, editing, or composer text into one block per newline, preserving the

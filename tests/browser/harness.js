@@ -2606,6 +2606,46 @@
     });
   });
 
+  test('US1 a layer applies to a single selected block', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = freshDocument(win);
+      var Model = win.Prompter.model;
+      app.setDocument(Model.createPromptDocument({
+        id: 'layer-single-selection-document',
+        title: '單選套用層級',
+        fileName: 'layer-single-selection.md',
+        blocks: [
+          Model.createTextBlock({ id: 'layer-single-h1', marker: '#', text: '第一章', seq: 1 }),
+          Model.createTextBlock({ id: 'layer-single-b1', marker: '-', text: '甲', seq: 2 }),
+          Model.createTextBlock({ id: 'layer-single-other', marker: '##', text: '其他小節', seq: 3 })
+        ]
+      }), [], { persisted: false });
+
+      byId(win, 'layer-toggle').click();
+      blockById(win, 'layer-single-b1').querySelector('.block-content')
+        .dispatchEvent(new win.MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          metaKey: true
+        }));
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','), 'layer-single-b1');
+      byId(win, 'layer-toolbar').querySelector('[data-layer="##"]').click();
+
+      equal(state.document.blocks.filter(function (block) {
+        return block.id === 'layer-single-b1';
+      })[0].marker, '##', 'The single selected block must receive the layer Marker.');
+      equal(win.Prompter.editor.getSelectedBlockIds().join(','), 'layer-single-b1',
+        'The selected block must stay selected.');
+      equal(win.document.activeElement, blockById(win, 'layer-single-b1'),
+        'The converted block must keep focus.');
+      assert(!blockById(win, 'layer-single-other').classList.contains('layer-dimmed'),
+        'The other matching block must stay visible.');
+      equal(win.Prompter.markdown.serializeDocument(state.document),
+        '# 第一章\n## 甲\n## 其他小節\n');
+    });
+  });
+
   test('US1 clicking a focused-layer block edits and selects all text', function () {
     return appReady().then(function (win) {
       var app = win.Prompter.app;
