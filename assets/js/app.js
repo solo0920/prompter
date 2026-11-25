@@ -563,6 +563,32 @@
     }
   }
 
+  function blockIdMapFor(previousDocument, nextDocument) {
+    var map = {};
+    if (!previousDocument || !nextDocument) {
+      return map;
+    }
+    var previous = Model.normalizeSequence(previousDocument);
+    var next = Model.normalizeSequence(nextDocument);
+    previous.forEach(function (block, index) {
+      if (next[index]) {
+        map[block.id] = next[index].id;
+      }
+    });
+    return map;
+  }
+
+  function remapComposer(composer, blockIdMap) {
+    if (!composer) {
+      return null;
+    }
+    var copy = Object.assign({}, composer);
+    if (copy.anchorBlockId) {
+      copy.anchorBlockId = blockIdMap[copy.anchorBlockId] || null;
+    }
+    return copy;
+  }
+
   function setDocument(document, assets, options) {
     var opts = options || {};
     if (!document) {
@@ -581,14 +607,32 @@
       applyTab(tab);
     } else {
       var active = activeTab();
+      var preservedComposer = null;
+      var preservedSelectedIds = [];
+      var preservedSelectedId = null;
+      if (opts.preserveEditorState === true) {
+        var blockIdMap = blockIdMapFor(state.document, document);
+        preservedComposer = remapComposer(state.composer, blockIdMap);
+        preservedSelectedIds = (state.selectedBlockIds || []).map(function (id) {
+          return blockIdMap[id];
+        }).filter(function (id) {
+          return !!id;
+        });
+        preservedSelectedId = state.selectedBlockId
+          ? blockIdMap[state.selectedBlockId] || null
+          : null;
+        if (!preservedSelectedId && preservedSelectedIds.length) {
+          preservedSelectedId = preservedSelectedIds[preservedSelectedIds.length - 1];
+        }
+      }
       active.document = document;
       active.assets = assets ? assets.slice() : [];
       active.fileTarget = opts.fileTarget !== undefined ? opts.fileTarget : active.fileTarget;
       active.documentPersisted = opts.persisted === true;
       active.dirty = opts.dirty === true;
-      active.composer = null;
-      active.selectedBlockId = null;
-      active.selectedBlockIds = [];
+      active.composer = preservedComposer;
+      active.selectedBlockId = preservedSelectedId;
+      active.selectedBlockIds = preservedSelectedIds;
       active.editingBlockId = null;
       state.activeTabId = document.id;
       applyTab(active);

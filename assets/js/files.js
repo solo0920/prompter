@@ -1155,7 +1155,10 @@
       }
     }).then(function () {
       if (saveAs) {
-        app.setDocument(workingDocument, workingAssets, { persisted: true });
+        app.setDocument(workingDocument, workingAssets, {
+          persisted: true,
+          preserveEditorState: true
+        });
       } else {
         var document = app.state.document;
         document.title = workingDocument.title;

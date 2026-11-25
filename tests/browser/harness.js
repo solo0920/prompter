@@ -4864,6 +4864,7 @@
     return appReady().then(function (win) {
       var app = win.Prompter.app;
       var state = freshDocument(win);
+      var Model = win.Prompter.model;
       commitComposer(win, '直接寫入');
       var imageInput = byId(win, 'image-input');
       var data = new win.DataTransfer();
@@ -4876,6 +4877,11 @@
       }, 8000).then(function () {
         var original = state.document;
         var originalId = original.id;
+        var draftInput = composerInput(win);
+        assert(draftInput, 'The composer must remain open before Save As.');
+        setValue(win, draftInput, '另存草稿');
+        var draftMarker = state.composer.marker;
+        var draftIndex = state.composer.insertIndex;
         return state.storage.saveDocument(original, state.assets).then(function () {
           var directory = fakeDirectory(win);
           var pickerCalls = 0;
@@ -4906,6 +4912,19 @@
             equal(state.documentPersisted, true);
             equal(state.dirty, false);
             equal(state.assets[0].documentId, state.document.id);
+            var restoredInput = composerInput(win);
+            assert(restoredInput, 'Save As must keep the composer visible.');
+            equal(restoredInput.value, '另存草稿',
+              'Save As must keep the composer draft.');
+            equal(state.composer.text, '另存草稿');
+            equal(state.composer.marker, draftMarker,
+              'Save As must keep the composer Marker.');
+            equal(state.composer.insertIndex, draftIndex,
+              'Save As must keep the composer insertion slot.');
+            var restoredOrder = Model.normalizeSequence(state.document);
+            equal(state.composer.anchorBlockId,
+              draftIndex > 0 ? restoredOrder[draftIndex - 1].id : null,
+              'Save As must remap the composer anchor to the cloned block.');
             assert(directory.files['picker.png'] instanceof win.Blob,
               'The image file was not written.');
             assert(directory.files['direct-test.md'] instanceof win.Blob,

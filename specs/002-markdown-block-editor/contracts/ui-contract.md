@@ -52,7 +52,7 @@ behavior so tests can be written against it.
 | File > New Document | `New Document` | Opens a new tab with a blank document titled `Untitled` and one composer; existing tabs stay open. |
 | File > Open File | `Open File` | Opens the multi-file picker; opened Markdown files appear in new tabs. |
 | File > Save | `Save` | Disabled when no document. First save asks for a name/location; later saves target the current file when available. |
-| File > Save As | `Save As` | Disabled when no document. Asks for a new name/location and creates a new document entry. |
+| File > Save As | `Save As` | Disabled when no document. Asks for a new name/location, creates a new document entry, and keeps the open composer, draft, Marker, insertion slot, and selection. |
 | File > Insert Image | `Insert Image` | Opens the image picker; disabled when no document. |
 | Edit | `Edit` | Opens the Edit menu immediately to the right of File. |
 | Edit > Undo | `Undo` | Undoes the latest document-changing action. Disabled when no undo step is available; displays the platform shortcut (`⌘Z` or `Ctrl+Z`). |

@@ -45,7 +45,7 @@ canonical Markdown serializer, reading order, blank-line/newline preservation, s
 image reference matching, the HTML renderer, preferences, storage degradation, composer
 Markdown splitting, and security guards. They do not require npm packages.
 
-Current result (2026-11-14): **110 passing, 0 failing**.
+Current result (2026-11-25): **110 passing, 0 failing**.
 
 ### Browser harness
 
@@ -61,7 +61,7 @@ Current result (2026-11-14): **110 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-11-14): Chrome **125 passing, 0 failing** (required gate), online and
+Current result (2026-11-25): Chrome **125 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
 focused-composer layer selection, empty layers that remain selectable, applying a layer to
 selected blocks while keeping other same-Marker blocks visible, single-click editing of text
@@ -425,7 +425,8 @@ session-only; arrow, Tab, and marker-menu keyboard navigation stays inside the e
 3. Edit the document; choose Save. Confirm the same files update and the directory entry moves
    to the top.
 4. Choose Save As again with a new name; confirm a second document and files are created and the
-   original files are unchanged.
+   original files are unchanged. Keep a composer draft open before saving and confirm the
+   composer, draft, Marker, insertion slot, and selection survive Save As.
 5. Cancel a picker; confirm the document and dirty state remain.
 6. Create a file-name conflict with an unrelated file; confirm the conflict dialog prevents a
    silent overwrite.
@@ -549,7 +550,7 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-11-14**: Chrome 156 passes the full 125-check automated harness from `file://`,
+**Verified 2026-11-25**: Chrome 156 passes the full 125-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
 insertion with the focused Marker, focused-composer layer selection and focus release on cancel,
 empty layers that remain selectable with the composer Marker applied, applying a layer to

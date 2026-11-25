@@ -394,7 +394,9 @@ retained. Open the settings panel and clear the local library after confirming t
   belong together.
 - **FR-013**: Save As MUST ask for a new file name or location, create a new Markdown file and
   its associated image files, add a new directory entry, leave the original document
-  unchanged, and make the new document the current target.
+  unchanged, and make the new document the current target. The new document MUST keep the
+  current editor state, including an open composer with its draft, Marker, insertion slot, and
+  the block selection.
 - **FR-014**: Save and Save As MUST be disabled when no document is open; New and Open MUST
   always be available.
 - **FR-015**: New, Open, and switching documents MUST preserve other open tabs without
@@ -782,7 +784,7 @@ retained. Open the settings panel and clear the local library after confirming t
 - Preview uses standard Markdown rendering plus KaTeX math; other custom Markdown extensions are
   out of scope.
 
-## Completion Status (2026-11-14)
+## Completion Status (2026-11-25)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
 - Automated verification: 110 unit tests and 125 browser tests pass in Chrome 156, online and
@@ -797,6 +799,9 @@ retained. Open the settings panel and clear the local library after confirming t
 - Layer-cancel focus verification (2026-11-14): Chrome passes the check confirming that
   canceling an active layer while the composer is focused keeps focus on the layer button and
   removes the composer's focus border instead of pulling focus back into the composer.
+- Save As editor-state verification (2026-11-25): Chrome passes the check confirming that Save As
+  keeps the composer visible with its draft, Marker, and insertion slot, and remaps its anchor
+  to the cloned block so the input remains usable.
 - Tab-title verification (2026-11-05): Chrome passes the check confirming that clicking a tab
   focuses its title with the whole name selected, and that pressing Enter commits the title and
   leaves the input's editing state.

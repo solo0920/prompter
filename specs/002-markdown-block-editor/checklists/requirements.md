@@ -37,7 +37,7 @@
 - 56 functional requirements and 16 measurable outcomes are defined.
 - The specification is ready for `/speckit.plan`.
 
-## Post-Implementation Verification (2026-11-14)
+## Post-Implementation Verification (2026-11-25)
 
 - Unit and contract tests: **110 passing, 0 failing** (`node --test tests/unit/*.test.js`).
   Coverage includes model defaults, Marker detection and rank ordering, blank-line/newline
