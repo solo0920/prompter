@@ -318,10 +318,11 @@ Each image block shows:
   text area grows wider with its content up to the block maximum and grows taller as text
   wraps.
 - Enter commits and exits edit mode; Shift+Enter inserts a line break; Escape cancels and
-  restores the original text and marker; clicking outside commits. If the submitted value has
-  multiple lines with obvious Markers, the same parser as the composer replaces the edited block
-  with the resulting sequence, preserves the original block's separator, and selects the last
-  new block. Plain Up/Down take priority: they commit the current edit and move to the adjacent
+  restores the original text and marker; clicking outside commits. A normal Enter commit clears
+  the selection and returns focus to the canvas, removing the selected styling. If the submitted
+  value has multiple lines with obvious Markers, the same parser as the composer replaces the
+  edited block with the resulting sequence, preserves the original block's separator, and selects
+  the last new block. Plain Up/Down take priority: they commit the current edit and move to the adjacent
   item instead of moving the caret.
 - After committing a text block, the next composer inherits that block's Marker.
 - Marker detection applies on commit: a recognized prefix typed at the start is extracted once.

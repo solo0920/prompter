@@ -447,7 +447,8 @@ retained. Open the settings panel and clear the local library after confirming t
   MUST insert a line break, Escape MUST cancel the edit, and clicking outside MUST commit the
   edit. When the submitted value contains multiple lines with obvious Markers, Enter MUST apply
   the same parse and split rules as FR-017 and replace the edited block with the resulting
-  blocks.
+  blocks. A normal Enter commit without splitting MUST clear the block selection and return
+  focus to the canvas so the block no longer shows selected styling.
 - **FR-022**: A text block MUST hold one or more lines of text. Enter MUST commit rather than
   insert a line break; Shift+Enter MUST insert a line break. The input box MUST grow wider as
   text exceeds its current width, up to its maximum width, and MUST grow taller as content
@@ -787,7 +788,7 @@ retained. Open the settings panel and clear the local library after confirming t
 ## Completion Status (2026-11-25)
 
 - Implementation: complete; all 96 tasks in `tasks.md` are checked.
-- Automated verification: 110 unit tests and 125 browser tests pass in Chrome 156, online and
+- Automated verification: 110 unit tests and 126 browser tests pass in Chrome 156, online and
   offline, from `file://`. Firefox 159 and Edge 156 last passed the 112-check suite before the
   layer-focus, full-width preview, and `分行` checks were added. Safari historically passed 108/108
   through the HTTP harness and a direct `file://` startup smoke; Safari testing is paused at the
@@ -802,6 +803,10 @@ retained. Open the settings panel and clear the local library after confirming t
 - Save As editor-state verification (2026-11-25): Chrome passes the check confirming that Save As
   keeps the composer visible with its draft, Marker, and insertion slot, and remaps its anchor
   to the cloned block so the input remains usable.
+- Edit performance verification (2026-11-25): Chrome commits an edit in a 300-block document
+  within 500 ms, clears the selection, and returns focus to the canvas. Profiling identified
+  repeated canvas-width reads during per-block width calculation as the bottleneck; caching the
+  width once per layout pass reduced a 500-block commit from about 186 ms to about 56 ms.
 - Tab-title verification (2026-11-05): Chrome passes the check confirming that clicking a tab
   focuses its title with the whole name selected, and that pressing Enter commits the title and
   leaves the input's editing state.

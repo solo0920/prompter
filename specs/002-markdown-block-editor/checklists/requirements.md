@@ -44,7 +44,7 @@
   round-trips, reading order, search, renderer escaping, clipboard payloads, preferences,
   storage degradation, file-name/path safety, composer Markdown splitting, forced `分行`
   splitting, and static no-network guards.
-- Browser harness: **125 passing, 0 failing** in Chrome 156.0.8078.49, the required release
+- Browser harness: **126 passing, 0 failing** in Chrome 156.0.8078.49, the required release
   gate, online and offline. The latest checks cover layer-focus `+` insertion with the focused
   Marker, focused-composer layer selection and focus release on cancel, empty layers that remain
   selectable with the composer Marker applied, applying a layer to selected blocks while

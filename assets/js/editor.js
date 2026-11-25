@@ -937,14 +937,17 @@
     };
   }
 
-  function applyIndentedWidth(element, x, basePadding, minimumWidth) {
+  function applyIndentedWidth(element, x, basePadding, minimumWidth, availableWidth) {
     if (!element) {
       return;
     }
     var offset = Math.max(0, Number(x) - Files.COLUMN_X);
     if (offset > 0) {
-      var canvas = getCanvas();
-      var available = canvas ? canvas.clientWidth : global.innerWidth;
+      var available = availableWidth;
+      if (available === undefined || available === null) {
+        var canvas = getCanvas();
+        available = canvas ? canvas.clientWidth : global.innerWidth;
+      }
       var maximum = Math.min(560, available - basePadding - offset);
       element.style.maxWidth = 'min(560px, calc(100% - ' +
         (basePadding + offset) + 'px))';
@@ -971,12 +974,13 @@
     sanitizeCollapsedView(state, activeCollapse);
     sanitizeLayerSelection(state, ordered);
     var indentInfo = outlineIndentation(ordered);
+    var availableWidth = canvas.clientWidth;
     ordered.forEach(function (block) {
       if (activeCollapse.hidden[block.id]) {
         return;
       }
       applyIndentedWidth(blockElement(block.id), Files.COLUMN_X +
-        ((indentInfo.levels[block.id] || 0) * INDENT_STEP), 48, 140);
+        ((indentInfo.levels[block.id] || 0) * INDENT_STEP), 48, 140, availableWidth);
     });
     Array.prototype.forEach.call(
       canvas.querySelectorAll('.composer-input, .block-edit-input'),
@@ -1004,7 +1008,7 @@
       state.composer.y = layout.composerTop;
       composerElement.style.left = layout.composerX + 'px';
       composerElement.style.top = layout.composerTop + 'px';
-      applyIndentedWidth(composerElement, layout.composerX, 32, 220);
+      applyIndentedWidth(composerElement, layout.composerX, 32, 220, availableWidth);
     }
     updateCanvasSize();
   }
@@ -1302,7 +1306,7 @@
         if (event.key === 'Enter' && !event.shiftKey) {
           event.preventDefault();
           event.stopPropagation();
-          commitEditing();
+          commitEditing({ clearSelection: true });
         } else if (event.key === 'Escape') {
           event.preventDefault();
           event.stopPropagation();
@@ -2127,13 +2131,14 @@
       height: drag.composerHeight
     } : null;
     var layout = computeSequenceLayout(blockOrder, composer, drag.heights, activeCollapse);
+    var availableWidth = canvas.clientWidth;
     drag.previewBlockOrder = blockOrder;
     drag.previewComposerIndex = composerIndex;
     blockOrder.forEach(function (block) {
       var point = layout.positions[block.id];
       var element = blockElement(block.id);
       if (element) {
-        applyIndentedWidth(element, point.x, 48, 140);
+        applyIndentedWidth(element, point.x, 48, 140, availableWidth);
         element.style.left = point.x + 'px';
         element.style.top = point.y + 'px';
       }
@@ -2141,7 +2146,7 @@
     if (composer && composerElement && layout.composerTop !== null) {
       composerElement.style.left = layout.composerX + 'px';
       composerElement.style.top = layout.composerTop + 'px';
-      applyIndentedWidth(composerElement, layout.composerX, 32, 220);
+      applyIndentedWidth(composerElement, layout.composerX, 32, 220, availableWidth);
     }
     drag.layout = layout;
   }
@@ -3038,7 +3043,8 @@
     selectBlock(last.id, { focus: true });
   }
 
-  function commitEditing() {
+  function commitEditing(options) {
+    var opts = options || {};
     var state = getState();
     if (!state || !state.editingBlockId) {
       return;
@@ -3097,8 +3103,18 @@
     if (changed) {
       markDirty();
     }
-    render();
-    selectBlock(block.id, { focus: true });
+    if (opts.clearSelection) {
+      state.selectedBlockIds = [];
+      state.selectedBlockId = null;
+      render();
+      var canvas = getCanvas();
+      if (canvas) {
+        canvas.focus();
+      }
+    } else {
+      render();
+      selectBlock(block.id, { focus: true });
+    }
   }
 
   function cancelEditing() {

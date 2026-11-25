@@ -1401,6 +1401,52 @@
     });
   });
 
+  test('US1 committing an edit clears selection and stays within the layout budget', function () {
+    return appReady().then(function (win) {
+      var app = win.Prompter.app;
+      var state = app.state;
+      var Model = win.Prompter.model;
+      var list = [];
+      for (var index = 0; index < 300; index += 1) {
+        list.push(Model.createTextBlock({
+          id: 'edit-perf-' + index,
+          marker: index % 7 === 0 ? '#' : 'none',
+          text: '第 ' + index + ' 個區塊內容',
+          seq: index + 1
+        }));
+      }
+      app.setDocument(Model.createPromptDocument({
+        id: 'edit-performance-document',
+        title: '編輯效能',
+        fileName: 'edit-performance.md',
+        blocks: list
+      }), [], { persisted: false });
+
+      var target = blockById(win, 'edit-perf-150').querySelector('.block-content');
+      target.click();
+      var input = blockById(win, 'edit-perf-150').querySelector('.block-edit-input');
+      assert(input, 'The block must enter edit mode.');
+      setValue(win, input, '修改後的內容');
+      var started = win.performance.now();
+      press(win, input, 'Enter');
+      var elapsed = win.performance.now() - started;
+
+      assert(elapsed < 500,
+        'Committing an edit in a 300-block document took ' + Math.round(elapsed) + ' ms.');
+      equal(state.editingBlockId, null);
+      equal(state.selectedBlockIds.length, 0,
+        'Committing an edit must clear the block selection.');
+      equal(state.selectedBlockId, null);
+      assert(!blockById(win, 'edit-perf-150').classList.contains('selected'),
+        'The committed block must not keep the selected styling.');
+      equal(win.document.activeElement, byId(win, 'canvas'),
+        'Focus must return to the canvas after committing an edit.');
+      equal(state.document.blocks.filter(function (block) {
+        return block.id === 'edit-perf-150';
+      })[0].text, '修改後的內容');
+    });
+  });
+
   test('US1 multi-line inputs grow and Shift+Enter inserts a line break', function () {
     return appReady().then(function (win) {
       var state = freshDocument(win);

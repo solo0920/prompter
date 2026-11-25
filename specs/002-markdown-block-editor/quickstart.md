@@ -61,7 +61,7 @@ Current result (2026-11-25): **110 passing, 0 failing**.
 Expected: no failures. Clipboard and directory-picker checks that require a real user gesture
 are marked manual and covered below.
 
-Current result (2026-11-25): Chrome **125 passing, 0 failing** (required gate), online and
+Current result (2026-11-25): Chrome **126 passing, 0 failing** (required gate), online and
 offline. The latest checks cover layer-focus `+` insertion, composer Marker inheritance and
 focused-composer layer selection, empty layers that remain selectable, applying a layer to
 selected blocks while keeping other same-Marker blocks visible, single-click editing of text
@@ -84,7 +84,7 @@ requests. Safari is not part of the current test loop.
 
 | Browser | Version | Automated harness | Offline harness | Notes |
 |---------|---------|-------------------|-----------------|-------|
-| Chrome (macOS) | 156.0.8078.49 | PASS 125/125 | PASS 125/125 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, selected-block layer conversion, click-to-edit, focused-composer layers and focus release, full-width preview, manual `分行` |
+| Chrome (macOS) | 156.0.8078.49 | PASS 126/126 | PASS 126/126 | Required gate; full editor, storage, settings, clipboard fallbacks, layer focus, empty layers, selected-block layer conversion, click-to-edit, focused-composer layers and focus release, large-document edit performance, full-width preview, manual `分行` |
 | Firefox (macOS) | 159.0 | PASS 112/112 | PASS 112/112 | Supplementary check; last run before the layer-focus add check |
 | Edge (macOS) | 156.0.4314.50 | PASS 112/112 | PASS 112/112 | Supplementary Chromium check; last run before the layer-focus add check |
 | Safari (macOS) | 27.2 | PASS 108/108 (HTTP) | Manual file:// smoke | Historical result; Safari testing is paused and not part of the current loop |
@@ -279,7 +279,8 @@ opens the Marker flyout without showing a grab cursor.
 ### 3. Edit, cancel, and remove (US1, FR-020..FR-022, FR-048)
 
 1. Double-click a text block; change the text; press Shift+Enter and type a second line;
-   confirm the editor stays open and grows; press Enter. Confirm both lines are kept.
+   confirm the editor stays open and grows; press Enter. Confirm both lines are kept, the block
+   no longer shows the selected outline, and focus returns to the canvas.
 2. Double-click again; change the text; press Escape. Confirm the original text returns.
 3. Double-click; clear all text; press Enter. Confirm the block disappears.
 4. Confirm the blank-line separation of surrounding blocks remains sensible.
@@ -550,7 +551,7 @@ is the required behavior.
 
 Record the exact Chrome version and pass/fail notes in the test log.
 
-**Verified 2026-11-25**: Chrome 156 passes the full 125-check automated harness from `file://`,
+**Verified 2026-11-25**: Chrome 156 passes the full 126-check automated harness from `file://`,
 online and offline, and is the required release gate; the latest checks cover layer-focus `+`
 insertion with the focused Marker, focused-composer layer selection and focus release on cancel,
 empty layers that remain selectable with the composer Marker applied, applying a layer to
