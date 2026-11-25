@@ -2814,6 +2814,10 @@
         equal(current.selectionStart, 1,
           'Clicking the composer must keep its caret position.');
         equal(current.selectionEnd, 3);
+        equal(win.Prompter.editor.getSelectedBlockIds().length, 0,
+          'Clicking the composer must clear the block selection.');
+        assert(!blockById(win, 'layer-click-b1').classList.contains('selected'),
+          'The previously selected block must lose its selected styling.');
       });
     });
   });

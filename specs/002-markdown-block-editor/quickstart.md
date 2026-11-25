@@ -282,20 +282,22 @@ opens the Marker flyout without showing a grab cursor.
    confirm the editor stays open and grows; press Enter. Confirm both lines are kept, the block
    no longer shows the selected outline, and focus returns to the canvas.
 2. Double-click again; change the text; press Escape. Confirm the original text returns.
-3. Double-click; clear all text; press Enter. Confirm the block disappears.
-4. Confirm the blank-line separation of surrounding blocks remains sensible.
-5. Confirm every block has a labeled `+` control and a delete control above it, including image
+3. Select a block without editing it, then click the composer input. Confirm the block's red
+   selection outline clears and the composer receives focus.
+4. Double-click; clear all text; press Enter. Confirm the block disappears.
+5. Confirm the blank-line separation of surrounding blocks remains sensible.
+6. Confirm every block has a labeled `+` control and a delete control above it, including image
    blocks; the delete control appears on right-side hover.
-6. Cmd-click two or more blocks and press Delete (or the macOS Delete key). Confirm every
+7. Cmd-click two or more blocks and press Delete (or the macOS Delete key). Confirm every
    selected block disappears, the remaining blocks close their gaps, and the selection clears.
-7. Double-click a block and press Delete inside the editor; confirm it edits text instead of
+8. Double-click a block and press Delete inside the editor; confirm it edits text instead of
    removing the block. Repeat in the composer.
-8. Hover the right side of a single block and activate the delete control above `+`. Confirm only
+9. Hover the right side of a single block and activate the delete control above `+`. Confirm only
    that block is removed. Press Cmd+Z outside the input and confirm the block returns in its
    original position; repeat undo to walk back further document changes. Press Cmd+Shift+Z and
    confirm the deletion is redone; make a new edit and confirm redo is no longer available.
-9. With focus inside the composer or block editor, press Cmd+Z and Cmd+Shift+Z and confirm text
-   undo and redo remain native instead of removing blocks or changing document structure.
+10. With focus inside the composer or block editor, press Cmd+Z and Cmd+Shift+Z and confirm text
+    undo and redo remain native instead of removing blocks or changing document structure.
 
 ### 4. Drag and keyboard movement (US1, FR-023..FR-026, FR-049, SC-011)
 

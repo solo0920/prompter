@@ -1671,6 +1671,10 @@
 
     element.addEventListener('pointerdown', function (event) {
       event.stopPropagation();
+      clearSelection();
+    });
+    element.addEventListener('focusin', function () {
+      clearSelection();
     });
     element.addEventListener('click', function (event) {
       event.stopPropagation();
